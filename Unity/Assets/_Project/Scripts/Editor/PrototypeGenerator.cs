@@ -39,7 +39,7 @@ namespace SAE.EditorTools
             var mapRoot = BuildMap(hubSpawn);
             var hub = BuildHub(mapRoot, mapSpawn);   // avant le joueur : l'installeur des bananes ajoute son TestSouris à Camera.main s'il en trouve une
             var player = Player(hubSpawn.position);
-            BuildChest(hub, Around(140f, Ring - 0.5f), player);
+            BuildChest(hub, Around(132f, Ring - 0.3f), player);
 
             EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), ScenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
@@ -101,12 +101,13 @@ namespace SAE.EditorTools
         // ---------------- HUB ----------------
         // Tout ce qui compte est disposé EN ROND autour du joueur (point d'apparition au centre, regard vers +Z),
         // chaque élément tourné vers lui :
-        //   devant (0°)           : le plateau incliné (la carte en direct)
-        //   devant, de biais      : JOUER (+35°) et Vider (-35°), hors du passage vers le plateau
-        //   gauche / droite (±90°): les deux meubles de la bibliothèque
-        //   derrière (180°)       : le coin économie : bananier de Maxens (agrandi) + panier, caisse (-150°), panneau d'amélioration (168°)
-        //   derrière-droite (140°): le coffre de Nicolas, avec son prix au-dessus et le panneau des chances
-        const float Ring = 4.0f;          // rayon du cercle des grands éléments (hub agrandi : on circule entre les éléments)
+        //   devant (0°)           : le plateau incliné (la carte en direct), reculé sur le cercle,
+        //                           avec JOUER (-20°) et Vider (+20°) de part et d'autre
+        //   côtés (±72°)          : les deux meubles de la bibliothèque, courbés le long du cercle
+        //   derrière (180°)       : le bananier de Maxens (agrandi), sa zone de chute devant lui (-172°),
+        //                           le panier (-150°) et la caisse (-140°), le panneau d'amélioration (160°)
+        //   derrière (132°)       : le coffre de Nicolas, avec son prix au-dessus et le panneau des chances
+        const float Ring = 5.0f;          // rayon du cercle : tout est posé dessus, le centre reste libre pour circuler
         const float SlotSize = 0.24f;     // ancienne taille ×1,1
         const float SlotStepX = 0.36f;    // espace entre deux raretés
         const float SlotStepY = 0.40f;    // espace entre deux étagères
@@ -123,24 +124,24 @@ namespace SAE.EditorTools
         static Transform BuildHub(Transform mapRoot, Transform mapSpawn)
         {
             var env = new GameObject("Hub").transform;
-            Visuals.Solid("Sol", env, new Vector3(0, -0.05f, 0), new Vector3(12, 0.1f, 12), Floor);
+            Visuals.Solid("Sol", env, new Vector3(0, -0.05f, 0), new Vector3(15, 0.1f, 15), Floor);
 
+            // Devant, sur le cercle : le plateau, avec JOUER et Vider de part et d'autre
             BuildBoard(env, mapRoot);
-
-            // Bibliothèque : deux meubles face à face (4 types + 3 types)
-            BuildShelf(env, "Bibliotheque gauche", -90f, 0, 4);
-            BuildShelf(env, "Bibliotheque droite", 90f, 4, 3);
-
-            // Coin « économie », derrière le joueur : bananier (Maxens) + panier, caisse, panneau d'amélioration
-            var bananier = BuildBananas(env, Around(180f, Ring + 1.0f), 180f);
-            BuildMoneyBoard(env, -150f);
-            if (bananier) BuildUpgradePanel(env, bananier, 168f);
-
-            // Boutons, devant de biais
-            MakeActionCube(env, "Jouer", Around(35f, 2.4f, 1.0f), 0.35f, new Color(0.2f, 0.85f, 0.3f),
+            MakeActionCube(env, "Jouer", Around(-20f, Ring - 0.5f, 1.0f), 0.35f, new Color(0.2f, 0.85f, 0.3f),
                 "JOUER", ActionCube.Action.Teleport, mapSpawn, "Aller sur la carte");
-            MakeActionCube(env, "Vider", Around(-35f, 2.4f, 0.9f), 0.25f, new Color(0.6f, 0.6f, 0.6f),
+            MakeActionCube(env, "Vider", Around(20f, Ring - 0.5f, 0.9f), 0.25f, new Color(0.6f, 0.6f, 0.6f),
                 "Vider", ActionCube.Action.ClearBoard, null, "Vider le plateau");
+
+            // Sur les côtés : les deux meubles de la bibliothèque, qui suivent le cercle (4 types + 3 types)
+            BuildShelf(env, "Bibliotheque gauche", -72f, 0, 4);
+            BuildShelf(env, "Bibliotheque droite", 72f, 4, 3);
+
+            // Derrière : le bananier sur le cercle, sa zone de chute devant lui, le panier et la caisse d'un côté,
+            // le panneau d'amélioration de l'autre (le coffre est placé après le joueur, derrière-droite)
+            var bananier = BuildBananas(env, Around(180f, Ring + 0.7f), 180f);
+            BuildMoneyBoard(env, -140f);
+            if (bananier) BuildUpgradePanel(env, bananier, 160f);
             return env;
         }
 
@@ -149,7 +150,7 @@ namespace SAE.EditorTools
         {
             float scale = BoardTile / MapLayout.Tile;
             float side = MapLayout.Size * BoardTile;
-            var center = new Vector3(0, 0.95f, 1.25f);
+            var center = Around(0f, Ring - 0.9f, 0.95f);   // reculé jusqu'au cercle, devant le joueur
 
             var boardGo = new GameObject("Plateau");
             boardGo.tag = Tags.Plateau;
@@ -245,7 +246,17 @@ namespace SAE.EditorTools
 
             // Le panier : à côté du bananier (pas collé à son bac), un peu vers le joueur pour rester à portée
             var basket = root.transform.Find("Panier");
-            if (basket) basket.localPosition = new Vector3(1.8f, 0f, -1.6f);
+            if (basket) basket.position = Around(-150f, Ring);
+
+            // Zone de chute : un tapis devant le bananier, à l'intérieur du cercle, du côté du panier.
+            // Les bananes tombent dedans (et plus contre le bac ou dans le panier tout seuls).
+            var zonePos = Around(-172f, Ring - 0.5f);
+            var zone = Visuals.Box("Zone de chute des bananes", env, zonePos + Vector3.up * 0.005f, new Vector3(1.6f, 0.01f, 0.9f), new Color(0.95f, 0.85f, 0.35f));
+            zone.transform.rotation = Quaternion.LookRotation(new Vector3(zonePos.x, 0, zonePos.z) - new Vector3(pos.x, 0, pos.z));
+            bananier.versCible = zone.transform;
+            bananier.margePanier = 0f;
+            bananier.largeurZone = 0.8f;
+            bananier.angleDispersion = 18f;
             return bananier;
         }
 

@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Hub en vrai cercle, d'après mon schéma
+> C'est plus espacé, mais pas assez. J'ai dessiné une idée : que tout suive vraiment un cercle. Recule le plateau et reprends mon schéma (avec plus d'espace) : le plateau devant avec JOUER à côté, les deux bibliothèques sur les côtés, le coffre, le bananier au fond avec le panier à côté, et une zone où tombent les bananes.
+
 ### Analyse critique du hub (à noter, pas encore à corriger)
 > Note mon analyse critique, je te dirai quand tout corriger :
 > - le hub est trop petit : on est serré, les éléments sont les uns devant les autres, c'est difficile de circuler et d'utiliser les objets ;
