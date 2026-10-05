@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Lun. 5 oct. 2026
 
+### Corriger les défauts du hub intégré
+> Avant de proposer la fusion dans `main`, corrige les trois défauts visibles sur mes captures : la bibliothèque de gauche vue de travers, le coffre qui n'est pas tourné vers le joueur, et le panier collé au bananier.
+
 ### Un seul menu
 > On ne garde que le hub : je ne veux plus que le menu « SAE » dans Unity. Enlève aussi les scènes de test de Nicolas et de Maxens.
 

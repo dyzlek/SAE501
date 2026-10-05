@@ -127,8 +127,8 @@ namespace SAE.EditorTools
             BuildBoard(env, mapRoot);
 
             // Bibliothèque : deux meubles face à face (4 types + 3 types)
-            BuildShelf(env, "Bibliotheque gauche", Around(-90f, Ring), -90f, 0, 4);
-            BuildShelf(env, "Bibliotheque droite", Around(90f, Ring), 90f, 4, 3);
+            BuildShelf(env, "Bibliotheque gauche", -90f, 0, 4);
+            BuildShelf(env, "Bibliotheque droite", 90f, 4, 3);
 
             // Bananier + panier (Maxens), derrière le joueur
             BuildBananas(env, Around(180f, Ring + 0.2f), 180f);
@@ -169,34 +169,48 @@ namespace SAE.EditorTools
             Visuals.Solid("Base du pied", env, new Vector3(0, 0.02f, center.z), new Vector3(0.6f, 0.04f, 0.6f), Wood);
         }
 
-        // Un meuble : une étagère par type (de firstType à firstType+count-1), une case par rareté.
-        // Repère local : les raretés vont vers +X, les étagères vers le haut, le joueur est du côté -Z.
-        static void BuildShelf(Transform env, string name, Vector3 pos, float yaw, int firstType, int count)
+        // Un meuble COURBE qui suit le cercle autour du joueur : chaque colonne (une rareté) est tournée vers lui,
+        // donc tout reste lisible depuis le centre (un meuble droit se voyait de biais et les textes se chevauchaient).
+        // Une étagère par type (de firstType à firstType+count-1), une colonne par rareté, de gauche à droite.
+        static void BuildShelf(Transform env, string name, float centerAngle, int firstType, int count)
         {
             var shelf = new GameObject(name).transform;
             shelf.tag = Tags.Bibliotheque;
             shelf.SetParent(env, false);
-            shelf.SetPositionAndRotation(pos, Quaternion.Euler(0, yaw, 0));
 
-            float width = MonkeyData.LevelCount * SlotStepX;
+            float step = SlotStepX / Ring * Mathf.Rad2Deg;            // angle entre deux colonnes
             float height = FirstShelfY + count * SlotStepY;
-            Visuals.Solid("Fond", shelf, new Vector3(0, height / 2f, 0.25f), new Vector3(width + 0.9f, height, 0.05f), Wood);
-            Visuals.Label(shelf, "BIBLIOTHÈQUE", new Vector3(0, height + 0.15f, 0), 0.1f);
+            float Angle(float column) => centerAngle + (column - (MonkeyData.LevelCount - 1) / 2f) * step;
+            Quaternion Facing(float angle) => Quaternion.Euler(0, angle, 0);   // +Z local = vers l'extérieur
 
-            float x0 = -(MonkeyData.LevelCount - 1) / 2f * SlotStepX;
+            // Fond et planches : un morceau par colonne (+ un en plus de chaque côté pour les noms des types)
+            for (int c = -1; c <= MonkeyData.LevelCount; c++)
+            {
+                float a = Angle(c);
+                var fond = Visuals.Solid($"Fond {c}", shelf, Around(a, Ring + 0.25f, height / 2f), new Vector3(SlotStepX + 0.02f, height, 0.05f), Wood);
+                fond.transform.rotation = Facing(a);
+                for (int i = 0; i < count; i++)
+                {
+                    float y = FirstShelfY + i * SlotStepY - SlotSize / 2f - 0.02f;
+                    var board = Visuals.Solid($"Etagere {i} {c}", shelf, Around(a, Ring + 0.05f, y), new Vector3(SlotStepX + 0.02f, 0.03f, 0.45f), Wood);
+                    board.transform.rotation = Facing(a);
+                }
+            }
+            Visuals.Label(shelf, "BIBLIOTHÈQUE", Around(centerAngle, Ring, height + 0.15f), 0.1f);
+
             for (int i = 0; i < count; i++)
             {
                 var type = (MonkeyType)(firstType + i);
                 float y = FirstShelfY + i * SlotStepY;
-                Visuals.Solid($"Etagere {type}", shelf, new Vector3(0, y - SlotSize / 2f - 0.02f, 0.05f), new Vector3(width + 0.9f, 0.03f, 0.45f), Wood);
-                Visuals.Label(shelf, type.ToString(), new Vector3(x0 - 0.6f, y, -0.05f), 0.07f);
+                Visuals.Label(shelf, type.ToString(), Around(Angle(-1), Ring - 0.05f, y), 0.07f);
 
                 for (int l = 0; l < MonkeyData.LevelCount; l++)
                 {
+                    float a = Angle(l);
                     var slot = new GameObject($"Slot {type} {(Rarity)l}");
                     slot.tag = Tags.Bibliotheque;
                     slot.transform.SetParent(shelf, false);
-                    slot.transform.localPosition = new Vector3(x0 + l * SlotStepX, y, 0);
+                    slot.transform.SetPositionAndRotation(Around(a, Ring, y), Facing(a));
                     slot.AddComponent<BoxCollider>().size = Vector3.one * (SlotSize + 0.04f);
                     var s = slot.AddComponent<LibrarySlot>();
                     s.type = type;
@@ -220,6 +234,10 @@ namespace SAE.EditorTools
             var root = GameObject.Find("Systeme_Bananes");
             root.transform.SetParent(env, false);
             root.transform.SetPositionAndRotation(pos, Quaternion.Euler(0, yaw, 0));
+
+            // Le panier : à côté du bananier (pas collé à son bac), un peu vers le joueur pour rester à portée
+            var basket = root.transform.Find("Panier");
+            if (basket) basket.localPosition = new Vector3(1.6f, 0f, -0.9f);
         }
 
         // Le coffre de Nicolas (modèle .glb animé + roulette + texte [E]), monté comme dans son menu SAE501 → 2,
@@ -263,6 +281,14 @@ namespace SAE.EditorTools
             prompt.chest = controller;
             prompt.player = player;
             chest.AddComponent<ChestClickable>().chest = controller;
+
+            // Le coffre se tourne toujours vers le joueur. L'origine du modèle n'est pas au centre du coffre :
+            // on le met dans un pivot placé au centre, et c'est le pivot qui tourne.
+            var pivot = new GameObject("Coffre (pivot)").transform;
+            pivot.SetParent(env, false);
+            pivot.SetPositionAndRotation(new Vector3(pos.x, 0, pos.z), chest.transform.rotation);
+            chest.transform.SetParent(pivot, true);
+            pivot.gameObject.AddComponent<FacePlayer>();
 
             var bridge = env.gameObject.AddComponent<EconomyBridge>();
             bridge.panier = env.GetComponentInChildren<Panier>();
