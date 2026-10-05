@@ -77,3 +77,5 @@ On garde de cet essai le plateau incliné, mais pas la bibliothèque : on revien
 | Claude (Claude Code) | Préparation des projets de Nicolas et Maxens pour les tester (dossiers à part), mise en forme de mon analyse de leurs prototypes | Gardé |
 | Claude (Claude Code) | Intégration des 3 prototypes sur `feat/integration` : merge des branches de Nicolas et Maxens, socle Unity 6000.6 gardé, packages glTFast / XR Toolkit / OpenXR / module VR ajoutés, `.glb` en LFS ; package perso `unity-mcp` de Maxens non repris | À tester |
 | Claude (Claude Code) | Ajout des retours de Maxens (envoyés sur Discord) dans son journal, à sa place | Gardé |
+| Claude (Claude Code) | Hub en cercle autour du joueur : plateau plus grand (1,6 m) devant, bibliothèque à gauche et à droite, bananier + panier de Maxens derrière, coffre de Nicolas derrière à droite ; branchements : prendre les bananes, ouvrir le coffre (clic ou E), argent commun (bananes → coffre) | À tester |
+| Claude (Claude Code) | Dossier `prompts/` (mes prompts reformulés et corrigés), règle « prompts » dans CLAUDE.md pour nous trois, README (rôles + journal commun du jour) | Gardé |

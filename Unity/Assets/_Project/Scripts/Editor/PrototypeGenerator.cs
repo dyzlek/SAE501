@@ -1,4 +1,5 @@
 using System.IO;
+using System.Reflection;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -12,7 +13,7 @@ namespace SAE.EditorTools
     {
         const string Folder = "Assets/_Project/Scenes";
         const string ScenePath = Folder + "/Jeu.unity";
-        const float BoardTile = 0.15f;   // plateau de 1,2 m : à portée de bras
+        const float BoardTile = 0.2f;    // plateau de 1,6 m : l'élément principal du hub
         static readonly Vector3 MapCenter = new Vector3(0f, 0f, 40f);
 
         static readonly Color Floor = new Color(0.35f, 0.35f, 0.38f);
@@ -36,8 +37,9 @@ namespace SAE.EditorTools
             var mapSpawn = Spawn("Spawn Carte", MapCenter + new Vector3(0, 0, -MapLayout.HalfExtent - 3f));
 
             var mapRoot = BuildMap(hubSpawn);
-            BuildHub(mapRoot, mapSpawn);
-            Player(hubSpawn.position);
+            var hub = BuildHub(mapRoot, mapSpawn);   // avant le joueur : l'installeur des bananes ajoute son TestSouris à Camera.main s'il en trouve une
+            var player = Player(hubSpawn.position);
+            BuildChest(hub, Around(150f, Ring - 0.4f), player);
 
             EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), ScenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
@@ -51,7 +53,7 @@ namespace SAE.EditorTools
             return go.transform;
         }
 
-        static void Player(Vector3 position)
+        static Transform Player(Vector3 position)
         {
             var player = new GameObject("Player");
             player.tag = Tags.Joueur;
@@ -79,6 +81,8 @@ namespace SAE.EditorTools
             cam.AddComponent<AudioListener>();
 
             player.AddComponent<PlayerController>().reach = 60f;
+            player.AddComponent<BananaHand>();   // prendre les bananes (clic maintenu)
+            return player.transform;
         }
 
         static void MakeActionCube(Transform parent, string name, Vector3 pos, float size, Color color,
@@ -95,31 +99,46 @@ namespace SAE.EditorTools
         }
 
         // ---------------- HUB ----------------
-        // Le joueur apparaît au centre, regard vers +Z.
-        // Devant : le plateau incliné vers lui. À gauche et à droite : deux meubles de bibliothèque
-        // (4 types + 3 types), rangées basses pour rester à portée d'un petit joueur en VR.
-        // Derrière : les boutons.
+        // Tout ce qui compte est disposé EN ROND autour du joueur (point d'apparition au centre, regard vers +Z),
+        // chaque élément tourné vers lui :
+        //   devant (0°)           : le plateau incliné (la carte en direct)
+        //   devant, de biais      : JOUER (+50°) et Vider (-50°)
+        //   gauche / droite (±90°): les deux meubles de la bibliothèque
+        //   derrière (180°)       : le bananier de Maxens, avec son panier à côté
+        //   derrière-droite (150°): le coffre de Nicolas
+        const float Ring = 2.7f;          // rayon du cercle des grands éléments
         const float SlotSize = 0.24f;     // ancienne taille ×1,1
-        const float SlotStepX = 0.45f;    // espace entre deux raretés
+        const float SlotStepX = 0.36f;    // espace entre deux raretés
         const float SlotStepY = 0.40f;    // espace entre deux étagères
-        const float FirstShelfY = 0.45f;  // rangée la plus basse
+        const float FirstShelfY = 0.45f;  // rangée la plus basse (accessible à un petit joueur)
 
-        static void BuildHub(Transform mapRoot, Transform mapSpawn)
+        // Position sur le cercle. angle 0 = devant, positif = à droite.
+        static Vector3 Around(float angleDeg, float radius, float height = 0f)
+        {
+            float a = angleDeg * Mathf.Deg2Rad;
+            return new Vector3(Mathf.Sin(a) * radius, height, Mathf.Cos(a) * radius);
+        }
+
+        static Transform BuildHub(Transform mapRoot, Transform mapSpawn)
         {
             var env = new GameObject("Hub").transform;
-            Visuals.Solid("Sol", env, new Vector3(0, -0.05f, 0), new Vector3(7, 0.1f, 7), Floor);
+            Visuals.Solid("Sol", env, new Vector3(0, -0.05f, 0), new Vector3(8, 0.1f, 8), Floor);
 
             BuildBoard(env, mapRoot);
 
-            // Bibliothèque en deux meubles qui se font face, de part et d'autre du joueur
-            BuildShelf(env, "Bibliotheque gauche", new Vector3(-2.0f, 0, 0.6f), -90f, 0, 4);
-            BuildShelf(env, "Bibliotheque droite", new Vector3(2.0f, 0, 0.6f), 90f, 4, 3);
+            // Bibliothèque : deux meubles face à face (4 types + 3 types)
+            BuildShelf(env, "Bibliotheque gauche", Around(-90f, Ring), -90f, 0, 4);
+            BuildShelf(env, "Bibliotheque droite", Around(90f, Ring), 90f, 4, 3);
 
-            // Boutons derrière le joueur
-            MakeActionCube(env, "Jouer", new Vector3(0.6f, 1.0f, -1.3f), 0.35f, new Color(0.2f, 0.85f, 0.3f),
+            // Bananier + panier (Maxens), derrière le joueur
+            BuildBananas(env, Around(180f, Ring + 0.2f), 180f);
+
+            // Boutons, devant de biais
+            MakeActionCube(env, "Jouer", Around(50f, 1.4f, 1.0f), 0.35f, new Color(0.2f, 0.85f, 0.3f),
                 "JOUER", ActionCube.Action.Teleport, mapSpawn, "Aller sur la carte");
-            MakeActionCube(env, "Vider", new Vector3(-0.6f, 0.9f, -1.3f), 0.25f, new Color(0.6f, 0.6f, 0.6f),
+            MakeActionCube(env, "Vider", Around(-50f, 1.4f, 0.9f), 0.25f, new Color(0.6f, 0.6f, 0.6f),
                 "Vider", ActionCube.Action.ClearBoard, null, "Vider le plateau");
+            return env;
         }
 
         // Plateau incliné de 25° vers le joueur, posé sur une planche qui suit l'inclinaison + un pied.
@@ -127,7 +146,7 @@ namespace SAE.EditorTools
         {
             float scale = BoardTile / MapLayout.Tile;
             float side = MapLayout.Size * BoardTile;
-            var center = new Vector3(0, 0.95f, 1.0f);
+            var center = new Vector3(0, 0.95f, 1.25f);
 
             var boardGo = new GameObject("Plateau");
             boardGo.tag = Tags.Plateau;
@@ -145,7 +164,7 @@ namespace SAE.EditorTools
             // Planche sous le plateau (même inclinaison) : rien ne traverse la surface
             Visuals.Box("Planche", boardGo.transform, new Vector3(0, -0.07f, 0), new Vector3(side + 0.06f, 0.06f, side + 0.06f), Wood);
             // Pied vertical : son sommet s'arrête sous la planche
-            float legTop = center.y - 0.16f;
+            float legTop = center.y - 0.18f;
             Visuals.Solid("Pied", env, new Vector3(0, legTop / 2f, center.z), new Vector3(0.12f, legTop, 0.12f), Wood);
             Visuals.Solid("Base du pied", env, new Vector3(0, 0.02f, center.z), new Vector3(0.6f, 0.04f, 0.6f), Wood);
         }
@@ -185,6 +204,77 @@ namespace SAE.EditorTools
                     Visuals.MonkeyPiece(new Monkey(type, (Rarity)l), slot.transform, Vector3.zero, SlotSize);
                 }
             }
+        }
+
+        // Le bananier, son panier et le récolteur, montés par l'installeur de Maxens (BananesInstaller.Construire),
+        // appelé tel quel pour ne pas dupliquer son code. Puis on le place sur le cercle, tourné vers le joueur.
+        static void BuildBananas(Transform env, Vector3 pos, float yaw)
+        {
+            var models = AssetDatabase.FindAssets("Bananes_Collectible t:Model");
+            if (models.Length == 0) { Debug.LogWarning("Hub : modèles du bananier introuvables, bananier non placé."); return; }
+            var folder = Path.GetDirectoryName(AssetDatabase.GUIDToAssetPath(models[0])).Replace(Path.DirectorySeparatorChar, '/');
+            const BindingFlags Private = BindingFlags.NonPublic | BindingFlags.Static;
+            typeof(BananesInstaller).GetField("s_fbx", Private).SetValue(null, folder);
+            typeof(BananesInstaller).GetMethod("Construire", Private).Invoke(null, new object[] { Vector3.zero });
+
+            var root = GameObject.Find("Systeme_Bananes");
+            root.transform.SetParent(env, false);
+            root.transform.SetPositionAndRotation(pos, Quaternion.Euler(0, yaw, 0));
+        }
+
+        // Le coffre de Nicolas (modèle .glb animé + roulette + texte [E]), monté comme dans son menu SAE501 → 2,
+        // branché sur notre joueur (ChestClickable) et sur l'argent commun (EconomyBridge).
+        static void BuildChest(Transform env, Vector3 pos, Transform player)
+        {
+            const string ChestModelPath = "Assets/_Project/Art/Chest/chest_cartoon_animations.glb";
+            var model = AssetDatabase.LoadAssetAtPath<GameObject>(ChestModelPath);
+            if (!model) { Debug.LogWarning("Hub : modèle du coffre introuvable (glTFast installé ?), coffre non placé."); return; }
+
+            var chest = (GameObject)PrefabUtility.InstantiatePrefab(model);
+            chest.name = "Coffre";
+            chest.transform.SetParent(env, false);
+            var b = Bounds(chest);
+            chest.transform.localScale *= 0.8f / Mathf.Max(b.size.x, b.size.z);    // ~0,8 m de large
+            // tourné vers le joueur (au centre), posé au sol
+            chest.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(new Vector3(-pos.x, 0, -pos.z)));
+            b = Bounds(chest);
+            chest.transform.position += new Vector3(pos.x - b.center.x, -b.min.y, pos.z - b.center.z);
+            float top = Bounds(chest).max.y;
+
+            var wallet = new GameObject("Bourse du coffre").AddComponent<Sae501.Coffres.Wallet>();
+            wallet.transform.SetParent(env, false);
+
+            var rouletteGo = new GameObject("Roulette");
+            rouletteGo.transform.SetParent(env, false);
+            rouletteGo.transform.position = new Vector3(pos.x, top + 1.0f, pos.z);
+            rouletteGo.AddComponent<Sae501.Coffres.Billboard>();
+            var roulette = rouletteGo.AddComponent<Sae501.Coffres.RouletteView>();
+
+            var promptGo = new GameObject("PromptCoffre");
+            promptGo.transform.SetParent(env, false);
+            promptGo.transform.position = new Vector3(pos.x, top + 0.35f, pos.z);
+            promptGo.AddComponent<Sae501.Coffres.Billboard>();
+            var prompt = promptGo.AddComponent<Sae501.Coffres.ChestPrompt>();
+
+            var controller = chest.AddComponent<Sae501.Coffres.ChestController>();
+            controller.wallet = wallet;
+            controller.roulette = roulette;
+            controller.prompt = prompt;
+            prompt.chest = controller;
+            prompt.player = player;
+            chest.AddComponent<ChestClickable>().chest = controller;
+
+            var bridge = env.gameObject.AddComponent<EconomyBridge>();
+            bridge.panier = env.GetComponentInChildren<Panier>();
+            bridge.wallet = wallet;
+        }
+
+        static Bounds Bounds(GameObject go)
+        {
+            var renderers = go.GetComponentsInChildren<Renderer>();
+            var b = renderers[0].bounds;
+            foreach (var r in renderers) b.Encapsulate(r.bounds);
+            return b;
         }
 
         // Grille 8x8 en dalles (sans collider sur le plateau, avec collider sur la carte pour marcher).

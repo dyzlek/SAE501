@@ -24,7 +24,15 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 
 ## Semaine 1 · 5-9 oct. — PROUVER
 **Lun. 5 oct.**
-- Prototype v2 jouable (clavier/souris) : hub, bibliothèque, plateau en direct, placement libre, fusion, vagues. Captures dans `docs/captures/`.
-- Fait : lancement de la SAÉ, dépôt GitHub, brouillon GDD v0 (idée TD Bloons).
-- Bloque : —
-- Prochaine étape : composition du groupe à Antoine, réservation casques, outil de suivi, premier essai du geste en greybox.
+- Fait :
+  - lancement de la SAÉ, dépôt GitHub, brouillon du GDD v0 (idée TD Bloons) ;
+  - composition du groupe envoyée à Antoine ;
+  - trois prototypes au clavier et à la souris : hub, plateau et carte (Dylan), coffres (Nicolas), bananier (Maxens) ;
+  - tests croisés entre nous ;
+  - intégration dans un seul projet Unity 6000.6 (`feat/integration`), avec un hub en cercle autour du joueur (plateau, bibliothèque, bananier et panier, coffre).
+- Bloque : pas de casque disponible aujourd'hui, donc rien de testé en VR.
+- Prochaine étape :
+  - au coffre, faire sortir un singe de la rareté gagnée, qui rejoint la bibliothèque ;
+  - rendre le plateau plus grand et alléger les textes ;
+  - réserver les casques et choisir l'outil de suivi ;
+  - GDD v1 pour vendredi.
