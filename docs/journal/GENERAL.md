@@ -26,4 +26,5 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 - Prototype v2 jouable (clavier/souris) : hub, bibliothèque, plateau en direct, placement libre, fusion, vagues. Captures dans `docs/captures/`.
 - Fait : lancement de la SAÉ, dépôt GitHub, brouillon GDD v0 (idée TD Bloons).
 - Bloque : —
+- Retours de Dylan sur le prototype v2 : hub disposé autour du joueur (pensé VR), bibliothèque à repenser (trop chargée), halo blanc pour la fusion, déplacer les singes depuis la carte.
 - Prochaine étape : composition du groupe à Antoine, réservation casques, outil de suivi, premier essai du geste en greybox.
