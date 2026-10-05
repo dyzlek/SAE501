@@ -42,7 +42,7 @@ Détails : [journal général](docs/journal/GENERAL.md) · [Dylan](docs/journal/
 ```
 Unity/     le projet Unity unique (Unity 6000.6, URP)
   Assets/_Project/Scripts/   Core, Hub, Map, Player (Dylan) · Runtime (coffres de Nicolas, bananier de Maxens) · Editor
-  Assets/_Project/Scenes/    Jeu.unity (hub + carte) · Sandbox/<Prénom>/ (scènes de test de chacun)
+  Assets/_Project/Scenes/    Jeu.unity (hub + carte, générée par le menu SAE → Générer le prototype)
 docs/      GDD.md · journal/ (GENERAL.md + un journal par personne, avec l'usage de l'IA) · captures/
 prompts/   les prompts de chacun, reformulés et corrigés
 ```

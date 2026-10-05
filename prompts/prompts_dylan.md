@@ -5,7 +5,7 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 ## Lun. 5 oct. 2026
 
 ### Un seul menu
-> On ne garde que le hub : je ne veux plus que le menu « SAE » dans Unity.
+> On ne garde que le hub : je ne veux plus que le menu « SAE » dans Unity. Enlève aussi les scènes de test de Nicolas et de Maxens.
 
 ### Hub en cercle avec le bananier et le coffre
 > Dans le hub, les éléments importants doivent être disposés en cercle autour du joueur. Ajoute le bananier (avec le panier à côté) et le coffre à ce que j'ai fait, de façon ordonnée, en rond. Je te laisse décider de la disposition.
