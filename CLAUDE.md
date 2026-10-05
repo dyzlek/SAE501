@@ -53,9 +53,20 @@ Semaine type : **lundi** cadrage visio 1 h (Antoine) · **mar-jeu** production (
 - Le code rendu doit pouvoir être **expliqué à l'oral** : quand Claude écrit du code, il l'explique et reste simple/lisible.
 - Réflexes : relire et tester avant de committer, commits petits, garder la main sur l'architecture.
 
+## Équipe
+**Dylan, Maxens et Nicolas** travaillent tous les trois avec Claude sur ce dépôt.
+En début de session, demander qui travaille si ce n'est pas clair (`git config user.name` aide).
+
+## Journal obligatoire (règle n°1)
+**Chaque modification du projet faite par l'IA est consignée dans [docs/JOURNAL.md](docs/JOURNAL.md), dans le même commit que la modification.**
+- Avant de travailler : `git pull`, puis lire le haut de `docs/JOURNAL.md` pour savoir où en sont les autres.
+- Après chaque tâche : une ligne dans le tableau « Usage de l'IA » (date, **qui**, outil, pour quoi, gardé/jeté) et, si besoin, une entrée dans « Avancement » (fait / bloque / prochaine étape).
+- Une demande refusée ou du code IA jeté se note aussi (colonne « gardé / jeté »).
+- Le journal sert à l'oral (transparence IA) et à la note de gestion de projet : il doit rester à jour et honnête.
+
 ## Règles de travail pour Claude dans ce dépôt
 - Projet Unity dans `Unity/` ; docs dans `docs/`. `.gitignore` Unity à la racine.
 - **Jamais deux personnes sur la même scène** : privilégier les prefabs, une scène de test par personne (`Assets/_Project/Scenes/Sandbox/<Prénom>`).
 - Ne pas proposer de feature hors périmètre sans le signaler ; en S3, aucune nouvelle feature.
 - Vérifier toute proposition contre les règles de confort et le test de l'écran.
-- Après chaque tâche, ajouter une entrée IA dans `docs/JOURNAL.md`.
+- Commits petits, message clair en français ; journal mis à jour dans le même commit ; `git pull` avant de pousser.

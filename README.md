@@ -7,7 +7,9 @@ BUT MMI 3, IUT de Béziers. Jeu en réalité virtuelle réalisé sous Unity (C#)
 ## Équipe
 | Membre | Rôle |
 |---|---|
-| | |
+| Dylan | |
+| Maxens | |
+| Nicolas | |
 
 ## Structure
 ```
