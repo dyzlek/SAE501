@@ -10,13 +10,31 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
     - des « +5 » / « −25 » qui flottent là où l'argent bouge ;
     - un **panneau d'amélioration** du bananier avec 3 gros boutons ;
     - le **prix du coffre**, affiché au-dessus de lui.
-- **Bloque :** pas encore testé en jeu.
+- **Bloque :** —
 - **Demain :** _
+
+**Captures de l'économie dans le hub**
+
+![Hub avec la caisse, le panneau du bananier et le coffre](../captures/economie-hub-vue.webp)
+
+![Hub vu du dessus](../captures/economie-hub-dessus.webp)
+
+**Mon analyse critique** _(à corriger plus tard, quand je le dirai)_
+1. **Le hub est trop petit.** On est trop serré, les éléments sont les uns devant les autres : c'est compliqué de circuler et d'utiliser les objets.
+2. **Le prix et la qualité du coffre doivent dépendre des vagues vaincues.** Plus on bat de vagues, plus le coffre est cher, mais plus il est intéressant : il donne plus de singes et de meilleur niveau.
+3. **Afficher les probabilités de drop** du coffre (chances par rareté), et les informations qui vont avec.
+4. **Les bananes ne doivent plus traverser le bananier.** Aujourd'hui, elles peuvent passer à travers et rester cachées autour, à des endroits inaccessibles.
+
+**Autres points vus sur les captures** _(notés par l'IA)_
+- Les textes au-dessus des cubes de la bibliothèque se chevauchent encore (CA5, CA6…), et ceux des boutons du panneau BANANIER sont trop petits pour être lus.
+- Le cube « Vider » et le pied du plateau gênent le passage devant le joueur.
+- Les vies et la vague sont encore affichées à l'écran (prévu avec le chantier D).
 
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
 | Claude (Claude Code) | Économie unique (`Economy`) : bananes et vagues rapportent, coffre et améliorations coûtent ; `Wallet` et pont supprimés ; caisse dans le décor, « +/− » flottants, panneau d'amélioration du bananier (3 boutons qui s'enfoncent, vert si payable), prix du coffre qui augmente (25, +30 % par coffre) et affiché au-dessus ; argent retiré de l'affichage écran ; palmier ×1,6 ; coin « économie » réorganisé derrière le joueur | À tester |
+| Claude (Claude Code) | Mise en forme de mon analyse critique du hub et ajout de mes captures (rien de corrigé pour l'instant, à ma demande) | Gardé |
 
 ## Lun. 5 oct. 2026
 - **Fait :** création du dépôt GitHub, lecture des consignes, première analyse de l'idée et brouillon du GDD, test du prototype v2 et captures, **analyse critique du prototype (personnelle, pas encore discutée avec l'équipe)**, test et analyse des prototypes de Nicolas (coffres) et de Maxens (bananier), intégration des trois prototypes dans un seul projet (branche `feat/integration`).

@@ -4,6 +4,13 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Analyse critique du hub (à noter, pas encore à corriger)
+> Note mon analyse critique, je te dirai quand tout corriger :
+> - le hub est trop petit : on est serré, les éléments sont les uns devant les autres, c'est difficile de circuler et d'utiliser les objets ;
+> - le coffre doit devenir plus cher en fonction des vagues vaincues, mais aussi meilleur : plus de singes, et de meilleur niveau ;
+> - je veux voir les probabilités de drop ;
+> - les bananes ne doivent pas traverser le bananier, sinon elles restent cachées à des endroits inaccessibles.
+
 ### Économie unique, sans interface à l'écran
 > On est le 6. Pour commencer, il faudrait agrandir l'asset du palmier. Ensuite, réalise quelque chose de stylé pour le chantier A (une seule économie avec de vrais coûts) :
 > - une seule bourse, `GameState.Money` : on supprime le `Wallet` du coffre et le pont entre les deux ;
