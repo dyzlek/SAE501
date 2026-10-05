@@ -13,10 +13,17 @@ namespace Sae501.Coffres
         public ChestPrompt prompt;
 
         [Header("Règles")]
-        // Prix d'ouverture, payé avec l'argent commun du jeu (SAE.Economy). Il augmente à chaque coffre ouvert.
+        // Le coffre suit la progression du joueur : plus on a vaincu de vagues, plus il est cher,
+        // mais meilleur (raretés débloquées, chances, nombre de singes). Payé avec l'argent commun (SAE.Economy).
         public int basePrice = 25;
-        public float priceGrowth = 1.3f;
-        public int Price => Mathf.RoundToInt(basePrice * Mathf.Pow(priceGrowth, OpenedCount));
+        public int pricePerWave = 20;
+        public int wavesPerExtraMonkey = 3;
+        public int Progress => SAE.GameState.WavesWon;
+        public int Price => basePrice + pricePerWave * Progress;
+        public int MonkeysPerChest => 1 + Progress / Mathf.Max(1, wavesPerExtraMonkey);
+        // Raretés obtenues au dernier coffre (l'inventaire viendra les récupérer)
+        public System.Collections.Generic.List<Rarity> LastResults { get; } = new System.Collections.Generic.List<Rarity>();
+        public event System.Action<System.Collections.Generic.List<Rarity>> Opened;
         public ChestOddsSettings oddsSettings = new ChestOddsSettings();
 
         [Header("Timing (secondes)")]
@@ -37,7 +44,7 @@ namespace Sae501.Coffres
         public bool IsInRange(Vector3 playerPosition) =>
             Vector3.Distance(playerPosition, transform.position) <= interactDistance;
 
-        public float[] CurrentOdds() => ChestOdds.Compute(oddsSettings, OpenedCount);
+        public float[] CurrentOdds() => ChestOdds.Compute(oddsSettings, Progress);
 
         void Awake()
         {
@@ -77,14 +84,21 @@ namespace Sae501.Coffres
             roulette.SetVisible(true);
 
             var odds = CurrentOdds();            // probabilités AVANT cette ouverture
-            Rarity result = ChestOdds.Roll(odds); // résultat décidé d'avance, la roulette ne fait que l'afficher
+            // Résultats décidés d'avance (un par singe), la roulette ne fait que montrer le meilleur
+            LastResults.Clear();
+            for (int i = 0; i < MonkeysPerChest; i++) LastResults.Add(ChestOdds.Roll(odds));
+            Rarity result = LastResults[0];
+            foreach (var r in LastResults) if (r > result) result = r;
 
             PlayChestAnimation();
             yield return new WaitForSeconds(spinDelay);
             yield return roulette.Spin(result, odds, spinDuration);
 
             OpenedCount++;
-            roulette.ShowMessage(result.ToString().ToUpper(), RarityInfo.ColorOf(result));
+            roulette.ShowMessage(LastResults.Count == 1 ? result.ToString().ToUpper()
+                                                        : $"{result.ToString().ToUpper()}  (+{LastResults.Count - 1})",
+                                 RarityInfo.ColorOf(result));
+            Opened?.Invoke(LastResults);
             IsBusy = false;
             hideRoutine = StartCoroutine(HideRouletteAfter(hideDelay));
         }

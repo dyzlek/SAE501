@@ -11,6 +11,8 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 > - je veux voir les probabilités de drop ;
 > - les bananes ne doivent pas traverser le bananier, sinon elles restent cachées à des endroits inaccessibles.
 
+Suite : « Ne pousse pas, et corrige tout ce que j'ai relevé pour le moment. »
+
 ### Économie unique, sans interface à l'écran
 > On est le 6. Pour commencer, il faudrait agrandir l'asset du palmier. Ensuite, réalise quelque chose de stylé pour le chantier A (une seule économie avec de vrais coûts) :
 > - une seule bourse, `GameState.Money` : on supprime le `Wallet` du coffre et le pont entre les deux ;

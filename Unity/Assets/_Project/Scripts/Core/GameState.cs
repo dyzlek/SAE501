@@ -23,6 +23,9 @@ namespace SAE
 
         public static int Money;
 
+        // Vagues vaincues : rendent le coffre plus cher, mais meilleur (raretés, nombre de singes).
+        public static int WavesWon;
+
         public static event Action Changed;
         public static void NotifyChanged() => Changed?.Invoke();
 

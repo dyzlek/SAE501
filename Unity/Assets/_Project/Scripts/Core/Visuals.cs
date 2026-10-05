@@ -55,14 +55,15 @@ namespace SAE
         }
 
         // Un singe = un cube couleur de sa rareté + son type écrit dessus.
-        public static GameObject MonkeyPiece(Monkey m, Transform parent, Vector3 localPos, float size)
+        public static GameObject MonkeyPiece(Monkey m, Transform parent, Vector3 localPos, float size, bool withLabel = true)
         {
             var root = new GameObject($"Singe {m}");
             root.transform.SetParent(parent, false);
             root.transform.localPosition = localPos;
             var cube = Box("Corps", root.transform, Vector3.zero, Vector3.one * size, MonkeyData.RarityColor(m.level));
             cube.GetComponent<ColorTint>().Set(MonkeyData.RarityColor(m.level), MonkeyData.IsRainbow(m.level));
-            Label(root.transform, $"{MonkeyData.ShortName(m.type)}{(int)m.level + 1}", new Vector3(0, size * 0.9f, 0), size * 0.45f, Color.black);
+            if (withLabel)
+                Label(root.transform, $"{MonkeyData.ShortName(m.type)}{(int)m.level + 1}", new Vector3(0, size * 0.9f, 0), size * 0.45f, Color.black);
             return root;
         }
     }

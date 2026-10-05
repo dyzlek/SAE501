@@ -19,7 +19,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
 ![Hub vu du dessus](../captures/economie-hub-dessus.webp)
 
-**Mon analyse critique** _(à corriger plus tard, quand je le dirai)_
+**Mon analyse critique** _(corrigée dans la foulée, à tester)_
 1. **Le hub est trop petit.** On est trop serré, les éléments sont les uns devant les autres : c'est compliqué de circuler et d'utiliser les objets.
 2. **Le prix et la qualité du coffre doivent dépendre des vagues vaincues.** Plus on bat de vagues, plus le coffre est cher, mais plus il est intéressant : il donne plus de singes et de meilleur niveau.
 3. **Afficher les probabilités de drop** du coffre (chances par rareté), et les informations qui vont avec.
@@ -35,6 +35,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 |---|---|---|
 | Claude (Claude Code) | Économie unique (`Economy`) : bananes et vagues rapportent, coffre et améliorations coûtent ; `Wallet` et pont supprimés ; caisse dans le décor, « +/− » flottants, panneau d'amélioration du bananier (3 boutons qui s'enfoncent, vert si payable), prix du coffre qui augmente (25, +30 % par coffre) et affiché au-dessus ; argent retiré de l'affichage écran ; palmier ×1,6 ; coin « économie » réorganisé derrière le joueur | À tester |
 | Claude (Claude Code) | Mise en forme de mon analyse critique du hub et ajout de mes captures (rien de corrigé pour l'instant, à ma demande) | Gardé |
+| Claude (Claude Code) | Corrections de mon analyse critique : hub agrandi (cercle de 4 m, sol 12 × 12 m, éléments espacés, boutons hors du passage) ; coffre qui dépend des vagues vaincues (prix 25 + 20 par vague, raretés débloquées par vague, 1 singe de plus toutes les 3 vagues) ; panneau des chances à côté du coffre ; bananes remises hors du bac si elles s'y coincent ; plus de textes sur les cubes de la bibliothèque ; textes du panneau du bananier agrandis | À tester |
 
 ## Lun. 5 oct. 2026
 - **Fait :** création du dépôt GitHub, lecture des consignes, première analyse de l'idée et brouillon du GDD, test du prototype v2 et captures, **analyse critique du prototype (personnelle, pas encore discutée avec l'équipe)**, test et analyse des prototypes de Nicolas (coffres) et de Maxens (bananier), intégration des trois prototypes dans un seul projet (branche `feat/integration`).

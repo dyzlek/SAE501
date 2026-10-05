@@ -27,6 +27,7 @@ public class Banane : MonoBehaviour
     public bool EstPourrie { get; private set; }
     public bool EnMain { get; private set; }
     public bool Deposee => deposee;
+    public bool Posee => posee;      // arrivée au sol (fin de la chute depuis l'arbre)
     /// 0 = fraîche, 1 = pourrie
     public float Progression => dureePourriture <= 0 ? 0 : Mathf.Clamp01(age / dureePourriture);
     /// Ce que la banane rapporte si on la dépose maintenant.
