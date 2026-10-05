@@ -43,6 +43,12 @@ On garde de cet essai le plateau incliné, mais pas la bibliothèque : on revien
 
 ![Alternative : vue d'ensemble](../captures/alternative-hub-cercle-3.png)
 
+**Version actuelle (prototype v3)** : bibliothèque en deux meubles d'étagères (×1,1), plateau incliné posé sur une planche et un pied.
+
+![v3 : les deux meubles de la bibliothèque et le plateau](../captures/proto-v3-hub-bibliotheques.webp)
+
+![v3 : plateau incliné devant la bibliothèque](../captures/proto-v3-plateau-incline.webp)
+
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
@@ -59,3 +65,4 @@ On garde de cet essai le plateau incliné, mais pas la bibliothèque : on revien
 | Claude (Claude Code) | Corrections suite à mon analyse : aperçu rouge + halo blanc pour la fusion, prendre/poser/fusionner directement sur la carte | Gardé |
 | Claude (Claude Code) | Proposition alternative : hub en cercle, bibliothèque à 7 socles + sélecteur de rareté | Jeté (non retenu, voir captures) |
 | Claude (Claude Code) | Retour à la bibliothèque en étagères ×1,1, en 2 meubles espacés (rangée la plus haute à 1,65 m) ; plateau incliné posé sur une planche + pied qui ne traverse plus | À tester |
+| Claude (Claude Code) | Ajout de mes captures de la version actuelle (v3) | Gardé |
