@@ -1,0 +1,23 @@
+BANANES : installation automatique dans Unity
+
+Rangement (comme le reste du projet) :
+   _Project/Art/Bananier   -> FBX, textures, matériaux (+ ce fichier)
+   _Project/Prefabs        -> Banane.prefab
+   _Project/Scripts        -> Runtime (Banane, Bananier, Panier, Recolteur, TestSouris) + Editor (BananesInstaller)
+   _Project/Scenes/Sandbox/Maxens/BananierSandbox.unity -> scène de test
+
+1. Ouvrir la scène BananierSandbox, Play. Ou depuis la barre de menus :
+   - Bananes > Créer une scène de test   (recrée Sandbox/Maxens/BananierSandbox.unity)
+   - Bananes > Installer dans la scène ouverte   (pour le mettre dans votre scène de jeu)
+2. Play.
+   Sans casque : clic maintenu sur une banane = elle est en main, on la glisse au-dessus du panier et on relâche (Panier > Zone_Depot : regarder "Total" en mode Debug de l'Inspector).
+   En VR : attraper la banane et la lâcher dans le panier.
+
+Ce que le menu fait tout seul :
+- matériaux (Built-in ou URP détecté automatiquement, plus de rose) + import des FBX,
+- prefab _Project/Prefabs/Banane.prefab : modèle + Box Collider + Rigidbody + Banane.cs
+  + XR Grab Interactable si le XR Interaction Toolkit est installé (Select Entered -> Prise, Select Exited -> Lachee déjà branchés),
+- "Systeme_Bananes" : Bananier (Bananier.cs réglé), Panier (zone de dépôt + Panier.cs), Recolteur (désactivé : cocher "Achete").
+
+Réglages : sélectionner Bananier > composant Bananier : Fréquence / Pourriture / Valeur (valeur de base, gain par niveau, limite, prix).
+Il faut un sol avec collider sous le bananier (le Plane de la scène de test en a un) sinon les bananes lâchées tombent à l'infini.

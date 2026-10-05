@@ -1,0 +1,49 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace SAE
+{
+    // Garde les singes de la carte synchronisés avec GameState.Placed :
+    // un singe posé sur le plateau apparaît tout de suite sur la carte, même pendant une vague.
+    public class TowerManager : MonoBehaviour
+    {
+        public const float TowerSize = 1.2f;
+
+        readonly Dictionary<PlacedMonkey, GameObject> towers = new Dictionary<PlacedMonkey, GameObject>();
+
+        void OnEnable()
+        {
+            GameState.Changed += Sync;
+            Sync();
+        }
+
+        void OnDisable() => GameState.Changed -= Sync;
+
+        void Sync()
+        {
+            // Retirer les singes qui ne sont plus posés (repris ou fusionnés)
+            var gone = new List<PlacedMonkey>();
+            foreach (var pair in towers)
+                if (!GameState.Placed.Contains(pair.Key)) gone.Add(pair.Key);
+            foreach (var p in gone)
+            {
+                Destroy(towers[p]);
+                towers.Remove(p);
+            }
+
+            // Ajouter les nouveaux
+            foreach (var p in GameState.Placed)
+            {
+                if (towers.ContainsKey(p)) continue;
+                var pos = new Vector3(p.pos.x, TowerSize / 2f, p.pos.y);
+                var go = Visuals.MonkeyPiece(p.monkey, transform, pos, TowerSize);
+                go.tag = Tags.Singe;
+                go.AddComponent<BoxCollider>().size = Vector3.one * TowerSize; // pour le prendre sur la carte
+                go.AddComponent<Tower>().Init(p.monkey);
+                var body = go.transform.Find("Corps");
+                body.gameObject.AddComponent<Mirrored>().label = go.GetComponentInChildren<TextMesh>().text;
+                towers.Add(p, go);
+            }
+        }
+    }
+}

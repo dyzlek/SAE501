@@ -69,6 +69,14 @@ Marche à suivre :
 - Une demande refusée ou du code IA jeté se note aussi (colonne « gardé / jeté »).
 - Les journaux servent à l'oral (transparence sur l'IA) et à la note de gestion de projet : ils doivent rester à jour et honnêtes.
 
+## Prompts (règle n°2)
+Les demandes faites à l'IA sont gardées dans `prompts/` : `prompts_dylan.md`, `prompts_maxens.md`, `prompts_nicolas.md`.
+- Après chaque demande **qui fait avancer le projet** (nouvelle fonction, décision, correction, organisation), Claude ajoute le prompt dans le fichier de **la personne avec qui il travaille**, en haut, sous la date du jour.
+- Le prompt est **reformulé et corrigé** : orthographe, grammaire, ponctuation, phrases claires. On garde le sens et les détails importants, on ne rajoute rien que la personne n'a pas demandé.
+- Une demande en plusieurs messages est regroupée en un seul prompt (avec une ligne « Suite : … » si besoin).
+- On ignore les messages sans intérêt pour le projet (« ok », « push », questions de détail).
+- Même commit que la modification et que la ligne du journal.
+
 ## Workflow Git (GitHub flow)
 - `main` = toujours stable (compile, tourne au casque). **Jamais de commit direct sur main.**
 - Une branche courte par tâche : `feat/<sujet>`, `fix/<sujet>`, `docs/<sujet>`, `art/<sujet>` (1-2 jours max).
@@ -77,7 +85,7 @@ Marche à suivre :
 - Claude : avant de modifier, vérifier la branche courante (`git branch --show-current`) ; si on est sur main, créer une branche.
 
 ## Règles de travail pour Claude dans ce dépôt
-- Projet Unity dans `Unity/` ; docs dans `docs/`. `.gitignore` Unity à la racine.
+- **Un seul projet Unity, en 6000.6**, dans `Unity/` ; docs dans `docs/` ; prompts dans `prompts/`. `.gitignore` Unity à la racine.
 - **Jamais deux personnes sur la même scène** : privilégier les prefabs, une scène de test par personne (`Assets/_Project/Scenes/Sandbox/<Prénom>`).
 - Ne pas proposer de feature hors périmètre sans le signaler ; en S3, aucune nouvelle feature.
 - Vérifier toute proposition contre les règles de confort et le test de l'écran.
