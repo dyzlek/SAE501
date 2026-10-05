@@ -76,3 +76,4 @@ On garde de cet essai le plateau incliné, mais pas la bibliothèque : on revien
 | Claude (Claude Code) | Ajout de mes captures de la version actuelle (v3) | Gardé |
 | Claude (Claude Code) | Préparation des projets de Nicolas et Maxens pour les tester (dossiers à part), mise en forme de mon analyse de leurs prototypes | Gardé |
 | Claude (Claude Code) | Intégration des 3 prototypes sur `feat/integration` : merge des branches de Nicolas et Maxens, socle Unity 6000.6 gardé, packages glTFast / XR Toolkit / OpenXR / module VR ajoutés, `.glb` en LFS ; package perso `unity-mcp` de Maxens non repris | À tester |
+| Claude (Claude Code) | Ajout des retours de Maxens (envoyés sur Discord) dans son journal, à sa place | Gardé |

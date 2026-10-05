@@ -28,6 +28,18 @@ Les bananes tombent à côté du bac, du côté du panier, et on les prend pour 
 
 **Rangement** (comme le reste du projet) : `Unity/Assets/_Project/` → `Art/Bananier` (FBX, textures, matériaux), `Prefabs/Banane.prefab`, `Scripts/Runtime` et `Scripts/Editor`, scène de test dans `Scenes/Sandbox/Maxens/BananierSandbox.unity`. Projet en Unity 6000.3.8f1, URP.
 
+**Mes retours sur les prototypes des autres** _(mon avis, 18h17)_
+
+- **Dylan (hub, plateau, bibliothèque)** :
+  - Je n'aime pas trop les textes au-dessus de chaque cube. Ce n'est pas essentiel et ça rend l'ensemble moins lisible (peut-être temporaire ?).
+  - Le plateau devrait être vraiment plus grand : c'est l'élément principal.
+  - Il faut trouver une autre idée pour les bibliothèques : elles ne sont pas très lisibles et prennent trop de place. Je n'ai pas encore d'idée, on en parle demain.
+  - Sinon, tout est bon, j'aime bien la mécanique.
+- **Nicolas (coffres)** :
+  - J'aime bien, mais je ne sais pas si je ne préférerais pas l'idée de départ : un bruit, le singe qui sort du coffre et qui tourne, avec l'aura qui apparaît.
+  - Si on garde la version actuelle, c'est pas mal. Il faudrait juste que le coffre se tourne automatiquement vers le joueur.
+- **Moi (bananier)** : rien à redire.
+
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
