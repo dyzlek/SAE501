@@ -46,3 +46,4 @@ La carte, avec les singes posés depuis le hub.
 | Claude (Claude Code) | Tags Unity (Ballon, Singe, Joueur, Plateau, Bibliotheque, Piste, Terrain, Bouton) créés automatiquement | Gardé |
 | Claude (Claude Code) | Mode démo + build Windows pour captures d'écran | Jeté (retiré à ma demande) |
 | Claude (Claude Code) | Ajout de mes captures du prototype dans mon compte rendu du jour | Gardé |
+| Claude (Claude Code) | Reformulation de mon analyse critique (le fond est le mien) | Gardé |
