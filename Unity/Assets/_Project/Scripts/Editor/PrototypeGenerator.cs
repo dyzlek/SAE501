@@ -95,86 +95,96 @@ namespace SAE.EditorTools
         }
 
         // ---------------- HUB ----------------
-        // Pensé pour la VR : le joueur est au centre (point d'apparition) et tout est autour de lui,
-        // à portée de bras (~0,85 m), tourné vers lui. Devant : le plateau incliné. À gauche : la bibliothèque.
-        // À droite : le choix de la rareté. Derrière : les boutons.
-        const float Reach = 0.85f;
-        const float HandHeight = 1.05f;
-
-        // Position sur un cercle autour du joueur. angle 0 = devant, négatif = à gauche.
-        static Vector3 Around(float angleDeg, float radius, float height)
-        {
-            float a = angleDeg * Mathf.Deg2Rad;
-            return new Vector3(Mathf.Sin(a) * radius, height, Mathf.Cos(a) * radius);
-        }
-
-        static Quaternion FacingCenter(Vector3 pos) => Quaternion.LookRotation(new Vector3(pos.x, 0, pos.z));
-
-        static void Pillar(Transform parent, Vector3 top)
-        {
-            Visuals.Solid("Socle", parent, new Vector3(top.x, (top.y - 0.1f) / 2f, top.z), new Vector3(0.08f, top.y - 0.1f, 0.08f), Wood);
-        }
+        // Le joueur apparaît au centre, regard vers +Z.
+        // Devant : le plateau incliné vers lui. À gauche et à droite : deux meubles de bibliothèque
+        // (4 types + 3 types), rangées basses pour rester à portée d'un petit joueur en VR.
+        // Derrière : les boutons.
+        const float SlotSize = 0.24f;     // ancienne taille ×1,1
+        const float SlotStepX = 0.45f;    // espace entre deux raretés
+        const float SlotStepY = 0.40f;    // espace entre deux étagères
+        const float FirstShelfY = 0.45f;  // rangée la plus basse
 
         static void BuildHub(Transform mapRoot, Transform mapSpawn)
         {
             var env = new GameObject("Hub").transform;
-            Visuals.Solid("Sol", env, new Vector3(0, -0.05f, 0), new Vector3(6, 0.1f, 6), Floor);
+            Visuals.Solid("Sol", env, new Vector3(0, -0.05f, 0), new Vector3(7, 0.1f, 7), Floor);
 
-            // Plateau incliné devant le joueur : la carte en direct, et la surface où l'on pose les singes
+            BuildBoard(env, mapRoot);
+
+            // Bibliothèque en deux meubles qui se font face, de part et d'autre du joueur
+            BuildShelf(env, "Bibliotheque gauche", new Vector3(-2.0f, 0, 0.6f), -90f, 0, 4);
+            BuildShelf(env, "Bibliotheque droite", new Vector3(2.0f, 0, 0.6f), 90f, 4, 3);
+
+            // Boutons derrière le joueur
+            MakeActionCube(env, "Jouer", new Vector3(0.6f, 1.0f, -1.3f), 0.35f, new Color(0.2f, 0.85f, 0.3f),
+                "JOUER", ActionCube.Action.Teleport, mapSpawn, "Aller sur la carte");
+            MakeActionCube(env, "Vider", new Vector3(-0.6f, 0.9f, -1.3f), 0.25f, new Color(0.6f, 0.6f, 0.6f),
+                "Vider", ActionCube.Action.ClearBoard, null, "Vider le plateau");
+        }
+
+        // Plateau incliné de 25° vers le joueur, posé sur une planche qui suit l'inclinaison + un pied.
+        static void BuildBoard(Transform env, Transform mapRoot)
+        {
             float scale = BoardTile / MapLayout.Tile;
-            Visuals.Solid("Pied du plateau", env, new Vector3(0, 0.4f, 1.0f), new Vector3(0.6f, 0.8f, 0.6f), Wood);
+            float side = MapLayout.Size * BoardTile;
+            var center = new Vector3(0, 0.95f, 1.0f);
+
             var boardGo = new GameObject("Plateau");
             boardGo.tag = Tags.Plateau;
             boardGo.transform.SetParent(env, false);
-            boardGo.transform.SetPositionAndRotation(new Vector3(0, 0.9f, 1.0f), Quaternion.Euler(-25f, 0, 0));
+            boardGo.transform.SetPositionAndRotation(center, Quaternion.Euler(-25f, 0, 0));
             var board = boardGo.AddComponent<Board>();
             board.mapRoot = mapRoot;
             board.scale = scale;
             boardGo.AddComponent<PlacementSurface>().scale = scale;
             var col = boardGo.AddComponent<BoxCollider>();
-            col.size = new Vector3(MapLayout.Size * BoardTile, 0.04f, MapLayout.Size * BoardTile);
+            col.size = new Vector3(side, 0.04f, side);
             col.center = new Vector3(0, -0.02f, 0);
             BuildGrid(boardGo.transform, BoardTile, 0.04f, false);
 
-            // Bibliothèque à gauche : un socle par type, en arc
-            var lib = new GameObject("Bibliotheque").transform;
-            lib.tag = Tags.Bibliotheque;
-            lib.SetParent(env, false);
-            Visuals.Label(lib, "SINGES", Around(-80f, Reach, HandHeight + 0.35f), 0.07f);
-            for (int t = 0; t < MonkeyData.TypeCount; t++)
-            {
-                var pos = Around(-110f + t * 10f, Reach, HandHeight);
-                Pillar(lib, pos);
-                var slot = new GameObject($"Socle {(MonkeyType)t}");
-                slot.tag = Tags.Bibliotheque;
-                slot.transform.SetParent(lib, false);
-                slot.transform.SetPositionAndRotation(pos, FacingCenter(pos));
-                slot.AddComponent<BoxCollider>().size = Vector3.one * 0.16f;
-                slot.AddComponent<LibrarySlot>().type = (MonkeyType)t;
-                Visuals.Label(slot.transform, ((MonkeyType)t).ToString(), new Vector3(0, 0.17f, 0), 0.035f);
-            }
+            // Planche sous le plateau (même inclinaison) : rien ne traverse la surface
+            Visuals.Box("Planche", boardGo.transform, new Vector3(0, -0.07f, 0), new Vector3(side + 0.06f, 0.06f, side + 0.06f), Wood);
+            // Pied vertical : son sommet s'arrête sous la planche
+            float legTop = center.y - 0.16f;
+            Visuals.Solid("Pied", env, new Vector3(0, legTop / 2f, center.z), new Vector3(0.12f, legTop, 0.12f), Wood);
+            Visuals.Solid("Base du pied", env, new Vector3(0, 0.02f, center.z), new Vector3(0.6f, 0.04f, 0.6f), Wood);
+        }
 
-            // Choix de la rareté à droite : 8 pastilles de couleur
-            var picker = new GameObject("Rarete").transform;
-            picker.SetParent(env, false);
-            Visuals.Label(picker, "RARETÉ", Around(85f, Reach, HandHeight + 0.3f), 0.07f);
-            for (int l = 0; l < MonkeyData.LevelCount; l++)
-            {
-                var r = (Rarity)l;
-                var pos = Around(50f + l * 10f, Reach, HandHeight);
-                Pillar(picker, pos);
-                var button = Visuals.Solid($"Rarete {r}", picker, pos, Vector3.one * 0.07f, MonkeyData.RarityColor(r));
-                button.transform.rotation = FacingCenter(pos);
-                button.tag = Tags.Bouton;
-                button.GetComponent<ColorTint>().Set(MonkeyData.RarityColor(r), MonkeyData.IsRainbow(r));
-                button.AddComponent<RarityButton>().rarity = r;
-            }
+        // Un meuble : une étagère par type (de firstType à firstType+count-1), une case par rareté.
+        // Repère local : les raretés vont vers +X, les étagères vers le haut, le joueur est du côté -Z.
+        static void BuildShelf(Transform env, string name, Vector3 pos, float yaw, int firstType, int count)
+        {
+            var shelf = new GameObject(name).transform;
+            shelf.tag = Tags.Bibliotheque;
+            shelf.SetParent(env, false);
+            shelf.SetPositionAndRotation(pos, Quaternion.Euler(0, yaw, 0));
 
-            // Boutons derrière le joueur
-            MakeActionCube(env, "Jouer", Around(150f, 1.0f, 1.0f), 0.3f, new Color(0.2f, 0.85f, 0.3f),
-                "JOUER", ActionCube.Action.Teleport, mapSpawn, "Aller sur la carte");
-            MakeActionCube(env, "Vider", Around(-150f, 1.0f, 0.9f), 0.2f, new Color(0.6f, 0.6f, 0.6f),
-                "Vider", ActionCube.Action.ClearBoard, null, "Vider le plateau");
+            float width = MonkeyData.LevelCount * SlotStepX;
+            float height = FirstShelfY + count * SlotStepY;
+            Visuals.Solid("Fond", shelf, new Vector3(0, height / 2f, 0.25f), new Vector3(width + 0.9f, height, 0.05f), Wood);
+            Visuals.Label(shelf, "BIBLIOTHÈQUE", new Vector3(0, height + 0.15f, 0), 0.1f);
+
+            float x0 = -(MonkeyData.LevelCount - 1) / 2f * SlotStepX;
+            for (int i = 0; i < count; i++)
+            {
+                var type = (MonkeyType)(firstType + i);
+                float y = FirstShelfY + i * SlotStepY;
+                Visuals.Solid($"Etagere {type}", shelf, new Vector3(0, y - SlotSize / 2f - 0.02f, 0.05f), new Vector3(width + 0.9f, 0.03f, 0.45f), Wood);
+                Visuals.Label(shelf, type.ToString(), new Vector3(x0 - 0.6f, y, -0.05f), 0.07f);
+
+                for (int l = 0; l < MonkeyData.LevelCount; l++)
+                {
+                    var slot = new GameObject($"Slot {type} {(Rarity)l}");
+                    slot.tag = Tags.Bibliotheque;
+                    slot.transform.SetParent(shelf, false);
+                    slot.transform.localPosition = new Vector3(x0 + l * SlotStepX, y, 0);
+                    slot.AddComponent<BoxCollider>().size = Vector3.one * (SlotSize + 0.04f);
+                    var s = slot.AddComponent<LibrarySlot>();
+                    s.type = type;
+                    s.level = (Rarity)l;
+                    Visuals.MonkeyPiece(new Monkey(type, (Rarity)l), slot.transform, Vector3.zero, SlotSize);
+                }
+            }
         }
 
         // Grille 8x8 en dalles (sans collider sur le plateau, avec collider sur la carte pour marcher).

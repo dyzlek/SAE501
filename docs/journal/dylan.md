@@ -34,6 +34,15 @@ La carte, avec les singes posés depuis le hub.
 - **Déplacer les singes sur la carte :** on doit pouvoir **prendre et déplacer** un singe directement quand on est sur la carte, pas seulement depuis le plateau du hub.
 
 
+**Proposition alternative (testée, non retenue)** : hub en cercle autour du joueur, avec une bibliothèque réduite à 7 socles (un par type) et un sélecteur de rareté à 8 pastilles.
+On garde de cet essai le plateau incliné, mais pas la bibliothèque : on revient à la bibliothèque en étagères (7 types × 8 raretés).
+
+![Alternative : hub en cercle, vue de face](../captures/alternative-hub-cercle-1.png)
+
+![Alternative : bibliothèque à 7 socles et pastilles de rareté](../captures/alternative-hub-cercle-2.png)
+
+![Alternative : vue d'ensemble](../captures/alternative-hub-cercle-3.png)
+
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
@@ -47,4 +56,6 @@ La carte, avec les singes posés depuis le hub.
 | Claude (Claude Code) | Mode démo + build Windows pour captures d'écran | Jeté (retiré à ma demande) |
 | Claude (Claude Code) | Ajout de mes captures du prototype dans mon compte rendu du jour | Gardé |
 | Claude (Claude Code) | Reformulation de mon analyse critique (le fond est le mien) | Gardé |
-| Claude (Claude Code) | Corrections suite à mon analyse : hub en cercle autour du joueur (plateau incliné devant, bibliothèque à gauche, rareté à droite), bibliothèque réduite à 7 socles + sélecteur de rareté, aperçu rouge + halo blanc pour la fusion, prendre/poser/fusionner directement sur la carte | À tester |
+| Claude (Claude Code) | Corrections suite à mon analyse : aperçu rouge + halo blanc pour la fusion, prendre/poser/fusionner directement sur la carte | Gardé |
+| Claude (Claude Code) | Proposition alternative : hub en cercle, bibliothèque à 7 socles + sélecteur de rareté | Jeté (non retenu, voir captures) |
+| Claude (Claude Code) | Retour à la bibliothèque en étagères ×1,1, en 2 meubles espacés (rangée la plus haute à 1,65 m) ; plateau incliné posé sur une planche + pied qui ne traverse plus | À tester |
