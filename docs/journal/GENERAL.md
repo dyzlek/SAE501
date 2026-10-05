@@ -36,3 +36,9 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
   - rendre le plateau plus grand et alléger les textes ;
   - réserver les casques et choisir l'outil de suivi ;
   - GDD v1 pour vendredi.
+
+**Captures de l'intégration** (les trois prototypes réunis dans le hub, en cercle autour du joueur) :
+
+![Intégration : coffre, bananier, bouton JOUER et bibliothèque](../captures/integration-hub-1.webp)
+
+![Intégration : plateau, bibliothèques, bananier et panier](../captures/integration-hub-2.webp)
