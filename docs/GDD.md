@@ -15,11 +15,11 @@ Univers de Bloons : singes, ballons colorés, ton cartoon. Le guide du tutoriel 
 
 ## 4. Type de jeu et références
 - **C'est Bloons TD, mais avec ton arc en main et tes singes posés à la main sur une maquette.**
-- Références : Bloons TD 6 (codes TD, types de ballons), Rush Royale (fusion 3 → 1, coffres), Bloons TD VR / Tower Tag (TD en VR), Job Simulator (saisir et lancer des objets).
+- Références : Bloons TD 6 (codes TD, types de ballons), Rush Royale (fusion 2 → 1, coffres), Bloons TD VR / Tower Tag (TD en VR), Job Simulator (saisir et lancer des objets).
 
 ## 5. Mécaniques et patterns
 - **Tours (singes) :** classique, boomerang, canon, sniper, tireur de punaises, singe de glace, encolleur.
-- **Fusion :** 3 singes de même type et même niveau donnent 1 singe du niveau suivant.
+- **Fusion :** 2 singes de même type et même niveau donnent 1 singe du niveau suivant (en VR : on prend un singe et on le pose sur l'autre).
 - **Coffres (gacha) :** raretés gris, vert, bleu, violet, légendaire, arc-en-ciel. Le prix augmente à chaque coffre ouvert. Le légendaire et l'arc-en-ciel sont peut-être hors des coffres.
 - **Économie :** tuer un ballon ne rapporte rien ; finir une vague ou tuer un boss rapporte de l'argent.
 - **Bananier** (améliorable) : les bananes tombent, il faut les ramasser et les mettre dans la caisse avant qu'elles pourrissent. Plus tard, on peut acheter un singe récolteur, payant et limité.
@@ -37,7 +37,7 @@ Univers de Bloons : singes, ballons colorés, ton cartoon. Le guide du tutoriel 
 ## 7. Périmètre _(proposition, à valider en équipe)_
 | DOIT | DEVRAIT | POURRAIT | NE FERA PAS |
 |---|---|---|---|
-| 1 carte, 1 chemin, ~10 vagues + un boss final (le dirigeable rouge) | Fusion 3 → 1 (niveaux 1 à 3) | 5-7 singes | Plusieurs cartes |
+| 1 carte, 1 chemin, ~10 vagues + un boss final (le dirigeable rouge) | Fusion 2 → 1 (niveaux 1 à 3) | 5-7 singes | Plusieurs cartes |
 | Quincy à l'arc (tir physique) | Bananier améliorable et bananes qui pourrissent | Roulette | Méta-progression entre les parties |
 | 3 singes posables à la main (classique, canon, glace) | Coffre simple avec 3 raretés | Ballon cœur, dirigeable bleu | Raretés légendaire et arc-en-ciel, gacha complet |
 | Bananes → caisse → argent | Ballon blindé | Améliorations de l'arc | Singe récolteur automatique |

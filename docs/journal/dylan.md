@@ -15,3 +15,4 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude (Claude Code) | Analyse de l'idée TD Bloons par rapport aux consignes, GDD v0 (boucle, pourquoi la VR, périmètre proposé) | À valider en équipe |
 | Claude (Claude Code) | Workflow Git (branches + PR), journaux général et par personne | Gardé |
 | Claude (Claude Code) | Fusion de la PR #1, mise à jour des journaux | Gardé |
+| Claude (Claude Code) | GDD : fusion des singes passée de 3 → 1 à 2 → 1 | Gardé |
