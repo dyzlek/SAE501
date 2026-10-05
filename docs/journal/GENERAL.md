@@ -23,6 +23,7 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 
 ## Semaine 1 · 5-9 oct. — PROUVER
 **Lun. 5 oct.**
+- Prototype v2 jouable (clavier/souris) : hub, bibliothèque, plateau en direct, placement libre, fusion, vagues. Captures dans `docs/captures/`.
 - Fait : lancement de la SAÉ, dépôt GitHub, brouillon GDD v0 (idée TD Bloons).
 - Bloque : —
 - Prochaine étape : composition du groupe à Antoine, réservation casques, outil de suivi, premier essai du geste en greybox.
