@@ -22,4 +22,5 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 **Lun. 5 oct.**
 - Fait : lancement de la SAÉ, dépôt GitHub, brouillon GDD v0 (idée TD Bloons).
 - Bloque : —
-- Prochaine étape : composition du groupe à Antoine, réservation casques, outil de suivi, premier essai du geste en greybox.
+- Fait aussi : composition du groupe envoyée à Antoine, Maxens et Nicolas invités sur le dépôt, PR #1 (workflow Git + journaux) fusionnée.
+- Prochaine étape : réservation casques, outil de suivi, trancher nom/assets/périmètre, setup Unity VR, premier essai du geste en greybox.
