@@ -3,7 +3,7 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Lun. 5 oct. 2026
-- **Fait :** création du dépôt GitHub, lecture des consignes, première analyse de l'idée et brouillon du GDD, test du prototype v2 et captures, **analyse critique du prototype (personnelle, pas encore discutée avec l'équipe)**.
+- **Fait :** création du dépôt GitHub, lecture des consignes, première analyse de l'idée et brouillon du GDD, test du prototype v2 et captures, **analyse critique du prototype (personnelle, pas encore discutée avec l'équipe)**, test et analyse des prototypes de Nicolas (coffres) et de Maxens (bananier).
 - **Bloque :** —
 - **Demain :** corriger les points de mon analyse critique (disposition VR, bibliothèque, halo de fusion, déplacement sur la carte).
 
@@ -49,6 +49,14 @@ On garde de cet essai le plateau incliné, mais pas la bibliothèque : on revien
 
 ![v3 : plateau incliné devant la bibliothèque](../captures/proto-v3-plateau-incline.webp)
 
+**Analyse des prototypes de mes camarades** _(mon avis)_
+
+- **Nicolas (ouverture de coffres)** :
+  - La roulette qui défile pour afficher la rareté gagnée est une bonne idée.
+  - L'animation du coffre fait trop maladroite (« goofy ») : elle est à retravailler.
+  - Je proposerais qu'une fois la rareté choisie par la roulette, **le singe sorte du coffre** avec la couleur de sa rareté. Ce serait plus satisfaisant et plus lisible.
+- **Maxens (bananier)** : rien à redire. Le prototype est simple et efficace.
+
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
@@ -66,3 +74,4 @@ On garde de cet essai le plateau incliné, mais pas la bibliothèque : on revien
 | Claude (Claude Code) | Proposition alternative : hub en cercle, bibliothèque à 7 socles + sélecteur de rareté | Jeté (non retenu, voir captures) |
 | Claude (Claude Code) | Retour à la bibliothèque en étagères ×1,1, en 2 meubles espacés (rangée la plus haute à 1,65 m) ; plateau incliné posé sur une planche + pied qui ne traverse plus | À tester |
 | Claude (Claude Code) | Ajout de mes captures de la version actuelle (v3) | Gardé |
+| Claude (Claude Code) | Préparation des projets de Nicolas et Maxens pour les tester (dossiers à part), mise en forme de mon analyse de leurs prototypes | Gardé |
