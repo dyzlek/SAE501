@@ -10,6 +10,8 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 | Date | Décision | Pourquoi |
 |---|---|---|
 | 2026-10-05 | Idée retenue : tower defense VR univers Bloons (Quincy à l'arc + singes posés à la main) | Gestes VR forts (arc, saisir/poser, ramasser) |
+| 2026-10-05 | Le plateau du hub = maquette 8×8 de la carte : un singe posé sur une case apparaît sur la même case de la carte | Un seul geste pour placer et fusionner, lisible en VR |
+| 2026-10-05 | Prototype d'abord au clavier/souris (pas de casque dispo), VR ensuite | Valider les mécaniques sans attendre le matériel |
 | 2026-10-05 | Git : `main` stable + une branche par tâche + PR relue | Éviter de casser le build commun |
 | _à trancher_ | Nom du jeu · assets Bloons ou maison · périmètre définitif | Avant le GDD v1 (ven. 9 oct.) |
 
