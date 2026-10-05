@@ -11,9 +11,9 @@ namespace SAE
 
         Monkey Monkey => new Monkey(type, level);
 
-        public string Hint => $"Prendre : {Monkey}";
+        public string GetHint(Vector3 point) => $"Prendre : {Monkey}";
 
-        public void OnClick(PlayerController player)
+        public void OnClick(PlayerController player, Vector3 point)
         {
             GameState.Held = Monkey;
             GameState.NotifyChanged();

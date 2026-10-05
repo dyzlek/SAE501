@@ -8,7 +8,6 @@ namespace SAE
     // Règle du GDD : éclater un ballon ne rapporte rien, finir une vague rapporte de l'argent.
     public class WaveSpawner : MonoBehaviour
     {
-        public float tile = 3f;
         public float balloonHeight = 1f;
         public float pauseBetweenWaves = 4f;
         public float spawnInterval = 0.7f;
@@ -22,8 +21,8 @@ namespace SAE
         void Start()
         {
             path = new List<Vector3>();
-            foreach (var cell in MapLayout.OrderedPath())
-                path.Add(transform.position + MapLayout.CellLocal(cell.y, cell.x, tile) + Vector3.up * balloonHeight);
+            foreach (var p in MapLayout.PathPoints())
+                path.Add(transform.position + p + Vector3.up * balloonHeight);
             lives = startLives;
             StartCoroutine(Run());
         }
@@ -56,7 +55,7 @@ namespace SAE
                 status = $"Vague {wave} finie : +{reward}";
                 yield return new WaitForSeconds(1.5f);
             }
-            status = $"Perdu à la vague {wave}. Retourne au hub pour recommencer.";
+            status = $"Perdu à la vague {wave}. Relance Play pour recommencer.";
         }
 
         void Spawn(int layers)
@@ -65,6 +64,7 @@ namespace SAE
             go.name = "Ballon";
             go.transform.localScale = Vector3.one * 0.9f;
             go.AddComponent<ColorTint>();
+            go.AddComponent<Mirrored>();
             go.AddComponent<Balloon>().Init(this, path, layers);
         }
 

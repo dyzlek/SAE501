@@ -28,7 +28,7 @@ namespace SAE
         // Distance parcourue : les singes visent le ballon le plus avancé.
         public float Progress { get; private set; }
 
-        public string Hint => $"Ballon ({Mathf.CeilToInt(hp)} couche(s)) : tirer";
+        public string GetHint(Vector3 point) => $"Ballon ({Mathf.CeilToInt(hp)} couche(s)) : tirer";
 
         public void Init(WaveSpawner owner, List<Vector3> points, int layers)
         {
@@ -43,7 +43,7 @@ namespace SAE
         void OnEnable() => All.Add(this);
         void OnDisable() => All.Remove(this);
 
-        public void OnClick(PlayerController player) => Hit(1f);
+        public void OnClick(PlayerController player, Vector3 point) => Hit(1f);
 
         public void Hit(float damage)
         {

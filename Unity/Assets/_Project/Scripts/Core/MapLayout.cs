@@ -3,11 +3,13 @@ using UnityEngine;
 
 namespace SAE
 {
-    // La piste en labyrinthe, partagée par le plateau du hub (en petit) et la carte (en grand).
-    // S = départ des ballons, E = sortie, # = piste, . = case libre pour un singe.
+    // La piste en labyrinthe. La même description sert à la carte (en grand) et au plateau (en petit).
+    // S = départ des ballons, E = sortie, # = piste, . = terrain où l'on peut poser des singes.
     public static class MapLayout
     {
         public const int Size = 8;
+        public const float Tile = 3f;                 // taille d'une case de la carte, en mètres
+        public const float HalfExtent = Size * Tile / 2f;
 
         static readonly string[] rows =
         {
@@ -21,24 +23,26 @@ namespace SAE
             "........",
         };
 
+        static List<Vector3> pathPoints;
+
         public static char At(int row, int col) => rows[row][col];
-        public static bool IsPath(int row, int col) => rows[row][col] != '.';
 
-        // Position locale du centre d'une case. La ligne 0 est au fond, loin du joueur.
-        public static Vector3 CellLocal(int row, int col, float tile) =>
-            new Vector3((col - (Size - 1) / 2f) * tile, 0f, ((Size - 1) / 2f - row) * tile);
+        // Centre d'une case dans le repère de la carte. La ligne 0 est au fond, loin du joueur.
+        public static Vector3 CellLocal(int row, int col) =>
+            new Vector3((col - (Size - 1) / 2f) * Tile, 0f, ((Size - 1) / 2f - row) * Tile);
 
-        // Cases de la piste dans l'ordre, du départ à la sortie (x = colonne, y = ligne).
-        public static List<Vector2Int> OrderedPath()
+        // Centres des cases de la piste dans l'ordre, du départ à la sortie (repère de la carte).
+        public static List<Vector3> PathPoints()
         {
-            var path = new List<Vector2Int>();
+            if (pathPoints != null) return pathPoints;
+            pathPoints = new List<Vector3>();
             var current = Find('S');
             var visited = new HashSet<Vector2Int>();
             Vector2Int[] dirs = { Vector2Int.right, Vector2Int.left, Vector2Int.up, Vector2Int.down };
 
             while (true)
             {
-                path.Add(current);
+                pathPoints.Add(CellLocal(current.y, current.x));
                 visited.Add(current);
                 if (At(current.y, current.x) == 'E') break;
 
@@ -47,14 +51,36 @@ namespace SAE
                 {
                     var next = current + d;
                     if (next.x < 0 || next.y < 0 || next.x >= Size || next.y >= Size) continue;
-                    if (!IsPath(next.y, next.x) || visited.Contains(next)) continue;
+                    if (At(next.y, next.x) == '.' || visited.Contains(next)) continue;
                     current = next;
                     moved = true;
                     break;
                 }
                 if (!moved) { Debug.LogError("MapLayout : la piste ne mène pas à E."); break; }
             }
-            return path;
+            return pathPoints;
+        }
+
+        // Peut-on poser un singe de rayon 'radius' en pos (x, z) ? Dans la carte et pas sur la piste.
+        public static bool CanPlace(Vector2 pos, float radius)
+        {
+            if (Mathf.Abs(pos.x) > HalfExtent - radius || Mathf.Abs(pos.y) > HalfExtent - radius) return false;
+            var pts = PathPoints();
+            float minDist = Tile / 2f + radius;
+            for (int i = 0; i < pts.Count - 1; i++)
+            {
+                var a = new Vector2(pts[i].x, pts[i].z);
+                var b = new Vector2(pts[i + 1].x, pts[i + 1].z);
+                if (DistanceToSegment(pos, a, b) < minDist) return false;
+            }
+            return true;
+        }
+
+        static float DistanceToSegment(Vector2 p, Vector2 a, Vector2 b)
+        {
+            var ab = b - a;
+            float t = Mathf.Clamp01(Vector2.Dot(p - a, ab) / ab.sqrMagnitude);
+            return Vector2.Distance(p, a + t * ab);
         }
 
         static Vector2Int Find(char c)

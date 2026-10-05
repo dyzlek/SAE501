@@ -12,13 +12,28 @@ namespace SAE
         public float mouseSensitivity = 0.1f;
         public float reach = 5f;
 
+        // Ce que le joueur vise : lu par le plateau pour afficher l'aperçu du singe à poser.
+        public static PlayerController Local { get; private set; }
+        public IClickable Target { get; private set; }
+        public Vector3 AimPoint { get; private set; }
+
         CharacterController controller;
         Transform cam;
         float pitch;
         float verticalSpeed;
-        IClickable target;
         GameObject heldVisual;
         Monkey? heldShown;
+
+        void Awake() => Local = this;
+
+        // Téléportation (cube Jouer / Hub). Le CharacterController doit être coupé pendant le déplacement.
+        public void TeleportTo(Transform spot)
+        {
+            controller.enabled = false;
+            transform.SetPositionAndRotation(spot.position, spot.rotation);
+            controller.enabled = true;
+            pitch = 0f;
+        }
 
         void Start()
         {
@@ -59,11 +74,14 @@ namespace SAE
             controller.Move(move * Time.deltaTime);
 
             // Viser un objet
-            target = null;
+            Target = null;
             if (Physics.Raycast(cam.position, cam.forward, out var hit, reach))
-                target = hit.collider.GetComponentInParent<IClickable>();
+            {
+                Target = hit.collider.GetComponentInParent<IClickable>();
+                AimPoint = hit.point;
+            }
 
-            if (mouse.leftButton.wasPressedThisFrame) target?.OnClick(this);
+            if (mouse.leftButton.wasPressedThisFrame) Target?.OnClick(this, AimPoint);
             if (mouse.rightButton.wasPressedThisFrame && GameState.Held != null)
             {
                 GameState.Held = null;
@@ -94,8 +112,8 @@ namespace SAE
         {
             var center = new Vector2(Screen.width / 2f, Screen.height / 2f);
             GUI.Label(new Rect(center.x - 5, center.y - 10, 20, 20), "+");
-            if (target != null)
-                GUI.Label(new Rect(center.x + 15, center.y - 10, 400, 25), target.Hint);
+            if (Target != null)
+                GUI.Label(new Rect(center.x + 15, center.y - 10, 500, 25), Target.GetHint(AimPoint));
 
             var held = GameState.Held.HasValue ? GameState.Held.Value.ToString() : "rien";
             GUI.Label(new Rect(10, 10, 600, 25), $"En main : {held}    Argent : {GameState.Money}");

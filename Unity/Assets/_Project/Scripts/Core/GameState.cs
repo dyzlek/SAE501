@@ -1,14 +1,22 @@
 using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace SAE
 {
-    // État partagé entre le hub et la carte. Statique : il survit au changement de scène.
+    // Un singe posé sur la carte. pos = position (x, z) en mètres dans le repère de la carte.
+    public class PlacedMonkey
+    {
+        public readonly Monkey monkey;
+        public readonly Vector2 pos;
+
+        public PlacedMonkey(Monkey monkey, Vector2 pos) { this.monkey = monkey; this.pos = pos; }
+    }
+
+    // État partagé du jeu : ce qui est posé, ce qu'on tient, l'argent.
     public static class GameState
     {
-        public const int BoardSize = 8;
-
-        // Singes posés sur le plateau. [ligne, colonne], même grille que la carte.
-        public static readonly Monkey?[,] Board = new Monkey?[BoardSize, BoardSize];
+        public static readonly List<PlacedMonkey> Placed = new List<PlacedMonkey>();
 
         // Singe tenu en main (null = main vide).
         public static Monkey? Held;
@@ -20,8 +28,21 @@ namespace SAE
 
         public static void ClearBoard()
         {
-            Array.Clear(Board, 0, Board.Length);
+            Placed.Clear();
             NotifyChanged();
+        }
+
+        // Singe posé le plus proche de pos, à moins de maxDistance.
+        public static PlacedMonkey Nearest(Vector2 pos, float maxDistance)
+        {
+            PlacedMonkey best = null;
+            float bestSqr = maxDistance * maxDistance;
+            foreach (var p in Placed)
+            {
+                float d = (p.pos - pos).sqrMagnitude;
+                if (d < bestSqr) { bestSqr = d; best = p; }
+            }
+            return best;
         }
     }
 }

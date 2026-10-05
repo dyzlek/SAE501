@@ -1,24 +1,23 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace SAE
 {
-    // Cube-bouton : charger une scène (Jouer / Retour au hub) ou vider le plateau.
+    // Cube-bouton : se téléporter (Jouer / Retour au hub) ou vider le plateau.
     public class ActionCube : MonoBehaviour, IClickable
     {
-        public enum Action { LoadScene, ClearBoard }
+        public enum Action { Teleport, ClearBoard }
 
         public Action action;
-        public string sceneName;
+        public Transform destination;
         public string hint = "Appuyer";
 
-        public string Hint => hint;
+        public string GetHint(Vector3 point) => hint;
 
-        public void OnClick(PlayerController player)
+        public void OnClick(PlayerController player, Vector3 point)
         {
             switch (action)
             {
-                case Action.LoadScene: SceneManager.LoadScene(sceneName); break;
+                case Action.Teleport: player.TeleportTo(destination); break;
                 case Action.ClearBoard: GameState.ClearBoard(); break;
             }
         }

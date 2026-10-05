@@ -5,15 +5,15 @@ using UnityEngine;
 
 namespace SAE.EditorTools
 {
-    // Menu SAE → Générer le prototype : construit les scènes Hub et Map en cubes (greybox)
-    // et les ajoute aux Build Profiles. Relancer le menu écrase les deux scènes.
+    // Menu SAE → Générer le prototype : construit la scène Jeu en cubes (greybox).
+    // Une seule scène, deux zones : le hub (autour de l'origine) et la carte (plus loin en Z).
+    // Ainsi le plateau du hub montre la carte en direct. Relancer le menu écrase la scène.
     public static class PrototypeGenerator
     {
         const string Folder = "Assets/_Project/Scenes";
-        const string HubPath = Folder + "/Hub.unity";
-        const string MapPath = Folder + "/Map.unity";
+        const string ScenePath = Folder + "/Jeu.unity";
         const float BoardTile = 0.22f;
-        const float MapTile = 3f;
+        static readonly Vector3 MapCenter = new Vector3(0f, 0f, 40f);
 
         static readonly Color Floor = new Color(0.35f, 0.35f, 0.38f);
         static readonly Color Wood = new Color(0.45f, 0.30f, 0.18f);
@@ -21,44 +21,53 @@ namespace SAE.EditorTools
         static readonly Color Grass1 = new Color(0.30f, 0.62f, 0.28f);
         static readonly Color Grass2 = new Color(0.26f, 0.55f, 0.24f);
 
-        [MenuItem("SAE/Générer le prototype (Hub + Map)")]
+        [MenuItem("SAE/Générer le prototype")]
         public static void Generate()
         {
-            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
             Directory.CreateDirectory(Folder);
 
-            NewScene();
-            BuildHub();
-            EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), HubPath);
-
-            NewScene();
-            BuildMap();
-            EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), MapPath);
-
-            EditorBuildSettings.scenes = new[]
-            {
-                new EditorBuildSettingsScene(HubPath, true),
-                new EditorBuildSettingsScene(MapPath, true),
-            };
-            EditorSceneManager.OpenScene(HubPath);
-            Debug.Log("Prototype généré : Hub.unity et Map.unity. Lance Play depuis Hub.");
-        }
-
-        static void NewScene()
-        {
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
             var defaultCam = GameObject.FindWithTag("MainCamera");
             if (defaultCam) Object.DestroyImmediate(defaultCam); // la caméra est celle du joueur
+
+            var hubSpawn = Spawn("Spawn Hub", new Vector3(0, 0, 0.4f));
+            var mapSpawn = Spawn("Spawn Carte", MapCenter + new Vector3(0, 0, -MapLayout.HalfExtent - 3f));
+
+            var mapRoot = BuildMap(hubSpawn);
+            BuildHub(mapRoot, mapSpawn);
+            Player(hubSpawn.position);
+
+            EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), ScenePath);
+            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
+            Debug.Log("Prototype généré : " + ScenePath);
         }
 
-        static void Player(Vector3 position, float yaw, float reach)
+        static Transform Spawn(string name, Vector3 pos)
+        {
+            var go = new GameObject(name);
+            go.transform.position = pos;
+            return go.transform;
+        }
+
+        static void Player(Vector3 position)
         {
             var player = new GameObject("Player");
-            player.transform.SetPositionAndRotation(position, Quaternion.Euler(0, yaw, 0));
+            player.transform.position = position;
             var cc = player.AddComponent<CharacterController>();
             cc.height = 1.8f;
             cc.radius = 0.3f;
             cc.center = new Vector3(0, 0.9f, 0);
+
+            // Corps visible : c'est lui qu'on voit en miniature sur le plateau (et plus tard un 2e joueur).
+            var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            body.name = "Corps";
+            Object.DestroyImmediate(body.GetComponent<Collider>());
+            body.transform.SetParent(player.transform, false);
+            body.transform.localPosition = new Vector3(0, 0.9f, 0);
+            body.transform.localScale = new Vector3(0.6f, 0.9f, 0.6f);
+            body.AddComponent<ColorTint>().Set(new Color(1f, 0.55f, 0.1f));
+            body.AddComponent<Mirrored>().label = "Toi";
 
             var cam = new GameObject("Camera");
             cam.tag = "MainCamera";
@@ -67,42 +76,45 @@ namespace SAE.EditorTools
             cam.AddComponent<Camera>().nearClipPlane = 0.05f;
             cam.AddComponent<AudioListener>();
 
-            player.AddComponent<PlayerController>().reach = reach;
+            player.AddComponent<PlayerController>().reach = 60f;
         }
 
-        static GameObject Root(string name) => new GameObject(name);
-
-        static GameObject MakeActionCube(Transform parent, string name, Vector3 pos, float size, Color color,
-            string label, ActionCube.Action action, string scene, string hint)
+        static void MakeActionCube(Transform parent, string name, Vector3 pos, float size, Color color,
+            string label, ActionCube.Action action, Transform destination, string hint)
         {
             var cube = Visuals.Solid(name, parent, pos, Vector3.one * size, color);
             var a = cube.AddComponent<ActionCube>();
             a.action = action;
-            a.sceneName = scene;
+            a.destination = destination;
             a.hint = hint;
-            Visuals.Label(cube.transform, label, new Vector3(0, 0.9f, 0), 0.35f);
-            // le label est enfant d'un cube mis à l'échelle : on compense
-            cube.transform.Find("Label").localScale = Vector3.one / size;
-            return cube;
+            var text = Visuals.Label(cube.transform, label, new Vector3(0, 0.9f, 0), 0.35f);
+            text.transform.localScale = Vector3.one / size; // le cube parent est mis à l'échelle : on compense
         }
 
         // ---------------- HUB ----------------
-        // Joueur au centre, regard vers +Z. Bibliothèque à gauche, plateau devant, cube Jouer à droite.
-        static void BuildHub()
+        // Joueur regard vers +Z. Bibliothèque à gauche, plateau devant, cube Jouer à droite.
+        static void BuildHub(Transform mapRoot, Transform mapSpawn)
         {
-            var env = Root("Environnement").transform;
+            var env = new GameObject("Hub").transform;
             Visuals.Solid("Sol", env, new Vector3(0, -0.05f, 1), new Vector3(12, 0.1f, 10), Floor);
 
-            // Plateau (maquette de la carte)
-            var table = Visuals.Solid("Table", env, new Vector3(0, 0.4f, 2.2f), new Vector3(2f, 0.8f, 2f), Wood);
-            var boardGo = Root("Plateau");
-            boardGo.transform.position = new Vector3(0, 0.82f, 2.2f);
-            boardGo.AddComponent<Board>().tile = BoardTile;
-            BuildGrid(boardGo.transform, BoardTile, 0.04f, true);
-            Visuals.Label(boardGo.transform, "PLATEAU\npose et fusionne tes singes", new Vector3(0, 0.9f, 1.1f), 0.12f);
+            // Plateau : la carte en miniature
+            Visuals.Solid("Table", env, new Vector3(0, 0.4f, 2.2f), new Vector3(2f, 0.8f, 2f), Wood);
+            var boardGo = new GameObject("Plateau");
+            boardGo.transform.SetParent(env, false);
+            boardGo.transform.position = new Vector3(0, 0.84f, 2.2f);
+            var board = boardGo.AddComponent<Board>();
+            board.mapRoot = mapRoot;
+            board.scale = BoardTile / MapLayout.Tile;
+            var col = boardGo.AddComponent<BoxCollider>();
+            col.size = new Vector3(MapLayout.Size * BoardTile, 0.04f, MapLayout.Size * BoardTile);
+            col.center = new Vector3(0, -0.02f, 0);
+            BuildGrid(boardGo.transform, BoardTile, 0.04f, false);
+            Visuals.Label(boardGo.transform, "PLATEAU = la carte en direct\npose et fusionne tes singes", new Vector3(0, 0.9f, 1.1f), 0.12f);
 
             // Bibliothèque : une ligne par type, une colonne par rareté
-            var lib = Root("Bibliotheque").transform;
+            var lib = new GameObject("Bibliotheque").transform;
+            lib.SetParent(env, false);
             lib.position = new Vector3(-3f, 0, 0);
             Visuals.Solid("Fond", lib, new Vector3(-0.35f, 1.4f, 1.0f), new Vector3(0.1f, 2.8f, 3.4f), Wood);
             Visuals.Label(lib, "BIBLIOTHÈQUE", new Vector3(0, 2.75f, 1.0f), 0.18f);
@@ -126,18 +138,16 @@ namespace SAE.EditorTools
             }
 
             // Boutons à droite
-            var ui = Root("Boutons").transform;
-            MakeActionCube(ui, "Jouer", new Vector3(3f, 1f, 1.8f), 0.6f, new Color(0.2f, 0.85f, 0.3f),
-                "JOUER", ActionCube.Action.LoadScene, "Map", "Aller sur la carte");
-            MakeActionCube(ui, "Vider", new Vector3(3f, 0.6f, 0.6f), 0.35f, new Color(0.6f, 0.6f, 0.6f),
-                "Vider", ActionCube.Action.ClearBoard, "", "Vider le plateau");
-
-            Player(new Vector3(0, 0, 0.4f), 0f, 5f);
+            MakeActionCube(env, "Jouer", new Vector3(3f, 1f, 1.8f), 0.6f, new Color(0.2f, 0.85f, 0.3f),
+                "JOUER", ActionCube.Action.Teleport, mapSpawn, "Aller sur la carte");
+            MakeActionCube(env, "Vider", new Vector3(3f, 0.6f, 0.6f), 0.35f, new Color(0.6f, 0.6f, 0.6f),
+                "Vider", ActionCube.Action.ClearBoard, null, "Vider le plateau");
         }
 
-        // Grille 8x8 : cases cliquables (plateau) ou simples dalles (carte).
-        static void BuildGrid(Transform parent, float tile, float thickness, bool clickable)
+        // Grille 8x8 en dalles (sans collider sur le plateau, avec collider sur la carte pour marcher).
+        static void BuildGrid(Transform parent, float tile, float thickness, bool walkable)
         {
+            float k = tile / MapLayout.Tile;
             for (int r = 0; r < MapLayout.Size; r++)
                 for (int c = 0; c < MapLayout.Size; c++)
                 {
@@ -145,44 +155,31 @@ namespace SAE.EditorTools
                     Color color = ch == 'S' ? new Color(0.3f, 0.9f, 0.4f)
                         : ch == 'E' ? new Color(0.9f, 0.25f, 0.25f)
                         : ch == '#' ? PathColor
-                        : clickable ? ((r + c) % 2 == 0 ? new Color(0.9f, 0.9f, 0.85f) : new Color(0.2f, 0.2f, 0.22f))
-                        : ((r + c) % 2 == 0 ? Grass1 : Grass2);
+                        : (r + c) % 2 == 0 ? Grass1 : Grass2;
 
-                    var cell = new GameObject($"Case {r},{c}");
-                    cell.transform.SetParent(parent, false);
-                    cell.transform.localPosition = MapLayout.CellLocal(r, c, tile);
-                    Visuals.Box("Dalle", cell.transform, new Vector3(0, -thickness / 2f, 0),
-                        new Vector3(tile * 0.97f, thickness, tile * 0.97f), color);
-
-                    var col = cell.AddComponent<BoxCollider>();
-                    col.size = new Vector3(tile, thickness, tile);
-                    col.center = new Vector3(0, -thickness / 2f, 0);
-                    if (clickable)
-                    {
-                        var bc = cell.AddComponent<BoardCell>();
-                        bc.row = r;
-                        bc.col = c;
-                    }
+                    var size = new Vector3(tile, thickness, tile);
+                    var pos = MapLayout.CellLocal(r, c) * k + new Vector3(0, -thickness / 2f, 0);
+                    if (walkable) Visuals.Solid($"Case {r},{c}", parent, pos, size, color);
+                    else Visuals.Box($"Case {r},{c}", parent, pos, size, color);
                 }
         }
 
-        // ---------------- MAP ----------------
-        static void BuildMap()
+        // ---------------- CARTE ----------------
+        static Transform BuildMap(Transform hubSpawn)
         {
-            var map = Root("Carte");
-            BuildGrid(map.transform, MapTile, 0.5f, false);
-            map.AddComponent<TowerPlacer>().tile = MapTile;
-            map.AddComponent<WaveSpawner>().tile = MapTile;
+            var map = new GameObject("Carte");
+            map.transform.position = MapCenter;
+            BuildGrid(map.transform, MapLayout.Tile, 0.5f, true);
+            map.AddComponent<TowerManager>();
+            map.AddComponent<WaveSpawner>();
 
-            float edge = MapLayout.Size / 2f * MapTile;
-            var env = Root("Environnement").transform;
-            Visuals.Solid("Sol autour", env, new Vector3(0, -0.6f, 0), new Vector3(edge * 2 + 20, 0.1f, edge * 2 + 20), Floor);
-            Visuals.Solid("Estrade", env, new Vector3(0, -0.25f, -edge - 2.5f), new Vector3(8, 0.5f, 5), Floor);
+            float edge = MapLayout.HalfExtent;
+            Visuals.Solid("Estrade", map.transform, new Vector3(0, -0.25f, -edge - 2.5f), new Vector3(8, 0.5f, 5), Floor);
+            Visuals.Solid("Sol autour", map.transform, new Vector3(0, -0.6f, 0), new Vector3(edge * 2 + 20, 0.1f, edge * 2 + 20), Floor);
 
-            MakeActionCube(env, "Retour hub", new Vector3(3f, 0.9f, -edge - 2f), 0.6f, new Color(0.3f, 0.5f, 1f),
-                "HUB", ActionCube.Action.LoadScene, "Hub", "Retour au hub");
-
-            Player(new Vector3(0, 0, -edge - 3f), 0f, 60f);
+            MakeActionCube(map.transform, "Retour hub", new Vector3(3f, 0.9f, -edge - 2f), 0.6f, new Color(0.3f, 0.5f, 1f),
+                "HUB", ActionCube.Action.Teleport, hubSpawn, "Retour au hub");
+            return map.transform;
         }
     }
 }
