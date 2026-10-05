@@ -64,6 +64,13 @@ En début de session, demander qui travaille si ce n'est pas clair (`git config 
 - Une demande refusée ou du code IA jeté se note aussi (colonne « gardé / jeté »).
 - Le journal sert à l'oral (transparence IA) et à la note de gestion de projet : il doit rester à jour et honnête.
 
+## Workflow Git (GitHub flow)
+- `main` = toujours stable (compile, tourne au casque). **Jamais de commit direct sur main.**
+- Une branche courte par tâche : `feat/<sujet>`, `fix/<sujet>`, `docs/<sujet>`, `art/<sujet>` (1-2 jours max).
+- `git pull` sur main avant de créer la branche ; Pull Request vers main, relue par un autre membre, puis merge et suppression de la branche.
+- Une scène Unity = un seul propriétaire à la fois ; le reste en prefabs.
+- Claude : avant de modifier, vérifier la branche courante (`git branch --show-current`) ; si on est sur main, créer une branche.
+
 ## Règles de travail pour Claude dans ce dépôt
 - Projet Unity dans `Unity/` ; docs dans `docs/`. `.gitignore` Unity à la racine.
 - **Jamais deux personnes sur la même scène** : privilégier les prefabs, une scène de test par personne (`Assets/_Project/Scenes/Sandbox/<Prénom>`).

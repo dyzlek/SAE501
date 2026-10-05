@@ -27,3 +27,12 @@ docs/    GDD.md (Game Design Document), JOURNAL.md (journal de bord + usage de l
 - Commits petits et fréquents, messages clairs ; on relit et on teste avant de pousser.
 - Un test sous casque par jour, un build casque chaque vendredi.
 - Tout usage de l'IA est noté dans [docs/JOURNAL.md](docs/JOURNAL.md).
+
+## Workflow Git
+```bash
+git switch main && git pull
+git switch -c feat/mon-sujet      # une branche par tâche
+# ... travail, petits commits ...
+git push -u origin feat/mon-sujet # puis Pull Request vers main sur GitHub
+```
+`main` reste toujours jouable. La PR est relue par un autre membre avant le merge.
