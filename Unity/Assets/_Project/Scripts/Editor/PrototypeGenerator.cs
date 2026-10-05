@@ -39,7 +39,7 @@ namespace SAE.EditorTools
             var mapRoot = BuildMap(hubSpawn);
             var hub = BuildHub(mapRoot, mapSpawn);   // avant le joueur : l'installeur des bananes ajoute son TestSouris à Camera.main s'il en trouve une
             var player = Player(hubSpawn.position);
-            BuildChest(hub, Around(150f, Ring - 0.4f), player);
+            BuildChest(hub, Around(140f, Ring - 0.5f), player);
 
             EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), ScenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
@@ -104,13 +104,14 @@ namespace SAE.EditorTools
         //   devant (0°)           : le plateau incliné (la carte en direct)
         //   devant, de biais      : JOUER (+50°) et Vider (-50°)
         //   gauche / droite (±90°): les deux meubles de la bibliothèque
-        //   derrière (180°)       : le bananier de Maxens, avec son panier à côté
-        //   derrière-droite (150°): le coffre de Nicolas
+        //   derrière (180°)       : le coin économie : bananier de Maxens (agrandi) + panier, caisse (-158°), panneau d'amélioration (172°)
+        //   derrière-droite (140°): le coffre de Nicolas, avec son prix au-dessus
         const float Ring = 2.7f;          // rayon du cercle des grands éléments
         const float SlotSize = 0.24f;     // ancienne taille ×1,1
         const float SlotStepX = 0.36f;    // espace entre deux raretés
         const float SlotStepY = 0.40f;    // espace entre deux étagères
         const float FirstShelfY = 0.45f;  // rangée la plus basse (accessible à un petit joueur)
+        const float TreeScale = 1.6f;     // le palmier de Maxens, agrandi
 
         // Position sur le cercle. angle 0 = devant, positif = à droite.
         static Vector3 Around(float angleDeg, float radius, float height = 0f)
@@ -130,8 +131,10 @@ namespace SAE.EditorTools
             BuildShelf(env, "Bibliotheque gauche", -90f, 0, 4);
             BuildShelf(env, "Bibliotheque droite", 90f, 4, 3);
 
-            // Bananier + panier (Maxens), derrière le joueur
-            BuildBananas(env, Around(180f, Ring + 0.2f), 180f);
+            // Coin « économie », derrière le joueur : bananier (Maxens) + panier, caisse, panneau d'amélioration
+            var bananier = BuildBananas(env, Around(180f, Ring + 0.8f), 180f);
+            BuildMoneyBoard(env, -158f);
+            if (bananier) BuildUpgradePanel(env, bananier, 172f);
 
             // Boutons, devant de biais
             MakeActionCube(env, "Jouer", Around(50f, 1.4f, 1.0f), 0.35f, new Color(0.2f, 0.85f, 0.3f),
@@ -222,10 +225,10 @@ namespace SAE.EditorTools
 
         // Le bananier, son panier et le récolteur, montés par l'installeur de Maxens (BananesInstaller.Construire),
         // appelé tel quel pour ne pas dupliquer son code. Puis on le place sur le cercle, tourné vers le joueur.
-        static void BuildBananas(Transform env, Vector3 pos, float yaw)
+        static Bananier BuildBananas(Transform env, Vector3 pos, float yaw)
         {
             var models = AssetDatabase.FindAssets("Bananes_Collectible t:Model");
-            if (models.Length == 0) { Debug.LogWarning("Hub : modèles du bananier introuvables, bananier non placé."); return; }
+            if (models.Length == 0) { Debug.LogWarning("Hub : modèles du bananier introuvables, bananier non placé."); return null; }
             var folder = Path.GetDirectoryName(AssetDatabase.GUIDToAssetPath(models[0])).Replace(Path.DirectorySeparatorChar, '/');
             const BindingFlags Private = BindingFlags.NonPublic | BindingFlags.Static;
             typeof(BananesInstaller).GetField("s_fbx", Private).SetValue(null, folder);
@@ -235,9 +238,92 @@ namespace SAE.EditorTools
             root.transform.SetParent(env, false);
             root.transform.SetPositionAndRotation(pos, Quaternion.Euler(0, yaw, 0));
 
+            // Le palmier en plus grand (seulement l'arbre et son bac, pas le panier)
+            var bananier = root.GetComponentInChildren<Bananier>();
+            bananier.transform.localScale *= TreeScale;
+
             // Le panier : à côté du bananier (pas collé à son bac), un peu vers le joueur pour rester à portée
             var basket = root.transform.Find("Panier");
-            if (basket) basket.localPosition = new Vector3(1.6f, 0f, -0.9f);
+            if (basket) basket.localPosition = new Vector3(1.4f, 0f, -1.2f);
+            return bananier;
+        }
+
+        // La caisse : un panneau en bois avec l'argent total en gros chiffres dorés, à côté du panier.
+        static void BuildMoneyBoard(Transform env, float angle)
+        {
+            var pos = Around(angle, Ring - 0.4f);
+            var root = new GameObject("Caisse").transform;
+            root.SetParent(env, false);
+            root.SetPositionAndRotation(pos, Quaternion.Euler(0, angle, 0));     // +Z local = vers l'extérieur
+
+            Visuals.Solid("Poteau", root, new Vector3(0, 0.75f, 0.05f), new Vector3(0.08f, 1.5f, 0.08f), Wood);
+            var panel = new GameObject("Panneau").transform;
+            panel.SetParent(root, false);
+            panel.localPosition = new Vector3(0, 1.6f, 0);
+            var frame = Visuals.Box("Cadre", panel, Vector3.zero, new Vector3(0.9f, 0.5f, 0.06f), Wood);
+            Visuals.Box("Fond", panel, new Vector3(0, 0, -0.035f), new Vector3(0.8f, 0.4f, 0.02f), new Color(0.12f, 0.1f, 0.08f));
+            var title = Visuals.Label(panel, "CAISSE", new Vector3(0, 0.12f, -0.06f), 0.07f, new Color(0.9f, 0.85f, 0.7f));
+            var amount = Visuals.Label(panel, "0", new Vector3(0, -0.05f, -0.06f), 0.2f, new Color(1f, 0.82f, 0.2f));
+            // Panneau fixe (pas de billboard) : c'est le panneau entier qui fait face au joueur (texte lisible vers +Z local)
+            Object.DestroyImmediate(title.GetComponent<Billboard>());
+            Object.DestroyImmediate(amount.GetComponent<Billboard>());
+
+            var board = root.gameObject.AddComponent<MoneyBoard>();
+            board.amount = amount;
+            board.panel = panel;
+            board.frame = frame.GetComponent<ColorTint>();
+        }
+
+        // Panneau d'amélioration du bananier : 3 gros boutons ronds à enfoncer (production, fraîcheur, valeur).
+        static void BuildUpgradePanel(Transform env, Bananier bananier, float angle)
+        {
+            var pos = Around(angle, Ring - 0.45f);
+            var root = new GameObject("Ameliorations bananier").transform;
+            root.SetParent(env, false);
+            root.SetPositionAndRotation(pos, Quaternion.Euler(0, angle, 0));     // +Z local = vers l'extérieur
+
+            Visuals.Solid("Pupitre", root, new Vector3(0, 0.45f, 0.05f), new Vector3(1.2f, 0.9f, 0.3f), Wood);
+            Visuals.Solid("Fronton", root, new Vector3(0, 1.45f, 0.18f), new Vector3(1.2f, 0.5f, 0.04f), Wood);
+            var title = Visuals.Label(root, "BANANIER", new Vector3(0, 1.62f, 0.14f), 0.08f, new Color(1f, 0.9f, 0.4f));
+            Object.DestroyImmediate(title.GetComponent<Billboard>());
+
+            var stats = new[] { BananaStat.Frequence, BananaStat.Pourriture, BananaStat.Valeur };
+            for (int i = 0; i < stats.Length; i++)
+            {
+                float x = (i - 1) * 0.38f;
+                var button = new GameObject($"Bouton {stats[i]}").transform;
+                button.SetParent(root, false);
+                button.localPosition = new Vector3(x, 0.9f, 0.05f);
+                button.gameObject.tag = Tags.Bouton;
+                var col = button.gameObject.AddComponent<BoxCollider>();
+                col.size = new Vector3(0.24f, 0.14f, 0.24f);
+                col.center = new Vector3(0, 0.05f, 0);
+
+                var socle = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                socle.name = "Socle";
+                Object.DestroyImmediate(socle.GetComponent<Collider>());
+                socle.transform.SetParent(button, false);
+                socle.transform.localPosition = new Vector3(0, 0.02f, 0);
+                socle.transform.localScale = new Vector3(0.22f, 0.02f, 0.22f);
+                socle.AddComponent<ColorTint>().Set(new Color(0.15f, 0.15f, 0.17f));
+
+                var cap = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                cap.name = "Bouton";
+                Object.DestroyImmediate(cap.GetComponent<Collider>());
+                cap.transform.SetParent(button, false);
+                cap.transform.localPosition = new Vector3(0, 0.07f, 0);
+                cap.transform.localScale = new Vector3(0.16f, 0.035f, 0.16f);
+                cap.AddComponent<ColorTint>().Set(new Color(0.25f, 0.85f, 0.35f));
+
+                var label = Visuals.Label(root, "", new Vector3(x, 1.38f, 0.14f), 0.045f, Color.white);
+                Object.DestroyImmediate(label.GetComponent<Billboard>());
+
+                var up = button.gameObject.AddComponent<UpgradeButton>();
+                up.bananier = bananier;
+                up.stat = stats[i];
+                up.cap = cap.transform;
+                up.label = label;
+            }
         }
 
         // Le coffre de Nicolas (modèle .glb animé + roulette + texte [E]), monté comme dans son menu SAE501 → 2,
@@ -259,8 +345,6 @@ namespace SAE.EditorTools
             chest.transform.position += new Vector3(pos.x - b.center.x, -b.min.y, pos.z - b.center.z);
             float top = Bounds(chest).max.y;
 
-            var wallet = new GameObject("Bourse du coffre").AddComponent<Sae501.Coffres.Wallet>();
-            wallet.transform.SetParent(env, false);
 
             var rouletteGo = new GameObject("Roulette");
             rouletteGo.transform.SetParent(env, false);
@@ -275,7 +359,7 @@ namespace SAE.EditorTools
             var prompt = promptGo.AddComponent<Sae501.Coffres.ChestPrompt>();
 
             var controller = chest.AddComponent<Sae501.Coffres.ChestController>();
-            controller.wallet = wallet;
+
             controller.roulette = roulette;
             controller.prompt = prompt;
             prompt.chest = controller;
@@ -290,9 +374,13 @@ namespace SAE.EditorTools
             chest.transform.SetParent(pivot, true);
             pivot.gameObject.AddComponent<FacePlayer>();
 
-            var bridge = env.gameObject.AddComponent<EconomyBridge>();
-            bridge.panier = env.GetComponentInChildren<Panier>();
-            bridge.wallet = wallet;
+            // Prix du coffre, toujours visible au-dessus (doré si on peut payer)
+            var tag = new GameObject("Prix du coffre");
+            tag.transform.SetParent(env, false);
+            tag.transform.position = new Vector3(pos.x, top + 0.75f, pos.z);
+            var priceTag = tag.AddComponent<ChestPriceTag>();
+            priceTag.chest = controller;
+            priceTag.label = Visuals.Label(tag.transform, "", Vector3.zero, 0.09f);
         }
 
         static Bounds Bounds(GameObject go)

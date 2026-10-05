@@ -2,6 +2,18 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Mar. 6 oct. 2026
+
+### Économie unique, sans interface à l'écran
+> On est le 6. Pour commencer, il faudrait agrandir l'asset du palmier. Ensuite, réalise quelque chose de stylé pour le chantier A (une seule économie avec de vrais coûts) :
+> - une seule bourse, `GameState.Money` : on supprime le `Wallet` du coffre et le pont entre les deux ;
+> - le coffre coûte de l'argent, avec un prix qui augmente ;
+> - améliorer le bananier coûte de l'argent, avec un panneau d'amélioration près de l'arbre et 3 boutons à appuyer ;
+> - ce qui rapporte : les bananes et chaque vague finie, pas les ballons éclatés ;
+> - l'argent est affiché dans le décor, près du panier.
+>
+> Je ne veux pas d'interface à l'écran pour la suite, parce qu'en VR ça donne le vertige : dans le hub, on doit pouvoir voir l'argent total et le reste directement dans le décor.
+
 ## Lun. 5 oct. 2026
 
 ### Plan du lendemain

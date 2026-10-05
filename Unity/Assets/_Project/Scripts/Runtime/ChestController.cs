@@ -8,12 +8,15 @@ namespace Sae501.Coffres
     // un XR Simple Interactable (selectEntered) pourra l'appeler en VR sans rien changer d'autre.
     public class ChestController : MonoBehaviour
     {
-        public Wallet wallet;
+
         public RouletteView roulette;
         public ChestPrompt prompt;
 
         [Header("Règles")]
-        public int requiredMoney = 5; // sous cette valeur : erreur. Ouvrir ne coûte rien.
+        // Prix d'ouverture, payé avec l'argent commun du jeu (SAE.Economy). Il augmente à chaque coffre ouvert.
+        public int basePrice = 25;
+        public float priceGrowth = 1.3f;
+        public int Price => Mathf.RoundToInt(basePrice * Mathf.Pow(priceGrowth, OpenedCount));
         public ChestOddsSettings oddsSettings = new ChestOddsSettings();
 
         [Header("Timing (secondes)")]
@@ -56,11 +59,9 @@ namespace Sae501.Coffres
         {
             if (IsBusy) return;
 
-            if (wallet.Money < requiredMoney)
+            if (!SAE.Economy.TrySpend(Price, transform.position))
             {
-                string msg = $"Pas assez de money ({wallet.Money}/{requiredMoney})";
-                Debug.LogError(msg, this);
-                prompt.ShowError(msg);
+                prompt.ShowError($"Pas assez d'argent ({SAE.Economy.Money}/{Price})");
                 return;
             }
             StartCoroutine(OpenRoutine());

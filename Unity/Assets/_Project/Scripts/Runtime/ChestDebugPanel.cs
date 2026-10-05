@@ -32,7 +32,7 @@ namespace Sae501.Coffres
 
             GUILayout.BeginArea(new Rect(10, 10, 330, 400), GUI.skin.box);
             GUILayout.Label("MENU BÊTA  (F1 pour fermer)");
-            GUILayout.Label($"Money : {chest.wallet.Money}   (requis : {chest.requiredMoney})");
+            GUILayout.Label($"Argent : {SAE.Economy.Money}   (prix du coffre : {chest.Price})");
             GUILayout.Label($"Coffres ouverts : {chest.OpenedCount}  (gel des proba à {chest.oddsSettings.freezeAfterOpened})");
 
             GUILayout.Space(6);
@@ -45,8 +45,8 @@ namespace Sae501.Coffres
             }
 
             GUILayout.Space(10);
-            if (GUILayout.Button("Money -> 0")) chest.wallet.Set(0);
-            if (GUILayout.Button("Money -> 5")) chest.wallet.Set(5);
+            if (GUILayout.Button("Argent -> 0")) SAE.GameState.Money = 0;
+            if (GUILayout.Button("Argent +100")) SAE.Economy.Earn(100);
             if (GUILayout.Button("Remettre le compteur à 0")) chest.ResetOpenedCount();
             GUILayout.EndArea();
         }

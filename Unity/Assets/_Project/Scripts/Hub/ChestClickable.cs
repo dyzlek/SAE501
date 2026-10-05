@@ -15,7 +15,7 @@ namespace SAE
         public string GetHint(Vector3 point)
         {
             if (chest.IsBusy) return "Ouverture en cours…";
-            return InRange ? $"Ouvrir le coffre (il faut {chest.requiredMoney} d'argent)" : "Coffre : approche-toi";
+            return InRange ? $"Ouvrir le coffre (prix : {chest.Price})" : "Coffre : approche-toi";
         }
 
         public void OnClick(PlayerController player, Vector3 point)

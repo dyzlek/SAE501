@@ -14,6 +14,8 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 | 2026-10-05 | Hub et carte dans **une seule scène** (deux zones, téléportation) | Pour que la carte tourne pendant qu'on est au hub |
 | 2026-10-05 | Prototype d'abord au clavier/souris (pas de casque dispo), VR ensuite | Valider les mécaniques sans attendre le matériel |
 | 2026-10-05 | Un seul projet Unity en **6000.6** ; intégration des 3 prototypes (hub, coffres, bananier) sur `feat/integration` avant `main` | 3 projets séparés et 2 versions d'Unity ne pouvaient pas cohabiter dans `Unity/` |
+| 2026-10-06 | **Pas d'interface collée à l'écran** : l'argent, les prix et les infos se lisent dans le décor du hub | En VR, un affichage collé au visage donne le vertige (règles de confort) |
+| 2026-10-06 | Économie de départ : banane 5 (amélioration « valeur » +3), vague finie 20 + 10 × n°, coffre 25 puis +30 % par coffre, améliorations du bananier 40 à 80 (×1,6 par niveau) | Premiers réglages, à équilibrer en jouant |
 | 2026-10-05 | Git : `main` stable + une branche par tâche + PR relue | Éviter de casser le build commun |
 | _à trancher_ | Nom du jeu · assets Bloons ou maison · périmètre définitif | Avant le GDD v1 (ven. 9 oct.) |
 

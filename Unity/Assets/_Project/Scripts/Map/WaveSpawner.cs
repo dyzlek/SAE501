@@ -50,8 +50,8 @@ namespace SAE
                 while (Balloon.All.Count > 0 && lives > 0) yield return null;
                 if (lives <= 0) break;
 
-                int reward = 100 + wave * 20;
-                GameState.Money += reward;
+                int reward = 20 + wave * 10;   // à équilibrer avec la banane (5) et le coffre (25, puis +30 % par coffre)
+                Economy.Earn(reward);
                 status = $"Vague {wave} finie : +{reward}";
                 yield return new WaitForSeconds(1.5f);
             }

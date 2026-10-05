@@ -57,6 +57,7 @@ public class Panier : MonoBehaviour
         bool pourrie = b.EstPourrie;
         int gain = Mathf.RoundToInt(b.Deposer() * part);
         Total += gain; NbBananes++;
+        SAE.Economy.Earn(gain, transform.position);   // l'argent du jeu (une seule bourse)
         if (effetDepot != null) Instantiate(effetDepot, transform.position, Quaternion.identity);
         var son = pourrie ? sonPourrie : sonDepot;
         if (son != null) AudioSource.PlayClipAtPoint(son, transform.position);

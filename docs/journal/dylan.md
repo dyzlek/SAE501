@@ -2,6 +2,22 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Mar. 6 oct. 2026
+- **Fait :**
+  - remarque de départ : le palmier de Maxens est trop petit dans le hub, il faut l'agrandir (fait : ×1,6) ;
+  - chantier A, **une seule économie avec de vrais coûts** (branche `feat/economie`), sans aucun affichage collé à l'écran, parce qu'en VR ça donne le vertige. Tout se lit dans le décor du hub :
+    - une **caisse** en bois avec l'argent total, dont le chiffre défile et qui clignote vert ou rouge ;
+    - des « +5 » / « −25 » qui flottent là où l'argent bouge ;
+    - un **panneau d'amélioration** du bananier avec 3 gros boutons ;
+    - le **prix du coffre**, affiché au-dessus de lui.
+- **Bloque :** pas encore testé en jeu.
+- **Demain :** _
+
+### IA
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | Économie unique (`Economy`) : bananes et vagues rapportent, coffre et améliorations coûtent ; `Wallet` et pont supprimés ; caisse dans le décor, « +/− » flottants, panneau d'amélioration du bananier (3 boutons qui s'enfoncent, vert si payable), prix du coffre qui augmente (25, +30 % par coffre) et affiché au-dessus ; argent retiré de l'affichage écran ; palmier ×1,6 ; coin « économie » réorganisé derrière le joueur | À tester |
+
 ## Lun. 5 oct. 2026
 - **Fait :** création du dépôt GitHub, lecture des consignes, première analyse de l'idée et brouillon du GDD, test du prototype v2 et captures, **analyse critique du prototype (personnelle, pas encore discutée avec l'équipe)**, test et analyse des prototypes de Nicolas (coffres) et de Maxens (bananier), intégration des trois prototypes dans un seul projet (branche `feat/integration`).
 - **Bloque :** —
