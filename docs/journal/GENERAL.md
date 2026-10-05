@@ -23,6 +23,47 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 - [ ] Ven. 13 nov. — rendu + oral
 
 ## Semaine 1 · 5-9 oct. — PROUVER
+**Mar. 6 oct. — plan du jour**
+
+**Objectif :** un prototype **jouable normalement, au casque**, avec les mécaniques de base reliées entre elles :
+bananes → panier → argent → améliorer le bananier ou ouvrir un coffre → le coffre donne un singe → inventaire → poser sur le plateau → fusionner → lancer la vague → la vague finie rapporte de l'argent.
+_Test de fin de journée : quelqu'un qui ne connaît pas le jeu enchaîne cette boucle au casque pendant 5 minutes sans aide._
+
+**À harmoniser avant de commencer**
+1. **Une seule liste de raretés.** Nicolas en a 7 (gris, vert, bleu, violet, jaune, rouge, LGBT), Dylan 8 (… rouge, arc-en-ciel, blanc). Proposition : garder **les 7 de Nicolas**, la LGBT étant affichée en arc-en-ciel.
+2. **Le prix d'un coffre et le coût des améliorations.** Aujourd'hui, ouvrir le coffre ne coûte rien : il demande seulement d'avoir 5 d'argent.
+3. **Le sens de « drop des singes »** : un singe qui sort du coffre, ou jeter un singe pour récupérer de l'argent ?
+
+**À faire aujourd'hui**
+
+*A. Une seule économie, de vrais coûts*
+- Une seule bourse, `GameState.Money`. On supprime le `Wallet` du coffre et le pont entre les deux.
+- Le coffre coûte de l'argent, avec un prix qui augmente (prévu dans le GDD).
+- Améliorer le bananier coûte de l'argent : les 3 statistiques de Maxens (fréquence, pourriture, valeur) ont déjà leurs prix calculés. Il manque le paiement et un panneau d'amélioration près de l'arbre, avec 3 boutons à appuyer.
+- Ce qui rapporte : les bananes et chaque vague finie. Les ballons éclatés ne rapportent rien (règle du GDD).
+- L'argent est affiché dans le décor, sur un panneau près du panier, et plus seulement en haut de l'écran.
+
+*B. Un vrai inventaire*
+- La bibliothèque démarre vide. Chaque case affiche le nombre de singes possédés, et une case vide est grisée.
+- Le coffre ajoute le singe gagné à l'inventaire. Le singe sort du coffre avec la couleur de sa rareté, puis va se ranger sur l'étagère.
+- Poser un singe le retire de l'inventaire, le reprendre l'y remet, et fusionner en consomme 2 pour en créer 1.
+
+*D. Un vrai système de vagues*
+- Une phase de préparation, puis une phase d'attaque. La vague démarre quand on appuie sur un gros bouton dans le hub, et plus automatiquement. Pendant la préparation, on gère les bananes et le plateau.
+- Une liste de vagues écrite à l'avance (nombre de ballons, couches, ballons cœur et blindés), plutôt qu'une formule.
+- Une fin : victoire après la vague 10 et le dirigeable rouge, défaite à 0 vie, puis un bouton « Rejouer ».
+
+*E. La VR : les gestes de base au casque*
+- Le joueur VR : rig XR avec téléportation et rotation par crans, et le simulateur XR pour continuer à tester sans casque.
+- Prendre un singe sur l'étagère avec la main (XR Grab).
+- Le lâcher au-dessus du plateau, ce qui le pose, avec l'aperçu vert ou rouge sous la main.
+- Le lâcher sur un singe identique, ce qui les fusionne, avec le halo blanc.
+- Les bananes : les prendre et les lâcher dans le panier. Le prefab est déjà prêt pour la VR. Pour respecter les règles de confort, on évite d'avoir à ramasser au sol en boucle : les bananes tombent sur un plateau à hauteur de main.
+- Les boutons (Jouer, lancer la vague, améliorations) s'enfoncent avec la main.
+- Un premier build sur le casque, au plus tard en début d'après-midi.
+
+_Ordre : A et B d'abord (tout le reste en dépend), le rig VR (E) en parallèle. Une branche par chantier, partie de `main`, en Unity 6000.6. La scène `Jeu.unity` n'a qu'un propriétaire (Dylan)._
+
 **Lun. 5 oct.**
 - Fait :
   - lancement de la SAÉ, dépôt GitHub, brouillon du GDD v0 (idée TD Bloons) ;

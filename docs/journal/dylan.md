@@ -83,3 +83,5 @@ On garde de cet essai le plateau incliné, mais pas la bibliothèque : on revien
 | Claude (Claude Code) | Suppression des scènes de test de Nicolas et Maxens (`Sandbox/`) et des anciennes scènes `Hub.unity` / `Map.unity` (prototype v1) : il ne reste que `Jeu.unity` | Gardé |
 | Claude (Claude Code) | Ajout de mes captures de l'intégration dans le journal général | Gardé |
 | Claude (Claude Code) | Corrections du hub intégré : bibliothèques courbes qui suivent le cercle (lisibles depuis le centre, textes qui ne se chevauchent plus), coffre qui se tourne automatiquement vers le joueur, panier écarté du bananier | À tester |
+| Claude (Claude Code) | Fusion de `feat/integration` dans `main` (PR #3), sans relecture de Maxens et Nicolas, à ma demande ; PR #2 fermée | Gardé |
+| Claude (Claude Code) | Plan du mardi 6 oct. dans le journal général : points à harmoniser, chantiers A (économie), B (inventaire), D (vagues), E (VR) | Gardé |
