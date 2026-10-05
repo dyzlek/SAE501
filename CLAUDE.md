@@ -40,7 +40,7 @@ Semaine type : **lundi** cadrage visio 1 h (Antoine) · **mar-jeu** production (
 - **GDD** ([docs/GDD.md](docs/GDD.md)) — v1 le 9 oct. (2 pages), final le 13 nov. Contenu : pitch 1 phrase, geste + boucle, univers/ambiance, type + références, mécaniques/patterns, pourquoi la VR, périmètre dedans/dehors, choix de confort.
 - **Projet Unity sur Git + build casque + captures/vidéo à plat** — 13 nov.
 - **Oral** — 13 nov. après-midi, Zoom, 45 min/groupe : présentation, tuto de prise en main, démo à plat, volet technique, pourquoi la VR.
-- **Suivi de projet** — en continu : outil de suivi, répartition, journal ([docs/JOURNAL.md](docs/JOURNAL.md)). Format précisé par Nicolas Maurin.
+- **Suivi de projet** — en continu : outil de suivi, répartition, journaux ([général](docs/journal/GENERAL.md) + un par personne dans `docs/journal/`). Format précisé par Nicolas Maurin.
 
 ## Évaluation (une note, cinq regards)
 - Production & gameplay + Démo/expérience VR — **Antoine Chollet** (game design, visio)
@@ -49,7 +49,7 @@ Semaine type : **lundi** cadrage visio 1 h (Antoine) · **mar-jeu** production (
 - Assets 3D & optimisation (pertinence, complexité, fluidité) — **Ilyasse Lojdi**
 
 ## IA : autorisée, transparente, comprise
-- Tout usage d'IA (dont Claude) est **noté dans [docs/JOURNAL.md](docs/JOURNAL.md)** : outil, pour quoi, gardé/jeté.
+- Tout usage d'IA (dont Claude) est **noté dans le journal perso de la personne** (`docs/journal/<prénom>.md`) : outil, pour quoi, gardé/jeté.
 - Le code rendu doit pouvoir être **expliqué à l'oral** : quand Claude écrit du code, il l'explique et reste simple/lisible.
 - Réflexes : relire et tester avant de committer, commits petits, garder la main sur l'architecture.
 
@@ -58,11 +58,23 @@ Semaine type : **lundi** cadrage visio 1 h (Antoine) · **mar-jeu** production (
 En début de session, demander qui travaille si ce n'est pas clair (`git config user.name` aide).
 
 ## Journal obligatoire (règle n°1)
-**Chaque modification du projet faite par l'IA est consignée dans [docs/JOURNAL.md](docs/JOURNAL.md), dans le même commit que la modification.**
-- Avant de travailler : `git pull`, puis lire le haut de `docs/JOURNAL.md` pour savoir où en sont les autres.
-- Après chaque tâche : une ligne dans le tableau « Usage de l'IA » (date, **qui**, outil, pour quoi, gardé/jeté) et, si besoin, une entrée dans « Avancement » (fait / bloque / prochaine étape).
+**Chaque modification du projet faite par l'IA est consignée dans le journal, dans le même commit que la modification.**
+Les journaux sont dans `docs/journal/` :
+- `GENERAL.md` : le journal de l'équipe. On y met les décisions, les jalons, les blocages communs et un résumé par jour. Mis à jour quand une décision est prise ou qu'une étape importante change.
+- `dylan.md`, `maxens.md`, `nicolas.md` : un journal par personne. On y met ce que la personne a fait, ce qui bloque, et **son tableau « IA »** (outil, pour quoi, gardé/jeté). Claude écrit **dans le journal de la personne avec qui il travaille**.
+
+Marche à suivre :
+- Avant de travailler : `git pull`, puis lire `GENERAL.md` et le haut du journal de la personne.
+- Après chaque tâche : ajouter une ligne dans le tableau IA du journal perso (ouvrir une entrée datée s'il n'y en a pas pour aujourd'hui) et, si besoin, compléter `GENERAL.md`.
 - Une demande refusée ou du code IA jeté se note aussi (colonne « gardé / jeté »).
-- Le journal sert à l'oral (transparence IA) et à la note de gestion de projet : il doit rester à jour et honnête.
+- Les journaux servent à l'oral (transparence sur l'IA) et à la note de gestion de projet : ils doivent rester à jour et honnêtes.
+
+## Workflow Git (GitHub flow)
+- `main` = toujours stable (compile, tourne au casque). **Jamais de commit direct sur main.**
+- Une branche courte par tâche : `feat/<sujet>`, `fix/<sujet>`, `docs/<sujet>`, `art/<sujet>` (1-2 jours max).
+- `git pull` sur main avant de créer la branche ; Pull Request vers main, relue par un autre membre, puis merge et suppression de la branche.
+- Une scène Unity = un seul propriétaire à la fois ; le reste en prefabs.
+- Claude : avant de modifier, vérifier la branche courante (`git branch --show-current`) ; si on est sur main, créer une branche.
 
 ## Règles de travail pour Claude dans ce dépôt
 - Projet Unity dans `Unity/` ; docs dans `docs/`. `.gitignore` Unity à la racine.

@@ -14,7 +14,7 @@ BUT MMI 3, IUT de Béziers. Jeu en réalité virtuelle réalisé sous Unity (C#)
 ## Structure
 ```
 Unity/   projet Unity (ouvrir ce dossier dans Unity Hub)
-docs/    GDD.md (Game Design Document), JOURNAL.md (journal de bord + usage de l'IA)
+docs/    GDD.md (Game Design Document), journal/ (GENERAL.md + un journal par personne, avec l'usage de l'IA)
 ```
 
 ## Lancer le projet
@@ -26,4 +26,13 @@ docs/    GDD.md (Game Design Document), JOURNAL.md (journal de bord + usage de l
 - Jamais deux personnes sur la même scène : on travaille en **prefabs**, chacun a sa scène sandbox.
 - Commits petits et fréquents, messages clairs ; on relit et on teste avant de pousser.
 - Un test sous casque par jour, un build casque chaque vendredi.
-- Tout usage de l'IA est noté dans [docs/JOURNAL.md](docs/JOURNAL.md).
+- Tout usage de l'IA est noté dans son journal perso ([docs/journal/](docs/journal/GENERAL.md)).
+
+## Workflow Git
+```bash
+git switch main && git pull
+git switch -c feat/mon-sujet      # une branche par tâche
+# ... travail, petits commits ...
+git push -u origin feat/mon-sujet # puis Pull Request vers main sur GitHub
+```
+`main` reste toujours jouable. La PR est relue par un autre membre avant le merge.
