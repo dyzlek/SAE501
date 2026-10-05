@@ -3,7 +3,7 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Lun. 5 oct. 2026
-- **Fait :** création du dépôt GitHub, lecture des consignes, première analyse de l'idée et brouillon du GDD.
+- **Fait :** création du dépôt GitHub, lecture des consignes, première analyse de l'idée et brouillon du GDD, test du prototype v2 et captures, **analyse critique du prototype (personnelle, pas encore discutée avec l'équipe)**.
 - **Bloque :** —
 - **Demain :** corriger les points de mon analyse critique (disposition VR, bibliothèque, halo de fusion, déplacement sur la carte).
 
@@ -25,7 +25,7 @@ La carte, avec les singes posés depuis le hub.
 
 ![Carte](../captures/proto-v2-carte.png)
 
-**Mon analyse critique du prototype v2**
+**Mon analyse critique du prototype v2** _(mon avis seul pour l'instant)_
 
 - **Ce qui marche :** l'idée globale est la bonne. Le hub avec sa bibliothèque, le plateau qui montre la carte en direct, et la carte avec les singes posés depuis le hub, tout ça fonctionne ensemble.
 - **Disposition pour la VR :** en VR, le joueur sera au centre, à son point d'apparition. Tous les éléments du hub doivent être **autour de lui**, inclinés vers lui et à portée de main. Aujourd'hui, ils sont alignés devant et sur les côtés, comme pour un écran.
