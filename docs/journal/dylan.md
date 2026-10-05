@@ -47,3 +47,4 @@ La carte, avec les singes posés depuis le hub.
 | Claude (Claude Code) | Mode démo + build Windows pour captures d'écran | Jeté (retiré à ma demande) |
 | Claude (Claude Code) | Ajout de mes captures du prototype dans mon compte rendu du jour | Gardé |
 | Claude (Claude Code) | Reformulation de mon analyse critique (le fond est le mien) | Gardé |
+| Claude (Claude Code) | Corrections suite à mon analyse : hub en cercle autour du joueur (plateau incliné devant, bibliothèque à gauche, rareté à droite), bibliothèque réduite à 7 socles + sélecteur de rareté, aperçu rouge + halo blanc pour la fusion, prendre/poser/fusionner directement sur la carte | À tester |

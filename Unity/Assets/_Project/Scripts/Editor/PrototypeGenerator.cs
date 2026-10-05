@@ -12,7 +12,7 @@ namespace SAE.EditorTools
     {
         const string Folder = "Assets/_Project/Scenes";
         const string ScenePath = Folder + "/Jeu.unity";
-        const float BoardTile = 0.22f;
+        const float BoardTile = 0.15f;   // plateau de 1,2 m : à portée de bras
         static readonly Vector3 MapCenter = new Vector3(0f, 0f, 40f);
 
         static readonly Color Floor = new Color(0.35f, 0.35f, 0.38f);
@@ -32,7 +32,7 @@ namespace SAE.EditorTools
             var defaultCam = GameObject.FindWithTag("MainCamera");
             if (defaultCam) Object.DestroyImmediate(defaultCam); // la caméra est celle du joueur
 
-            var hubSpawn = Spawn("Spawn Hub", new Vector3(0, 0, 0.4f));
+            var hubSpawn = Spawn("Spawn Hub", Vector3.zero);
             var mapSpawn = Spawn("Spawn Carte", MapCenter + new Vector3(0, 0, -MapLayout.HalfExtent - 3f));
 
             var mapRoot = BuildMap(hubSpawn);
@@ -90,63 +90,90 @@ namespace SAE.EditorTools
             a.action = action;
             a.destination = destination;
             a.hint = hint;
-            var text = Visuals.Label(cube.transform, label, new Vector3(0, 0.9f, 0), 0.35f);
+            var text = Visuals.Label(cube.transform, label, new Vector3(0, 0.9f, 0), 0.12f);
             text.transform.localScale = Vector3.one / size; // le cube parent est mis à l'échelle : on compense
         }
 
         // ---------------- HUB ----------------
-        // Joueur regard vers +Z. Bibliothèque à gauche, plateau devant, cube Jouer à droite.
+        // Pensé pour la VR : le joueur est au centre (point d'apparition) et tout est autour de lui,
+        // à portée de bras (~0,85 m), tourné vers lui. Devant : le plateau incliné. À gauche : la bibliothèque.
+        // À droite : le choix de la rareté. Derrière : les boutons.
+        const float Reach = 0.85f;
+        const float HandHeight = 1.05f;
+
+        // Position sur un cercle autour du joueur. angle 0 = devant, négatif = à gauche.
+        static Vector3 Around(float angleDeg, float radius, float height)
+        {
+            float a = angleDeg * Mathf.Deg2Rad;
+            return new Vector3(Mathf.Sin(a) * radius, height, Mathf.Cos(a) * radius);
+        }
+
+        static Quaternion FacingCenter(Vector3 pos) => Quaternion.LookRotation(new Vector3(pos.x, 0, pos.z));
+
+        static void Pillar(Transform parent, Vector3 top)
+        {
+            Visuals.Solid("Socle", parent, new Vector3(top.x, (top.y - 0.1f) / 2f, top.z), new Vector3(0.08f, top.y - 0.1f, 0.08f), Wood);
+        }
+
         static void BuildHub(Transform mapRoot, Transform mapSpawn)
         {
             var env = new GameObject("Hub").transform;
-            Visuals.Solid("Sol", env, new Vector3(0, -0.05f, 1), new Vector3(12, 0.1f, 10), Floor);
+            Visuals.Solid("Sol", env, new Vector3(0, -0.05f, 0), new Vector3(6, 0.1f, 6), Floor);
 
-            // Plateau : la carte en miniature
-            Visuals.Solid("Table", env, new Vector3(0, 0.4f, 2.2f), new Vector3(2f, 0.8f, 2f), Wood);
+            // Plateau incliné devant le joueur : la carte en direct, et la surface où l'on pose les singes
+            float scale = BoardTile / MapLayout.Tile;
+            Visuals.Solid("Pied du plateau", env, new Vector3(0, 0.4f, 1.0f), new Vector3(0.6f, 0.8f, 0.6f), Wood);
             var boardGo = new GameObject("Plateau");
             boardGo.tag = Tags.Plateau;
             boardGo.transform.SetParent(env, false);
-            boardGo.transform.position = new Vector3(0, 0.84f, 2.2f);
+            boardGo.transform.SetPositionAndRotation(new Vector3(0, 0.9f, 1.0f), Quaternion.Euler(-25f, 0, 0));
             var board = boardGo.AddComponent<Board>();
             board.mapRoot = mapRoot;
-            board.scale = BoardTile / MapLayout.Tile;
+            board.scale = scale;
+            boardGo.AddComponent<PlacementSurface>().scale = scale;
             var col = boardGo.AddComponent<BoxCollider>();
             col.size = new Vector3(MapLayout.Size * BoardTile, 0.04f, MapLayout.Size * BoardTile);
             col.center = new Vector3(0, -0.02f, 0);
             BuildGrid(boardGo.transform, BoardTile, 0.04f, false);
-            Visuals.Label(boardGo.transform, "PLATEAU = la carte en direct\npose et fusionne tes singes", new Vector3(0, 0.9f, 1.1f), 0.12f);
 
-            // Bibliothèque : une ligne par type, une colonne par rareté
+            // Bibliothèque à gauche : un socle par type, en arc
             var lib = new GameObject("Bibliotheque").transform;
             lib.tag = Tags.Bibliotheque;
             lib.SetParent(env, false);
-            lib.position = new Vector3(-3f, 0, 0);
-            Visuals.Solid("Fond", lib, new Vector3(-0.35f, 1.4f, 1.0f), new Vector3(0.1f, 2.8f, 3.4f), Wood);
-            Visuals.Label(lib, "BIBLIOTHÈQUE", new Vector3(0, 2.75f, 1.0f), 0.18f);
-            const float step = 0.36f;
+            Visuals.Label(lib, "SINGES", Around(-80f, Reach, HandHeight + 0.35f), 0.07f);
             for (int t = 0; t < MonkeyData.TypeCount; t++)
             {
-                float y = 0.4f + t * step;
-                Visuals.Solid($"Etagere {t}", lib, new Vector3(-0.1f, y - 0.15f, 1.0f), new Vector3(0.45f, 0.03f, 3.2f), Wood);
-                Visuals.Label(lib, ((MonkeyType)t).ToString(), new Vector3(0, y, -0.75f), 0.08f);
-                for (int l = 0; l < MonkeyData.LevelCount; l++)
-                {
-                    var slot = new GameObject($"Slot {(MonkeyType)t} {(Rarity)l}");
-                    slot.tag = Tags.Bibliotheque;
-                    slot.transform.SetParent(lib, false);
-                    slot.transform.localPosition = new Vector3(0, y, -0.25f + l * step);
-                    slot.AddComponent<BoxCollider>().size = Vector3.one * 0.26f;
-                    var s = slot.AddComponent<LibrarySlot>();
-                    s.type = (MonkeyType)t;
-                    s.level = (Rarity)l;
-                    Visuals.MonkeyPiece(new Monkey(s.type, s.level), slot.transform, Vector3.zero, 0.22f);
-                }
+                var pos = Around(-110f + t * 10f, Reach, HandHeight);
+                Pillar(lib, pos);
+                var slot = new GameObject($"Socle {(MonkeyType)t}");
+                slot.tag = Tags.Bibliotheque;
+                slot.transform.SetParent(lib, false);
+                slot.transform.SetPositionAndRotation(pos, FacingCenter(pos));
+                slot.AddComponent<BoxCollider>().size = Vector3.one * 0.16f;
+                slot.AddComponent<LibrarySlot>().type = (MonkeyType)t;
+                Visuals.Label(slot.transform, ((MonkeyType)t).ToString(), new Vector3(0, 0.17f, 0), 0.035f);
             }
 
-            // Boutons à droite
-            MakeActionCube(env, "Jouer", new Vector3(3f, 1f, 1.8f), 0.6f, new Color(0.2f, 0.85f, 0.3f),
+            // Choix de la rareté à droite : 8 pastilles de couleur
+            var picker = new GameObject("Rarete").transform;
+            picker.SetParent(env, false);
+            Visuals.Label(picker, "RARETÉ", Around(85f, Reach, HandHeight + 0.3f), 0.07f);
+            for (int l = 0; l < MonkeyData.LevelCount; l++)
+            {
+                var r = (Rarity)l;
+                var pos = Around(50f + l * 10f, Reach, HandHeight);
+                Pillar(picker, pos);
+                var button = Visuals.Solid($"Rarete {r}", picker, pos, Vector3.one * 0.07f, MonkeyData.RarityColor(r));
+                button.transform.rotation = FacingCenter(pos);
+                button.tag = Tags.Bouton;
+                button.GetComponent<ColorTint>().Set(MonkeyData.RarityColor(r), MonkeyData.IsRainbow(r));
+                button.AddComponent<RarityButton>().rarity = r;
+            }
+
+            // Boutons derrière le joueur
+            MakeActionCube(env, "Jouer", Around(150f, 1.0f, 1.0f), 0.3f, new Color(0.2f, 0.85f, 0.3f),
                 "JOUER", ActionCube.Action.Teleport, mapSpawn, "Aller sur la carte");
-            MakeActionCube(env, "Vider", new Vector3(3f, 0.6f, 0.6f), 0.35f, new Color(0.6f, 0.6f, 0.6f),
+            MakeActionCube(env, "Vider", Around(-150f, 1.0f, 0.9f), 0.2f, new Color(0.6f, 0.6f, 0.6f),
                 "Vider", ActionCube.Action.ClearBoard, null, "Vider le plateau");
         }
 
@@ -178,6 +205,7 @@ namespace SAE.EditorTools
             map.transform.position = MapCenter;
             BuildGrid(map.transform, MapLayout.Tile, 0.5f, true);
             map.AddComponent<TowerManager>();
+            map.AddComponent<PlacementSurface>().scale = 1f; // prendre / poser / fusionner directement sur la carte
             map.AddComponent<WaveSpawner>();
 
             float edge = MapLayout.HalfExtent;

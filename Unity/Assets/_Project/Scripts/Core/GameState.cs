@@ -21,6 +21,9 @@ namespace SAE
         // Singe tenu en main (null = main vide).
         public static Monkey? Held;
 
+        // Rareté choisie dans le sélecteur de la bibliothèque.
+        public static Rarity SelectedRarity = Rarity.Gris;
+
         public static int Money;
 
         public static event Action Changed;
