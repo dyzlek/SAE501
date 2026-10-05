@@ -79,3 +79,4 @@ On garde de cet essai le plateau incliné, mais pas la bibliothèque : on revien
 | Claude (Claude Code) | Ajout des retours de Maxens (envoyés sur Discord) dans son journal, à sa place | Gardé |
 | Claude (Claude Code) | Hub en cercle autour du joueur : plateau plus grand (1,6 m) devant, bibliothèque à gauche et à droite, bananier + panier de Maxens derrière, coffre de Nicolas derrière à droite ; branchements : prendre les bananes, ouvrir le coffre (clic ou E), argent commun (bananes → coffre) | À tester |
 | Claude (Claude Code) | Dossier `prompts/` (mes prompts reformulés et corrigés), règle « prompts » dans CLAUDE.md pour nous trois, README (rôles + journal commun du jour) | Gardé |
+| Claude (Claude Code) | Un seul menu, « SAE » : menu « SAE501 » de Nicolas supprimé (packages déjà dans le projet, coffre monté par le hub), menus « Bananes » de Maxens retirés (son installeur reste utilisé par le hub) | Gardé |

@@ -21,6 +21,8 @@ using UnityEngine.Rendering;
 ///  - Récolteur (désactivé par défaut : cocher « Achete » pour tester).
 /// Fichiers : _Project/Art/Bananier (FBX, textures, matériaux), _Project/Prefabs, _Project/Scripts,
 /// scène de test dans _Project/Scenes/Sandbox/Maxens/BananierSandbox.unity.
+// Intégration : les menus « Bananes » ont été retirés, le bananier est monté par le menu SAE → Générer le prototype
+// (PrototypeGenerator appelle Construire). Le code de Maxens est inchangé par ailleurs.
 public static class BananesInstaller
 {
     static string s_root, s_fbx;   // s_root = _Project/Art/Bananier (FBX, Textures, Materiaux)
@@ -29,7 +31,6 @@ public static class BananesInstaller
     const string DossierSandbox = "Assets/_Project/Scenes/Sandbox/Maxens";
     const string SceneTest = DossierSandbox + "/BananierSandbox.unity";
 
-    [MenuItem("Bananes/Installer dans la scène ouverte")]
     public static void InstallerDansScene()
     {
         if (!Preparer()) return;
@@ -38,7 +39,6 @@ public static class BananesInstaller
         Debug.Log("Bananes : installé dans la scène ouverte. Déplace l'objet « Systeme_Bananes » où tu veux.");
     }
 
-    [MenuItem("Bananes/Créer une scène de test")]
     public static void SceneDeTest()
     {
         if (!Preparer()) return;
