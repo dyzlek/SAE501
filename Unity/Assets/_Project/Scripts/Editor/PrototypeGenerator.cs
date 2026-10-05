@@ -26,6 +26,7 @@ namespace SAE.EditorTools
         {
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
             Directory.CreateDirectory(Folder);
+            TagSetup.EnsureTags();
 
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
             var defaultCam = GameObject.FindWithTag("MainCamera");
@@ -53,6 +54,7 @@ namespace SAE.EditorTools
         static void Player(Vector3 position)
         {
             var player = new GameObject("Player");
+            player.tag = Tags.Joueur;
             player.transform.position = position;
             var cc = player.AddComponent<CharacterController>();
             cc.height = 1.8f;
@@ -83,6 +85,7 @@ namespace SAE.EditorTools
             string label, ActionCube.Action action, Transform destination, string hint)
         {
             var cube = Visuals.Solid(name, parent, pos, Vector3.one * size, color);
+            cube.tag = Tags.Bouton;
             var a = cube.AddComponent<ActionCube>();
             a.action = action;
             a.destination = destination;
@@ -101,6 +104,7 @@ namespace SAE.EditorTools
             // Plateau : la carte en miniature
             Visuals.Solid("Table", env, new Vector3(0, 0.4f, 2.2f), new Vector3(2f, 0.8f, 2f), Wood);
             var boardGo = new GameObject("Plateau");
+            boardGo.tag = Tags.Plateau;
             boardGo.transform.SetParent(env, false);
             boardGo.transform.position = new Vector3(0, 0.84f, 2.2f);
             var board = boardGo.AddComponent<Board>();
@@ -114,6 +118,7 @@ namespace SAE.EditorTools
 
             // Bibliothèque : une ligne par type, une colonne par rareté
             var lib = new GameObject("Bibliotheque").transform;
+            lib.tag = Tags.Bibliotheque;
             lib.SetParent(env, false);
             lib.position = new Vector3(-3f, 0, 0);
             Visuals.Solid("Fond", lib, new Vector3(-0.35f, 1.4f, 1.0f), new Vector3(0.1f, 2.8f, 3.4f), Wood);
@@ -127,6 +132,7 @@ namespace SAE.EditorTools
                 for (int l = 0; l < MonkeyData.LevelCount; l++)
                 {
                     var slot = new GameObject($"Slot {(MonkeyType)t} {(Rarity)l}");
+                    slot.tag = Tags.Bibliotheque;
                     slot.transform.SetParent(lib, false);
                     slot.transform.localPosition = new Vector3(0, y, -0.25f + l * step);
                     slot.AddComponent<BoxCollider>().size = Vector3.one * 0.26f;
@@ -159,8 +165,9 @@ namespace SAE.EditorTools
 
                     var size = new Vector3(tile, thickness, tile);
                     var pos = MapLayout.CellLocal(r, c) * k + new Vector3(0, -thickness / 2f, 0);
-                    if (walkable) Visuals.Solid($"Case {r},{c}", parent, pos, size, color);
-                    else Visuals.Box($"Case {r},{c}", parent, pos, size, color);
+                    var cell = walkable ? Visuals.Solid($"Case {r},{c}", parent, pos, size, color)
+                                        : Visuals.Box($"Case {r},{c}", parent, pos, size, color);
+                    cell.tag = ch == '.' ? Tags.Terrain : Tags.Piste;
                 }
         }
 

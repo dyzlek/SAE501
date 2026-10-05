@@ -62,6 +62,7 @@ namespace SAE
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             go.name = "Ballon";
+            go.tag = Tags.Ballon;
             go.transform.localScale = Vector3.one * 0.9f;
             go.AddComponent<ColorTint>();
             go.AddComponent<Mirrored>();

@@ -37,6 +37,7 @@ namespace SAE
                 if (towers.ContainsKey(p)) continue;
                 var pos = new Vector3(p.pos.x, TowerSize / 2f, p.pos.y);
                 var go = Visuals.MonkeyPiece(p.monkey, transform, pos, TowerSize);
+                go.tag = Tags.Singe;
                 go.AddComponent<Tower>().Init(p.monkey);
                 var body = go.transform.Find("Corps");
                 body.gameObject.AddComponent<Mirrored>().label = go.GetComponentInChildren<TextMesh>().text;
