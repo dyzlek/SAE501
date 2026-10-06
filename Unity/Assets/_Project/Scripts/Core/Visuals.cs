@@ -74,21 +74,25 @@ namespace SAE
                 view.body.GetComponent<Renderer>().enabled = false;   // le cube reste comme collider et repère
                 view.model = FitModel(modelAsset, yaw, root.transform, size, out bodySize);
             }
-            // L'aura (particules) n'est créée qu'en jeu : enregistrée dans la scène pour chaque case,
-            // elle la ferait passer de 1 à 7 Mo. Les cases de la bibliothèque la recréent au lancement.
+            // L'aura n'est créée qu'en jeu : les particules ne bougent pas hors Play, et enregistrées dans la scène
+            // pour chaque case elles l'alourdiraient beaucoup. Les cases de la bibliothèque la créent au lancement.
             if (Application.isPlaying) view.aura = Aura.Add(root, m.level, bodySize);
             if (withLabel)
                 Label(root.transform, $"{MonkeyData.ShortName(m.type)}{(int)m.level + 1}", new Vector3(0, size * 0.9f, 0), size * 0.45f, Color.black);
             return root;
         }
 
-        // Pose une copie du modèle dans parent, à la hauteur size et centrée. Les bras écartés (pose en T)
-        // peuvent un peu déborder sur les côtés : on les compte pour 80 %, sinon les singes seraient minuscules.
+        // Les bras écartés (pose en T) peuvent un peu déborder sur les côtés : on ne compte la largeur
+        // qu'à 80 % pour mettre le modèle à l'échelle, sinon les singes seraient minuscules.
+        const float WidthWeight = 0.8f;
+
+        // Pose une copie du modèle dans parent, à la hauteur size et centrée.
         // fittedSize = taille finale du modèle (largeur, hauteur, profondeur) en mètres.
         static GameObject FitModel(GameObject asset, float yaw, Transform parent, float size, out Vector3 fittedSize)
         {
 #if UNITY_EDITOR
-            // Hors Play (scène enregistrée) : un lien vers le FBX plutôt qu'une copie complète, la scène reste légère
+            // Hors Play (menu qui met les singes dans la scène) : un lien vers le FBX plutôt qu'une copie complète,
+            // sinon chaque case enregistre tout le modèle et la scène passe de 1,5 à 9 Mo.
             var model = Application.isPlaying ? Object.Instantiate(asset) : (GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(asset);
 #else
             var model = Object.Instantiate(asset);
@@ -101,7 +105,7 @@ namespace SAE
             var renderers = model.GetComponentsInChildren<Renderer>();
             var bounds = renderers[0].bounds;
             foreach (var r in renderers) bounds.Encapsulate(r.bounds);
-            float scale = size / Mathf.Max(bounds.size.y, bounds.size.x * 0.8f, bounds.size.z * 0.8f);
+            float scale = size / Mathf.Max(bounds.size.y, bounds.size.x * WidthWeight, bounds.size.z * WidthWeight);
 
             model.transform.SetParent(parent, false);
             model.transform.localScale = asset.transform.localScale * scale;

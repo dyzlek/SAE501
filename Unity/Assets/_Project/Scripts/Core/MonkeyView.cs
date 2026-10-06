@@ -17,6 +17,8 @@ namespace SAE
 
         static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
         MaterialPropertyBlock block;
+        Renderer[] modelRenderers;   // gardés en mémoire : Tint est appelé à chaque frame par l'aperçu de pose
+        Color modelColor = Color.white;
 
         // Case vide de la bibliothèque : un singe sombre, sans aura (on voit ce qu'on pourrait avoir).
         public void SetEmpty(bool empty, Color emptyColor, Monkey monkey)
@@ -36,8 +38,11 @@ namespace SAE
         // La couleur multiplie la texture du modèle (blanc = couleurs d'origine), sans créer de matériau.
         void TintModel(Color color)
         {
+            if (modelRenderers != null && color == modelColor) return;   // déjà de cette couleur
+            modelColor = color;
+            modelRenderers ??= model.GetComponentsInChildren<Renderer>();
             block ??= new MaterialPropertyBlock();
-            foreach (var r in model.GetComponentsInChildren<Renderer>())
+            foreach (var r in modelRenderers)
             {
                 r.GetPropertyBlock(block);
                 block.SetColor(BaseColorId, color);

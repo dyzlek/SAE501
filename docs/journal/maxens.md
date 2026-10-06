@@ -10,15 +10,21 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 - **Fait :** `.meta` des modèles créés par Unity et commités.
 - **Fait :** les **vrais singes dans la bibliothèque** (et partout où un singe s'affiche : sortie du coffre, singe en main, aperçu de pose, carte) à la place des cubes de couleur :
   - un type = un modèle : Classique → Singe de base, Boomerang, Canon, Sniper, Punaise → Tireur, Glace, Colle. Les modèles sont rangés dans `Resources/MonkeyVisuals.asset`, rempli par le menu **SAE → Brancher les modèles des singes** ;
-  - la rareté n'est plus la couleur du cube mais une **aura « à la Dragon Ball »** : des flammes de la couleur de la rareté qui montent autour du singe et se resserrent en pointe, plus une lueur douce (arc-en-ciel = flammes de toutes les couleurs). Code dans `Core/Aura.cs`, en particules ;
+  - la rareté n'est plus la couleur du cube mais une **aura « à la Dragon Ball »** : des flammes de la couleur de la rareté qui montent autour du singe et se resserrent en pointe, plus une lueur douce (arc-en-ciel = flammes de toutes les couleurs). C'est un **prefab** (`Prefabs/Aura.prefab`, deux systèmes de particules « Flammes » et « Lueur ») qu'on règle dans l'Inspector ; le script `Core/Aura.cs` ne fait que le colorer et l'adapter à la taille du singe ;
   - case vide de la bibliothèque : le singe est sombre, plus petit et sans aura ; le nombre possédé est écrit devant lui ;
-  - sur le plateau du hub, la miniature reste un petit cube couleur de la rareté (plus lisible en petit).
 - **Testé** dans l'éditeur (Play) : bibliothèque remplie, singe en main, singe posé sur la carte, aucune erreur dans la console. Les singes riggés étaient exportés de dos : ils sont retournés de 180° (réglage par modèle dans `MonkeyVisuals`).
 - **Corrigé après mon test :**
   - le singe posé sur le **plateau du hub** apparaissait en cube : la miniature est maintenant le vrai singe en petit, avec son aura ;
   - l'aura du **Canon** et du **Tireur** (objets larges et bas) était cachée par le modèle : les flammes partent maintenant du bord de l'objet, quelle que soit sa forme ;
   - le **Canon** était tourné vers le mur : il est retourné vers le joueur ;
   - hors Play, la bibliothèque repassait en **cubes** : la scène gardait les cubes enregistrés, et les singes 3D n'étaient construits qu'au lancement. Nouveau menu **SAE → Mettre à jour les singes de la bibliothèque**, lancé puis scène `Jeu.unity` enregistrée **sur ma branche** (accord : la scène est à Dylan, à voir avec lui au moment de fusionner). Hors Play on voit les modèles sans l'aura : les particules enregistrées dans la scène la faisaient passer de 1,3 à 7,6 Mo, donc l'aura n'est créée qu'en jeu. Les modèles sont enregistrés comme liens vers les FBX (sinon 9 Mo) ; la scène fait 1,5 Mo.
+
+- **Relu avec les cours de D. Di Pierro** (les PDF des supports 2, 3, 4 et le TP 1, plus `docs/GUIDE_CODE.md`), et code repris pour suivre leurs exemples :
+  - l'aura était construite entièrement en code, avec beaucoup de nombres en dur : elle devient un **prefab** réglé dans l'Inspector, comme le pistolet et sa balle du support 4 ;
+  - plus de recherche de composants à chaque frame : l'aperçu de pose teintait le modèle en cherchant ses renderers à chaque image, ils sont maintenant gardés en mémoire (guide, section 4) ;
+  - les derniers nombres en dur ont un nom (`WidthWeight`, `MinRadius`) ;
+  - corrigé au passage : sur la carte et le plateau, l'aura apparaissait d'abord blanche (le prefab démarrait avant de recevoir sa couleur).
+  Retesté en Play (bibliothèque, singe en main, carte, plateau du hub) : aucune erreur dans la console.
 
 **Captures** (bibliothèque avec les singes 3D et leur aura, et singe tenu en main) :
 
@@ -35,6 +41,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
 | Claude (Cowork) | Tronc du bananier rallongé ×3 avec un script Blender, export FBX | Gardé (intégré sur `feat/prototype-maxens`) |
+| Claude (Code) | Lecture des PDF du cours (installation de `pypdf`), relecture du code avec le guide : aura en prefab réglable dans l'Inspector, renderers gardés en mémoire, constantes nommées, aura blanche corrigée | À tester au casque |
 | Claude (Code) | Corrections après mon test : singe 3D aussi en miniature sur le plateau, aura élargie pour le Canon et le Tireur, Canon retourné, menu pour mettre les singes 3D dans la scène hors Play (scène `Jeu.unity` enregistrée, 1,5 Mo) ; testé en Play et hors Play, aucune erreur | À tester au casque |
 | Claude (Code) | Modèles 3D des singes dans la bibliothèque (et coffre, main, carte) + aura « Dragon Ball » en particules à la couleur de la rareté, outil d'éditeur pour brancher les modèles, testé en Play via Unity MCP | À tester au casque |
 | Claude (Code) | Copie de tous mes modèles (FBX, GLB, textures) dans `_Project/Art/`, bananier grand tronc à la place de l'ancien | Gardé |

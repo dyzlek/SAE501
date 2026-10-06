@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace SAE
 {
-    // Les modèles 3D des singes (un par type) et le matériau de leur aura, rangés dans un seul asset :
+    // Les modèles 3D des singes (un par type) et le prefab de leur aura, rangés dans un seul asset :
     // Assets/_Project/Resources/MonkeyVisuals.asset, rempli par le menu SAE → Brancher les modèles des singes.
     // Il est dans un dossier Resources pour que le code le trouve aussi en jeu, sans glisser de référence à la main.
     [CreateAssetMenu(menuName = "SAE/Modèles des singes")]
@@ -10,7 +10,7 @@ namespace SAE
     {
         public GameObject[] models = new GameObject[MonkeyData.TypeCount];   // dans l'ordre de MonkeyType
         public float[] yaw = new float[MonkeyData.TypeCount];                 // rotation (degrés) pour que le modèle regarde vers -Z
-        public Material auraMaterial;                                         // particules additives (flammes)
+        public Aura auraPrefab;                                               // Prefabs/Aura.prefab
 
         static MonkeyVisuals instance;
 

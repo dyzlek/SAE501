@@ -4,6 +4,11 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mar. 6 oct. 2026
 
+### Suivre les cours
+> Attention : est-ce que tu as lu les cours qu'on a eus ? Prends exemple dessus.
+>
+> Suite : installe l'outil pour lire les PDF, puis reprends tout.
+
 ### Corrections après test
 > C'est pas mal, mais quand je pose le singe sur le plateau, il redevient un cube. L'aura n'est pas très adaptée au Canon et au Tireur, et le Canon est tourné vers le mur. Et pourquoi, quand j'arrête le Play, les singes redeviennent des cubes ?
 >

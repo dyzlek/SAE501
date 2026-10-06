@@ -2,84 +2,66 @@ using UnityEngine;
 
 namespace SAE
 {
-    // Aura « à la Dragon Ball » de la couleur de la rareté autour d'un singe :
-    // des flammes qui partent du sol tout autour de lui et se resserrent en montant (forme de goutte),
-    // plus une lueur douce au centre. Arc-en-ciel : chaque flamme prend une couleur au hasard.
-    // Les particules suivent le singe (espace local) et grandissent ou rétrécissent avec lui.
+    // Aura « à la Dragon Ball » autour d'un singe, de la couleur de sa rareté.
+    // Le visuel est le prefab Assets/_Project/Prefabs/Aura.prefab (réglé dans l'Inspector, pour un singe de 1 m) :
+    // - « Flammes » : des flammes qui partent du sol tout autour du singe et se resserrent en montant ;
+    // - « Lueur » : quelques grosses particules pâles au centre.
+    // Ce script ne fait que colorer l'aura et l'adapter à la taille et à la forme du singe.
     public class Aura : MonoBehaviour
     {
-        public const float FlamesPerSecond = 70f;
+        public ParticleSystem flames;
+        public ParticleSystem glow;
 
-        // bodySize = taille du singe en mètres (largeur, hauteur, profondeur) : l'aura s'adapte à sa forme.
+        // Rayon minimum du cercle de flammes, en part de la hauteur du singe (un singe fin garde une aura serrée).
+        public const float MinRadius = 0.38f;
+
+        // Pose une aura sur target. bodySize = taille du singe en mètres (largeur, hauteur, profondeur).
         // Le singe est centré sur target, donc ses pieds sont à -hauteur/2.
         public static Aura Add(GameObject target, Rarity level, Vector3 bodySize)
         {
-            var aura = new GameObject("Aura").AddComponent<Aura>();
-            aura.transform.SetParent(target.transform, false);
-            aura.transform.localPosition = Vector3.down * bodySize.y / 2f;
-            // Les flammes partent du bord du singe : un singe fin garde une aura serrée,
-            // un objet large et bas (Canon, Tireur) en a une plus large, sinon il cacherait les flammes.
-            float radius = Mathf.Max(bodySize.y * 0.38f, Mathf.Max(bodySize.x, bodySize.z) * 0.5f);
-            aura.Build(level, bodySize.y, radius);
+            var prefab = MonkeyVisuals.Instance ? MonkeyVisuals.Instance.auraPrefab : null;
+            if (!prefab) return null;
+
+            var aura = Instantiate(prefab, target.transform);
+            aura.name = "Aura";
+            aura.Fit(bodySize);
+            aura.SetColor(level);
+            aura.Restart();
             return aura;
         }
 
-        void Build(Rarity level, float height, float radius)
+        // Le prefab est fait pour un singe de 1 m : on le met à l'échelle de la hauteur du singe
+        // (les particules suivent, grâce au mode « Hierarchy »), puis on élargit le cercle de flammes
+        // pour les objets larges et bas (Canon, Tireur), sinon ils cacheraient les flammes.
+        void Fit(Vector3 bodySize)
+        {
+            float height = bodySize.y;
+            transform.localPosition = Vector3.down * height / 2f;
+            transform.localScale = Vector3.one * height;
+
+            float halfWidth = Mathf.Max(bodySize.x, bodySize.z) / 2f;
+            var shape = flames.shape;
+            shape.radius = Mathf.Max(MinRadius, halfWidth / height);
+        }
+
+        void SetColor(Rarity level)
         {
             var color = ColorOf(level);
-            var material = MonkeyVisuals.Instance ? MonkeyVisuals.Instance.auraMaterial : null;
-
-            // Les flammes : émises sur un cercle autour des pieds, elles montent et se resserrent vers le haut
-            var flames = CreateSystem("Flammes", material);
-            var main = flames.main;
-            main.startLifetime = new ParticleSystem.MinMaxCurve(0.5f, 0.8f);
-            main.startSpeed = new ParticleSystem.MinMaxCurve(height * 1.1f, height * 1.6f);
-            main.startSize3D = true;                       // flammes 2 fois plus hautes que larges
-            main.startSizeX = new ParticleSystem.MinMaxCurve(height * 0.35f, height * 0.5f);
-            main.startSizeY = new ParticleSystem.MinMaxCurve(height * 0.7f, height * 1f);
-            main.startSizeZ = 1f;
-            main.startColor = color;
-            main.maxParticles = 80;
-            var emission = flames.emission;
-            emission.rateOverTime = FlamesPerSecond;
-
-            var shape = flames.shape;
-            shape.shapeType = ParticleSystemShapeType.Cone;   // un cône presque droit tourné vers le haut
-            shape.angle = 5f;
-            shape.radius = radius;
-            shape.rotation = new Vector3(-90f, 0f, 0f);
-            shape.radiusThickness = 0.2f;                     // surtout sur le bord : le singe reste visible au milieu
-
-            var velocity = flames.velocityOverLifetime;   // vitesse vers le centre : les flammes se rejoignent en pointe
-            velocity.enabled = true;
-            velocity.space = ParticleSystemSimulationSpace.Local;
-            velocity.radial = -height * 0.35f;
-
-            var size = flames.sizeOverLifetime;           // la flamme s'affine en montant
-            size.enabled = true;
-            size.size = new ParticleSystem.MinMaxCurve(1f, AnimationCurve.Linear(0f, 1f, 1f, 0.3f));
-
-            FadeInOut(flames, 0.6f);
-            // Toujours debout face au joueur : la pointe de la texture de flamme reste en haut
-            flames.GetComponent<ParticleSystemRenderer>().renderMode = ParticleSystemRenderMode.VerticalBillboard;
-
-            // La lueur : quelques grosses particules pâles au centre, qui « respirent »
-            var glow = CreateSystem("Lueur", material);
-            glow.transform.localPosition = Vector3.up * height / 2f;
+            var flamesMain = flames.main;
+            flamesMain.startColor = color;
             var glowMain = glow.main;
-            glowMain.startLifetime = 1f;
-            glowMain.startSpeed = 0f;
-            glowMain.startSize = new ParticleSystem.MinMaxCurve(height * 1.3f, height * 1.6f);
             glowMain.startColor = color;
-            glowMain.maxParticles = 6;
-            var glowEmission = glow.emission;
-            glowEmission.rateOverTime = 4f;
-            var glowShape = glow.shape;
-            glowShape.enabled = false;
-            FadeInOut(glow, 0.25f);
+        }
 
-            flames.Play();
-            glow.Play();
+        // Le prefab démarre tout seul (déjà « allumé » grâce au prewarm), mais avec sa couleur et sa taille
+        // d'origine : on le relance pour que les premières flammes aient déjà la bonne couleur.
+        void Restart()
+        {
+            foreach (var ps in new[] { flames, glow })
+            {
+                ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                ps.Play(true);
+            }
         }
 
         // Rareté → couleur des particules. Arc-en-ciel = une couleur au hasard par particule.
@@ -97,37 +79,6 @@ namespace SAE
                 },
                 new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) });
             return new ParticleSystem.MinMaxGradient(rainbow) { mode = ParticleSystemGradientMode.RandomColor };
-        }
-
-        ParticleSystem CreateSystem(string name, Material material)
-        {
-            var go = new GameObject(name);
-            go.transform.SetParent(transform, false);
-            var ps = go.AddComponent<ParticleSystem>();
-            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);   // on règle tout avant de le lancer
-
-            var main = ps.main;
-            main.simulationSpace = ParticleSystemSimulationSpace.Local;      // l'aura suit le singe quand il vole
-            main.scalingMode = ParticleSystemScalingMode.Hierarchy;          // et rétrécit avec lui
-            main.prewarm = true;                                             // déjà allumée dès qu'elle apparaît
-
-            var render = go.GetComponent<ParticleSystemRenderer>();
-            render.sharedMaterial = material;
-            render.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            render.receiveShadows = false;
-            return ps;
-        }
-
-        // Les particules apparaissent puis s'effacent en douceur (sinon elles « clignotent »).
-        static void FadeInOut(ParticleSystem ps, float maxAlpha)
-        {
-            var fade = new Gradient();
-            fade.SetKeys(
-                new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
-                new[] { new GradientAlphaKey(0f, 0f), new GradientAlphaKey(maxAlpha, 0.25f), new GradientAlphaKey(0f, 1f) });
-            var colorOverLife = ps.colorOverLifetime;
-            colorOverLife.enabled = true;
-            colorOverLife.color = fade;
         }
     }
 }
