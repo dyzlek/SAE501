@@ -4,6 +4,11 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mar. 6 oct. 2026
 
+### Corrections de l'arc et mains de Quincy
+> Au casque, l'arc est beaucoup trop gros et je n'arrive pas à tirer : c'est sans doute lié aux commandes. Corrige ces deux points.
+>
+> Je veux aussi que les mains affichées au hub soient celles de Quincy, correctement riggées si ce n'est pas déjà le cas.
+
 ### Le système de l'arc
 > Récupère le `main` à jour et crée une nouvelle branche pour l'arme. Au hub, le joueur n'a que ses mains ; l'arc n'apparaît dans ses mains qu'une fois téléporté sur la carte. Pour l'instant, réalise uniquement le système de tir : tendre l'arc, encocher la flèche, l'animation de la corde et de la flèche, le tir.
 

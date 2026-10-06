@@ -85,6 +85,20 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 
   ![L'arc tendu, flèche encochée ; la flèche tirée juste avant vole en haut](../captures/maxens-arc-tendu.png)
 
+- **Corrigé après mon test au casque (simulateur) :** l'arc était trop gros et je n'arrivais pas à tirer.
+  - l'arc passe de 1 m à environ **65 cm** (et la flèche de 81 à 60 cm), la corde recule de 40 cm au maximum ;
+  - attraper la corde est beaucoup plus facile : la main droite peut être **jusqu'à 40 cm** de la corde (au lieu de 15), et **la gâchette marche aussi**, en plus du grip ;
+  - **dans le simulateur sans casque** : `]` pour piloter la manette droite, `` ` `` pour choisir l'action rapide « Grip », `Espace` pour serrer / relâcher, `S` pour reculer la main pendant que la corde est tenue.
+- **Fait : les mains de Quincy à la place des manettes**, au hub comme sur la carte :
+  - la main gauche de Quincy est sortie du personnage dans Blender (script `creer_mains.py`, sur une nouvelle copie `Quincy_Mains.blend`) et **riggée** : poignet, paume, doigts, pouce (avant, une main = un seul os, impossible à fermer). Le trou au poignet est bouché ;
+  - la main droite est la même, en miroir. Prefabs `Main_Gauche` / `Main_Droite` (menu **SAE → Préparer les mains**), posés sur les manettes ; les manettes blanches des Starter Assets sont cachées ;
+  - nouveau script `AnimateHandOnInput` (le même principe que dans le support 3 du cours) : le grip ferme les doigts, la gâchette plie le pouce ; la main gauche reste fermée sur l'arc tant qu'il est sorti.
+  - Testé en Play : mains visibles et bien orientées (doigts devant, pouce en haut), main gauche refermée sur la poignée de l'arc, aucune erreur de notre code.
+  - **À voir au casque :** la position de la main sur la manette (réglage `HandOffset` dans le générateur) et la taille des gants (environ 18 cm).
+  - Pas commité : les réglages OpenXR réécrits tout seuls par le package Meta à l'ouverture (réglages VR de l'équipe).
+
+  ![La main gauche de Quincy refermée sur l'arc](../captures/maxens-main-quincy-arc.png)
+
 **Captures** (bibliothèque avec les singes 3D et leur aura, et singe tenu en main) :
 
 ![Bibliothèque : singes 3D avec l'aura de leur rareté](../captures/maxens-bibliotheque-singes-3d.png)
@@ -120,6 +134,7 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Corrections après test : arc plus petit, corde plus facile à attraper (40 cm, grip ou gâchette) ; mains de Quincy riggées (poignet, paume, doigts, pouce) à la place des manettes, qui se ferment avec les boutons ; testé en Play | À tester au casque |
 | Claude (Code) | Système de l'arc : arc seulement sur la carte, tir au casque (main droite sur la corde) et au PC (clic droit), corde et branches animées, flèche qui vole et éclate les ballons ; prefabs, générateur, testé en Play | À tester au casque |
 | Claude (Code) | Séparation de l'arc de Quincy par un script Blender (sur une copie) : arc à part avec son squelette (poignée, branches, corde à tirer), os de la flèche en points d'accroche, point `BowGrip` dans la main, export FBX, matériau ; testé dans Unity | À tester au casque |
 | Claude (Code) | Analyse du rig de Quincy dans Unity puis dans Blender en lecture seule (squelette, poids, séparation arc / bras / mains) et liste de ce qu'il faut corriger dans Blender pour utiliser l'arc comme arme | Gardé |

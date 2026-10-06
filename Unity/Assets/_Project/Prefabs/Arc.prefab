@@ -27,7 +27,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
+  m_LocalScale: {x: 0.55, y: 0.55, z: 0.55}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 256308094314135111}
@@ -50,7 +50,7 @@ MonoBehaviour:
   limbBottom: {fileID: 4937453772912410445}
   grip: {fileID: 7754925533001159995}
   arrowPrefab: {fileID: 5002355028947167862, guid: ed9de66d0515e7e49a232dd63e98d638, type: 3}
-  maxDraw: 0.5
+  maxDraw: 0.4
   minSpeed: 8
   maxSpeed: 30
   limbBend: 12

@@ -16,7 +16,7 @@ namespace SAE
         public Transform grip;           // la poignée : c'est là que l'arc est tenu
         public Arrow arrowPrefab;
 
-        public float maxDraw = 0.5f;     // recul maximum de la corde, en mètres
+        public float maxDraw = 0.4f;     // recul maximum de la corde, en mètres
         public float minSpeed = 8f;      // vitesse de la flèche à peine tendue, en m/s
         public float maxSpeed = 30f;     // vitesse de la flèche à pleine tension, en m/s
         public float limbBend = 12f;     // angle des branches à pleine tension, en degrés
