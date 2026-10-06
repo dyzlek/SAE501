@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mar. 6 oct. 2026
 
+### Retour aux mains simples
+> Finalement, je préférais les mains simples : les nouvelles collent moins au style du jeu. Reprends la main de Quincy d'avant, avec une fermeture légère quand on appuie sur les boutons.
+
 ### Refaire les mains
 > Les mains se ferment de façon étrange : il faudrait sans doute les refaire. Autre problème : quand on prend un singe, il se retrouve à l'intérieur de la main.
 

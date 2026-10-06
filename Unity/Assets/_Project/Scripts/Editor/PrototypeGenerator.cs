@@ -185,7 +185,7 @@ namespace SAE.EditorTools
         static AnimateHandOnInput GiveHands(PlayerRig rig)
         {
             if (!rig.leftHand || !rig.rightHand) return null;
-            HandSetup.Setup();
+            if (!HandSetup.Left || !HandSetup.Right) HandSetup.Setup();   // refaits seulement s'ils manquent (menu SAE → Préparer les mains)
             PutHand(HandSetup.Right, rig.rightHand, "Right");
             return PutHand(HandSetup.Left, rig.leftHand, "Left");
         }

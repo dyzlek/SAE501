@@ -1,9 +1,14 @@
 fileFormatVersion: 2
-guid: a591fc05470a76b4399f61c58384ea14
+guid: a3fb615df48257b42a0814e1854e50f7
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Quincy
+    second: {fileID: 2100000, guid: 9aaf93877d6c4b341ac9be05232e5aa6, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

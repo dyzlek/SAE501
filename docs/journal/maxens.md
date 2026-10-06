@@ -108,6 +108,8 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 
   ![Nouvelles mains de Quincy : à droite, poing fermé](../captures/maxens-mains-quincy-v2.png)
 
+- **Annulé : les mains détaillées** ne collent pas au style du jeu (trop « réalistes » à côté des modèles simples). **Retour à la main simple découpée dans Quincy** (`Quincy_Main.fbx`), en gardant le singe tenu devant la main. La fermeture qui faisait bizarre est corrigée : les doigts tournaient dans le plan de la paume (sur le côté) ; ils tournent maintenant autour de l'axe des articulations, et **seulement un peu** (30° pour les doigts, 20° pour le pouce), pour que les blocs ne se cassent pas. Les fichiers des mains détaillées sont retirés du projet (le script `creer_mains.py` et `Quincy_Mains.blend` restent dans mon dossier Blender).
+
 **Captures** (bibliothèque avec les singes 3D et leur aura, et singe tenu en main) :
 
 ![Bibliothèque : singes 3D avec l'aura de leur rareté](../captures/maxens-bibliotheque-singes-3d.png)
@@ -143,7 +145,8 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
-| Claude (Code) | Nouvelles mains de Quincy modélisées et riggées par script Blender (2 phalanges par doigt), pliage phalange par phalange, singe tenu devant la main ; testé en Play | À tester au casque |
+| Claude (Code) | Retour à la main simple de Quincy, fermeture corrigée (bon axe, pliage léger) ; singe tenu devant la main gardé | À tester au casque |
+| Claude (Code) | Nouvelles mains de Quincy modélisées et riggées par script Blender (2 phalanges par doigt), pliage phalange par phalange, singe tenu devant la main ; testé en Play | Mains jetées (pas dans le style), singe devant la main gardé |
 | Claude (Code) | Corrections après test : arc plus petit, corde plus facile à attraper (40 cm, grip ou gâchette) ; mains de Quincy riggées (poignet, paume, doigts, pouce) à la place des manettes, qui se ferment avec les boutons ; testé en Play | Arc gardé, mains jetées (refaites) |
 | Claude (Code) | Système de l'arc : arc seulement sur la carte, tir au casque (main droite sur la corde) et au PC (clic droit), corde et branches animées, flèche qui vole et éclate les ballons ; prefabs, générateur, testé en Play | À tester au casque |
 | Claude (Code) | Séparation de l'arc de Quincy par un script Blender (sur une copie) : arc à part avec son squelette (poignée, branches, corde à tirer), os de la flèche en points d'accroche, point `BowGrip` dans la main, export FBX, matériau ; testé dans Unity | À tester au casque |
