@@ -5,8 +5,8 @@ namespace SAE
 {
     // Une case de la bibliothèque = un type de singe dans une rareté.
     // Elle affiche combien on en possède (inventaire) ; vide, elle est grisée et plus petite.
-    // Clic : prendre un singe en main. Clic en tenant déjà un singe : le ranger.
-    public class LibrarySlot : MonoBehaviour, IClickable, IMonkeyInfo
+    // Si on en possède au moins un, un petit singe à saisir (MonkeyToken) est posé sur elle.
+    public class LibrarySlot : MonoBehaviour, IMonkeyInfo
     {
         public MonkeyType type;
         public Rarity level;
@@ -19,6 +19,7 @@ namespace SAE
         ColorTint body;
         Vector3 bodyScale;
         TextMesh countLabel;
+        MonkeyToken token;     // le singe posé sur la case, prêt à être pris
 
         Monkey Monkey => new Monkey(type, level);
 
@@ -54,13 +55,21 @@ namespace SAE
             body.Set(owned ? MonkeyData.RarityColor(level) : EmptyColor, owned && MonkeyData.IsRainbow(level));
             body.transform.localScale = owned ? bodyScale : bodyScale * 0.6f;
             countLabel.text = owned ? count.ToString() : "";
+
+            // Un singe à saisir sur le dessus de la case tant qu'il en reste
+            if (owned && !token)
+                token = MonkeyToken.Create(this, Monkey, Vector3.up * (bodyScale.y + MonkeyToken.Size) / 2f);
+            else if (!owned && token)
+            {
+                Destroy(token.gameObject);
+                token = null;
+            }
         }
 
-        public string GetHint(Vector3 point)
+        // Appelé quand on prend le singe posé : il n'appartient plus à la case (elle en posera un autre).
+        public void Detach(MonkeyToken taken)
         {
-            if (GameState.Held != null) return $"Ranger : {GameState.Held}";
-            int count = GameState.Count(Monkey);
-            return count > 0 ? $"Prendre : {Monkey} (×{count})" : $"{Monkey} : aucun (ouvre le coffre)";
+            if (token == taken) token = null;
         }
 
         // La fiche s'affiche au-dessus de la case, même vide (on voit ce que vaut un singe avant de l'avoir).
@@ -71,12 +80,6 @@ namespace SAE
             rangeCenter = Vector3.zero;
             rangeScale = 0f;
             return true;
-        }
-
-        public void OnClick(PlayerController player, Vector3 point)
-        {
-            if (GameState.Held != null) GameState.ReturnHeld();
-            else GameState.TakeFromInventory(Monkey);
         }
     }
 }

@@ -4,6 +4,16 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Chantier E : la VR, les gestes de base au casque
+> Maintenant, mettons la VR :
+> - le joueur VR : rig XR avec téléportation et rotation par crans, et le simulateur XR pour continuer à tester sans casque ;
+> - prendre un singe sur l'étagère avec la main (XR Grab) ;
+> - le lâcher au-dessus du plateau, ce qui le pose, avec l'aperçu vert ou rouge sous la main ;
+> - le lâcher sur un singe identique, ce qui les fusionne, avec le halo blanc ;
+> - les bananes : les prendre et les lâcher dans le panier (le prefab est déjà prêt pour la VR). Pour le confort, on évite de ramasser au sol en boucle : les bananes tombent sur un plateau à hauteur de main ;
+> - les boutons (Jouer, lancer la vague, améliorations) s'enfoncent avec la main ;
+> - un premier build sur le casque, au plus tard en début d'après-midi.
+
 ### Branche pour la VR et schéma du hub
 > Je vais m'occuper de l'ajout de la VR dans une branche `feat/ajout-vr`. Avant ça, regarde ce que j'ai fait et ajoute l'image de mon schéma du hub.
 
