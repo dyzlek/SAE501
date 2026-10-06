@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mar. 6 oct. 2026
 
+### Séparer l'arc de Quincy
+> D'accord pour ta proposition : sépare l'arc de Quincy par un script Blender, en travaillant sur une copie du fichier. L'arc doit devenir un objet à part avec son propre squelette (poignée, branches, corde qu'on peut tirer), exporté en FBX, et les bras et les mains du personnage doivent en être indépendants.
+
 ### Analyse du rig de Quincy
 > Notre personnage sera Quincy, et son arme sera l'arc. Pour l'instant, analyse uniquement son rig, sans rien modifier : vérifie qu'il est bien construit, et en particulier que les bras et les mains sont correctement séparés de l'arc.
 

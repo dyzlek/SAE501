@@ -63,6 +63,16 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
     - lui donner son propre petit squelette : poignée, branche haute, branche basse, et un os au milieu de la corde (point d'encoche) ; la corde en deux segments qui se rejoignent à ce point, pour pouvoir la tirer ;
     - décocher « Deform » sur `ArrowSocket` et `ArrowTip`, retirer leurs poids sur le corps, et mettre à la place des points d'accroche vides : un pour l'arc dans la main qui le tient, un pour la flèche dans la main qui tire ;
     - si les mains de Quincy sont visibles au casque : ajouter des os de doigts.
+- **Fait : l'arc de Quincy est séparé du personnage** (script Blender lancé sur une **copie** du fichier : `Quincy_Rig_ArcSepare.blend`, l'original `Quincy_Rig.blend` n'est pas modifié ; le script est rangé à côté, `separer_arc.py`) :
+  - pour les 4 niveaux, l'arc (corps, pointes, corde : 152 sommets) sort du maillage du singe : bras et mains sont maintenant seuls dans le maillage du personnage ;
+  - **nouvel objet `Quincy_Bow.fbx`** avec son propre squelette : `Grip` (poignée, le point à saisir), `LimbTop` et `LimbBottom` (les branches), `String` (le milieu de la corde). La corde est droite au repos et **se tend en tirant l'os `String`** (testé : 15 à 20 cm de recul donnent le V de la corde) ;
+  - les os de la flèche (`ArrowSocket`, `ArrowTip`) ne déforment plus le corps : ce sont des points d'accroche, et la flèche chargée y est accrochée comme un objet enfant ;
+  - nouveau point d'accroche **`BowGrip`** dans la main droite : en Unity, on pose l'arc dessus (poignée sur poignée) et il tombe exactement à sa place d'origine ;
+  - les 4 FBX du singe sont remplacés dans `Art/Quincy/FBX/`, et un matériau `Quincy_Mat` (avec la texture de Quincy) est branché sur tous les modèles de Quincy : ils étaient blancs après le nouvel export.
+  - **Reste à faire :** les branches de l'arc ne plient pas encore quand on tire (on pourra tourner `LimbTop` / `LimbBottom`), la flèche chargée est toujours dans la main de l'arc (en VR, elle suivra la main qui tire, gérée par le jeu), et seul l'arc du niveau 3 est exporté (celui du niveau 20 est un peu plus grand).
+
+  ![Quincy tient l'arc séparé (à gauche), l'arc seul avec la corde tirée (à droite)](../captures/maxens-quincy-arc-separe.png)
+
 **Captures** (bibliothèque avec les singes 3D et leur aura, et singe tenu en main) :
 
 ![Bibliothèque : singes 3D avec l'aura de leur rareté](../captures/maxens-bibliotheque-singes-3d.png)
@@ -98,6 +108,7 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Séparation de l'arc de Quincy par un script Blender (sur une copie) : arc à part avec son squelette (poignée, branches, corde à tirer), os de la flèche en points d'accroche, point `BowGrip` dans la main, export FBX, matériau ; testé dans Unity | À tester au casque |
 | Claude (Code) | Analyse du rig de Quincy dans Unity puis dans Blender en lecture seule (squelette, poids, séparation arc / bras / mains) et liste de ce qu'il faut corriger dans Blender pour utiliser l'arc comme arme | Gardé |
 | Claude (Code) | Réécriture de mes prompts du jour, plus clairs et mieux structurés (contexte, objectif, contraintes), sans changer leur sens | Gardé |
 | Claude (Code) | Retour à la version d'avant (hub « sans bouger » sur un grand cercle) : générateur et scène remis, `Carousel.cs` supprimé | Gardé |
