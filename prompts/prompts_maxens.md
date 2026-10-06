@@ -4,10 +4,13 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mar. 6 oct. 2026
 
+### Tous mes modèles sur GitHub
+> J'ai tous mes modèles 3D dans mon dossier `Semestre-5/SAE/SAE-dispositif-interectif/Asset`. Pour le bananier, prends la version du dossier « Grand tronc ». Mets-les tous sur GitHub.
+
 ### Branche de test
 > Mets le fichier du bananier agrandi de côté. Prends le `main` actuel et crée-moi une branche `feat/prototype-maxens` pour que je puisse faire des tests (placer l'arbre, etc.). Ensuite, pousse la branche et mets à jour mes prompts et mon journal.
 
-### Bananier plus grand _(mis de côté)_
+### Bananier plus grand
 > Agrandis le bananier : je veux un tronc plus grand.
 
 ## Lun. 5 oct. 2026

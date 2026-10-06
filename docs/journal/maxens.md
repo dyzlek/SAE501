@@ -4,13 +4,17 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
 ## Mar. 6 oct. 2026
 - **Fait :** nouvelle branche `feat/prototype-maxens`, créée depuis le `main` à jour (PR #7 incluse), pour faire mes tests : placer le bananier dans la scène, essayer des réglages, etc.
-- **Mis de côté :** le bananier au tronc 3× plus haut (FBX refait sous Blender) reste sur la branche locale `art/bananier-grand-tronc`, **non poussée**. On n'utilise pas ce modèle pour l'instant ; on pourra le reprendre plus tard si l'arbre paraît trop petit au casque.
+- **Fait :** tous mes modèles 3D ajoutés au projet Unity sur cette branche, dans `Unity/Assets/_Project/Art/<Nom>/` (`FBX/` + `Textures/`) : Ballons (normal, blindé, cœur), BFB, MOAB, Boomerang, Canon, Colle, Glace, Pat Fusty (FBX + `Pat_Fusty.glb`), Quincy (niv. 3, 7, 10, 20 + flèche), Singe de base (+ fléchette), Sniper, Tireur (+ punaise).
+- **Fait :** le bananier passe à la version **grand tronc** (`Bananier.fbx` remplacé, mêmes noms d'objets, donc les scripts et la scène marchent toujours). La branche locale `art/bananier-grand-tronc` n'est plus utile.
+- **Pas mis dans Unity :** les `.blend` (Unity essaierait de les ouvrir avec Blender), les dossiers `Source/` et `Ancien/`, les images d'aperçu et les scripts du Tireur (à reprendre à part si besoin).
+- **À faire :** ouvrir le projet dans Unity pour qu'il crée les `.meta` (réglages d'import), vérifier les modèles riggés, puis committer les `.meta`.
 - **Bloque :** —
 
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
-| Claude (Cowork) | Tronc du bananier rallongé ×3 avec un script Blender, export FBX (branche locale `art/bananier-grand-tronc`) | Mis de côté |
+| Claude (Cowork) | Tronc du bananier rallongé ×3 avec un script Blender, export FBX | Gardé (intégré sur `feat/prototype-maxens`) |
+| Claude (Code) | Copie de tous mes modèles (FBX, GLB, textures) dans `_Project/Art/`, bananier grand tronc à la place de l'ancien | Gardé |
 | Claude (Code) | Mise à jour de `main`, création et push de la branche de test `feat/prototype-maxens`, journal et prompt | Gardé |
 
 ## Lun. 5 oct. 2026
