@@ -11,7 +11,7 @@ namespace SAE
     // En mode PC : DesktopPlayer utilise la même constante Reach pour le clic.
     public class GrabReach : MonoBehaviour, IXRHoverFilter, IXRSelectFilter
     {
-        public const float Reach = 2f;   // en mètres, de la main jusqu'au bord de l'objet
+        public const float Reach = 6f;   // en mètres, de la main au bord de l'objet : du centre du hub (cercle de 5 m), on atteint les bibliothèques
 
         XRBaseInteractable interactable;
 
