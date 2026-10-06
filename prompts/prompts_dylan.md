@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Guide de bonnes pratiques tiré des cours
+> Récupère toutes les informations importantes de mes supports de cours (comment bien structurer son code, etc.) et mets-les soit dans le CLAUDE.md, soit dans un autre fichier .md que tu liras quand tu coderas dans le projet.
+
 ### Fiche du singe sur un bouton
 > J'aimerais avoir les infos seulement quand j'appuie sur un bouton, par exemple A.
 

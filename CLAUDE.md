@@ -85,6 +85,7 @@ Les demandes faites à l'IA sont gardées dans `prompts/` : `prompts_dylan.md`, 
 - Claude : avant de modifier, vérifier la branche courante (`git branch --show-current`) ; si on est sur main, créer une branche.
 
 ## Règles de travail pour Claude dans ce dépôt
+- **Avant d'écrire ou de modifier du code, lire [docs/GUIDE_CODE.md](docs/GUIDE_CODE.md)** : bonnes pratiques C# / Unity / VR tirées des cours de D. Di Pierro (qui note la qualité technique), plus la check-list avant commit.
 - **Un seul projet Unity, en 6000.6**, dans `Unity/` ; docs dans `docs/` ; prompts dans `prompts/`. `.gitignore` Unity à la racine.
 - **Jamais deux personnes sur la même scène** : privilégier les prefabs, une scène de test par personne (`Assets/_Project/Scenes/Sandbox/<Prénom>`).
 - Ne pas proposer de feature hors périmètre sans le signaler ; en S3, aucune nouvelle feature.
