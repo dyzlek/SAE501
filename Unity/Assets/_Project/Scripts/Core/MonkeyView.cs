@@ -1,0 +1,47 @@
+using UnityEngine;
+
+namespace SAE
+{
+    // L'apparence d'un singe, construite par Visuals.MonkeyPiece :
+    // - « Corps » : le cube couleur de la rareté. Avec un modèle 3D, il reste invisible mais sert toujours
+    //   de collider et de source pour la miniature du plateau (Board / Mirrored copient un mesh simple) ;
+    // - « Modele » : le modèle 3D du type de singe (s'il existe) ;
+    // - « Aura » : les flammes de la couleur de la rareté.
+    // Les autres scripts passent par ici pour griser, teinter ou cacher le singe, quel que soit son rendu.
+    public class MonkeyView : MonoBehaviour
+    {
+        public ColorTint body;
+        public GameObject model;     // null : pas de modèle, on voit le cube
+        public Aura aura;
+
+        static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+        MaterialPropertyBlock block;
+
+        // Case vide de la bibliothèque : un singe sombre, sans aura (on voit ce qu'on pourrait avoir).
+        public void SetEmpty(bool empty, Color emptyColor, Monkey monkey)
+        {
+            if (aura) aura.gameObject.SetActive(!empty);
+            if (model) TintModel(empty ? emptyColor : Color.white);
+            else body.Set(empty ? emptyColor : MonkeyData.RarityColor(monkey.level), !empty && MonkeyData.IsRainbow(monkey.level));
+        }
+
+        // Aperçu de pose : vert si on peut poser, rouge sinon.
+        public void Tint(Color color)
+        {
+            if (model) TintModel(color);
+            else body.Set(color);
+        }
+
+        // La couleur multiplie la texture du modèle (blanc = couleurs d'origine), sans créer de matériau.
+        void TintModel(Color color)
+        {
+            block ??= new MaterialPropertyBlock();
+            foreach (var r in model.GetComponentsInChildren<Renderer>())
+            {
+                r.GetPropertyBlock(block);
+                block.SetColor(BaseColorId, color);
+                r.SetPropertyBlock(block);
+            }
+        }
+    }
+}

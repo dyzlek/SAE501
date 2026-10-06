@@ -7,13 +7,22 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 - **Fait :** tous mes modèles 3D ajoutés au projet Unity sur cette branche, dans `Unity/Assets/_Project/Art/<Nom>/` (`FBX/` + `Textures/`) : Ballons (normal, blindé, cœur), BFB, MOAB, Boomerang, Canon, Colle, Glace, Pat Fusty (FBX + `Pat_Fusty.glb`), Quincy (niv. 3, 7, 10, 20 + flèche), Singe de base (+ fléchette), Sniper, Tireur (+ punaise).
 - **Fait :** le bananier passe à la version **grand tronc** (`Bananier.fbx` remplacé, mêmes noms d'objets, donc les scripts et la scène marchent toujours). La branche locale `art/bananier-grand-tronc` n'est plus utile.
 - **Pas mis dans Unity :** les `.blend` (Unity essaierait de les ouvrir avec Blender), les dossiers `Source/` et `Ancien/`, les images d'aperçu et les scripts du Tireur (à reprendre à part si besoin).
-- **À faire :** ouvrir le projet dans Unity pour qu'il crée les `.meta` (réglages d'import), vérifier les modèles riggés, puis committer les `.meta`.
+- **Fait :** `.meta` des modèles créés par Unity et commités.
+- **Fait :** les **vrais singes dans la bibliothèque** (et partout où un singe s'affiche : sortie du coffre, singe en main, aperçu de pose, carte) à la place des cubes de couleur :
+  - un type = un modèle : Classique → Singe de base, Boomerang, Canon, Sniper, Punaise → Tireur, Glace, Colle. Les modèles sont rangés dans `Resources/MonkeyVisuals.asset`, rempli par le menu **SAE → Brancher les modèles des singes** ;
+  - la rareté n'est plus la couleur du cube mais une **aura « à la Dragon Ball »** : des flammes de la couleur de la rareté qui montent autour du singe et se resserrent en pointe, plus une lueur douce (arc-en-ciel = flammes de toutes les couleurs). Code dans `Core/Aura.cs`, en particules ;
+  - case vide de la bibliothèque : le singe est sombre, plus petit et sans aura ; le nombre possédé est écrit devant lui ;
+  - sur le plateau du hub, la miniature reste un petit cube couleur de la rareté (plus lisible en petit).
+- **Testé** dans l'éditeur (Play) : bibliothèque remplie, singe en main, singe posé sur la carte, aucune erreur dans la console. Les singes riggés étaient exportés de dos : ils sont retournés de 180° (réglage par modèle dans `MonkeyVisuals`).
+- **À vérifier au casque :** les fps avec beaucoup d'auras allumées (≤ 80 particules par singe, seulement sur les cases possédées).
+- **Attention (équipe) :** ça touche des scripts de Dylan (`Visuals`, `LibrarySlot`, `ChestReward`, `PlacementSurface`, `PrototypeGenerator`). La scène `Jeu.unity` n'est **pas** modifiée : les cases de la bibliothèque remplacent leur cube par le modèle au lancement.
 - **Bloque :** —
 
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
 | Claude (Cowork) | Tronc du bananier rallongé ×3 avec un script Blender, export FBX | Gardé (intégré sur `feat/prototype-maxens`) |
+| Claude (Code) | Modèles 3D des singes dans la bibliothèque (et coffre, main, carte) + aura « Dragon Ball » en particules à la couleur de la rareté, outil d'éditeur pour brancher les modèles, testé en Play via Unity MCP | À tester au casque |
 | Claude (Code) | Copie de tous mes modèles (FBX, GLB, textures) dans `_Project/Art/`, bananier grand tronc à la place de l'ancien | Gardé |
 | Claude (Code) | Mise à jour de `main`, création et push de la branche de test `feat/prototype-maxens`, journal et prompt | Gardé |
 

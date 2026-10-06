@@ -4,7 +4,7 @@ using UnityEngine;
 namespace SAE
 {
     // Une case de la bibliothèque = un type de singe dans une rareté.
-    // Elle affiche combien on en possède (inventaire) ; vide, elle est grisée et plus petite.
+    // Elle affiche combien on en possède (inventaire) ; vide, le singe est sombre, plus petit et sans aura.
     // Clic : prendre un singe en main. Clic en tenant déjà un singe : le ranger.
     public class LibrarySlot : MonoBehaviour, IClickable, IMonkeyInfo
     {
@@ -16,8 +16,7 @@ namespace SAE
 
         static readonly Color EmptyColor = new Color(0.2f, 0.2f, 0.22f);
 
-        ColorTint body;
-        Vector3 bodyScale;
+        MonkeyView view;
         TextMesh countLabel;
 
         Monkey Monkey => new Monkey(type, level);
@@ -38,21 +37,32 @@ namespace SAE
 
         void Start()
         {
-            body = GetComponentInChildren<ColorTint>();
-            bodyScale = body.transform.localScale;
-            // Le nombre, écrit sur la face du cube tournée vers le joueur (-Z local)
-            countLabel = Visuals.Label(transform, "", new Vector3(0, 0, -bodyScale.z / 2f - 0.005f), bodyScale.y * 0.6f, Color.black);
+            // La scène a pu être générée avant l'arrivée des modèles 3D (cases en cubes) :
+            // on reconstruit le singe de la case pour avoir la version à jour (modèle + aura).
+            float size = 0f;
+            foreach (Transform child in transform)
+            {
+                var corps = child.Find("Corps");
+                if (corps) size = corps.localScale.x;
+                Destroy(child.gameObject);
+            }
+            view = Visuals.MonkeyPiece(Monkey, transform, Vector3.zero, size, withLabel: false).GetComponent<MonkeyView>();
+
+            // Le nombre possédé, devant le singe, côté joueur (-Z local)
+            bool hasModel = view.model;
+            var labelPos = hasModel ? new Vector3(0, -size * 0.35f, -size / 2f - 0.01f) : new Vector3(0, 0, -size / 2f - 0.005f);
+            countLabel = Visuals.Label(transform, "", labelPos, size * (hasModel ? 0.4f : 0.6f), hasModel ? Color.white : Color.black);
             Destroy(countLabel.GetComponent<Billboard>());
             Refresh();
         }
 
         void Refresh()
         {
-            if (!body) return;
+            if (!view) return;
             int count = GameState.Count(Monkey);
             bool owned = count > 0;
-            body.Set(owned ? MonkeyData.RarityColor(level) : EmptyColor, owned && MonkeyData.IsRainbow(level));
-            body.transform.localScale = owned ? bodyScale : bodyScale * 0.6f;
+            view.SetEmpty(!owned, EmptyColor, Monkey);
+            view.transform.localScale = owned ? Vector3.one : Vector3.one * 0.6f;
             countLabel.text = owned ? count.ToString() : "";
         }
 

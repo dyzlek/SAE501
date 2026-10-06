@@ -69,7 +69,7 @@ namespace SAE
                     ghost.name = "Apercu";
                 }
                 ghost.transform.localPosition = ToLocal(pos, TowerManager.TowerSize * 0.5f);
-                ghost.transform.Find("Corps").GetComponent<ColorTint>().Set(action == PlacementAction.Place ? Ok : No);
+                ghost.GetComponent<MonkeyView>().Tint(action == PlacementAction.Place ? Ok : No);
             }
 
             // Halo blanc sous le singe avec lequel on peut fusionner

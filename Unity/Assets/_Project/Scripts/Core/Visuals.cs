@@ -54,17 +54,51 @@ namespace SAE
             return tm;
         }
 
-        // Un singe = un cube couleur de sa rareté + son type écrit dessus.
+        // Un singe = son modèle 3D (s'il existe, sinon un cube couleur de sa rareté), son aura de la couleur
+        // de la rareté, et son type écrit au-dessus. Tout tient dans un cube de côté size, centré sur localPos.
+        // Le modèle regarde vers -Z local, comme la face du cube tournée vers le joueur (voir MonkeyVisuals.yaw).
         public static GameObject MonkeyPiece(Monkey m, Transform parent, Vector3 localPos, float size, bool withLabel = true)
         {
             var root = new GameObject($"Singe {m}");
             root.transform.SetParent(parent, false);
             root.transform.localPosition = localPos;
-            var cube = Box("Corps", root.transform, Vector3.zero, Vector3.one * size, MonkeyData.RarityColor(m.level));
-            cube.GetComponent<ColorTint>().Set(MonkeyData.RarityColor(m.level), MonkeyData.IsRainbow(m.level));
+            var view = root.AddComponent<MonkeyView>();
+            view.body = Box("Corps", root.transform, Vector3.zero, Vector3.one * size, MonkeyData.RarityColor(m.level)).GetComponent<ColorTint>();
+            view.body.Set(MonkeyData.RarityColor(m.level), MonkeyData.IsRainbow(m.level));
+
+            var modelAsset = MonkeyVisuals.Model(m.type, out float yaw);
+            if (modelAsset)
+            {
+                view.body.GetComponent<Renderer>().enabled = false;   // le cube reste pour la miniature du plateau
+                view.model = FitModel(modelAsset, yaw, root.transform, size);
+            }
+            view.aura = Aura.Add(root, m.level, size);
             if (withLabel)
                 Label(root.transform, $"{MonkeyData.ShortName(m.type)}{(int)m.level + 1}", new Vector3(0, size * 0.9f, 0), size * 0.45f, Color.black);
             return root;
         }
+
+        // Pose une copie du modèle dans parent, à la hauteur size et centrée. Les bras écartés (pose en T)
+        // peuvent un peu déborder sur les côtés : on les compte pour 80 %, sinon les singes seraient minuscules.
+        static GameObject FitModel(GameObject asset, float yaw, Transform parent, float size)
+        {
+            var model = Object.Instantiate(asset);
+            model.name = "Modele";
+            var rotation = Quaternion.Euler(0f, yaw, 0f) * asset.transform.rotation;
+            model.transform.SetPositionAndRotation(Vector3.zero, rotation);
+
+            // Boîte englobante du modèle à l'échelle 1, posé à l'origine
+            var renderers = model.GetComponentsInChildren<Renderer>();
+            var bounds = renderers[0].bounds;
+            foreach (var r in renderers) bounds.Encapsulate(r.bounds);
+            float scale = size / Mathf.Max(bounds.size.y, bounds.size.x * 0.8f, bounds.size.z * 0.8f);
+
+            model.transform.SetParent(parent, false);
+            model.transform.localScale = asset.transform.localScale * scale;
+            model.transform.localRotation = rotation;
+            model.transform.localPosition = -bounds.center * scale;
+            return model;
+        }
+
     }
 }
