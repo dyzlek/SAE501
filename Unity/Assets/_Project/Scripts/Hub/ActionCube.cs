@@ -17,8 +17,7 @@ namespace SAE
         void Start()
         {
             var label = GetComponentInChildren<TextMesh>();
-            if (action == Action.ClearBoard && label) label.text = $"Vider
-{ClearBoardPrice} bananes";
+            if (action == Action.ClearBoard && label) label.text = $"Vider\n{ClearBoardPrice} bananes";
         }
 
         public void Press()

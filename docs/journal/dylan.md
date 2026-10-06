@@ -86,6 +86,7 @@ Le hub était plus espacé, mais pas encore assez. J'ai dessiné une disposition
 | Claude (Claude Code) | Le singe pris de loin vient jusqu'à la main au lieu de rester au bout du rayon (`farAttachMode = Near` dans `MonkeyToken.Create`) | À tester |
 | Claude (Claude Code) | Le bouton « Vider » coûte 10 bananes (`ActionCube.ClearBoardPrice`, rien n'est payé si le plateau est vide ou s'il manque des bananes) ; plus de texte au-dessus des singes posés sur le plateau (`Board`) | À tester |
 | Claude (Claude Code) | Prix écrit sur le bouton « Vider » (`ActionCube.Start`) ; en mode PC le singe tenu est décalé en bas à droite (`DesktopPlayer.holdOffset`) ; en VR il se cale directement dans la main (`useDynamicAttach = false`) | À tester |
+| Claude (Claude Code) | Correction d'une erreur de compilation que j'avais introduite (retour à la ligne dans le texte du bouton Vider), qui empêchait de lancer le jeu | Gardé |
 
 ## Lun. 5 oct. 2026
 - **Fait :** création du dépôt GitHub, lecture des consignes, première analyse de l'idée et brouillon du GDD, test du prototype v2 et captures, **analyse critique du prototype (personnelle, pas encore discutée avec l'équipe)**, test et analyse des prototypes de Nicolas (coffres) et de Maxens (bananier), intégration des trois prototypes dans un seul projet (branche `feat/integration`).
