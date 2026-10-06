@@ -19,6 +19,14 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
 ![Hub vu du dessus](../captures/economie-hub-dessus.webp)
 
+**Captures du singe récolteur** _(branche `feat/singe-recolteur`, mode PC)_
+
+![Panneau RÉCOLTEUR à côté de la caisse, toutes les améliorations au max](../captures/recolteur-panneau.webp)
+
+![Le singe récolteur traverse le hub, du bananier vers le panier à côté du plateau](../captures/recolteur-hub.webp)
+
+![Le singe arrive au panier, posé à côté du bouton Vider (10 bananes)](../captures/recolteur-panier.webp)
+
 **Mon analyse critique** _(corrigée dans la foulée, à tester)_
 1. **Le hub est trop petit.** On est trop serré, les éléments sont les uns devant les autres : c'est compliqué de circuler et d'utiliser les objets.
 2. **Le prix et la qualité du coffre doivent dépendre des vagues vaincues.** Plus on bat de vagues, plus le coffre est cher, mais plus il est intéressant : il donne plus de singes et de meilleur niveau.
@@ -91,6 +99,7 @@ Le hub était plus espacé, mais pas encore assez. J'ai dessiné une disposition
 | Claude (Claude Code) | Retouches du récolteur : tête plus grosse (×1,4), fléchette retirée ; panier avancé vers le centre (−156°, 3,7 m), loin de la table et de la caisse (générateur + déplacement au lancement pour la scène actuelle) | À tester |
 | Claude (Claude Code) | Récolteur plus drôle : beaucoup plus lent de base (0,25 m/s, jusqu'à 1,05) ; panier éloigné vers le plateau (−160°, 2 m du centre) ; 20 % de dunks (grand saut, banane écrasée dans le panier, tour sur lui-même bras levés), 25 % de lancers ratés (la banane tombe à côté, il secoue la tête et tape du pied, la ramasse et retente) | À tester |
 | Claude (Claude Code) | Panier déplacé à côté du plateau des singes (+32°, après « Vider ») ; le récolteur va aussi chercher les bananes que le joueur a lâchées ailleurs (par terre, sur un meuble), une fois immobiles | À tester |
+| Claude (Claude Code) | Ajout de mes 3 captures du singe récolteur dans ce journal (converties en .webp dans `docs/captures/`) | Gardé |
 
 ## Lun. 5 oct. 2026
 - **Fait :** création du dépôt GitHub, lecture des consignes, première analyse de l'idée et brouillon du GDD, test du prototype v2 et captures, **analyse critique du prototype (personnelle, pas encore discutée avec l'équipe)**, test et analyse des prototypes de Nicolas (coffres) et de Maxens (bananier), intégration des trois prototypes dans un seul projet (branche `feat/integration`).
