@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Textes en VR et boutons à distance
+> Je peux me déplacer, mais tous les textes s'affichent mal, et peu de choses sont adaptées à la VR. J'aimerais aussi pouvoir interagir avec les boutons un peu à distance. Je te laisse faire.
+
 ### Chantier E : la VR, les gestes de base au casque
 > Maintenant, mettons la VR :
 > - le joueur VR : rig XR avec téléportation et rotation par crans, et le simulateur XR pour continuer à tester sans casque ;

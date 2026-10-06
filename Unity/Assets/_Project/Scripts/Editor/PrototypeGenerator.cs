@@ -140,6 +140,7 @@ namespace SAE.EditorTools
             var cube = Visuals.Solid(name, parent, pos, Vector3.one * size, color);
             cube.tag = Tags.Bouton;
             var a = cube.AddComponent<ActionCube>();
+            cube.AddComponent<RayPress>();   // on peut aussi l'enfoncer de loin, en le visant
             a.action = action;
             a.destination = destination;
             var text = Visuals.Label(cube.transform, label, new Vector3(0, 0.9f, 0), 0.12f);
@@ -423,6 +424,7 @@ namespace SAE.EditorTools
                 Object.DestroyImmediate(label.GetComponent<Billboard>());
 
                 var up = button.gameObject.AddComponent<UpgradeButton>();
+                button.gameObject.AddComponent<RayPress>();
                 up.bananier = bananier;
                 up.stat = stats[i];
                 up.cap = cap.transform;
@@ -470,6 +472,13 @@ namespace SAE.EditorTools
             prompt.player = player;
             prompt.keyLabel = "Touche";   // « [Touche]  Ouvrir le coffre » : on l'ouvre avec la main
             chest.AddComponent<ChestClickable>().chest = controller;
+            // Le modèle .glb n'a pas de collider : on en met un autour, pour le toucher ou le viser avec le rayon
+            var chestBounds = Bounds(chest);
+            var box = chest.AddComponent<BoxCollider>();
+            box.center = chest.transform.InverseTransformPoint(chestBounds.center);
+            var s = chest.transform.lossyScale;
+            box.size = new Vector3(chestBounds.size.x / s.x, chestBounds.size.y / s.y, chestBounds.size.z / s.z);
+            chest.AddComponent<RayPress>();
             // Les singes gagnés sortent du coffre avec leur aura et vont se ranger dans la bibliothèque
             var reward = chest.AddComponent<ChestReward>();
             reward.chest = controller;

@@ -35,15 +35,44 @@ namespace SAE
             return go;
         }
 
+        // Police et matériau de tous les textes 3D. Le matériau utilise notre shader « SAE/Texte 3D »
+        // (Art/Resources) : celui de Unity ne s'affiche pas correctement dans le casque (un seul œil, à travers les murs).
+        static Font font;
+        static Material textMaterial;
+
+        static Font Font => font ? font : font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+
+        static Material TextMaterial
+        {
+            get
+            {
+                if (!textMaterial)
+                {
+                    textMaterial = new Material(Shader.Find("SAE/Texte 3D")) { name = "Texte 3D" };
+                    // Quand Unity agrandit la texture de la police (nouvelles lettres), on la redonne au matériau
+                    Font.textureRebuilt += f => { if (textMaterial && f == font) textMaterial.mainTexture = f.material.mainTexture; };
+                }
+                textMaterial.mainTexture = Font.material.mainTexture;
+                return textMaterial;
+            }
+        }
+
+        // Au lancement du jeu, les textes déjà posés dans la scène prennent le matériau du jeu (créé à ce moment-là).
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        static void FixSceneTexts()
+        {
+            foreach (var tm in Object.FindObjectsByType<TextMesh>())
+                if (tm.font == Font) tm.GetComponent<MeshRenderer>().sharedMaterial = TextMaterial;
+        }
+
         public static TextMesh Label(Transform parent, string text, Vector3 localPos, float height, Color? color = null)
         {
             var go = new GameObject("Label");
             go.transform.SetParent(parent, false);
             go.transform.localPosition = localPos;
             var tm = go.AddComponent<TextMesh>();
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            tm.font = font;
-            go.GetComponent<MeshRenderer>().sharedMaterial = font.material;
+            tm.font = Font;
+            go.GetComponent<MeshRenderer>().sharedMaterial = TextMaterial;
             tm.text = text;
             tm.fontSize = 48;
             tm.characterSize = height / 4.8f; // ~ hauteur d'une ligne en mètres
