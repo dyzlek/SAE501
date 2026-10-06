@@ -47,6 +47,7 @@ public class Banane : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rb.isKinematic = true;          // posée au sol, elle ne bouge pas
         rb.useGravity = false;
+        if (!GetComponent<SAE.GrabReach>()) gameObject.AddComponent<SAE.GrabReach>();   // attrapable de loin, jusqu'à 2 m
         rends = GetComponentsInChildren<Renderer>();
         mpb = new MaterialPropertyBlock();
     }

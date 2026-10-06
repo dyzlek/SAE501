@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Prendre les singes et les bananes de loin (2 m)
+> J'aimerais qu'en mode PC, et aussi en VR si ce n'est pas déjà le cas, je puisse prendre les singes et le reste de loin, à environ 2 m.
+
 ### La VR dans le travail de Maxens, avec un mode PC
 > Maintenant, prends ce qu'il a fait (commit 1cc56b1) et implémente la VR dedans. Ajoute juste une option pour jouer en VR ou non, pour tester vite fait.
 

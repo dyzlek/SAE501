@@ -43,6 +43,7 @@ namespace SAE
             var grab = piece.AddComponent<XRGrabInteractable>();
             grab.throwOnDetach = false;
             grab.useDynamicAttach = true;   // il reste dans la main là où on l'a attrapé
+            piece.AddComponent<GrabReach>();  // on peut l'attraper de loin, jusqu'à 2 m
 
             var token = piece.AddComponent<MonkeyToken>();
             token.monkey = monkey;

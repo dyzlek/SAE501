@@ -6,13 +6,14 @@ namespace SAE
     // Joueur clavier/souris, pour tester vite sans casque (mode PC : menu SAE → Mode de jeu).
     // ZQSD : marcher · souris : regarder · clic gauche : appuyer (boutons, coffre) ou prendre (singe, banane),
     // relâcher le clic : lâcher · A maintenu : fiche du singe visé · Échap : libérer la souris.
-    // Mêmes règles qu'en VR : le singe tenu se pose là où on vise, la banane se lâche au-dessus du panier.
+    // Mêmes règles qu'en VR : on prend un singe ou une banane jusqu'à 2 m (GrabReach.Reach), le singe tenu se pose
+    // là où on vise, la banane se lâche au-dessus du panier.
     [RequireComponent(typeof(CharacterController))]
     public class DesktopPlayer : MonoBehaviour
     {
         public float speed = 3.5f;              // en m/s
         public float mouseSensitivity = 0.1f;   // degrés par pixel
-        public float reach = 30f;               // portée du clic, en mètres
+        public float reach = 30f;               // portée du clic sur les boutons, en mètres
         public float holdDistance = 0.8f;       // l'objet tenu flotte à cette distance devant les yeux
 
         CharacterController controller;
@@ -72,22 +73,23 @@ namespace SAE
             controller.Move(move * Time.deltaTime);
         }
 
-        // Ce qu'on vise au centre de l'écran : un singe ou une banane à prendre, sinon un bouton à enfoncer.
+        // Ce qu'on vise au centre de l'écran : un singe ou une banane à prendre (à 2 m au plus), sinon un bouton à enfoncer.
         void Click()
         {
             if (!Physics.Raycast(cam.position, cam.forward, out var hit, reach, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
                 return;
 
+            bool inGrabReach = hit.distance <= GrabReach.Reach;
             var token = hit.collider.GetComponentInParent<MonkeyToken>();
             if (token)
             {
-                if (token.Take(cam)) heldMonkey = token;
+                if (inGrabReach && token.Take(cam)) heldMonkey = token;
                 return;
             }
             var banana = hit.collider.GetComponentInParent<Banane>();
             if (banana)
             {
-                if (!banana.Deposee) { heldBanana = banana; banana.Prise(); }
+                if (inGrabReach && !banana.Deposee) { heldBanana = banana; banana.Prise(); }
                 return;
             }
             hit.collider.GetComponentInParent<IPressable>()?.Press();
