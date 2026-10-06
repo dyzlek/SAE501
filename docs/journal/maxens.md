@@ -112,6 +112,7 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 - **Corrigé après mon test dans le simulateur VR :**
   - **le tir en VR ne marchait pas dans le simulateur** : la flèche apparaissait puis disparaissait. Le tir VR suit le vrai geste (on attrape la corde et on recule la main) ; dans le simulateur, la main ne recule pas quand on tient le bouton, donc la tension restait à 0 et la flèche était rangée au lâcher. **Sans casque, la tension monte maintenant toute seule** tant qu'on garde le bouton (1 s pour tendre à fond), comme le clic droit du mode PC ; avec un vrai casque, c'est toujours le geste de la main ;
   - **les mains se fermaient trop peu** pour qu'on le voie : 60° pour les doigts et 30° pour le pouce maintenant que l'axe est le bon ;
+  - **les mains se fermaient sans qu'on le voie** (2e retour) : on voyait le poignet de face et les doigts étaient cachés derrière. Les mains sont maintenant **tournées dos de la main vers le haut** (comme sa propre main), **réduites à 60 %**, et les doigts se replient vers la paume ;
   - **l'arc cache la vue dans le simulateur** : le simulateur tient les manettes à 30 cm du visage. Au casque, le bras est tendu (60-70 cm), l'arc est donc plus loin et plus petit à l'écran. À vérifier au casque avant de le réduire encore.
 
 **Captures** (bibliothèque avec les singes 3D et leur aura, et singe tenu en main) :

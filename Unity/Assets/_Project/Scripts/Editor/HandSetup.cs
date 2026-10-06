@@ -6,13 +6,15 @@ namespace SAE.EditorTools
 {
     // Menu SAE → Préparer les mains : fabrique Prefabs/Main_Gauche.prefab et Prefabs/Main_Droite.prefab
     // à partir de la main de Quincy (Art/Quincy/FBX/Quincy_Main.fbx, découpée dans le personnage par decouper_main.py).
-    // Dans chaque prefab : le poignet à l'origine, les doigts vers +Z, le pouce vers +Y ; la main droite est
-    // la gauche en miroir (échelle X = -1). Le générateur pose les mains sur les manettes.
+    // Dans chaque prefab : le poignet à l'origine, les doigts vers +Z (vers l'avant de la manette), le dos de la
+    // main vers +Y (on voit le dos de la main, comme sa propre main) ; la main droite est la gauche en miroir
+    // (échelle X = -1). Réduite à HandScale : le gant de Quincy est fait pour un singe vu de loin, pas pour le casque.
     public static class HandSetup
     {
         const string HandModel = "Assets/_Project/Art/Quincy/FBX/Quincy_Main.fbx";
         const string LeftPath = "Assets/_Project/Prefabs/Main_Gauche.prefab";
         const string RightPath = "Assets/_Project/Prefabs/Main_Droite.prefab";
+        const float HandScale = 0.6f;
 
         [MenuItem("SAE/Préparer les mains")]
         public static void Setup()
@@ -42,12 +44,12 @@ namespace SAE.EditorTools
             var wrist = Find(model, "Poignet");
             var fingers = Find(model, "Doigts");
             var thumb = Find(model, "Pouce");
-            // On tourne le modèle pour que les doigts aillent vers +Z et le pouce vers +Y, puis le poignet à l'origine
+            // On tourne le modèle pour que les doigts aillent vers +Z et le dos de la main vers +Y
+            // (dans le modèle, le bras est tendu à l'horizontale, dos de la main vers le haut), puis le poignet à l'origine
             var fingerDir = Find(model, "Doigts_Bout").position - wrist.position;
-            var thumbDir = thumb.position - wrist.position;
-            model.transform.rotation = Quaternion.Inverse(Quaternion.LookRotation(fingerDir, thumbDir)) * model.transform.rotation;
+            model.transform.rotation = Quaternion.Inverse(Quaternion.LookRotation(fingerDir, Vector3.up)) * model.transform.rotation;
             model.transform.position -= wrist.position;
-            if (mirror) root.transform.localScale = new Vector3(-1f, 1f, 1f);
+            root.transform.localScale = new Vector3(mirror ? -HandScale : HandScale, HandScale, HandScale);
 
             var hand = root.AddComponent<AnimateHandOnInput>();
             hand.fingers = fingers;
