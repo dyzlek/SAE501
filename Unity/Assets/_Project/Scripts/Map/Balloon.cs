@@ -5,6 +5,7 @@ namespace SAE
 {
     // Un ballon suit la piste. Ses points de vie = ses couches (la couleur change à chaque couche perdue).
     // Cliquer dessus le touche : c'est la place de l'arc de Quincy en attendant la VR.
+    // Un boss est un gros ballon violet foncé, plus lent, avec beaucoup de couches.
     public class Balloon : MonoBehaviour, IClickable
     {
         public static readonly List<Balloon> All = new List<Balloon>();
@@ -16,6 +17,8 @@ namespace SAE
         };
 
         public float baseSpeed = 2.5f;
+        public float bossSpeedFactor = 0.6f;
+        static readonly Color BossColor = new Color(0.35f, 0.1f, 0.45f);
 
         WaveSpawner spawner;
         List<Vector3> path;
@@ -24,14 +27,17 @@ namespace SAE
         float slowFactor = 1f;
         float slowUntil;
         ColorTint tint;
+        bool boss;
 
         // Distance parcourue : les singes visent le ballon le plus avancé.
         public float Progress { get; private set; }
 
-        public string GetHint(Vector3 point) => $"Ballon ({Mathf.CeilToInt(hp)} couche(s)) : tirer";
+        public string GetHint(Vector3 point) => $"{(boss ? "BOSS" : "Ballon")} ({Mathf.CeilToInt(hp)} couche(s)) : tirer";
 
-        public void Init(WaveSpawner owner, List<Vector3> points, int layers)
+        public void Init(WaveSpawner owner, List<Vector3> points, int layers, bool isBoss = false)
         {
+            boss = isBoss;
+            if (boss) baseSpeed *= bossSpeedFactor;
             spawner = owner;
             path = points;
             hp = layers;
@@ -84,6 +90,7 @@ namespace SAE
 
         void UpdateColor()
         {
+            if (boss) { if (tint) tint.Set(BossColor); return; }
             int layer = Mathf.Clamp(Mathf.CeilToInt(hp) - 1, 0, layerColors.Length - 1);
             if (tint) tint.Set(layerColors[layer]);
         }

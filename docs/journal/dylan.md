@@ -36,7 +36,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
 ![Hub en cercle vu du dessus](../captures/hub-cercle-dessus.webp)
 
-**Ma deuxième analyse critique** _(notée, pas encore corrigée)_
+**Ma deuxième analyse critique** _(corrigée dans la foulée, à tester après avoir régénéré la scène)_
 1. **Un bouton pour lancer la vague à la main.** Le joueur décide quand il est prêt, au lieu que la vague parte toute seule.
 2. **Perdre une vague ne fait pas tout recommencer.** On reprend au début de la vague perdue, pas à la vague 1.
 3. **Un ou plusieurs boss à chaque vague** : des ballons plus gros que les autres.
@@ -52,6 +52,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude (Claude Code) | Corrections de mon analyse critique : hub agrandi (cercle de 4 m, sol 12 × 12 m, éléments espacés, boutons hors du passage) ; coffre qui dépend des vagues vaincues (prix 25 + 20 par vague, raretés débloquées par vague, 1 singe de plus toutes les 3 vagues) ; panneau des chances à côté du coffre ; bananes remises hors du bac si elles s'y coincent ; plus de textes sur les cubes de la bibliothèque ; textes du panneau du bananier agrandis | À tester |
 | Claude (Claude Code) | Hub refait d'après mon schéma : tout posé sur un cercle de 5 m (centre libre), plateau reculé sur le cercle devant avec JOUER/Vider à côté, bibliothèques courbes sur les côtés, bananier au fond avec une zone de chute des bananes devant lui, panier et caisse d'un côté, panneau d'amélioration et coffre de l'autre | À tester |
 | Claude (Claude Code) | Mise en forme de ma deuxième analyse critique (vague lancée à la main, reprise à la vague perdue, boss à chaque vague, raretés par paliers, blanc et arc-en-ciel absents du coffre, vies et vague retirées de l'écran) et ajout de mes 2 captures du hub en cercle ; rien de corrigé pour l'instant | Gardé |
+| Claude (Claude Code) | Corrections de ma deuxième analyse : bouton LANCER (hub et carte), la vague ne part plus toute seule ; vague perdue = on la recommence avec les vies du départ (singes et argent gardés) ; 1 boss par vague (+1 toutes les 5 vagues), gros ballon violet lent et solide ; coffre sans arc-en-ciel ni blanc (fusion seulement), raretés par paliers (Bleu 3, Violet 7, Jaune 12, Rouge 20 vagues) ; vies et vague retirées de l'écran, affichées sur un tableau au-dessus du plateau et sur la carte | À tester |
 
 ## Lun. 5 oct. 2026
 - **Fait :** création du dépôt GitHub, lecture des consignes, première analyse de l'idée et brouillon du GDD, test du prototype v2 et captures, **analyse critique du prototype (personnelle, pas encore discutée avec l'équipe)**, test et analyse des prototypes de Nicolas (coffres) et de Maxens (bananier), intégration des trois prototypes dans un seul projet (branche `feat/integration`).

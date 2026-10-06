@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Corriger ma deuxième analyse critique
+> Maintenant, essaie de résoudre tout ce que j'ai relevé.
+
 ### Deuxième analyse critique (à noter)
 > Ajoute que j'ai refait une analyse critique :
 > - il faut un bouton pour lancer la vague manuellement ;

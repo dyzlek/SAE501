@@ -8,6 +8,7 @@ namespace SAE
     // Panneau à côté du coffre : ce que le coffre peut donner, en direct.
     // Vagues vaincues, prix, nombre de singes par coffre, et la chance de chaque rareté (dans sa couleur).
     // Une rareté pas encore débloquée indique à partir de quelle vague elle le sera.
+    // L'arc-en-ciel et le blanc ne sortent jamais du coffre (fusion seulement).
     public class ChestOddsPanel : MonoBehaviour
     {
         public ChestController chest;
@@ -31,16 +32,17 @@ namespace SAE
             sb.AppendLine();
 
             var odds = chest.CurrentOdds();
-            for (int i = 0; i < RarityInfo.Count; i++)
+            for (int i = 0; i < chest.oddsSettings.unlockAtWave.Length; i++)
             {
                 var r = (ChestRarity)i;
                 string hex = ColorUtility.ToHtmlStringRGB(RarityInfo.ColorOf(r));
-                string name = r == ChestRarity.LGBT ? "Arc-en-ciel" : r.ToString();
+                string name = r.ToString();
                 if (ChestOdds.IsUnlocked(chest.oddsSettings, r, GameState.WavesWon))
                     sb.AppendLine($"<color=#{hex}>{name}</color>  {Percent(odds[i])}");
                 else
                     sb.AppendLine($"<color=#777777>{name}  dès la vague {chest.oddsSettings.unlockAtWave[i]}</color>");
             }
+            sb.AppendLine("<color=#AAAAAA>Arc-en-ciel et Blanc : fusion seulement</color>");
             text.text = sb.ToString().TrimEnd();
         }
 

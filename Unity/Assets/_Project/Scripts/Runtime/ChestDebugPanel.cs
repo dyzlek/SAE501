@@ -33,7 +33,7 @@ namespace Sae501.Coffres
             GUILayout.BeginArea(new Rect(10, 10, 330, 400), GUI.skin.box);
             GUILayout.Label("MENU BÊTA  (F1 pour fermer)");
             GUILayout.Label($"Argent : {SAE.Economy.Money}   (prix du coffre : {chest.Price})");
-            GUILayout.Label($"Vagues vaincues : {chest.Progress}  (gel des proba à {chest.oddsSettings.freezeAfterWaves})   Coffres ouverts : {chest.OpenedCount}");
+            GUILayout.Label($"Vagues vaincues : {chest.Progress}   Coffres ouverts : {chest.OpenedCount}");
 
             GUILayout.Space(6);
             var odds = chest.CurrentOdds();
@@ -41,7 +41,8 @@ namespace Sae501.Coffres
                 {
                 var r = (Rarity)i;
                 bool open = ChestOdds.IsUnlocked(chest.oddsSettings, r, chest.Progress);
-                GUILayout.Label(open ? $"{r} : {odds[i] * 100f:0.00} %" : $"{r} : verrouillé (dès la vague {chest.oddsSettings.unlockAtWave[i]})");
+                if (r == Rarity.LGBT) GUILayout.Label($"{r} : jamais au coffre (fusion seulement)");
+                else GUILayout.Label(open ? $"{r} : {odds[i] * 100f:0.00} %" : $"{r} : verrouillé (dès la vague {chest.oddsSettings.unlockAtWave[i]})");
             }
 
             GUILayout.Space(10);

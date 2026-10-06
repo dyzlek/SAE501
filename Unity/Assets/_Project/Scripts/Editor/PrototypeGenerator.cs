@@ -37,7 +37,8 @@ namespace SAE.EditorTools
             var mapSpawn = Spawn("Spawn Carte", MapCenter + new Vector3(0, 0, -MapLayout.HalfExtent - 3f));
 
             var mapRoot = BuildMap(hubSpawn);
-            var hub = BuildHub(mapRoot, mapSpawn);   // avant le joueur : l'installeur des bananes ajoute son TestSouris à Camera.main s'il en trouve une
+            var spawner = mapRoot.GetComponent<WaveSpawner>();
+            var hub = BuildHub(mapRoot, mapSpawn, spawner);   // avant le joueur : l'installeur des bananes ajoute son TestSouris à Camera.main s'il en trouve une
             var player = Player(hubSpawn.position);
             BuildChest(hub, Around(132f, Ring - 0.3f), player);
 
@@ -85,7 +86,7 @@ namespace SAE.EditorTools
             return player.transform;
         }
 
-        static void MakeActionCube(Transform parent, string name, Vector3 pos, float size, Color color,
+        static ActionCube MakeActionCube(Transform parent, string name, Vector3 pos, float size, Color color,
             string label, ActionCube.Action action, Transform destination, string hint)
         {
             var cube = Visuals.Solid(name, parent, pos, Vector3.one * size, color);
@@ -96,13 +97,39 @@ namespace SAE.EditorTools
             a.hint = hint;
             var text = Visuals.Label(cube.transform, label, new Vector3(0, 0.9f, 0), 0.12f);
             text.transform.localScale = Vector3.one / size; // le cube parent est mis à l'échelle : on compense
+            return a;
+        }
+
+        // Bouton LANCER : la vague ne part que quand le joueur appuie dessus.
+        static void MakeLaunchCube(Transform parent, Vector3 pos, float size, WaveSpawner spawner)
+        {
+            var a = MakeActionCube(parent, "Lancer la vague", pos, size, new Color(0.95f, 0.45f, 0.15f),
+                "LANCER", ActionCube.Action.StartWave, null, "Lancer la vague");
+            a.spawner = spawner;
+        }
+
+        // Tableau de la vague dans le décor (vague, vies, état) : remplace l'affichage à l'écran.
+        // Comme la caisse : panneau fixe, +Z local tourné à l'opposé du joueur, texte côté joueur.
+        static void BuildWaveBoard(Transform parent, Vector3 pos, Quaternion rotation, WaveSpawner spawner)
+        {
+            var root = new GameObject("Tableau de la vague").transform;
+            root.SetParent(parent, false);
+            root.SetPositionAndRotation(pos, rotation);
+            Visuals.Box("Cadre", root, Vector3.zero, new Vector3(1.2f, 0.6f, 0.06f), Wood);
+            Visuals.Box("Fond", root, new Vector3(0, 0, -0.035f), new Vector3(1.1f, 0.5f, 0.02f), new Color(0.12f, 0.1f, 0.08f));
+            var text = Visuals.Label(root, "", new Vector3(0, 0, -0.06f), 0.11f, new Color(1f, 0.9f, 0.6f));
+            Object.DestroyImmediate(text.GetComponent<Billboard>());
+            var board = root.gameObject.AddComponent<WaveBoard>();
+            board.spawner = spawner;
+            board.text = text;
         }
 
         // ---------------- HUB ----------------
         // Tout ce qui compte est disposé EN ROND autour du joueur (point d'apparition au centre, regard vers +Z),
         // chaque élément tourné vers lui :
         //   devant (0°)           : le plateau incliné (la carte en direct), reculé sur le cercle,
-        //                           avec JOUER (-20°) et Vider (+20°) de part et d'autre
+        //                           avec LANCER (-32°), JOUER (-20°) et Vider (+20°) de part et d'autre,
+        //                           et le tableau de la vague au-dessus
         //   côtés (±72°)          : les deux meubles de la bibliothèque, courbés le long du cercle
         //   derrière (180°)       : le bananier de Maxens (agrandi), sa zone de chute devant lui (-172°),
         //                           le panier (-150°) et la caisse (-140°), le panneau d'amélioration (160°)
@@ -121,7 +148,7 @@ namespace SAE.EditorTools
             return new Vector3(Mathf.Sin(a) * radius, height, Mathf.Cos(a) * radius);
         }
 
-        static Transform BuildHub(Transform mapRoot, Transform mapSpawn)
+        static Transform BuildHub(Transform mapRoot, Transform mapSpawn, WaveSpawner spawner)
         {
             var env = new GameObject("Hub").transform;
             Visuals.Solid("Sol", env, new Vector3(0, -0.05f, 0), new Vector3(15, 0.1f, 15), Floor);
@@ -132,6 +159,10 @@ namespace SAE.EditorTools
                 "JOUER", ActionCube.Action.Teleport, mapSpawn, "Aller sur la carte");
             MakeActionCube(env, "Vider", Around(20f, Ring - 0.5f, 0.9f), 0.25f, new Color(0.6f, 0.6f, 0.6f),
                 "Vider", ActionCube.Action.ClearBoard, null, "Vider le plateau");
+            // LANCER à côté de JOUER (on peut lancer depuis le hub et regarder la vague sur le plateau),
+            // et le tableau de la vague au-dessus du plateau
+            MakeLaunchCube(env, Around(-32f, Ring - 0.5f, 1.0f), 0.3f, spawner);
+            BuildWaveBoard(env, Around(0f, Ring + 0.1f, 2.1f), Quaternion.identity, spawner);
 
             // Sur les côtés : les deux meubles de la bibliothèque, qui suivent le cercle (4 types + 3 types)
             BuildShelf(env, "Bibliotheque gauche", -72f, 0, 4);
@@ -444,7 +475,7 @@ namespace SAE.EditorTools
             BuildGrid(map.transform, MapLayout.Tile, 0.5f, true);
             map.AddComponent<TowerManager>();
             map.AddComponent<PlacementSurface>().scale = 1f; // prendre / poser / fusionner directement sur la carte
-            map.AddComponent<WaveSpawner>();
+            var spawner = map.AddComponent<WaveSpawner>();
 
             float edge = MapLayout.HalfExtent;
             Visuals.Solid("Estrade", map.transform, new Vector3(0, -0.25f, -edge - 2.5f), new Vector3(8, 0.5f, 5), Floor);
@@ -452,6 +483,8 @@ namespace SAE.EditorTools
 
             MakeActionCube(map.transform, "Retour hub", new Vector3(3f, 0.9f, -edge - 2f), 0.6f, new Color(0.3f, 0.5f, 1f),
                 "HUB", ActionCube.Action.Teleport, hubSpawn, "Retour au hub");
+            MakeLaunchCube(map.transform, new Vector3(-3f, 0.9f, -edge - 2f), 0.6f, spawner);
+            BuildWaveBoard(map.transform, map.transform.position + new Vector3(0, 2.4f, -edge - 0.3f), Quaternion.identity, spawner);
             return map.transform;
         }
     }
