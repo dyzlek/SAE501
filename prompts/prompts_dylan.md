@@ -4,6 +4,15 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Deuxième analyse critique (à noter)
+> Ajoute que j'ai refait une analyse critique :
+> - il faut un bouton pour lancer la vague manuellement ;
+> - si on perd une vague, on ne recommence pas de zéro, mais à partir de cette vague ;
+> - à chaque vague, il y aura un ou plusieurs boss (des ballons plus gros) ;
+> - les raretés plus élevées du coffre se débloqueront plus tard, par exemple après la vague 20, etc. ;
+> - on ne peut pas obtenir les singes blancs et arc-en-ciel dans le coffre ;
+> - le nombre de vies restantes et la vague actuelle ne doivent pas être affichés à l'écran, car une interface à l'écran en VR donne la nausée.
+
 ### Hub en vrai cercle, d'après mon schéma
 > C'est plus espacé, mais pas assez. J'ai dessiné une idée : que tout suive vraiment un cercle. Recule le plateau et reprends mon schéma (avec plus d'espace) : le plateau devant avec JOUER à côté, les deux bibliothèques sur les côtés, le coffre, le bananier au fond avec le panier à côté, et une zone où tombent les bananes.
 

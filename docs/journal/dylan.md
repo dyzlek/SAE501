@@ -30,6 +30,14 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 - Le cube « Vider » et le pied du plateau gênent le passage devant le joueur.
 - Les vies et la vague sont encore affichées à l'écran (prévu avec le chantier D).
 
+**Ma deuxième analyse critique** _(notée, pas encore corrigée)_
+1. **Un bouton pour lancer la vague à la main.** Le joueur décide quand il est prêt, au lieu que la vague parte toute seule.
+2. **Perdre une vague ne fait pas tout recommencer.** On reprend au début de la vague perdue, pas à la vague 1.
+3. **Un ou plusieurs boss à chaque vague** : des ballons plus gros que les autres.
+4. **Les raretés élevées du coffre se débloquent plus tard**, par paliers de vagues (par exemple après la vague 20, etc.).
+5. **Les singes blancs et arc-en-ciel ne sortent jamais du coffre.**
+6. **Plus de vies ni de numéro de vague affichés à l'écran** : une interface collée au visage en VR donne la nausée. Ces informations doivent se lire dans le décor.
+
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
@@ -37,6 +45,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude (Claude Code) | Mise en forme de mon analyse critique du hub et ajout de mes captures (rien de corrigé pour l'instant, à ma demande) | Gardé |
 | Claude (Claude Code) | Corrections de mon analyse critique : hub agrandi (cercle de 4 m, sol 12 × 12 m, éléments espacés, boutons hors du passage) ; coffre qui dépend des vagues vaincues (prix 25 + 20 par vague, raretés débloquées par vague, 1 singe de plus toutes les 3 vagues) ; panneau des chances à côté du coffre ; bananes remises hors du bac si elles s'y coincent ; plus de textes sur les cubes de la bibliothèque ; textes du panneau du bananier agrandis | À tester |
 | Claude (Claude Code) | Hub refait d'après mon schéma : tout posé sur un cercle de 5 m (centre libre), plateau reculé sur le cercle devant avec JOUER/Vider à côté, bibliothèques courbes sur les côtés, bananier au fond avec une zone de chute des bananes devant lui, panier et caisse d'un côté, panneau d'amélioration et coffre de l'autre | À tester |
+| Claude (Claude Code) | Mise en forme de ma deuxième analyse critique (vague lancée à la main, reprise à la vague perdue, boss à chaque vague, raretés par paliers, blanc et arc-en-ciel absents du coffre, vies et vague retirées de l'écran) ; rien de corrigé pour l'instant | Gardé |
 
 ## Lun. 5 oct. 2026
 - **Fait :** création du dépôt GitHub, lecture des consignes, première analyse de l'idée et brouillon du GDD, test du prototype v2 et captures, **analyse critique du prototype (personnelle, pas encore discutée avec l'équipe)**, test et analyse des prototypes de Nicolas (coffres) et de Maxens (bananier), intégration des trois prototypes dans un seul projet (branche `feat/integration`).
