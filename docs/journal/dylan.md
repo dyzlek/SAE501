@@ -2,6 +2,59 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Mar. 6 oct. 2026
+- **Fait :**
+  - remarque de départ : le palmier de Maxens est trop petit dans le hub, il faut l'agrandir (fait : ×1,6) ;
+  - chantier A, **une seule économie avec de vrais coûts** (branche `feat/economie`), sans aucun affichage collé à l'écran, parce qu'en VR ça donne le vertige. Tout se lit dans le décor du hub :
+    - une **caisse** en bois avec l'argent total, dont le chiffre défile et qui clignote vert ou rouge ;
+    - des « +5 » / « −25 » qui flottent là où l'argent bouge ;
+    - un **panneau d'amélioration** du bananier avec 3 gros boutons ;
+    - le **prix du coffre**, affiché au-dessus de lui.
+- **Bloque :** —
+- **Demain :** _
+
+**Captures de l'économie dans le hub**
+
+![Hub avec la caisse, le panneau du bananier et le coffre](../captures/economie-hub-vue.webp)
+
+![Hub vu du dessus](../captures/economie-hub-dessus.webp)
+
+**Mon analyse critique** _(corrigée dans la foulée, à tester)_
+1. **Le hub est trop petit.** On est trop serré, les éléments sont les uns devant les autres : c'est compliqué de circuler et d'utiliser les objets.
+2. **Le prix et la qualité du coffre doivent dépendre des vagues vaincues.** Plus on bat de vagues, plus le coffre est cher, mais plus il est intéressant : il donne plus de singes et de meilleur niveau.
+3. **Afficher les probabilités de drop** du coffre (chances par rareté), et les informations qui vont avec.
+4. **Les bananes ne doivent plus traverser le bananier.** Aujourd'hui, elles peuvent passer à travers et rester cachées autour, à des endroits inaccessibles.
+
+**Autres points vus sur les captures** _(notés par l'IA)_
+- Les textes au-dessus des cubes de la bibliothèque se chevauchent encore (CA5, CA6…), et ceux des boutons du panneau BANANIER sont trop petits pour être lus.
+- Le cube « Vider » et le pied du plateau gênent le passage devant le joueur.
+- Les vies et la vague sont encore affichées à l'écran (prévu avec le chantier D).
+
+**Captures du hub en cercle** (base de ma deuxième analyse)
+
+![Hub en cercle, vue joueur : vies et vague encore affichées en haut à gauche](../captures/hub-cercle-vue.webp)
+
+![Hub en cercle vu du dessus](../captures/hub-cercle-dessus.webp)
+
+**Ma deuxième analyse critique** _(corrigée dans la foulée, à tester après avoir régénéré la scène)_
+1. **Un bouton pour lancer la vague à la main.** Le joueur décide quand il est prêt, au lieu que la vague parte toute seule.
+2. **Perdre une vague ne fait pas tout recommencer.** On reprend au début de la vague perdue, pas à la vague 1.
+3. **Un ou plusieurs boss à chaque vague** : des ballons plus gros que les autres.
+4. **Les raretés élevées du coffre se débloquent plus tard**, par paliers de vagues (par exemple après la vague 20, etc.).
+5. **Les singes blancs et arc-en-ciel ne sortent jamais du coffre.**
+6. **Plus de vies ni de numéro de vague affichés à l'écran** : une interface collée au visage en VR donne la nausée. Ces informations doivent se lire dans le décor.
+
+### IA
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | Économie unique (`Economy`) : bananes et vagues rapportent, coffre et améliorations coûtent ; `Wallet` et pont supprimés ; caisse dans le décor, « +/− » flottants, panneau d'amélioration du bananier (3 boutons qui s'enfoncent, vert si payable), prix du coffre qui augmente (25, +30 % par coffre) et affiché au-dessus ; argent retiré de l'affichage écran ; palmier ×1,6 ; coin « économie » réorganisé derrière le joueur | À tester |
+| Claude (Claude Code) | Mise en forme de mon analyse critique du hub et ajout de mes captures (rien de corrigé pour l'instant, à ma demande) | Gardé |
+| Claude (Claude Code) | Corrections de mon analyse critique : hub agrandi (cercle de 4 m, sol 12 × 12 m, éléments espacés, boutons hors du passage) ; coffre qui dépend des vagues vaincues (prix 25 + 20 par vague, raretés débloquées par vague, 1 singe de plus toutes les 3 vagues) ; panneau des chances à côté du coffre ; bananes remises hors du bac si elles s'y coincent ; plus de textes sur les cubes de la bibliothèque ; textes du panneau du bananier agrandis | À tester |
+| Claude (Claude Code) | Hub refait d'après mon schéma : tout posé sur un cercle de 5 m (centre libre), plateau reculé sur le cercle devant avec JOUER/Vider à côté, bibliothèques courbes sur les côtés, bananier au fond avec une zone de chute des bananes devant lui, panier et caisse d'un côté, panneau d'amélioration et coffre de l'autre | À tester |
+| Claude (Claude Code) | Mise en forme de ma deuxième analyse critique (vague lancée à la main, reprise à la vague perdue, boss à chaque vague, raretés par paliers, blanc et arc-en-ciel absents du coffre, vies et vague retirées de l'écran) et ajout de mes 2 captures du hub en cercle ; rien de corrigé pour l'instant | Gardé |
+| Claude (Claude Code) | Corrections de ma deuxième analyse : bouton LANCER (hub et carte), la vague ne part plus toute seule ; vague perdue = on la recommence avec les vies du départ (singes et argent gardés) ; 1 boss par vague (+1 toutes les 5 vagues), gros ballon violet lent et solide ; coffre sans arc-en-ciel ni blanc (fusion seulement), raretés par paliers (Bleu 3, Violet 7, Jaune 12, Rouge 20 vagues) ; vies et vague retirées de l'écran, affichées sur un tableau au-dessus du plateau et sur la carte | Gardé (testé et validé par moi) |
+| Claude (Claude Code) | Scène régénérée commitée, branche `feat/economie` poussée et fusionnée dans `main` par Pull Request (pas de remplacement forcé de main : `main` était déjà contenu dans la branche, rien n'est perdu) | Gardé |
+
 ## Lun. 5 oct. 2026
 - **Fait :** création du dépôt GitHub, lecture des consignes, première analyse de l'idée et brouillon du GDD, test du prototype v2 et captures, **analyse critique du prototype (personnelle, pas encore discutée avec l'équipe)**, test et analyse des prototypes de Nicolas (coffres) et de Maxens (bananier), intégration des trois prototypes dans un seul projet (branche `feat/integration`).
 - **Bloque :** —
@@ -83,3 +136,5 @@ On garde de cet essai le plateau incliné, mais pas la bibliothèque : on revien
 | Claude (Claude Code) | Suppression des scènes de test de Nicolas et Maxens (`Sandbox/`) et des anciennes scènes `Hub.unity` / `Map.unity` (prototype v1) : il ne reste que `Jeu.unity` | Gardé |
 | Claude (Claude Code) | Ajout de mes captures de l'intégration dans le journal général | Gardé |
 | Claude (Claude Code) | Corrections du hub intégré : bibliothèques courbes qui suivent le cercle (lisibles depuis le centre, textes qui ne se chevauchent plus), coffre qui se tourne automatiquement vers le joueur, panier écarté du bananier | À tester |
+| Claude (Claude Code) | Fusion de `feat/integration` dans `main` (PR #3), sans relecture de Maxens et Nicolas, à ma demande ; PR #2 fermée | Gardé |
+| Claude (Claude Code) | Plan du mardi 6 oct. dans le journal général : points à harmoniser, chantiers A (économie), B (inventaire), D (vagues), E (VR) | Gardé |

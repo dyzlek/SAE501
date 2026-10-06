@@ -2,7 +2,51 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Mar. 6 oct. 2026
+
+### Corriger ma deuxième analyse critique
+> Maintenant, essaie de résoudre tout ce que j'ai relevé.
+
+### Deuxième analyse critique (à noter)
+> Ajoute que j'ai refait une analyse critique :
+> - il faut un bouton pour lancer la vague manuellement ;
+> - si on perd une vague, on ne recommence pas de zéro, mais à partir de cette vague ;
+> - à chaque vague, il y aura un ou plusieurs boss (des ballons plus gros) ;
+> - les raretés plus élevées du coffre se débloqueront plus tard, par exemple après la vague 20, etc. ;
+> - on ne peut pas obtenir les singes blancs et arc-en-ciel dans le coffre ;
+> - le nombre de vies restantes et la vague actuelle ne doivent pas être affichés à l'écran, car une interface à l'écran en VR donne la nausée.
+
+### Hub en vrai cercle, d'après mon schéma
+> C'est plus espacé, mais pas assez. J'ai dessiné une idée : que tout suive vraiment un cercle. Recule le plateau et reprends mon schéma (avec plus d'espace) : le plateau devant avec JOUER à côté, les deux bibliothèques sur les côtés, le coffre, le bananier au fond avec le panier à côté, et une zone où tombent les bananes.
+
+### Analyse critique du hub (à noter, pas encore à corriger)
+> Note mon analyse critique, je te dirai quand tout corriger :
+> - le hub est trop petit : on est serré, les éléments sont les uns devant les autres, c'est difficile de circuler et d'utiliser les objets ;
+> - le coffre doit devenir plus cher en fonction des vagues vaincues, mais aussi meilleur : plus de singes, et de meilleur niveau ;
+> - je veux voir les probabilités de drop ;
+> - les bananes ne doivent pas traverser le bananier, sinon elles restent cachées à des endroits inaccessibles.
+
+Suite : « Ne pousse pas, et corrige tout ce que j'ai relevé pour le moment. »
+
+### Économie unique, sans interface à l'écran
+> On est le 6. Pour commencer, il faudrait agrandir l'asset du palmier. Ensuite, réalise quelque chose de stylé pour le chantier A (une seule économie avec de vrais coûts) :
+> - une seule bourse, `GameState.Money` : on supprime le `Wallet` du coffre et le pont entre les deux ;
+> - le coffre coûte de l'argent, avec un prix qui augmente ;
+> - améliorer le bananier coûte de l'argent, avec un panneau d'amélioration près de l'arbre et 3 boutons à appuyer ;
+> - ce qui rapporte : les bananes et chaque vague finie, pas les ballons éclatés ;
+> - l'argent est affiché dans le décor, près du panier.
+>
+> Je ne veux pas d'interface à l'écran pour la suite, parce qu'en VR ça donne le vertige : dans le hub, on doit pouvoir voir l'argent total et le reste directement dans le décor.
+
 ## Lun. 5 oct. 2026
+
+### Plan du lendemain
+> Planifie ce qu'il faut faire demain. Objectif du prototype : pouvoir y jouer normalement avec les mécaniques de base (poser des singes, les fusionner en VR, obtenir des singes, améliorer le bananier, récupérer des bananes…). Il faut relier tout ce qu'on a fait : un vrai système d'économie, un vrai inventaire, une meilleure lisibilité, un meilleur système de vagues, et commencer l'arme.
+
+Suite : « Ajoute dans le journal général ce qu'il faut faire aujourd'hui : les points à harmoniser (raretés, prix, sens de "drop") et les chantiers A, B, D et E. »
+
+### Fusion dans main
+> Tu peux mettre l'intégration directement sur `main`.
 
 ### Corriger les défauts du hub intégré
 > Avant de proposer la fusion dans `main`, corrige les trois défauts visibles sur mes captures : la bibliothèque de gauche vue de travers, le coffre qui n'est pas tourné vers le joueur, et le panier collé au bananier.

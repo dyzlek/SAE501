@@ -63,7 +63,7 @@ namespace Sae501.Coffres
 
             if (showHint)
             {
-                label.text = $"[{keyLabel}]  Ouvrir le coffre";
+                label.text = $"[{keyLabel}]  Ouvrir le coffre : {chest.Price}";
                 label.color = Color.white;
             }
             canvasRoot.SetActive(showError || showHint);

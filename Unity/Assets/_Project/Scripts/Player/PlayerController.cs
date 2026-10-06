@@ -115,8 +115,8 @@ namespace SAE
             if (Target != null)
                 GUI.Label(new Rect(center.x + 15, center.y - 10, 500, 25), Target.GetHint(AimPoint));
 
-            var held = GameState.Held.HasValue ? GameState.Held.Value.ToString() : "rien";
-            GUI.Label(new Rect(10, 10, 600, 25), $"En main : {held}    Argent : {GameState.Money}");
+            // Pas d'interface collée à l'écran (en VR ça donne le vertige) : l'argent est sur la caisse du hub,
+            // le singe tenu est visible dans la main. Seuls restent le viseur et l'aide, pour tester sans casque.
             GUI.Label(new Rect(10, Screen.height - 30, 900, 25),
                 "ZQSD : marcher · Souris : regarder · Clic gauche : interagir · Clic droit : lâcher · Échap : souris");
         }
