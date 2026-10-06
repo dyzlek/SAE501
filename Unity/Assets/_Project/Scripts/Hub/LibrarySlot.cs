@@ -76,12 +76,22 @@ namespace SAE
                 Destroy(token.gameObject);
                 token = null;
             }
+            UpdateCollider();
+        }
+
+        // La boîte de la case englobe le singe posé : le rayon s'y arrêterait sans jamais toucher le singe à saisir.
+        // On la coupe tant qu'un singe est posé (la fiche marche quand même : le singe est enfant de la case).
+        void UpdateCollider()
+        {
+            var box = GetComponent<Collider>();
+            if (box) box.enabled = !token;
         }
 
         // Appelé quand on prend le singe posé : il n'appartient plus à la case (elle en posera un autre).
         public void Detach(MonkeyToken taken)
         {
             if (token == taken) token = null;
+            UpdateCollider();
         }
 
         // La fiche s'affiche au-dessus de la case, même vide (on voit ce que vaut un singe avant de l'avoir).
