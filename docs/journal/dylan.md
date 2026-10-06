@@ -101,6 +101,7 @@ Le hub était plus espacé, mais pas encore assez. J'ai dessiné une disposition
 | Claude (Claude Code) | Retouches du récolteur : tête plus grosse (×1,4), fléchette retirée ; panier avancé vers le centre (−156°, 3,7 m), loin de la table et de la caisse (générateur + déplacement au lancement pour la scène actuelle) | À tester |
 | Claude (Claude Code) | Récolteur plus drôle : beaucoup plus lent de base (0,25 m/s, jusqu'à 1,05) ; panier éloigné vers le plateau (−160°, 2 m du centre) ; 20 % de dunks (grand saut, banane écrasée dans le panier, tour sur lui-même bras levés), 25 % de lancers ratés (la banane tombe à côté, il secoue la tête et tape du pied, la ramasse et retente) | À tester |
 | Claude (Claude Code) | Panier déplacé à côté du plateau des singes (+32°, après « Vider ») ; le récolteur va aussi chercher les bananes que le joueur a lâchées ailleurs (par terre, sur un meuble), une fois immobiles | À tester |
+| Claude (Claude Code) | Branche de test `test/cabane` : le hub devient une cabane en bois fermée (12 murs en planches, poteaux, plafond à poutres, lampe), avec un tapis rond au centre ; tout est resserré (cercle de 5 m → 3,5 m, angles réajustés) pour que tout soit proche en VR. Mesures partagées dans `HubLayout` | À tester |
 | Claude (Claude Code) | Ajout de mes 3 captures du singe récolteur dans ce journal (converties en .webp dans `docs/captures/`), puis la vue du dessus du hub | Gardé |
 
 ## Lun. 5 oct. 2026
