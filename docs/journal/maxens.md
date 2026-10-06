@@ -113,6 +113,12 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
   - **le tir en VR ne marchait pas dans le simulateur** : la flèche apparaissait puis disparaissait. Le tir VR suit le vrai geste (on attrape la corde et on recule la main) ; dans le simulateur, la main ne recule pas quand on tient le bouton, donc la tension restait à 0 et la flèche était rangée au lâcher. **Sans casque, la tension monte maintenant toute seule** tant qu'on garde le bouton (1 s pour tendre à fond), comme le clic droit du mode PC ; avec un vrai casque, c'est toujours le geste de la main ;
   - **les mains se fermaient trop peu** pour qu'on le voie : 60° pour les doigts et 30° pour le pouce maintenant que l'axe est le bon ;
   - **les mains se fermaient sans qu'on le voie** (2e retour) : on voyait le poignet de face et les doigts étaient cachés derrière. Les mains sont maintenant **tournées dos de la main vers le haut** (comme sa propre main), **réduites à 60 %**, et les doigts se replient vers la paume ;
+  - **tenue de l'arc** (3e retour, quand tout le reste était bon) :
+    - les mains sont **inclinées de 35°**, pouce relevé, comme quand on tient vraiment les manettes (avant : paume à plat, pas naturel) ;
+    - **la main gauche tient l'arc sur le côté** : la poignée est décalée de 7 cm vers l'intérieur de la main, la flèche passe à côté de la main et plus au travers ;
+    - **la main droite s'accroche à la corde** pendant la tension : le bout de ses doigts est collé à l'encoche et suit la corde quand elle recule, puis la main revient sur la manette après le tir (`VRArcher.HoldString`).
+
+    ![Main droite sur la corde, main gauche sur le côté de l'arc](../captures/maxens-arc-mains.png)
   - **l'arc cache la vue dans le simulateur** : le simulateur tient les manettes à 30 cm du visage. Au casque, le bras est tendu (60-70 cm), l'arc est donc plus loin et plus petit à l'écran. À vérifier au casque avant de le réduire encore.
 
 **Captures** (bibliothèque avec les singes 3D et leur aura, et singe tenu en main) :
@@ -150,6 +156,8 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Mains inclinées (pouce relevé), arc tenu sur le côté de la main gauche, main droite collée à la corde pendant la tension ; testé en Play | À tester au casque |
+| Claude (Code) | Mains tournées dos vers le haut, plus petites, doigts repliés vers la paume | Gardé |
 | Claude (Code) | Tir VR utilisable dans le simulateur (tension au temps sans casque, geste de la main avec casque), mains qui se ferment davantage | À tester au casque |
 | Claude (Code) | Retour à la main simple de Quincy, fermeture corrigée (bon axe, pliage léger) ; singe tenu devant la main gardé | À tester au casque |
 | Claude (Code) | Nouvelles mains de Quincy modélisées et riggées par script Blender (2 phalanges par doigt), pliage phalange par phalange, singe tenu devant la main ; testé en Play | Mains jetées (pas dans le style), singe devant la main gardé |

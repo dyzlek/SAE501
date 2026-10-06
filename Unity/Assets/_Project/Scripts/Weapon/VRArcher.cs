@@ -14,13 +14,15 @@ namespace SAE
     {
         public Bow bow;
         public Transform drawHand;
+        public AnimateHandOnInput drawHandVisual;   // la main de Quincy qui tire : collée à la corde pendant la tension
         public InputActionProperty drawGrip;      // XRI Right Interaction/Select Value : le grip de la main qui tire
         public InputActionProperty drawTrigger;   // XRI Right Interaction/Activate Value : la gâchette marche aussi
         public float grabRadius = 0.4f;           // distance main-corde pour attraper la corde, en mètres (large : pas besoin de viser)
         public float simulatorDrawTime = 1f;      // sans casque : secondes pour tendre l'arc à fond
 
         bool drawing;
-        bool simulated;                           // pas de vrai casque : c'est le simulateur XR qui bouge les manettes
+        bool simulated;
+        Vector3 handRestPosition;                 // place de la main sur la manette, pour l'y remettre après le tir                           // pas de vrai casque : c'est le simulateur XR qui bouge les manettes
 
         // Aucun casque n'a démarré (OpenXR sans « loader » actif) : on est dans le simulateur
         void Start() => simulated = !XRGeneralSettings.Instance || !XRGeneralSettings.Instance.Manager.activeLoader;
@@ -39,6 +41,7 @@ namespace SAE
             if (!drawing && pressed && Vector3.Distance(drawHand.position, bow.NockPoint) < grabRadius)
             {
                 drawing = true;
+                if (drawHandVisual) handRestPosition = drawHandVisual.transform.localPosition;
                 bow.Nock();
                 PlayerRig.Buzz(drawHand, 0.3f);
             }
@@ -46,14 +49,23 @@ namespace SAE
             {
                 float tension = simulated ? bow.Draw + Time.deltaTime / simulatorDrawTime : bow.TensionFor(drawHand.position);
                 bow.SetDraw(tension);
+                HoldString();
                 PlayerRig.Buzz(drawHand, 0.05f * bow.Draw, 0.02f);   // la corde « tire » de plus en plus dans la main
             }
             else if (drawing)
             {
                 drawing = false;
+                if (drawHandVisual) drawHandVisual.transform.localPosition = handRestPosition;
                 bow.Release(bow.ShootDirection);
                 PlayerRig.Buzz(drawHand, 0.8f, 0.1f);
             }
+        }
+
+        // La main de Quincy pince la corde : on la déplace pour que le bout de ses doigts soit sur l'encoche.
+        void HoldString()
+        {
+            if (!drawHandVisual) return;
+            drawHandVisual.transform.position += bow.NockPoint - drawHandVisual.fingersTip.position;
         }
 
         static float Read(InputActionProperty input) => input.action != null ? input.action.ReadValue<float>() : 0f;

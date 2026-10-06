@@ -4,6 +4,12 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mar. 6 oct. 2026
 
+### Tenue de l'arc
+> C'est parfait. Deux améliorations : quand on tient les manettes, les mains sont paume vers le bas, ce qui n'est pas naturel ; il faudrait les incliner un peu, comme sur la capture. Ensuite, la main gauche devrait tenir l'arc sur le côté : aujourd'hui elle est au milieu, et la flèche passe à travers. Enfin, la main droite devrait être accrochée à la corde : il reste un espace entre les deux.
+
+### Les mains doivent se voir se fermer
+> Voici une capture main ouverte et une capture main fermée : on ne voit presque aucune différence.
+
 ### Tir VR et mains
 > Les mains ne se ferment pas, et l'arc ne rend pas bien. Surtout : en mode PC le tir fonctionne, mais pas en VR. Quand je clique, la flèche apparaît puis disparaît. Comment as-tu conçu le système de tir en VR ?
 
