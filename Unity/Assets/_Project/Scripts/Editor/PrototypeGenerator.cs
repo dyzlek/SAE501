@@ -41,6 +41,12 @@ namespace SAE.EditorTools
             CabinArt.Build();   // la texture de bois des meubles du hub (la cabane elle-même vient de Blender)
 
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+            // Une brume légère au loin : les montagnes s'estompent dans le ciel, on sent la profondeur
+            RenderSettings.fog = true;
+            RenderSettings.fogMode = FogMode.Linear;
+            RenderSettings.fogStartDistance = 60f;
+            RenderSettings.fogEndDistance = 230f;
+            RenderSettings.fogColor = new Color(0.72f, 0.82f, 0.93f);
             var defaultCam = GameObject.FindWithTag("MainCamera");
             if (defaultCam) Object.DestroyImmediate(defaultCam); // la caméra est celle du joueur
 
@@ -53,6 +59,7 @@ namespace SAE.EditorTools
             var player = Player(hubSpawn.position);
             if (!player) return;
             BuildChest(hub, Around(100f, Ring - 0.2f), player.head);
+            UseWoodTexture(hub);   // encore une fois : l'estrade et le cadre du coffre sont posés après le reste du hub
             BuildPlayerMode(player.gameObject, DesktopPlayerObject(hubSpawn.position));
 
             EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), ScenePath);
@@ -202,25 +209,60 @@ namespace SAE.EditorTools
             area.interactionLayers = 1 << VRSetup.TeleportLayer;
         }
 
+        // Borne de commande en bois (même style que la cabane) : un socle, un poteau, une platine avec un gros bouton rond
+        // cerclé de laiton, et une plaque en bois avec le nom écrit en grand. Le bouton (ActionCube) s'enfonce avec la main
+        // ou se vise avec le rayon. pos : où poser la borne (on garde x et z, elle est posée au sol).
+        // yaw : null = tournée vers le centre du hub ; sinon l'angle voulu (sur la carte, 0 = face au joueur de l'estrade).
+        static readonly Color Brass = new Color(0.85f, 0.65f, 0.25f);
+        static readonly Color SignText = new Color(1f, 0.93f, 0.75f);
+
         static ActionCube MakeActionCube(Transform parent, string name, Vector3 pos, float size, Color color,
-            string label, ActionCube.Action action, Transform destination)
+            string label, ActionCube.Action action, Transform destination, float? yaw = null)
         {
-            var cube = Visuals.Solid(name, parent, pos, Vector3.one * size, color);
-            cube.tag = Tags.Bouton;
-            var a = cube.AddComponent<ActionCube>();
-            cube.AddComponent<RayPress>();   // on peut aussi l'enfoncer de loin, en le visant
+            var root = new GameObject($"Borne {name}").transform;
+            root.SetParent(parent, false);
+            root.localPosition = new Vector3(pos.x, 0f, pos.z);
+            root.localRotation = Quaternion.Euler(0, yaw ?? AngleOf(pos), 0);   // +Z local = à l'opposé du joueur
+
+            const float Top = 0.95f;                    // hauteur de la platine : le bouton tombe sous la main
+            float plate = Mathf.Max(0.38f, size * 0.95f + 0.1f);
+            Visuals.Solid("Socle", root, new Vector3(0, 0.03f, 0), new Vector3(plate - 0.04f, 0.06f, plate - 0.04f), Wood);
+            Visuals.Solid("Poteau", root, new Vector3(0, Top / 2f, 0), new Vector3(0.14f, Top - 0.06f, 0.14f), Wood);
+            Visuals.Solid("Platine", root, new Vector3(0, Top - 0.03f, 0), new Vector3(plate, 0.06f, plate), Wood);
+            var cylinder = Resources.GetBuiltinResource<Mesh>("Cylinder.fbx");
+            var ring = Visuals.Box("Bague", root, new Vector3(0, Top + 0.01f, 0), new Vector3(size * 0.95f, 0.01f, size * 0.95f), Brass);
+            ring.GetComponent<MeshFilter>().sharedMesh = cylinder;
+
+            var button = Visuals.Box(name, root, new Vector3(0, Top + 0.04f, 0), new Vector3(size * 0.75f, 0.03f, size * 0.75f), color);
+            button.GetComponent<MeshFilter>().sharedMesh = cylinder;
+            var col = button.AddComponent<BoxCollider>();
+            col.size = new Vector3(1.3f, 4f, 1.3f);     // un peu plus grand que le bouton : facile à toucher du bout de la manette
+            button.tag = Tags.Bouton;
+            var a = button.AddComponent<ActionCube>();
+            button.AddComponent<RayPress>();             // on peut aussi l'enfoncer de loin, en le visant
             a.action = action;
             a.destination = destination;
-            var text = Visuals.Label(cube.transform, label, new Vector3(0, 1.3f, 0), 0.12f);   // bien au-dessus : on voit le cube d'en haut
-            text.transform.localScale = Vector3.one / size; // le cube parent est mis à l'échelle : on compense
+
+            // Plaque au-dessus, côté mur, sur deux montants : le nom se lit de loin, sans cacher le bouton
+            var rows = label.Split('\n');
+            float charSize = rows.Length > 1 ? 0.06f : 0.075f;    // deux lignes : un peu plus petit
+            int longest = 0;
+            foreach (var row in rows) longest = Mathf.Max(longest, row.Length);
+            float signW = Mathf.Max(0.46f, longest * charSize * 0.85f + 0.08f);   // la plaque s'adapte au texte
+            float signH = 0.08f + charSize * 1.2f * rows.Length, signY = Top + 0.3f + signH / 2f;
+            for (int sx = -1; sx <= 1; sx += 2)
+                Visuals.Box("Montant", root, new Vector3(sx * 0.15f, (Top + signY) / 2f, plate / 2f - 0.03f), new Vector3(0.03f, signY - Top, 0.03f), Wood);
+            Visuals.Box("Plaque", root, new Vector3(0, signY, plate / 2f - 0.03f), new Vector3(signW, signH, 0.03f), Wood);
+            var text = Visuals.Label(root, label, new Vector3(0, signY, plate / 2f - 0.05f), charSize, SignText);
+            Object.DestroyImmediate(text.GetComponent<Billboard>());
             return a;
         }
 
         // Bouton LANCER : la vague ne part que quand le joueur appuie dessus.
-        static void MakeLaunchCube(Transform parent, Vector3 pos, float size, WaveSpawner spawner)
+        static void MakeLaunchCube(Transform parent, Vector3 pos, float size, WaveSpawner spawner, float? yaw = null)
         {
             var a = MakeActionCube(parent, "Lancer la vague", pos, size, new Color(0.95f, 0.45f, 0.15f),
-                "LANCER", ActionCube.Action.StartWave, null);
+                "LANCER", ActionCube.Action.StartWave, null, yaw);
             a.spawner = spawner;
         }
 
@@ -244,7 +286,7 @@ namespace SAE.EditorTools
         // Le hub est une cabane en rondins (voir BuildCabin). Tout est posé EN ROND contre les murs, tourné vers le joueur
         // qui se tient au centre, sur le tapis (point d'apparition, regard vers +Z). Cercle de 2,8 m : un ou deux pas suffisent.
         //   devant (0°)        : le plateau incliné (la carte en direct), le tableau de la vague au mur au-dessus,
-        //                        LANCER (-41°), JOUER (-30°), Vider (+30°) et le panier (+42°)
+        //                        LANCER (-41°), JOUER (-30°), Vider (+30°) sur des bornes en bois, et le panier (+45°)
         //   gauche (-82°)      : LA bibliothèque, un seul meuble courbe (7 types × 8 raretés)
         //   derrière (180°)    : la grande porte ouverte : le bananier dehors, la table des bananes juste devant
         //   arrière-gauche     : le panneau RÉCOLTEUR (-132°, posé au lancement) et la caisse accrochée au mur au-dessus
@@ -275,7 +317,7 @@ namespace SAE.EditorTools
             MakeActionCube(env, "Jouer", Around(-30f, Ring - 0.5f, 1.0f), 0.35f, new Color(0.2f, 0.85f, 0.3f),
                 "JOUER", ActionCube.Action.Teleport, mapSpawn);
             MakeActionCube(env, "Vider", Around(30f, Ring - 0.5f, 0.9f), 0.25f, new Color(0.6f, 0.6f, 0.6f),
-                "Vider", ActionCube.Action.ClearBoard, null);
+                $"VIDER\n{ActionCube.ClearBoardPrice} bananes", ActionCube.Action.ClearBoard, null);
             MakeLaunchCube(env, Around(-41f, Ring - 0.5f, 1.0f), 0.3f, spawner);
             BuildWaveBoard(env, Around(0f, HubLayout.CabinRadius - 0.25f, 2.25f), Quaternion.identity, spawner);   // accroché au mur
 
@@ -386,12 +428,12 @@ namespace SAE.EditorTools
 
             Prop(decor, "Caisse", Around(-50f, Ring + 0.2f), 10f, 1f);
             Prop(decor, "Caisse", Around(-50f, Ring + 0.2f, 0.5f), -15f, 0.7f);
-            Prop(decor, "Tonneau", Around(57f, Ring + 0.15f), 0f, 1f);
-            Prop(decor, "Regime", Around(57f, Ring + 0.15f, 0.9f), 30f, 1f);
+            Prop(decor, "Tonneau", Around(61f, Ring + 0.15f), 0f, 1f);
+            Prop(decor, "Regime", Around(61f, Ring + 0.15f, 0.9f), 30f, 1.6f);
 
             // Dehors, sur la terrasse, autour du bananier
             Prop(decor, "Tonneau", Around(205f, Ring + 1.6f), 40f, 1f);
-            Prop(decor, "Regime", Around(205f, Ring + 1.6f, 0.9f), 0f, 1f);
+            Prop(decor, "Regime", Around(205f, Ring + 1.6f, 0.9f), 0f, 1.6f);
             Prop(decor, "Tonneau", Around(155f, Ring + 1.5f), 0f, 1f);
             Prop(decor, "Caisse", Around(145f, Ring + 1.9f), 30f, 1f);
         }
@@ -644,7 +686,11 @@ namespace SAE.EditorTools
             // tourné vers le joueur (au centre), posé au sol
             chest.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(new Vector3(-pos.x, 0, -pos.z)));
             b = Bounds(chest);
-            chest.transform.position += new Vector3(pos.x - b.center.x, -b.min.y, pos.z - b.center.z);
+            // posé sur une petite estrade en bois (comme un trésor qu'on expose)
+            const float Dais = 0.1f;
+            var dais = Visuals.Solid("Estrade du coffre", env, new Vector3(pos.x, Dais / 2f, pos.z), new Vector3(1.0f, Dais, 0.8f), Wood);
+            dais.transform.rotation = Quaternion.Euler(0, AngleOf(pos), 0);
+            chest.transform.position += new Vector3(pos.x - b.center.x, Dais - b.min.y, pos.z - b.center.z);
             float top = Bounds(chest).max.y;
 
 
@@ -656,7 +702,7 @@ namespace SAE.EditorTools
 
             var promptGo = new GameObject("PromptCoffre");
             promptGo.transform.SetParent(env, false);
-            promptGo.transform.position = new Vector3(pos.x, top + 0.35f, pos.z);
+            promptGo.transform.position = new Vector3(pos.x, top + 0.3f, pos.z);
             promptGo.AddComponent<Sae501.Coffres.Billboard>();
             var prompt = promptGo.AddComponent<Sae501.Coffres.ChestPrompt>();
 
@@ -687,13 +733,14 @@ namespace SAE.EditorTools
             chest.transform.SetParent(pivot, true);
             pivot.gameObject.AddComponent<FacePlayer>();
 
-            // Panneau des chances, à côté du coffre (il tourne avec lui, donc reste face au joueur)
+            // Panneau des chances : un tableau encadré de bois, accroché au mur derrière le coffre (comme la caisse)
+            float chestAngle = AngleOf(pos);
             var oddsRoot = new GameObject("Chances du coffre").transform;
-            oddsRoot.SetParent(pivot, false);
-            oddsRoot.localPosition = new Vector3(1.0f, 1.35f, 0f);
-            oddsRoot.localRotation = Quaternion.Euler(0, 180, 0);   // le pivot regarde le joueur : on retourne le texte pour qu'il soit lisible
-            Visuals.Box("Fond", oddsRoot, new Vector3(0, 0, 0.02f), new Vector3(1.15f, 1.5f, 0.02f), new Color(0.1f, 0.09f, 0.08f));
-            var oddsText = Visuals.Label(oddsRoot, "", Vector3.zero, 0.055f);
+            oddsRoot.SetParent(env, false);
+            oddsRoot.SetPositionAndRotation(Around(chestAngle, HubLayout.CabinRadius - 0.3f, 2.18f), Quaternion.Euler(0, chestAngle, 0));   // +Z local = vers le mur
+            Visuals.Box("Cadre", oddsRoot, Vector3.zero, new Vector3(1.25f, 1.55f, 0.06f), Wood);
+            Visuals.Box("Fond", oddsRoot, new Vector3(0, 0, -0.035f), new Vector3(1.15f, 1.45f, 0.02f), new Color(0.12f, 0.1f, 0.08f));
+            var oddsText = Visuals.Label(oddsRoot, "", new Vector3(0, 0, -0.06f), 0.058f, SignText);
             Object.DestroyImmediate(oddsText.GetComponent<Billboard>());
             var oddsPanel = oddsRoot.gameObject.AddComponent<ChestOddsPanel>();
             oddsPanel.chest = controller;
@@ -702,10 +749,10 @@ namespace SAE.EditorTools
             // Prix du coffre, toujours visible au-dessus (doré si on peut payer)
             var tag = new GameObject("Prix du coffre");
             tag.transform.SetParent(env, false);
-            tag.transform.position = new Vector3(pos.x, top + 0.75f, pos.z);
+            tag.transform.position = new Vector3(pos.x, top + 0.55f, pos.z);
             var priceTag = tag.AddComponent<ChestPriceTag>();
             priceTag.chest = controller;
-            priceTag.label = Visuals.Label(tag.transform, "", Vector3.zero, 0.09f);
+            priceTag.label = Visuals.Label(tag.transform, "", Vector3.zero, 0.1f);
         }
 
         static Bounds Bounds(GameObject go)
@@ -752,8 +799,8 @@ namespace SAE.EditorTools
             Teleportable(Visuals.Solid("Sol autour", map.transform, new Vector3(0, -0.6f, 0), new Vector3(edge * 2 + 20, 0.1f, edge * 2 + 20), Floor));
 
             MakeActionCube(map.transform, "Retour hub", new Vector3(3f, 0.9f, -edge - 2f), 0.6f, new Color(0.3f, 0.5f, 1f),
-                "HUB", ActionCube.Action.Teleport, hubSpawn);
-            MakeLaunchCube(map.transform, new Vector3(-3f, 0.9f, -edge - 2f), 0.6f, spawner);
+                "HUB", ActionCube.Action.Teleport, hubSpawn, 0f);
+            MakeLaunchCube(map.transform, new Vector3(-3f, 0.9f, -edge - 2f), 0.6f, spawner, 0f);
             BuildWaveBoard(map.transform, map.transform.position + new Vector3(0, 2.4f, -edge - 0.3f), Quaternion.identity, spawner);
             return map.transform;
         }

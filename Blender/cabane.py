@@ -270,6 +270,11 @@ def material(name, base=None, normal=None, color=(0.8, 0.8, 0.8), rough=0.75, me
             rnd.operation = "ROUND"
             nt.links.new(t.outputs["Alpha"], rnd.inputs[0])
             nt.links.new(rnd.outputs[0], bsdf.inputs["Alpha"])
+    elif vcol:
+        # pas de texture : la couleur vient seulement des sommets (montagnes : herbe, roche, neige selon la hauteur)
+        vc = nt.nodes.new("ShaderNodeVertexColor")
+        vc.layer_name = "Col"
+        nt.links.new(vc.outputs["Color"], bsdf.inputs["Base Color"])
     else:
         bsdf.inputs["Base Color"].default_value = (*lin(color), 1)
     if normal:
@@ -308,6 +313,9 @@ def build_materials():
     M["douelles"] = material("Douelles", *tex_staves(), rough=0.75)
     M["caisse"] = material("Caisse", *tex_wood("Caisse", (0.78, 0.6, 0.36), 24, 81), rough=0.75)
     M["banane"] = material("Banane", tex_banana(), rough=0.6)
+    M["montagne"] = material("Montagne", rough=0.95, vcol=True)
+    M["palme"] = material("Palme", color=(0.25, 0.55, 0.16), rough=0.7)
+    M["palme"].use_backface_culling = False            # les feuilles de palmier sont des plans fins
     M["plume_rouge"] = material("Plume", color=(0.85, 0.12, 0.1), rough=0.6)
     M["plume_rouge"].use_backface_culling = False     # les ailettes des fléchettes sont de simples plans
     return M
@@ -771,8 +779,8 @@ def build_dartboard(M, coll):
 def build_outside(M, coll):
     """Dehors : une prairie, des rochers et des buissons (vus par la porte et les fenêtres)."""
     b = Builder([M["herbe"]])
-    n = 48
-    rad = 17.0
+    n = 64
+    rad = 95.0                                   # jusqu'au pied des montagnes
     c = P(0, GROUND_Y, 0)
     ring = [P(math.sin(2 * math.pi * k / n) * rad, GROUND_Y, math.cos(2 * math.pi * k / n) * rad) for k in range(n)]
     for k in range(n):
@@ -812,7 +820,109 @@ def build_outside(M, coll):
         ob = bpy.data.objects.new("Rochers" if kind == "roche" else "Buissons", me)
         coll.objects.link(ob)
         deco.append(ob)
-    return [ground] + deco
+    return [ground] + deco + [build_mountains(M, coll), build_palms(M, coll)]
+
+
+def outward(face, center):
+    """Tourne la face vers l'extérieur de la montagne (sinon, une seule face étant dessinée, on verrait le ciel au travers)."""
+    face.normal_update()
+    c = face.calc_center_median()
+    if face.normal.dot(Vector((c.x - center.x, c.y - center.y, max(c.z - center.z, 0.0) * 0.3 + 0.01))) < 0:
+        face.normal_flip()
+
+
+def build_mountains(M, coll):
+    """Une couronne de montagnes à l'horizon : pentes vertes, roche, neige au sommet (couleurs par sommet).
+    Devant (la carte de jeu est à 40 m) elles reculent derrière la carte."""
+    g = random.Random(11)
+    b = Builder([M["montagne"]])
+    grass, rock, snow = lin((0.36, 0.55, 0.24)), lin((0.52, 0.48, 0.44)), lin((0.95, 0.96, 0.98))
+    count = 22
+    for i in range(count):
+        ang = i * 360 / count + g.uniform(-6, 6)
+        front = abs((ang + 180) % 360 - 180) < 35
+        dist = g.uniform(88, 110) if front else g.uniform(55, 85)
+        height = g.uniform(18, 38)
+        base = g.uniform(18, 30)
+        center = polar(ang, dist, GROUND_Y - 0.5)
+        rings, segs = 7, 18
+        seed = g.random() * 100
+        grid = []
+        for k in range(rings + 1):
+            t = k / rings                                            # 0 = sommet, 1 = pied
+            row = []
+            for j in range(segs):
+                a = 2 * math.pi * j / segs
+                bump = 1 + 0.25 * math.sin(a * 3 + seed) + 0.12 * math.sin(a * 7 + seed * 2)
+                r = base * t * bump
+                h = height * (1 - t) ** 1.4 * (1 + 0.15 * math.sin(a * 5 + seed)) if k else height
+                p = center + Vector((math.cos(a) * r, math.sin(a) * r, h))
+                row.append(p)
+                if k == 0:
+                    break
+            grid.append(row)
+
+        def colour(z):
+            u = (z - center.z) / height
+            if u > 0.72:
+                return snow
+            if u > 0.38:
+                return rock
+            return grass
+
+        top = grid[0][0]
+        for j in range(segs):
+            j2 = (j + 1) % segs
+            f = b.face([top, grid[1][j], grid[1][j2]], [(0, 0)] * 3, M["montagne"])
+            outward(f, center)
+            for loop in f.loops:
+                c = colour(loop.vert.co.z)
+                loop[b.col] = (*c, 1)
+            f.tag = True
+        for k in range(1, rings):
+            for j in range(segs):
+                j2 = (j + 1) % segs
+                f = b.face([grid[k][j], grid[k + 1][j], grid[k + 1][j2], grid[k][j2]], [(0, 0)] * 4, M["montagne"])
+                outward(f, center)
+                for loop in f.loops:
+                    c = colour(loop.vert.co.z)
+                    loop[b.col] = (*c, 1)
+                f.tag = True
+    ob = b.finish("Montagnes", coll, recalc=False)
+    for p in ob.data.polygons:
+        p.use_smooth = False                                         # facettes nettes : style « low poly »
+    return ob
+
+
+def build_palms(M, coll):
+    """Des palmiers autour de la cabane : tronc courbe en anneaux, couronne de palmes arquées."""
+    g = random.Random(17)
+    b = Builder([M["poutre"], M["bout"], M["palme"]])
+    spots = [a for a in range(0, 360, 31) if not (-40 < ((a + 180) % 360 - 180) < 40)]
+    for idx, ang in enumerate(spots):
+        dist = g.uniform(8, 16)
+        base = polar(ang + g.uniform(-8, 8), dist, GROUND_Y)
+        height = g.uniform(5, 8)
+        lean = Vector((g.uniform(-1, 1), g.uniform(-1, 1), 0)).normalized() * g.uniform(0.6, 1.4)
+        pts = [base + lean * (t * t) + Vector((0, 0, height * t)) for t in np.linspace(0, 1, 7)]
+        for k in range(6):
+            b.log(pts[k], pts[k + 1] + (pts[k + 1] - pts[k]) * 0.05, 0.16 - 0.015 * k, M["poutre"], M["bout"], 1000 + idx * 10 + k, segs=8)
+        crown = pts[-1]
+        for f in range(9):
+            yaw = 2 * math.pi * f / 9 + g.uniform(-0.2, 0.2)
+            d = Vector((math.cos(yaw), math.sin(yaw), 0))
+            side = Vector((-d.y, d.x, 0))
+            length = g.uniform(2.4, 3.4)
+            prev_l = prev_r = None
+            for s_ in range(7):
+                t = s_ / 6
+                p = crown + d * (length * t) + Vector((0, 0, 0.6 * t - 1.6 * t * t))
+                w = 0.45 * math.sin(math.pi * min(t + 0.08, 1.0)) + 0.02
+                l, r = p - side * w, p + side * w
+                if prev_l is not None:
+                    b.face([prev_l, prev_r, r, l], [(0, t), (1, t), (1, t), (0, t)], M["palme"])
+                prev_l, prev_r = l, r
+    return b.finish("Palmiers", coll, recalc=False)
 
 
 # ============================================================ accessoires (posés par Unity)
@@ -847,12 +957,12 @@ def build_crate(M, coll):
                 size[ax] = s
                 b.box(Vector(p) + Vector((0, 0, s / 2)), tuple(size), I, M["poutre"], uv_scale=1 / 0.6, bevel=0.006)
     # une diagonale sur deux faces
-    for ang, axis in ((45, "Y"), (-45, "X")):
-        rot = Matrix.Rotation(math.radians(ang), 3, axis)
-        n = Vector((1, 0, 0)) if axis == "Y" else Vector((0, 1, 0))
+    # une planche en diagonale sur les 4 côtés, À PLAT dans la face (on tourne autour de la normale de la face)
+    for axis, n in (("X", Vector((1, 0, 0))), ("Y", Vector((0, 1, 0)))):
+        rot = Matrix.Rotation(math.radians(45), 3, axis)
+        size = (0.02, 0.06, (s - 2 * t) * 1.38) if axis == "X" else (0.06, 0.02, (s - 2 * t) * 1.38)
         for sgn in (-1, 1):
-            size = (0.025, s * 1.25, 0.06) if axis == "Y" else (s * 1.25, 0.025, 0.06)
-            b.box(n * sgn * (s / 2 - 0.005) + Vector((0, 0, s / 2)), (0.02, 0.06, s * 1.25) if axis == "Y" else (0.06, 0.02, s * 1.25), rot, M["poutre"], uv_scale=1 / 0.6, bevel=0.004)
+            b.box(n * sgn * (s / 2 - 0.012) + Vector((0, 0, s / 2)), size, rot, M["poutre"], uv_scale=1 / 0.6, bevel=0.004)
     return b.finish("Caisse", coll)
 
 
@@ -957,6 +1067,7 @@ def render_views(cam, folder):
         "dedans_droite": (P(-0.3, 1.6, 0), 60, 2),
         "dedans_gauche": (P(0.3, 1.6, 0), -110, 0),
         "dehors": (P(5.5, 3.2, -9.0), None, None),
+        "horizon": (P(0, 1.7, -5.0), 160, 6),
     }
     only = os.environ.get("SAE_VIEWS")
     for name, (loc, ang, pitch) in views.items():

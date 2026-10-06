@@ -39,6 +39,12 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
 ![Cabane v3 vue de dehors : toit de chaume, volets verts, terrasse sur pilotis](../captures/cabane-v3-dehors.webp)
 
+**Cabane v4** _(rendus Blender : montagnes et palmiers autour)_
+
+![Cabane v4 : montagnes enneigées et palmiers autour de la cabane](../captures/cabane-v4-dehors.webp)
+
+![Cabane v4 : la vue depuis la terrasse](../captures/cabane-v4-horizon.webp)
+
 **Mon analyse critique** _(corrigée dans la foulée, à tester)_
 1. **Le hub est trop petit.** On est trop serré, les éléments sont les uns devant les autres : c'est compliqué de circuler et d'utiliser les objets.
 2. **Le prix et la qualité du coffre doivent dépendre des vagues vaincues.** Plus on bat de vagues, plus le coffre est cher, mais plus il est intéressant : il donne plus de singes et de meilleur niveau.
@@ -114,6 +120,7 @@ Le hub était plus espacé, mais pas encore assez. J'ai dessiné une disposition
 | Claude (Claude Code) | Branche de test `test/cabane` : le hub devient une cabane en bois fermée (12 murs en planches, poteaux, plafond à poutres, lampe), avec un tapis rond au centre ; tout est resserré (cercle de 5 m → 3,5 m, angles réajustés) pour que tout soit proche en VR. Mesures partagées dans `HubLayout` | À tester |
 | Claude (Claude Code) | Cabane v2, « vraiment belle » et plus serrée (cercle 3,5 → 2,8 m, murs à 3,4 m) : murs en rondins, toit conique en planches avec charpente, grande porte ouverte sur le bananier (dehors, sur une terrasse), 3 fenêtres, lustre en roue de charrette et 2 lanternes, tapis rond oriental ; textures de bois et de tapis dessinées par le code (`CabinArt`) ; une seule bibliothèque compacte (7 × 8, plus haute rangée à 2,1 m) ; caisse accrochée au mur ; caisses, tonneaux et régimes de bananes en déco | À tester |
 | Claude (Claude Code) | Cabane v3 : la cabane devient un vrai modèle 3D fait dans **Blender par un script** (`Blender/cabane.py`, lancé en ligne de commande, sans rien télécharger) : textures dessinées par le code (bois, rondins, bois de bout, chaume, tapis à franges, cible, herbe, avec relief), murs en rondins croisés aux angles avec joints, toit de chaume conique et charpente, porte au battant ouvert, fenêtres à volets peints, lustre en roue de charrette, lanternes, cible de fléchettes, terrasse sur pilotis, prairie avec rochers et buissons ; tonneau, caisse et régime de bananes en accessoires. Vérifié sur des rendus Blender à chaque essai (4 itérations : grain trop tourbillonnant, rondins illisibles → joints + ombrage par sommet, couleurs unies trop claires → conversion sRGB/linéaire). Unity pose le .glb, l'aligne avec ses repères, ajoute colliders, téléportation et lumières | À tester |
+| Claude (Claude Code) | Tout dans la même DA : montagnes enneigées en couronne (low poly, couleurs par hauteur) et palmiers autour de la cabane, prairie jusqu'à l'horizon, brume légère au loin ; JOUER / LANCER / Vider (et les boutons de la carte) deviennent des bornes en bois avec un gros bouton cerclé de laiton et une plaque gravée ; coffre sur une estrade, panneau des chances encadré de bois et accroché au mur (il traversait les rondins), prix plus gros ; diagonales des caisses corrigées (elles dépassaient), régimes de bananes plus gros | À tester |
 | Claude (Claude Code) | Ajout de mes 3 captures du singe récolteur dans ce journal (converties en .webp dans `docs/captures/`), puis la vue du dessus du hub | Gardé |
 
 ## Lun. 5 oct. 2026

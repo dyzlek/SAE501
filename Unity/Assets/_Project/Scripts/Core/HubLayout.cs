@@ -10,7 +10,7 @@ namespace SAE
         public const float CabinHeight = 3.0f;       // hauteur des murs (le toit conique monte à 4,8 m)
         public const float CarpetRadius = 1.5f;      // le tapis rond au centre, là où se tient le joueur
 
-        public const float BasketAngle = 42f;        // le panier, à côté du plateau, après Vider
+        public const float BasketAngle = 45f;        // le panier, à côté du plateau, après Vider
         public const float BasketRadius = Ring - 0.3f;
 
         public const float HarvesterPanelAngle = -132f;   // le panneau RÉCOLTEUR (la caisse est accrochée au mur au-dessus)

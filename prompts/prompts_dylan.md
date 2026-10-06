@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Même DA partout : coffre, boutons, montagnes, lisibilité
+> J'aimerais que le coffre corresponde au style et que les boutons soient plus intégrés au décor. Ajoute des montagnes et d'autres éléments autour de la maison pour la déco : je veux que tout soit dans la même DA. Améliore aussi la lisibilité de certains éléments.
+
 ### Cabane : fais encore mieux
 > Fais encore mieux, dépasse-toi.
 
