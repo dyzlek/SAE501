@@ -4,7 +4,7 @@ using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 namespace SAE
 {
-    // Un singe qu'on prend à la main sur l'étagère (XR Grab Interactable).
+    // Un singe qu'on prend à la main sur l'étagère (XR Grab Interactable en VR, clic en mode PC).
     // Chaque case de la bibliothèque qui possède au moins un singe en pose un sur elle (voir LibrarySlot).
     //   - le saisir le sort de l'inventaire (GameState.Held) ;
     //   - pendant qu'on le tient, un rayon part de la main : là où il touche le plateau ou la carte (même de loin),
@@ -98,25 +98,38 @@ namespace SAE
             return line;
         }
 
+        // En VR : la main serre le grip (XR Grab) ou le relâche.
         void OnGrab(SelectEnterEventArgs args)
         {
-            if (Held != null) return;
-            Held = this;
-            hand = args.interactorObject.transform;
-            slot.Detach(this);                      // la case en pose un autre si on en a encore
-            GameState.TakeFromInventory(monkey);
-            PlayerRig.Buzz(args.interactorObject.transform, 0.3f);
+            if (Take(args.interactorObject.transform)) PlayerRig.Buzz(args.interactorObject.transform, 0.3f);
         }
 
         void OnRelease(SelectExitEventArgs args)
         {
             if (Held != this) return;
-            Held = null;
-
-            bool placed = TryGetSurfacePoint(out var surface, out var point) && surface.Drop(point);
-            if (!placed) GameState.ReturnHeld();    // lâché dans le vide : il retourne dans la bibliothèque
+            bool placed = Release();
             PlayerRig.Buzz(args.interactorObject.transform, placed ? 0.7f : 0.2f);
+        }
+
+        // Prendre le singe (en VR, ou au clic en mode PC). byHand = d'où part le rayon de pose.
+        public bool Take(Transform byHand)
+        {
+            if (Held != null) return false;
+            Held = this;
+            hand = byHand;
+            slot.Detach(this);                      // la case en pose un autre si on en a encore
+            GameState.TakeFromInventory(monkey);
+            return true;
+        }
+
+        // Lâcher le singe : posé (ou fusionné) là où vise le rayon, sinon rangé dans la bibliothèque. true = posé.
+        public bool Release()
+        {
+            Held = null;
+            bool placed = TryGetSurfacePoint(out var surface, out var point) && surface.Drop(point);
+            if (!placed) GameState.ReturnHeld();
             Destroy(gameObject);
+            return placed;
         }
 
         // Le plateau (ou la carte) visé, et le point visé dessus :

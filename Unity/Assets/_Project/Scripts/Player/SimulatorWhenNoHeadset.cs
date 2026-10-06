@@ -1,11 +1,12 @@
 #if UNITY_EDITOR
+using Unity.XR.CoreUtils;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.XR.Management;
 
 namespace SAE
 {
-    // Le simulateur XR (tester au clavier/souris dans l'éditeur) ne se lance que si AUCUN casque n'est branché.
+    // Le simulateur XR (tester la VR au clavier/souris dans l'éditeur) ne se lance qu'en mode VR, et si AUCUN casque n'est branché.
     // Sinon il prend la place du vrai casque (Quest Link) : la tête et les manettes ne bougeraient plus.
     // Éditeur seulement : le build casque n'en a jamais besoin.
     static class SimulatorWhenNoHeadset
@@ -16,6 +17,7 @@ namespace SAE
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void StartIfNeeded()
         {
+            if (!Object.FindFirstObjectByType<XROrigin>()) return;   // mode PC : pas de joueur VR, pas de simulateur
             var manager = XRGeneralSettings.Instance ? XRGeneralSettings.Instance.Manager : null;
             if (manager && manager.activeLoader) return;   // un casque tourne : pas de simulateur
 

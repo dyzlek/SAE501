@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 namespace SAE
 {
     // Fiche d'un singe : quand on vise un singe avec la manette droite (bibliothèque, plateau ou carte)
-    // EN MAINTENANT son bouton A, une petite carte apparaît
+    // EN MAINTENANT son bouton A (mode PC : viser au centre de l'écran + touche A), une petite carte apparaît
     // DANS LE DÉCOR, au-dessus de lui, avec ses caractéristiques et ce que donnerait une fusion.
     // Sur le plateau et la carte, un cercle montre aussi sa portée.
     // Pas d'affichage collé à l'écran (règle de confort VR) : la carte reste posée près du singe.
@@ -29,6 +29,7 @@ namespace SAE
         {
             showInfo = new InputAction("Infos du singe", InputActionType.Button);
             showInfo.AddBinding("<XRController>{RightHand}/primaryButton");
+            showInfo.AddBinding("<Keyboard>/q");   // mode PC : touche A en AZERTY (le clavier est lu par position de touche)
             showInfo.Enable();
         }
 

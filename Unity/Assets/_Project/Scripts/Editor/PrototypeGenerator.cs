@@ -52,9 +52,11 @@ namespace SAE.EditorTools
             var player = Player(hubSpawn.position);
             if (!player) return;
             BuildChest(hub, Around(132f, Ring - 0.3f), player.head);
+            BuildPlayerMode(player.gameObject, DesktopPlayerObject(hubSpawn.position));
 
             EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), ScenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
+            PlayerModeMenu.Apply();   // VR ou PC, selon le menu SAE → Mode de jeu
             Debug.Log("Prototype généré : " + ScenePath);
         }
 
@@ -68,6 +70,53 @@ namespace SAE.EditorTools
         // Le joueur VR : l'XR Origin des Starter Assets (casque + 2 manettes, téléportation, rotation par crans),
         // avec nos réglages de confort, un bout de doigt sur chaque manette pour enfoncer les boutons,
         // et le corps visible en miniature sur le plateau.
+        // Les deux joueurs sont dans la scène, désactivés : PlayerMode active le bon au lancement (menu SAE → Mode de jeu).
+        static void BuildPlayerMode(GameObject vrPlayer, GameObject pcPlayer)
+        {
+            var mode = new GameObject("Mode de jeu").AddComponent<PlayerMode>();
+            mode.vrPlayer = vrPlayer;
+            mode.pcPlayer = pcPlayer;
+            vrPlayer.SetActive(false);
+            pcPlayer.SetActive(false);
+        }
+
+        // Le joueur PC (clavier/souris), pour tester vite sans casque : DesktopPlayer, et la caméra sert de tête et de mains.
+        static GameObject DesktopPlayerObject(Vector3 position)
+        {
+            var player = new GameObject("Joueur PC");
+            player.tag = Tags.Joueur;
+            player.layer = IgnoreRaycast;
+            player.transform.position = position;
+            var cc = player.AddComponent<CharacterController>();
+            cc.height = 1.8f;
+            cc.radius = 0.3f;
+            cc.center = new Vector3(0, 0.9f, 0);
+
+            // Corps : copié en miniature sur le plateau (« Toi »)
+            var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            body.name = "Corps";
+            Object.DestroyImmediate(body.GetComponent<Collider>());
+            body.transform.SetParent(player.transform, false);
+            body.transform.localPosition = new Vector3(0, 0.9f, 0);
+            body.transform.localScale = new Vector3(0.6f, 0.9f, 0.6f);
+            body.GetComponent<Renderer>().enabled = false;
+            body.AddComponent<ColorTint>().Set(new Color(1f, 0.55f, 0.1f));
+            body.AddComponent<Mirrored>().label = "Toi";
+
+            var cam = new GameObject("Camera");
+            cam.tag = "MainCamera";
+            cam.transform.SetParent(player.transform, false);
+            cam.transform.localPosition = new Vector3(0, 1.6f, 0);
+            cam.AddComponent<Camera>().nearClipPlane = 0.05f;
+            cam.AddComponent<AudioListener>();
+
+            player.AddComponent<DesktopPlayer>();
+            var rig = player.AddComponent<PlayerRig>();
+            rig.head = rig.leftHand = rig.rightHand = cam.transform;
+            player.AddComponent<MonkeyInfoCard>();
+            return player;
+        }
+
         static PlayerRig Player(Vector3 position)
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(VRSetup.RigPrefab);

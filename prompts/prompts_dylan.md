@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### La VR dans le travail de Maxens, avec un mode PC
+> Maintenant, prends ce qu'il a fait (commit 1cc56b1) et implémente la VR dedans. Ajoute juste une option pour jouer en VR ou non, pour tester vite fait.
+
 ### Plus adapté à la VR : vies, rayon et interactions de loin
 > Ce n'est pas encore adapté à la VR. D'abord, j'aimerais que la vie se réinitialise à chaque niveau. Ensuite, le rayon n'est pas sur les manettes : j'aimerais pouvoir poser les singes sur la carte de loin, et qu'un rayon lumineux parte devant quand on vise, pour appuyer sur les boutons, récupérer les bananes de loin, etc.
 
