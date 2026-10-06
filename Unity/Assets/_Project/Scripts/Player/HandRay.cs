@@ -19,6 +19,7 @@ namespace SAE
         static readonly Color OnTarget = new Color(0.3f, 0.75f, 1f, 1f);
 
         LineRenderer line;
+        Transform castOrigin;   // d'où part vraiment le tir de détection : le rayon dessiné part du même endroit
 
         void Awake()
         {
@@ -30,14 +31,18 @@ namespace SAE
             line.sharedMaterial = Visuals.LineMaterial;
         }
 
-        // Par défaut, le Near-Far détecte avec un cône de 6° (très tolérant : le rayon était bleu à côté du singe).
-        // On le passe en rayon exact : il faut pointer sur l'objet. Dans Start : le Near-Far a créé son caster dans son Awake.
+        // Par défaut, le Near-Far détecte avec un cône de 6° (très tolérant : le rayon était bleu à côté du singe),
+        // depuis une origine lissée (stabilisation) qui n'est pas celle du rayon dessiné.
+        // On passe en rayon exact, sans lissage, et on dessine le rayon depuis l'origine du tir : on touche ce qu'on voit toucher.
+        // Dans Start : le Near-Far a créé son caster dans son Awake.
         void Start()
         {
             if (interactor && interactor.farInteractionCaster is CurveInteractionCaster caster)
             {
                 caster.hitDetectionType = CurveInteractionCaster.HitDetectionType.Raycast;
                 caster.coneCastAngle = 0f;
+                caster.enableStabilization = false;
+                castOrigin = caster.effectiveCastOrigin;
             }
         }
 
@@ -48,7 +53,7 @@ namespace SAE
             line.enabled = show;
             if (!show) return;
 
-            var origin = interactor.transform;
+            var origin = castOrigin ? castOrigin : interactor.transform;
             var end = origin.position + origin.forward * length;
             if (Physics.Raycast(origin.position, origin.forward, out var hit, length, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
                 end = hit.point;
