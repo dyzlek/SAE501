@@ -19,7 +19,7 @@ namespace SAE.EditorTools
     // Le générateur l'appelle à chaque fois : on peut le relancer sans risque.
     public static class VRSetup
     {
-        const string SamplesFolder = "Assets/Samples/XR Interaction Toolkit/3.6.1";
+        public const string SamplesFolder = "Assets/Samples/XR Interaction Toolkit/3.6.1";
         public const string RigPrefab = SamplesFolder + "/Starter Assets/Prefabs/XR Origin (XR Rig).prefab";
         const string LayerSettings = "Assets/XRI/Settings/Resources/InteractionLayerSettings.asset";
         const string SimulatorSettings = "Assets/XRI/Settings/Resources/XRDeviceSimulatorSettings.asset";

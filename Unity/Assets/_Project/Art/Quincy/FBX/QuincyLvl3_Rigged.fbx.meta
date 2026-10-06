@@ -3,7 +3,12 @@ guid: 4d2ed8f2cf04992498374fdc4ed72b4b
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Quincy
+    second: {fileID: 2100000, guid: 9aaf93877d6c4b341ac9be05232e5aa6, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

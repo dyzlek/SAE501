@@ -16,6 +16,9 @@ namespace SAE
 
         public static PlayerRig Local { get; private set; }
 
+        // Prévient quand le joueur arrive sur un point (hub ou carte) : l'arc s'affiche ou se range (BowHolster).
+        public static event System.Action<Transform> Teleported;
+
         XROrigin origin;
         CharacterController body;
 
@@ -40,6 +43,7 @@ namespace SAE
             }
             else transform.SetPositionAndRotation(spot.position, Quaternion.Euler(0f, spot.eulerAngles.y, 0f));
             if (body) body.enabled = true;
+            Teleported?.Invoke(spot);
         }
 
         // Petite vibration dans la manette qui contient 'hand' : le retour « c'est fait » de chaque action.
