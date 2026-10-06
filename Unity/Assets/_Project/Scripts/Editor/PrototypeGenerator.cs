@@ -3,6 +3,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace SAE.EditorTools
 {
@@ -83,6 +84,7 @@ namespace SAE.EditorTools
 
             player.AddComponent<PlayerController>().reach = 60f;
             player.AddComponent<BananaHand>();   // prendre les bananes (clic maintenu)
+            player.AddComponent<MonkeyInfoCard>();   // fiche du singe visé, dans le décor
             return player.transform;
         }
 
@@ -115,9 +117,9 @@ namespace SAE.EditorTools
             var root = new GameObject("Tableau de la vague").transform;
             root.SetParent(parent, false);
             root.SetPositionAndRotation(pos, rotation);
-            Visuals.Box("Cadre", root, Vector3.zero, new Vector3(1.2f, 0.6f, 0.06f), Wood);
-            Visuals.Box("Fond", root, new Vector3(0, 0, -0.035f), new Vector3(1.1f, 0.5f, 0.02f), new Color(0.12f, 0.1f, 0.08f));
-            var text = Visuals.Label(root, "", new Vector3(0, 0, -0.06f), 0.11f, new Color(1f, 0.9f, 0.6f));
+            Visuals.Box("Cadre", root, Vector3.zero, new Vector3(1.7f, 0.8f, 0.06f), Wood);
+            Visuals.Box("Fond", root, new Vector3(0, 0, -0.035f), new Vector3(1.6f, 0.7f, 0.02f), new Color(0.12f, 0.1f, 0.08f));
+            var text = Visuals.Label(root, "", new Vector3(0, 0, -0.06f), 0.1f, new Color(1f, 0.9f, 0.6f));
             Object.DestroyImmediate(text.GetComponent<Billboard>());
             var board = root.gameObject.AddComponent<WaveBoard>();
             board.spawner = spawner;
@@ -408,6 +410,10 @@ namespace SAE.EditorTools
             prompt.chest = controller;
             prompt.player = player;
             chest.AddComponent<ChestClickable>().chest = controller;
+            // Les singes gagnés sortent du coffre avec leur aura et vont se ranger dans la bibliothèque
+            var reward = chest.AddComponent<ChestReward>();
+            reward.chest = controller;
+            reward.auraMaterial = AuraMaterial();
 
             // Le coffre se tourne toujours vers le joueur. L'origine du modèle n'est pas au centre du coffre :
             // on le met dans un pivot placé au centre, et c'est le pivot qui tourne.
@@ -420,9 +426,9 @@ namespace SAE.EditorTools
             // Panneau des chances, à côté du coffre (il tourne avec lui, donc reste face au joueur)
             var oddsRoot = new GameObject("Chances du coffre").transform;
             oddsRoot.SetParent(pivot, false);
-            oddsRoot.localPosition = new Vector3(0.9f, 1.15f, 0f);
+            oddsRoot.localPosition = new Vector3(1.0f, 1.35f, 0f);
             oddsRoot.localRotation = Quaternion.Euler(0, 180, 0);   // le pivot regarde le joueur : on retourne le texte pour qu'il soit lisible
-            Visuals.Box("Fond", oddsRoot, new Vector3(0, 0, 0.02f), new Vector3(0.95f, 0.95f, 0.02f), new Color(0.1f, 0.09f, 0.08f));
+            Visuals.Box("Fond", oddsRoot, new Vector3(0, 0, 0.02f), new Vector3(1.15f, 1.5f, 0.02f), new Color(0.1f, 0.09f, 0.08f));
             var oddsText = Visuals.Label(oddsRoot, "", Vector3.zero, 0.055f);
             Object.DestroyImmediate(oddsText.GetComponent<Billboard>());
             var oddsPanel = oddsRoot.gameObject.AddComponent<ChestOddsPanel>();
@@ -436,6 +442,28 @@ namespace SAE.EditorTools
             var priceTag = tag.AddComponent<ChestPriceTag>();
             priceTag.chest = controller;
             priceTag.label = Visuals.Label(tag.transform, "", Vector3.zero, 0.09f);
+        }
+
+        // Matériau de l'aura : transparent et additif (il éclaircit ce qu'il y a derrière, comme une lueur).
+        // Créé une seule fois dans Assets/_Project/Art/Materials, puis réutilisé.
+        static Material AuraMaterial()
+        {
+            const string path = "Assets/_Project/Art/Materials/Aura.mat";
+            var existing = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (existing) return existing;
+
+            Directory.CreateDirectory("Assets/_Project/Art/Materials");
+            var mat = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            mat.SetFloat("_Surface", 1f);                          // transparent
+            mat.SetFloat("_Blend", 2f);                            // additif
+            mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+            mat.SetFloat("_DstBlend", (float)BlendMode.One);
+            mat.SetFloat("_ZWrite", 0f);
+            mat.SetOverrideTag("RenderType", "Transparent");
+            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            mat.renderQueue = (int)RenderQueue.Transparent;
+            AssetDatabase.CreateAsset(mat, path);
+            return mat;
         }
 
         static Bounds Bounds(GameObject go)

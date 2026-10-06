@@ -6,7 +6,8 @@ using ChestRarity = Sae501.Coffres.Rarity;   // les 7 raretés du coffre (SAE.Ra
 namespace SAE
 {
     // Panneau à côté du coffre : ce que le coffre peut donner, en direct.
-    // Vagues vaincues, prix, nombre de singes par coffre, et la chance de chaque rareté (dans sa couleur).
+    // Vagues vaincues, prix, nombre de singes par coffre, la chance de chaque rareté (dans sa couleur)
+    // et la chance de chaque type de singe.
     // Une rareté pas encore débloquée indique à partir de quelle vague elle le sera.
     // L'arc-en-ciel et le blanc ne sortent jamais du coffre (fusion seulement).
     public class ChestOddsPanel : MonoBehaviour
@@ -43,6 +44,25 @@ namespace SAE
                     sb.AppendLine($"<color=#777777>{name}  dès la vague {chest.oddsSettings.unlockAtWave[i]}</color>");
             }
             sb.AppendLine("<color=#AAAAAA>Arc-en-ciel et Blanc : fusion seulement</color>");
+
+            // Chances par type de singe, deux par ligne pour garder le panneau compact
+            var reward = chest.GetComponent<ChestReward>();
+            if (reward)
+            {
+                sb.AppendLine();
+                sb.AppendLine("<b>SINGES</b>");
+                var typeOdds = reward.CurrentTypeOdds();
+                for (int i = 0; i < MonkeyData.TypeCount; i++)
+                {
+                    var t = (MonkeyType)i;
+                    sb.Append(MonkeyOdds.IsUnlocked(reward.typeOdds, t, GameState.WavesWon)
+                        ? $"{t} {Percent(typeOdds[i])}"
+                        : $"<color=#777777>{t} : vague {reward.typeOdds.unlockAtWave[i]}</color>");
+                    if (i % 2 == 1) sb.AppendLine();
+                    else sb.Append("    ");
+                }
+                sb.AppendLine();
+            }
             text.text = sb.ToString().TrimEnd();
         }
 

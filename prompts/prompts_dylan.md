@@ -4,6 +4,22 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Fiche du singe sur un bouton
+> J'aimerais avoir les infos seulement quand j'appuie sur un bouton, par exemple A.
+
+### Vrai système de vagues et fiche des singes
+> Maintenant, j'aimerais que tu fasses un vrai système de vagues, et qu'on puisse voir les caractéristiques des singes, etc.
+
+### Singe de départ et chances par type de singe
+> Il faudrait qu'on puisse avoir un singe Classique dès le départ. Mais j'aimerais aussi ajouter des probabilités de drop des personnages : au début, seulement le Classique, puis petit à petit les autres, etc.
+
+### Chantier B : un vrai inventaire
+> - La bibliothèque démarre vide. Chaque case affiche le nombre de singes possédés, et une case vide est grisée.
+> - Le coffre ajoute le singe gagné à l'inventaire. Le singe sort du coffre avec la couleur de sa rareté, puis va se ranger sur l'étagère.
+> - Poser un singe le retire de l'inventaire, le reprendre l'y remet, et fusionner en consomme 2 pour en créer 1.
+>
+> J'aimerais aussi qu'une aura de la couleur de sa rareté soit autour de lui.
+
 ### Corriger ma deuxième analyse critique
 > Maintenant, essaie de résoudre tout ce que j'ai relevé.
 

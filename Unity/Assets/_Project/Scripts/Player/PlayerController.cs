@@ -82,11 +82,7 @@ namespace SAE
             }
 
             if (mouse.leftButton.wasPressedThisFrame) Target?.OnClick(this, AimPoint);
-            if (mouse.rightButton.wasPressedThisFrame && GameState.Held != null)
-            {
-                GameState.Held = null;
-                GameState.NotifyChanged();
-            }
+            if (mouse.rightButton.wasPressedThisFrame) GameState.ReturnHeld();   // lâcher = ranger dans la bibliothèque
 
             UpdateHeldVisual();
         }
@@ -118,7 +114,7 @@ namespace SAE
             // Pas d'interface collée à l'écran (en VR ça donne le vertige) : l'argent est sur la caisse du hub,
             // le singe tenu est visible dans la main. Seuls restent le viseur et l'aide, pour tester sans casque.
             GUI.Label(new Rect(10, Screen.height - 30, 900, 25),
-                "ZQSD : marcher · Souris : regarder · Clic gauche : interagir · Clic droit : lâcher · Échap : souris");
+                "ZQSD : marcher · Souris : regarder · Clic gauche : interagir · Clic droit : lâcher · A (maintenu) : infos du singe · Échap : souris");
         }
     }
 }

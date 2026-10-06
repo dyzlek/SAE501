@@ -17,6 +17,7 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 | 2026-10-06 | **Pas d'interface collée à l'écran** : l'argent, les prix et les infos se lisent dans le décor du hub | En VR, un affichage collé au visage donne le vertige (règles de confort) |
 | 2026-10-06 | Économie de départ : banane 5 (amélioration « valeur » +3), vague finie 20 + 10 × n°, coffre 25 (+20 par vague vaincue), améliorations du bananier 40 à 80 (×1,6 par niveau) | Premiers réglages, à équilibrer en jouant |
 | 2026-10-06 | Le coffre suit la progression : **prix et qualité selon les vagues vaincues** (prix 25 + 20 / vague ; raretés débloquées par vague ; 1 singe de plus toutes les 3 vagues), chances affichées à côté du coffre | Récompenser l'avancée dans les vagues ; transparence des drops |
+| 2026-10-06 | **Vagues** : lancées par un bouton LANCER ; vague perdue = on la rejoue (pas de retour à zéro) ; 10 vagues écrites à l'avance avec boss, ballons rapides et blindés, **victoire après le dirigeable rouge (vague 10)** puis mode infini. Coffre : arc-en-ciel et blanc par fusion seulement, raretés par paliers de vagues | Le joueur décide quand il est prêt ; pas de frustration de tout recommencer ; une vraie fin pour la démo, et de quoi continuer pour débloquer les raretés hautes (Dylan) |
 | 2026-10-05 | Git : `main` stable + une branche par tâche + PR relue | Éviter de casser le build commun |
 | _à trancher_ | Nom du jeu · assets Bloons ou maison · périmètre définitif | Avant le GDD v1 (ven. 9 oct.) |
 

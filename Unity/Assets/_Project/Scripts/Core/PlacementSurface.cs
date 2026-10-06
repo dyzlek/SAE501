@@ -6,7 +6,7 @@ namespace SAE
     // Son repère local = le repère de la carte multiplié par 'scale'.
     // Aperçu : singe fantôme vert (on peut poser) ou rouge (on ne peut pas),
     // et halo blanc autour du singe déjà posé quand on peut fusionner.
-    public class PlacementSurface : MonoBehaviour, IClickable
+    public class PlacementSurface : MonoBehaviour, IClickable, IMonkeyInfo
     {
         public float scale = 1f;
 
@@ -28,6 +28,17 @@ namespace SAE
         public string GetHint(Vector3 point) => Placement.Hint(ToMap(point));
 
         public void OnClick(PlayerController player, Vector3 point) => Placement.Apply(ToMap(point));
+
+        // Fiche du singe posé que l'on vise (sur le plateau ou la carte), avec son cercle de portée.
+        public bool TryGetMonkeyInfo(Vector3 point, out Monkey monkey, out Vector3 anchor, out Vector3 rangeCenter, out float rangeScale)
+        {
+            var placed = GameState.Nearest(ToMap(point), Placement.Radius * 2f);
+            monkey = placed?.monkey ?? default;
+            rangeCenter = placed != null ? transform.TransformPoint(ToLocal(placed.pos, 0.05f)) : Vector3.zero;
+            anchor = rangeCenter + Vector3.up * (TowerManager.TowerSize * scale * 2f + 0.2f);   // au-dessus, sans cacher le singe
+            rangeScale = scale;
+            return placed != null;
+        }
 
         void LateUpdate()
         {
