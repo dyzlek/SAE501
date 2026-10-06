@@ -54,8 +54,16 @@ namespace SAE
         GameObject CreateProxy(Mirrored m)
         {
             var proxy = new GameObject($"Miniature {m.name}");
-            proxy.AddComponent<MeshFilter>().sharedMesh = m.GetComponent<MeshFilter>().sharedMesh;
-            proxy.AddComponent<MeshRenderer>().sharedMaterial = m.GetComponent<MeshRenderer>().sharedMaterial;
+            // Un singe avec un modèle 3D : sa miniature est le même singe (modèle + aura), à l'échelle 1 du proxy
+            // (le proxy prend la taille du cube du singe). Sinon, on copie simplement le mesh (ballons, joueur).
+            var view = m.GetComponentInParent<MonkeyView>();
+            if (view && view.model)
+                Visuals.MonkeyPiece(view.monkey, proxy.transform, Vector3.zero, 1f, withLabel: false);
+            else
+            {
+                proxy.AddComponent<MeshFilter>().sharedMesh = m.GetComponent<MeshFilter>().sharedMesh;
+                proxy.AddComponent<MeshRenderer>().sharedMaterial = m.GetComponent<MeshRenderer>().sharedMaterial;
+            }
             proxy.AddComponent<ColorTint>();
             if (!string.IsNullOrEmpty(m.label))
             {

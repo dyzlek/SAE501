@@ -4,6 +4,11 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mar. 6 oct. 2026
 
+### Corrections après test
+> C'est pas mal, mais quand je pose le singe sur le plateau, il redevient un cube. L'aura n'est pas très adaptée au Canon et au Tireur, et le Canon est tourné vers le mur. Et pourquoi, quand j'arrête le Play, les singes redeviennent des cubes ?
+>
+> Suite : annule les changements parasites d'Unity, ne committe pas le package MCP, travaille bien sur ma branche, et ajoute mes deux captures dans la partie « Fait » de mon journal. Tout doit y être, même les changements que je vais te demander.
+
 ### Les singes dans la bibliothèque, avec une aura
 > Dans la scène Unity, je ne vois pas encore les singes dans la bibliothèque. Pense aussi à l'aura : aujourd'hui c'est la couleur du cube, mais ça devra être une sorte d'aura à la Dragon Ball autour des singes.
 

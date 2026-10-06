@@ -63,16 +63,20 @@ namespace SAE
             root.transform.SetParent(parent, false);
             root.transform.localPosition = localPos;
             var view = root.AddComponent<MonkeyView>();
+            view.monkey = m;
             view.body = Box("Corps", root.transform, Vector3.zero, Vector3.one * size, MonkeyData.RarityColor(m.level)).GetComponent<ColorTint>();
             view.body.Set(MonkeyData.RarityColor(m.level), MonkeyData.IsRainbow(m.level));
 
+            var bodySize = Vector3.one * size;   // taille de ce qu'on voit, pour ajuster l'aura
             var modelAsset = MonkeyVisuals.Model(m.type, out float yaw);
             if (modelAsset)
             {
-                view.body.GetComponent<Renderer>().enabled = false;   // le cube reste pour la miniature du plateau
-                view.model = FitModel(modelAsset, yaw, root.transform, size);
+                view.body.GetComponent<Renderer>().enabled = false;   // le cube reste comme collider et repère
+                view.model = FitModel(modelAsset, yaw, root.transform, size, out bodySize);
             }
-            view.aura = Aura.Add(root, m.level, size);
+            // L'aura (particules) n'est créée qu'en jeu : enregistrée dans la scène pour chaque case,
+            // elle la ferait passer de 1 à 7 Mo. Les cases de la bibliothèque la recréent au lancement.
+            if (Application.isPlaying) view.aura = Aura.Add(root, m.level, bodySize);
             if (withLabel)
                 Label(root.transform, $"{MonkeyData.ShortName(m.type)}{(int)m.level + 1}", new Vector3(0, size * 0.9f, 0), size * 0.45f, Color.black);
             return root;
@@ -80,9 +84,15 @@ namespace SAE
 
         // Pose une copie du modèle dans parent, à la hauteur size et centrée. Les bras écartés (pose en T)
         // peuvent un peu déborder sur les côtés : on les compte pour 80 %, sinon les singes seraient minuscules.
-        static GameObject FitModel(GameObject asset, float yaw, Transform parent, float size)
+        // fittedSize = taille finale du modèle (largeur, hauteur, profondeur) en mètres.
+        static GameObject FitModel(GameObject asset, float yaw, Transform parent, float size, out Vector3 fittedSize)
         {
+#if UNITY_EDITOR
+            // Hors Play (scène enregistrée) : un lien vers le FBX plutôt qu'une copie complète, la scène reste légère
+            var model = Application.isPlaying ? Object.Instantiate(asset) : (GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(asset);
+#else
             var model = Object.Instantiate(asset);
+#endif
             model.name = "Modele";
             var rotation = Quaternion.Euler(0f, yaw, 0f) * asset.transform.rotation;
             model.transform.SetPositionAndRotation(Vector3.zero, rotation);
@@ -97,6 +107,7 @@ namespace SAE
             model.transform.localScale = asset.transform.localScale * scale;
             model.transform.localRotation = rotation;
             model.transform.localPosition = -bounds.center * scale;
+            fittedSize = bounds.size * scale;
             return model;
         }
 

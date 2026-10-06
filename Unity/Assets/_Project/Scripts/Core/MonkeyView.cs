@@ -4,12 +4,13 @@ namespace SAE
 {
     // L'apparence d'un singe, construite par Visuals.MonkeyPiece :
     // - « Corps » : le cube couleur de la rareté. Avec un modèle 3D, il reste invisible mais sert toujours
-    //   de collider et de source pour la miniature du plateau (Board / Mirrored copient un mesh simple) ;
+    //   de repère (taille, Mirrored pour la miniature du plateau) ;
     // - « Modele » : le modèle 3D du type de singe (s'il existe) ;
     // - « Aura » : les flammes de la couleur de la rareté.
     // Les autres scripts passent par ici pour griser, teinter ou cacher le singe, quel que soit son rendu.
     public class MonkeyView : MonoBehaviour
     {
+        public Monkey monkey;
         public ColorTint body;
         public GameObject model;     // null : pas de modèle, on voit le cube
         public Aura aura;

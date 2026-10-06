@@ -10,17 +10,21 @@ namespace SAE
     {
         public const float FlamesPerSecond = 70f;
 
-        // height = hauteur du singe en mètres : l'aura s'adapte à sa taille.
-        public static Aura Add(GameObject target, Rarity level, float height)
+        // bodySize = taille du singe en mètres (largeur, hauteur, profondeur) : l'aura s'adapte à sa forme.
+        // Le singe est centré sur target, donc ses pieds sont à -hauteur/2.
+        public static Aura Add(GameObject target, Rarity level, Vector3 bodySize)
         {
             var aura = new GameObject("Aura").AddComponent<Aura>();
             aura.transform.SetParent(target.transform, false);
-            aura.transform.localPosition = Vector3.down * height / 2f;   // pied du singe
-            aura.Build(level, height);
+            aura.transform.localPosition = Vector3.down * bodySize.y / 2f;
+            // Les flammes partent du bord du singe : un singe fin garde une aura serrée,
+            // un objet large et bas (Canon, Tireur) en a une plus large, sinon il cacherait les flammes.
+            float radius = Mathf.Max(bodySize.y * 0.38f, Mathf.Max(bodySize.x, bodySize.z) * 0.5f);
+            aura.Build(level, bodySize.y, radius);
             return aura;
         }
 
-        void Build(Rarity level, float height)
+        void Build(Rarity level, float height, float radius)
         {
             var color = ColorOf(level);
             var material = MonkeyVisuals.Instance ? MonkeyVisuals.Instance.auraMaterial : null;
@@ -42,7 +46,7 @@ namespace SAE
             var shape = flames.shape;
             shape.shapeType = ParticleSystemShapeType.Cone;   // un cône presque droit tourné vers le haut
             shape.angle = 5f;
-            shape.radius = height * 0.38f;
+            shape.radius = radius;
             shape.rotation = new Vector3(-90f, 0f, 0f);
             shape.radiusThickness = 0.2f;                     // surtout sur le bord : le singe reste visible au milieu
 

@@ -26,8 +26,9 @@ namespace SAE.EditorTools
             "Assets/_Project/Art/Colle/FBX/Colle_Rigged.fbx",
         };
 
-        // Les modèles riggés ont été exportés de dos (ils regardent vers +Z) : on les retourne.
-        static readonly float[] Yaw = { 180f, 180f, 0f, 180f, 0f, 180f, 180f };
+        // Les modèles ont été exportés de dos (ils regardent vers +Z) : on les retourne.
+        // Le Tireur est symétrique, inutile de le tourner.
+        static readonly float[] Yaw = { 180f, 180f, 180f, 180f, 0f, 180f, 180f };
 
         [MenuItem("SAE/Brancher les modèles des singes")]
         public static void Setup()
@@ -52,6 +53,28 @@ namespace SAE.EditorTools
             EditorUtility.SetDirty(visuals);
             AssetDatabase.SaveAssets();
             Debug.Log("Singes : modèles et aura branchés.");
+        }
+
+        // Menu SAE → Mettre à jour les singes de la bibliothèque : remplace, dans la scène ouverte, le singe de
+        // chaque case par la version à jour (modèle 3D + aura), pour le voir aussi hors Play.
+        // (En Play, chaque case le fait déjà toute seule au lancement.) Il faut ensuite enregistrer la scène.
+        [MenuItem("SAE/Mettre à jour les singes de la bibliothèque")]
+        public static void RefreshLibrary()
+        {
+            foreach (var slot in Object.FindObjectsByType<LibrarySlot>(FindObjectsSortMode.None))
+            {
+                float size = 0f;
+                for (int i = slot.transform.childCount - 1; i >= 0; i--)
+                {
+                    var child = slot.transform.GetChild(i);
+                    var corps = child.Find("Corps");
+                    if (corps) size = corps.localScale.x;
+                    Object.DestroyImmediate(child.gameObject);
+                }
+                Visuals.MonkeyPiece(new Monkey(slot.type, slot.level), slot.transform, Vector3.zero, size, withLabel: false);
+                EditorUtility.SetDirty(slot);
+            }
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
         }
 
         // Matériau des flammes : particules additives (elles éclaircissent ce qu'il y a derrière, comme une lueur),
