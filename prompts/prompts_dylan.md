@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Branche pour la VR et schéma du hub
+> Je vais m'occuper de l'ajout de la VR dans une branche `feat/ajout-vr`. Avant ça, regarde ce que j'ai fait et ajoute l'image de mon schéma du hub.
+
 ### Guide de bonnes pratiques tiré des cours
 > Récupère toutes les informations importantes de mes supports de cours (comment bien structurer son code, etc.) et mets-les soit dans le CLAUDE.md, soit dans un autre fichier .md que tu liras quand tu coderas dans le projet.
 

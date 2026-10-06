@@ -30,6 +30,15 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 - Le cube « Vider » et le pied du plateau gênent le passage devant le joueur.
 - Les vies et la vague sont encore affichées à l'écran (prévu avec le chantier D).
 
+**Mon schéma du hub en cercle**
+Le hub était plus espacé, mais pas encore assez. J'ai dessiné une disposition où tout suit vraiment un cercle (rouge), avec le centre libre pour circuler :
+- le **plateau** (carré marron) est reculé sur le cercle, devant le joueur, avec le bouton **JOUER** (orange) juste à côté ;
+- les deux **bibliothèques** (vert) sont courbes et suivent le cercle sur les côtés ;
+- le **bananier** (BANANE) est au fond, avec le panier (rond marron) et la **zone de chute des bananes** (jaune) devant lui ;
+- le **coffre** (chest) est en haut à gauche, sur le cercle.
+
+![Mon schéma du hub en cercle](../captures/schema-hub-cercle.png)
+
 **Captures du hub en cercle** (base de ma deuxième analyse)
 
 ![Hub en cercle, vue joueur : vies et vague encore affichées en haut à gauche](../captures/hub-cercle-vue.webp)
@@ -59,6 +68,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude (Claude Code) | Chantier D, vrai système de vagues : 10 vagues écrites à l'avance (groupes de ballons normaux, **rapides**, **blindés** qui prennent moitié moins de dégâts et ne se ralentissent pas, boss), **dirigeable rouge** à la vague 10, victoire puis mode infini ; tableau de la vague avec la composition de la prochaine vague. **Fiche des singes** dans le décor quand on vise un singe (bibliothèque, plateau, carte) : effet, dégâts, portée, cadence, cibles et gain de la fusion, plus le cercle de portée sur le plateau et la carte | Gardé (testé et validé par moi) |
 | Claude (Claude Code) | La fiche du singe ne s'affiche plus toute seule : il faut viser le singe **en maintenant A** (clavier AZERTY), ou le bouton A de la manette droite en VR ; aide en bas de l'écran mise à jour | Gardé (testé et validé par moi) |
 | Claude (Claude Code) | Scène régénérée commitée, branche `feat/inventaire` poussée et fusionnée dans `main` par Pull Request | Gardé |
+| Claude (Claude Code) | Ajout de mon schéma du hub en cercle (image + légende) dans ce journal, sur la nouvelle branche `feat/ajout-vr` | Gardé |
 | Claude (Claude Code) | Lecture des 7 supports de cours de D. Di Pierro et synthèse dans `docs/GUIDE_CODE.md` (organisation, style C#, cycle de vie, événements, collisions, mise en place VR, saisie, UI en World Space, tests, perf, check-list avant commit) ; CLAUDE.md demande de le lire avant de coder | À relire par l'équipe |
 
 ## Lun. 5 oct. 2026
