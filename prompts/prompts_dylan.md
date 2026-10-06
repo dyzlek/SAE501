@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Panier à côté du plateau, le récolteur va chercher partout
+> J'aimerais vraiment que le panier soit à côté du plateau où on pose les singes. Et quand on prend une banane et qu'on la pose ailleurs, le singe va la chercher.
+
 ### Récolteur plus lent et plus drôle
 > J'aimerais qu'il soit beaucoup plus lent de base, que le panier soit plus loin, vers le plateau, et quelque chose de drôle : parfois il dunke, parfois il rate, etc.
 

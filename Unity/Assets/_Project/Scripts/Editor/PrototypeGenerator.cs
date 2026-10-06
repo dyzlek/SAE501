@@ -247,7 +247,7 @@ namespace SAE.EditorTools
         //                           et le tableau de la vague au-dessus
         //   côtés (±72°)          : les deux meubles de la bibliothèque, courbés le long du cercle
         //   derrière (180°)       : le bananier de Maxens (agrandi), la table des bananes devant lui (-172°),
-        //                           le panier sur son socle (-157°) et la caisse (-140°), le panneau d'amélioration (160°)
+        //                           la caisse (-140°), le panneau d'amélioration (160°) ; le panier, lui, est devant, à côté du plateau (+32°)
         //   derrière (132°)       : le coffre de Nicolas, avec son prix au-dessus et le panneau des chances
         const float Ring = 5.0f;          // rayon du cercle : tout est posé dessus, le centre reste libre pour circuler
         const float SlotSize = 0.24f;     // ancienne taille ×1,1
@@ -255,8 +255,8 @@ namespace SAE.EditorTools
         const float SlotStepY = 0.40f;    // espace entre deux étagères
         const float FirstShelfY = 0.45f;  // rangée la plus basse (accessible à un petit joueur)
         const float TreeScale = 1.6f;     // le palmier de Maxens, agrandi
-        public const float BasketAngle = -160f;   // le panier (HarvesterSetup le déplace aussi dans une scène déjà générée)
-        public const float BasketRadius = 2.0f;
+        public const float BasketAngle = 32f;   // le panier (HarvesterSetup le déplace aussi dans une scène déjà générée)
+        public const float BasketRadius = Ring - 0.6f;   // à côté du plateau, après Vider (+20°)
 
         // Position sur le cercle. angle 0 = devant, positif = à droite.
         static Vector3 Around(float angleDeg, float radius, float height = 0f)

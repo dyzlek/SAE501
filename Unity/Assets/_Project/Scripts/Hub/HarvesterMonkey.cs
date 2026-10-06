@@ -8,7 +8,7 @@ namespace SAE
     public enum HarvesterStat { Vitesse, Cadence, Rendement }
 
     // Le singe récolteur (un singe classique) : un service qu'on achète au panneau « RÉCOLTEUR ».
-    // Il marche jusqu'à une banane posée sur la table, saute pour l'attraper, la porte au-dessus de sa tête,
+    // Il marche jusqu'à une banane (sur la table, ou n'importe où si le joueur l'a lâchée ailleurs), saute pour l'attraper, la porte au-dessus de sa tête,
     // marche jusqu'au panier et la jette dedans. Puis il souffle un peu et recommence.
     // Pour rire, le lancer n'est pas toujours le même : parfois il DUNK (saute au-dessus du panier, l'y écrase et fête ça),
     // parfois il RATE (la banane tombe à côté, il boude, la ramasse et recommence).
@@ -83,7 +83,7 @@ namespace SAE
 
                 // Le joueur peut la prendre avant nous : on abandonne et on en cherche une autre
                 Func<bool> lost = () => !banana || banana.EnMain || banana.Deposee;
-                yield return WalkTo(TableSpot(banana.transform.position), lost);
+                yield return WalkTo(PickSpot(banana.transform.position), lost);
                 if (lost()) continue;
 
                 yield return JumpAndGrab(banana);
@@ -98,16 +98,38 @@ namespace SAE
             Banane best = null;
             foreach (var b in bananier.BananesAuSol)
             {
-                if (!b || !b.Posee || b.EnMain || b.Deposee || b.EstPourrie) continue;
+                if (!b || b.EnMain || b.Deposee || b.EstPourrie || !AtRest(b)) continue;
                 if (!best || b.Progression > best.Progression) best = b;
             }
             return best;
         }
 
-        // Au bord de la table, juste sous la banane, du côté où le singe attend (il ne passe pas sous la table)
-        Vector3 TableSpot(Vector3 bananaPos)
+        // Immobile : finie sa chute depuis l'arbre, ou retombée (par terre, sur un meuble…) après un lâcher du joueur
+        static bool AtRest(Banane b)
+        {
+            var body = b.GetComponent<Rigidbody>();
+            return body.isKinematic ? b.Posee : body.linearVelocity.sqrMagnitude < 0.01f;
+        }
+
+        // Où se mettre pour la prendre : au bord de la table si elle est dessus, sinon juste devant elle
+        Vector3 PickSpot(Vector3 bananaPos)
         {
             var local = table.InverseTransformPoint(bananaPos);
+            bool onTable = Mathf.Abs(local.x) < 0.85f && Mathf.Abs(local.z) < 0.55f;
+            if (!onTable)
+            {
+                var toMonkey = transform.position - bananaPos;
+                toMonkey.y = 0f;
+                var spot = bananaPos + toMonkey.normalized * 0.2f;
+                spot.y = home.y;
+                return spot;
+            }
+            return TableSpot(local);
+        }
+
+        // Au bord de la table, juste sous la banane, du côté où le singe attend (il ne passe pas sous la table)
+        Vector3 TableSpot(Vector3 local)
+        {
             float side = Mathf.Sign(table.InverseTransformPoint(home).z);
             var spot = table.TransformPoint(new Vector3(Mathf.Clamp(local.x, -0.7f, 0.7f), 0f, side * 0.7f));
             spot.y = home.y;
@@ -165,6 +187,8 @@ namespace SAE
         {
             Carried = banana;
             banana.Prise();   // elle ne pourrit plus en disparaissant, le panier ne la compte pas toute seule
+            var body = banana.GetComponent<Rigidbody>();
+            body.isKinematic = true;   // lâchée par le joueur, elle tombait : dans ses mains, plus de gravité
             // Le joueur ne peut plus la lui prendre des mains
             foreach (var c in banana.GetComponentsInChildren<Collider>()) c.enabled = false;
         }
