@@ -49,11 +49,22 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 - **À vérifier au casque :** les fps avec beaucoup d'auras allumées (≤ 80 particules par singe, seulement sur les cases possédées).
 - **Attention (équipe) :** ça touche des scripts de Dylan (`Visuals`, `LibrarySlot`, `ChestReward`, `PlacementSurface`, `Board`, `TowerManager`, `PlayerController`, `PrototypeGenerator`) et sa scène `Jeu.unity`.
 - **Rangé :** changements parasites d'Unity annulés (`Jeu.unity`, réglages URP, réécrits à l'ouverture du projet) ; le package MCP for Unity reste installé sur mon PC seulement (non commité).
-- **Bloque :** —
+- **Bloque : le hub « sans bouger » n'est pas adapté à la VR.** Depuis le centre, tout est à 2,5-4 m : les boutons (JOUER, LANCER, Vider, améliorations), les 56 cases de la bibliothèque et le plateau sont **hors de portée des mains**. Au casque, il faudrait viser de loin avec un rayon pour tout, ce qui ressemble à un jeu à la souris (« test de l'écran » raté) et va contre la règle « tout à portée de bras ». Les 56 cases (7 types × 8 raretés) prennent aussi trop de place pour tenir près du joueur.
+
+  ![Hub vu depuis le centre : boutons et bibliothèques hors de portée](../captures/maxens-hub-pas-adapte-vr.png)
+
+  **Pistes** (à décider en équipe) :
+  1. **Réagencer, sans changer le jeu** : un établi en arc de cercle à portée de bras (~0,6 m) avec le plateau incliné au milieu et de vrais boutons à enfoncer sur le bord ; le coffre et le bananier derrière, en se retournant (snap turn). Limite : les 56 cases ne tiennent toujours pas à portée.
+  2. **Changer la bibliothèque** : elle n'affiche plus 56 cases fixes. Une étagère tournante (carrousel) à portée de main, 7 compartiments (un par type) qu'on fait tourner à la main ; chaque compartiment montre seulement les raretés qu'on possède. Geste VR en plus (tourner), et beaucoup moins de place.
+  3. **Inventaire sur la main** (comme le sac de Half-Life Alyx ou la ceinture de Job Simulator) : on ouvre un menu sur le poignet et on y attrape directement le singe. Le plus compact, mais c'est un vrai changement de fonctionnement et plus de travail.
+  4. **Garder la disposition et viser au rayon** (Ray Interactor, support 5) : le moins de travail, mais le moins « VR ».
+
+  **Mon avis (proposé par Claude) :** 1 + 2 ensemble. L'établi pour le plateau et les boutons, le carrousel pour les singes. Le rayon seulement pour ce qui reste loin (prendre une banane au sol, par exemple).
 
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Analyse du problème VR du hub « sans bouger » (portée des boutons et de la bibliothèque) et 4 pistes de solution, capture ajoutée | À décider en équipe |
 | Claude (Cowork) | Tronc du bananier rallongé ×3 avec un script Blender, export FBX | Gardé (intégré sur `feat/prototype-maxens`) |
 | Claude (Code) | Test du hub « sans bouger » d'après mon schéma : joueur fixé au centre, tout rapproché en rond, plateau agrandi, zone de chute vers le joueur, portée 6 m, plus de textes au-dessus des singes ; scène régénérée et testée en Play | À tester au casque |
 | Claude (Code) | Lecture des PDF du cours (installation de `pypdf`), relecture du code avec le guide : aura en prefab réglable dans l'Inspector, renderers gardés en mémoire, constantes nommées, aura blanche corrigée | À tester au casque |

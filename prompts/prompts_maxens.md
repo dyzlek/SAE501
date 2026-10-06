@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mar. 6 oct. 2026
 
+### Problème VR du hub
+> Note dans les problèmes, avec la capture, que ce n'est pas adapté à la VR, pour les boutons par exemple. Il faudrait trouver un moyen : soit réagencer les bibliothèques, soit changer complètement le fonctionnement. Dis-moi ce qui serait possible.
+
 ### Hub sans bouger
 > Enlève les textes au-dessus des singes. Je veux aussi faire un test : dans le hub, on ne peut pas se déplacer, on fait tout en tournant la tête et en prenant les objets. Le plateau est trop petit, on ne voit pas bien les différences entre les singes. Regarde le schéma : on serait au milieu, on aurait accès à tout avec le regard, et on aurait une portée assez longue.
 
