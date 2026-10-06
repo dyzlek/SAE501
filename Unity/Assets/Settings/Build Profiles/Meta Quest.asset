@@ -260,6 +260,9 @@ MonoBehaviour:
     - line: '|   bundleVersion: 0.1.0'
     - line: '|   preloadedAssets:'
     - line: '|   - {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}'
+    - line: '|   - {fileID: 11400000, guid: a8a8f64a61489074c963a0b75d40aac6, type: 2}'
+    - line: '|   - {fileID: -866474898869680587, guid: 0faf35c9278ebe14f8831ef783cf4a65, type: 2}'
+    - line: '|   - {fileID: -3939708503225001034, guid: 96d6989430fa50d44a165e26586ff96d, type: 2}'
     - line: '|   metroInputSource: 0'
     - line: '|   wsaTransparentSwapchain: 0'
     - line: '|   xboxOneDisableKinectGpuReservation: 1'
@@ -1089,7 +1092,7 @@ MonoBehaviour:
         m_ExportAsGoogleAndroidProject: 0
         m_DebugSymbolLevel: 1
         m_DebugSymbolFormat: 5
-        m_CurrentDeploymentTargetId: __builtin__target_all
+        m_CurrentDeploymentTargetId: __builtin__target_default
         m_BuildType: 2
         m_LinkTimeOptimization: 0
         m_BuildAppBundle: 0
