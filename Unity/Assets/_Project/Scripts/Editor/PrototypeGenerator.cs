@@ -27,9 +27,6 @@ namespace SAE.EditorTools
 
         static readonly Color Floor = new Color(0.35f, 0.35f, 0.38f);
         static readonly Color Wood = new Color(0.45f, 0.30f, 0.18f);
-        static readonly Color FloorWood = new Color(0.55f, 0.40f, 0.26f);   // plancher de la cabane
-        static readonly Color WallWood = new Color(0.50f, 0.34f, 0.20f);
-        static readonly Color Beam = new Color(0.30f, 0.20f, 0.12f);         // poutres et poteaux, plus foncés
         static readonly Color PathColor = new Color(0.62f, 0.45f, 0.25f);
         static readonly Color Grass1 = new Color(0.30f, 0.62f, 0.28f);
         static readonly Color Grass2 = new Color(0.26f, 0.55f, 0.24f);
@@ -41,7 +38,7 @@ namespace SAE.EditorTools
             Directory.CreateDirectory(Folder);
             TagSetup.EnsureTags();
             VRSetup.Configure();
-            CabinArt.Build();   // textures et matériaux de la cabane du hub (bois, tapis, vitres)
+            CabinArt.Build();   // la texture de bois des meubles du hub (la cabane elle-même vient de Blender)
 
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
             var defaultCam = GameObject.FindWithTag("MainCamera");
@@ -295,232 +292,124 @@ namespace SAE.EditorTools
             return env;
         }
 
-        // La cabane en rondins qui ferme le hub : 12 murs de rondins empilés, des poteaux aux angles,
-        // un toit conique en planches avec sa charpente, une grande porte ouverte sur le bananier (derrière),
-        // trois fenêtres, un lustre et deux lanternes, un plancher et un tapis rond au centre.
-        // Les matériaux (bois, tapis, vitres) sont fabriqués par CabinArt.
-        // Murs et toit ne font pas d'ombre : le soleil éclaire toujours l'intérieur, les lampes ajoutent la lumière chaude.
+        // La cabane est un vrai modèle 3D, fabriqué dans Blender par un script : Blender/cabane.py (à relancer après
+        // un changement, voir son en-tête) -> Art/Cabane/Cabane.glb, plus les accessoires Tonneau, Caisse et Regime.
+        // Le modèle apporte tout ce qui se voit : rondins, toit de chaume, porte et fenêtres, lustre, lanternes, tapis, prairie.
+        // Ici, on le pose, on l'aligne, et on ajoute ce qu'un modèle n'a pas : les colliders (invisibles),
+        // la zone de téléportation et les vraies lumières (aux repères « Lumiere_* » placés dans le modèle).
+        const string CabinFolder = "Assets/_Project/Art/Cabane/";
         const int CabinSides = 12;
-        const float LogSize = 0.22f;      // diamètre d'un rondin, en mètres
-        const float DoorHeight = 2.4f;    // la grande porte, derrière (le bananier est dehors)
+        const float CabinDoorHeight = 2.4f;   // même valeur que DOOR_H dans cabane.py : la porte est derrière (180°)
 
         static void BuildCabin(Transform env)
         {
-            var cabin = new GameObject("Cabane").transform;
-            cabin.SetParent(env, false);
-            float r = HubLayout.CabinRadius, h = HubLayout.CabinHeight;
-            float sideLength = 2f * r * Mathf.Tan(Mathf.PI / CabinSides);
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(CabinFolder + "Cabane.glb");
+            if (!asset) { Debug.LogWarning("Hub : Cabane.glb introuvable. Lancer Blender/cabane.py (voir l'en-tête du script)."); return; }
+            var cabin = (GameObject)PrefabUtility.InstantiatePrefab(asset);
+            cabin.name = "Cabane";
+            cabin.transform.SetParent(env, false);
+            AlignCabin(cabin.transform);
 
-            // Plancher : dedans, et dehors en terrasse sous le bananier (même bois)
-            var floor = Visuals.Solid("Plancher", cabin, new Vector3(0, -0.05f, 0), new Vector3(r * 2f + 3f, 0.1f, r * 2f + 3f), Color.white);
-            floor.GetComponent<Renderer>().sharedMaterial = CabinArt.Floor;
+            // Plancher : dedans et la terrasse derrière la porte (mêmes limites que la plateforme du modèle)
+            var floor = new GameObject("Plancher (collider)");
+            floor.transform.SetParent(env, false);
+            var floorBox = floor.AddComponent<BoxCollider>();
+            floorBox.center = new Vector3(0f, -0.05f, -0.8f);
+            floorBox.size = new Vector3(8f, 0.1f, 9.6f);
             Teleportable(floor);
 
+            // Un collider par mur : on ne traverse pas, ni en marchant ni en se téléportant (sauf par la porte)
+            float r = HubLayout.CabinRadius, h = HubLayout.CabinHeight;
+            float sideLength = 2f * r * Mathf.Tan(Mathf.PI / CabinSides);
             for (int i = 0; i < CabinSides; i++)
             {
                 float angle = i * 360f / CabinSides;
-                bool door = Mathf.Approximately(angle, 180f);
-                var side = new GameObject(door ? "Mur de la porte" : $"Mur {i}").transform;
-                side.SetParent(cabin, false);
-                side.SetPositionAndRotation(Around(angle, r), Quaternion.Euler(0, angle, 0));   // +Z local = vers l'extérieur
-
-                // Un seul collider par mur (invisible) : on ne passe pas au travers, ni en marchant ni en se téléportant
-                float bottom = door ? DoorHeight : 0f;
-                var col = side.gameObject.AddComponent<BoxCollider>();
-                col.center = new Vector3(0, (bottom + h) / 2f, 0);
-                col.size = new Vector3(sideLength, h - bottom, LogSize);
-
-                // Les rondins, couchés et empilés ; un peu plus longs que le mur pour se croiser aux angles
-                for (float y = bottom + LogSize / 2f; y < h; y += LogSize * 0.9f)
-                    NoShadow(Part("Rondin", side, PrimitiveType.Cylinder, new Vector3(0, y, 0),
-                        new Vector3(LogSize, sideLength / 2f + 0.12f, LogSize), CabinArt.Logs, Quaternion.Euler(0, 0, 90)));
-
-                if (door)
-                    for (int s = -1; s <= 1; s += 2)   // les montants de la porte
-                        NoShadow(Part("Montant", side, PrimitiveType.Cylinder, new Vector3(s * (sideLength / 2f - 0.12f), DoorHeight / 2f, 0),
-                            new Vector3(0.26f, DoorHeight / 2f, 0.26f), CabinArt.Logs));
-                else if (angle == 60f || angle == 150f || angle == 210f)
-                    BuildWindow(side, 2.15f, 0.9f, 0.7f);
-
-                // Poteau d'angle (entre ce mur et le suivant)
-                NoShadow(Part("Poteau", cabin, PrimitiveType.Cylinder, Around(angle + 15f, r / Mathf.Cos(Mathf.PI / CabinSides), h / 2f),
-                    new Vector3(0.32f, h / 2f, 0.32f), CabinArt.Logs));
+                float bottom = Mathf.Approximately(angle, 180f) ? CabinDoorHeight : 0f;
+                var wall = new GameObject($"Mur {i} (collider)");
+                wall.transform.SetParent(env, false);
+                wall.transform.SetPositionAndRotation(Around(angle, r), Quaternion.Euler(0, angle, 0));
+                var box = wall.AddComponent<BoxCollider>();
+                box.center = new Vector3(0, (bottom + h) / 2f, 0);
+                box.size = new Vector3(sideLength, h - bottom, 0.25f);
             }
 
-            BuildRoof(cabin, r, h);
-            BuildLights(cabin, h);
+            // Les lumières, là où le modèle a mis ses repères : un lustre au centre, deux lanternes aux murs
+            foreach (var t in cabin.GetComponentsInChildren<Transform>())
+            {
+                if (t.name == "Lumiere_Lustre") AddLight(t, 7f, 2.4f);
+                else if (t.name.StartsWith("Lumiere_Lanterne")) AddLight(t, 3.5f, 1.3f);
+            }
 
-            // Tapis rond au centre, là où se tient le joueur (sans collider : la téléportation vise le plancher dessous)
-            Part("Tapis", cabin, PrimitiveType.Quad, new Vector3(0, 0.005f, 0), Vector3.one * (HubLayout.CarpetRadius * 2f),
-                CabinArt.Rug, Quaternion.Euler(90, 0, 0));
-
-            // Rien ici ne bouge : Unity regroupe les rondins en quelques gros maillages (moins d'appels de dessin, plus de fps)
+            // Rien ici ne bouge : Unity regroupe les maillages (moins d'appels de dessin, plus de fps dans le casque)
             foreach (var t in cabin.GetComponentsInChildren<Transform>())
                 GameObjectUtility.SetStaticEditorFlags(t.gameObject, StaticEditorFlags.BatchingStatic);
         }
 
-        // Fenêtre (fausse : une vitre qui brille, couleur ciel), avec son cadre, sa croix et son appui, côté intérieur du mur
-        static void BuildWindow(Transform side, float y, float width, float height)
+        // Le modèle passe de Blender (Z en haut) à Unity (Y en haut) : selon l'importeur, il peut arriver tourné ou en miroir.
+        // On le remet d'aplomb avec ses deux repères : « Repere_Porte » doit être derrière (180°), « Repere_Droite » à droite (+90°).
+        static void AlignCabin(Transform cabin)
         {
-            float z = -LogSize / 2f - 0.02f;
-            NoShadow(Part("Vitre", side, PrimitiveType.Cube, new Vector3(0, y, z), new Vector3(width, height, 0.01f), CabinArt.Glass));
-            var frame = new Color(0.28f, 0.18f, 0.1f);
-            Tinted(Part("Cadre haut", side, PrimitiveType.Cube, new Vector3(0, y + height / 2f, z - 0.02f), new Vector3(width + 0.1f, 0.06f, 0.06f), CabinArt.Furniture), frame);
-            Tinted(Part("Appui", side, PrimitiveType.Cube, new Vector3(0, y - height / 2f, z - 0.05f), new Vector3(width + 0.2f, 0.06f, 0.14f), CabinArt.Furniture), frame);
-            for (int s = -1; s <= 1; s += 2)
-                Tinted(Part("Cadre côté", side, PrimitiveType.Cube, new Vector3(s * width / 2f, y, z - 0.02f), new Vector3(0.06f, height, 0.06f), CabinArt.Furniture), frame);
-            Tinted(Part("Croix", side, PrimitiveType.Cube, new Vector3(0, y, z - 0.015f), new Vector3(0.03f, height, 0.03f), CabinArt.Furniture), frame);
-            Tinted(Part("Croix", side, PrimitiveType.Cube, new Vector3(0, y, z - 0.015f), new Vector3(width, 0.03f, 0.03f), CabinArt.Furniture), frame);
-        }
-
-        // Toit conique en planches (un maillage fait en code : 12 triangles vers la pointe, une face dedans, une dehors),
-        // qui dépasse un peu des murs, et ses chevrons (une poutre par angle, de l'avant-toit à la pointe).
-        static void BuildRoof(Transform cabin, float r, float h)
-        {
-            float eave = (r + 0.35f) / Mathf.Cos(Mathf.PI / CabinSides);   // coin de l'avant-toit
-            var apex = new Vector3(0, h + 1.8f, 0);
-            var verts = new System.Collections.Generic.List<Vector3>();
-            var uvs = new System.Collections.Generic.List<Vector2>();
-            for (int i = 0; i < CabinSides; i++)
+            Transform door = null, right = null;
+            foreach (var t in cabin.GetComponentsInChildren<Transform>())
             {
-                var p0 = Around(15f + i * 30f, eave, h);
-                var p1 = Around(45f + i * 30f, eave, h);
-                float edge = Vector3.Distance(p0, p1), slant = Vector3.Distance((p0 + p1) / 2f, apex);
-                // Ordre des sommets : la face visible est celle d'où on les voit tourner dans le sens des aiguilles d'une montre.
-                bool outward = Vector3.Dot(Vector3.Cross(p1 - p0, apex - p0), (p0 + p1) / 2f) > 0f;
-                foreach (bool inside in new[] { true, false })
-                {
-                    bool keep = inside != outward;
-                    verts.Add(keep ? p0 : p1); verts.Add(keep ? p1 : p0); verts.Add(apex);
-                    uvs.Add(new Vector2(0, 0)); uvs.Add(new Vector2(edge * 0.5f, 0)); uvs.Add(new Vector2(edge * 0.25f, slant * 0.5f));
-                }
-
-                var rafterStart = p0 + Vector3.down * 0.1f;
-                var rafter = Part("Chevron", cabin, PrimitiveType.Cube, (rafterStart + apex) / 2f + Vector3.down * 0.08f,
-                    new Vector3(0.1f, 0.14f, Vector3.Distance(rafterStart, apex)), CabinArt.Furniture, Quaternion.LookRotation(apex - rafterStart));
-                Tinted(rafter, new Color(0.3f, 0.2f, 0.12f));
-                NoShadow(rafter);
+                if (t.name == "Repere_Porte") door = t;
+                if (t.name == "Repere_Droite") right = t;
             }
-            var tris = new int[verts.Count];
-            for (int i = 0; i < tris.Length; i++) tris[i] = i;
-            var mesh = new Mesh { name = "Toit conique" };
-            mesh.SetVertices(verts);
-            mesh.SetUVs(0, uvs);
-            mesh.SetTriangles(tris, 0);
-            mesh.RecalculateNormals();
-            mesh.RecalculateBounds();
+            if (!door || !right) { Debug.LogWarning("Hub : repères de la cabane introuvables, cabane non alignée."); return; }
 
-            var roof = new GameObject("Toit");
-            roof.transform.SetParent(cabin, false);
-            roof.AddComponent<MeshFilter>().sharedMesh = mesh;
-            var rend = roof.AddComponent<MeshRenderer>();
-            rend.sharedMaterial = CabinArt.Roof;
-            rend.shadowCastingMode = ShadowCastingMode.Off;
-        }
-
-        // Un lustre en roue de charrette au centre (6 bougies) et deux lanternes aux murs : lumière chaude, sans ombres (fps)
-        static void BuildLights(Transform cabin, float h)
-        {
-            float wheelY = 2.75f;
-            Part("Chaîne", cabin, PrimitiveType.Cube, new Vector3(0, (wheelY + h + 1.6f) / 2f, 0), new Vector3(0.03f, h + 1.6f - wheelY, 0.03f), CabinArt.Iron);
-            Tinted(Part("Roue du lustre", cabin, PrimitiveType.Cylinder, new Vector3(0, wheelY, 0), new Vector3(0.9f, 0.03f, 0.9f), CabinArt.Furniture),
-                new Color(0.3f, 0.2f, 0.12f));
-            for (int i = 0; i < 6; i++)
-                Part("Bougie", cabin, PrimitiveType.Cylinder, Around(i * 60f, 0.4f, wheelY + 0.08f), new Vector3(0.05f, 0.06f, 0.05f), CabinArt.Glow);
-            AddLight(cabin, new Vector3(0, wheelY - 0.1f, 0), 6.5f, 2.2f);
-
-            foreach (float angle in new[] { 120f, -60f })
+            cabin.Rotate(0f, 180f - AngleOf(door.position), 0f, Space.World);
+            if (AngleOf(right.position) < 0f)
             {
-                var pos = Around(angle, HubLayout.CabinRadius - LogSize - 0.12f, 2.55f);
-                Part("Support", cabin, PrimitiveType.Cube, Around(angle, HubLayout.CabinRadius - LogSize - 0.05f, 2.7f), new Vector3(0.04f, 0.04f, 0.04f), CabinArt.Iron);
-                Part("Lanterne", cabin, PrimitiveType.Cube, pos, new Vector3(0.12f, 0.16f, 0.12f), CabinArt.Glow);
-                Part("Chapeau", cabin, PrimitiveType.Cube, pos + Vector3.up * 0.1f, new Vector3(0.16f, 0.04f, 0.16f), CabinArt.Iron);
-                AddLight(cabin, pos, 3.5f, 1.2f);
+                var s = cabin.localScale;
+                cabin.localScale = new Vector3(-s.x, s.y, s.z);   // miroir gauche-droite : la porte (sur l'axe) ne bouge pas
             }
         }
 
-        static void AddLight(Transform parent, Vector3 pos, float range, float intensity)
+        static float AngleOf(Vector3 p) => Mathf.Atan2(p.x, p.z) * Mathf.Rad2Deg;   // 0 = devant, positif = à droite
+
+        static void AddLight(Transform at, float range, float intensity)
         {
             var light = new GameObject("Lumière").AddComponent<Light>();
-            light.transform.SetParent(parent, false);
-            light.transform.localPosition = pos;
+            light.transform.SetParent(at, false);
             light.type = LightType.Point;
             light.range = range;
             light.intensity = intensity;
-            light.color = new Color(1f, 0.8f, 0.55f);
-            light.shadows = LightShadows.None;
+            light.color = new Color(1f, 0.8f, 0.55f);   // chaude, comme une flamme
+            light.shadows = LightShadows.None;           // les ombres des lampes coûtent trop cher sur le casque
         }
 
-        // Les petits objets qui donnent vie à la cabane : caisses, tonneaux, régimes de bananes (dedans et sur la terrasse)
+        // Les accessoires du modèle Blender (tonneaux, caisses, régimes de bananes), dans la cabane et sur la terrasse
         static void BuildDecor(Transform env)
         {
             var decor = new GameObject("Décor").transform;
             decor.SetParent(env, false);
 
-            Crate(decor, Around(-50f, Ring + 0.3f), 0.5f, 10f);
-            Crate(decor, Around(-50f, Ring + 0.3f, 0.5f), 0.34f, -15f);
-            Barrel(decor, Around(57f, Ring + 0.25f));
-            Bananas(decor, Around(57f, Ring + 0.25f, 0.92f));
+            Prop(decor, "Caisse", Around(-50f, Ring + 0.2f), 10f, 1f);
+            Prop(decor, "Caisse", Around(-50f, Ring + 0.2f, 0.5f), -15f, 0.7f);
+            Prop(decor, "Tonneau", Around(57f, Ring + 0.15f), 0f, 1f);
+            Prop(decor, "Regime", Around(57f, Ring + 0.15f, 0.9f), 30f, 1f);
 
-            // Dehors, autour du bananier
-            Barrel(decor, Around(205f, Ring + 1.6f));
-            Bananas(decor, Around(205f, Ring + 1.6f, 0.92f));
-            Barrel(decor, Around(155f, Ring + 1.5f));
-            Crate(decor, Around(145f, Ring + 1.9f), 0.5f, 30f);
+            // Dehors, sur la terrasse, autour du bananier
+            Prop(decor, "Tonneau", Around(205f, Ring + 1.6f), 40f, 1f);
+            Prop(decor, "Regime", Around(205f, Ring + 1.6f, 0.9f), 0f, 1f);
+            Prop(decor, "Tonneau", Around(155f, Ring + 1.5f), 0f, 1f);
+            Prop(decor, "Caisse", Around(145f, Ring + 1.9f), 30f, 1f);
         }
 
-        static void Crate(Transform parent, Vector3 pos, float size, float yaw)
+        static void Prop(Transform parent, string model, Vector3 pos, float yaw, float scale)
         {
-            var crate = Part("Caisse en bois", parent, PrimitiveType.Cube, pos + Vector3.up * (size / 2f), Vector3.one * size, CabinArt.Furniture, Quaternion.Euler(0, yaw, 0));
-            Tinted(crate, new Color(0.72f, 0.55f, 0.35f));
-            crate.AddComponent<BoxCollider>();
-            for (int s = -1; s <= 1; s += 2)   // deux cerclages plus foncés
-                Tinted(Part("Planche", crate.transform, PrimitiveType.Cube, new Vector3(0, s * 0.35f, 0), new Vector3(1.03f, 0.14f, 1.03f), CabinArt.Furniture),
-                    new Color(0.42f, 0.28f, 0.16f));
-        }
-
-        static void Barrel(Transform parent, Vector3 pos)
-        {
-            var barrel = Part("Tonneau", parent, PrimitiveType.Cylinder, pos + Vector3.up * 0.45f, new Vector3(0.55f, 0.45f, 0.55f), CabinArt.Furniture);
-            Tinted(barrel, new Color(0.55f, 0.36f, 0.2f));
-            barrel.AddComponent<CapsuleCollider>();
-            foreach (float y in new[] { -0.6f, 0.6f })   // cercles de fer
-                Part("Cercle", barrel.transform, PrimitiveType.Cylinder, new Vector3(0, y, 0), new Vector3(1.04f, 0.05f, 1.04f), CabinArt.Iron);
-        }
-
-        // Un régime de bananes posé : 5 bananes en éventail autour d'une tige
-        static void Bananas(Transform parent, Vector3 pos)
-        {
-            var bunch = new GameObject("Régime de bananes").transform;
-            bunch.SetParent(parent, false);
-            bunch.position = pos;
-            Tinted(Part("Tige", bunch, PrimitiveType.Cylinder, new Vector3(0, 0.06f, 0), new Vector3(0.03f, 0.06f, 0.03f), null), new Color(0.35f, 0.25f, 0.1f));
-            for (int i = 0; i < 5; i++)
-            {
-                var banana = Part("Banane", bunch, PrimitiveType.Capsule, Around(i * 72f, 0.07f, 0.05f), new Vector3(0.05f, 0.09f, 0.05f), null,
-                    Quaternion.Euler(0, i * 72f, 0) * Quaternion.Euler(70f, 0, 0));
-                Tinted(banana, new Color(1f, 0.85f, 0.2f));
-            }
-        }
-
-        // Une pièce de décor sans collider (les murs et les meubles portent leur propre collider)
-        static GameObject Part(string name, Transform parent, PrimitiveType type, Vector3 localPos, Vector3 scale, Material material, Quaternion? rotation = null)
-        {
-            var go = GameObject.CreatePrimitive(type);
-            go.name = name;
-            Object.DestroyImmediate(go.GetComponent<Collider>());
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(CabinFolder + model + ".glb");
+            if (!asset) { Debug.LogWarning($"Hub : {model}.glb introuvable (Blender/cabane.py)."); return; }
+            var go = (GameObject)PrefabUtility.InstantiatePrefab(asset);
             go.transform.SetParent(parent, false);
-            go.transform.localPosition = localPos;
-            go.transform.localRotation = rotation ?? Quaternion.identity;
-            go.transform.localScale = scale;
-            if (material) go.GetComponent<Renderer>().sharedMaterial = material;
-            return go;
-        }
-
-        static GameObject Tinted(GameObject go, Color color)
-        {
-            go.AddComponent<ColorTint>().Set(color);
-            return go;
+            go.transform.SetPositionAndRotation(pos, Quaternion.Euler(0, yaw, 0));
+            go.transform.localScale = Vector3.one * scale;
+            if (model == "Regime") return;   // les bananes de déco ne bloquent rien (les vraies tombent du bananier)
+            // Un collider qui l'entoure : les bananes lâchées s'y posent, on ne marche pas au travers
+            var b = Bounds(go);
+            var box = go.AddComponent<BoxCollider>();
+            box.center = go.transform.InverseTransformPoint(b.center);
+            box.size = b.size / scale;
         }
 
         // Les meubles en bois uni (pupitres, bibliothèque, socles, cadres) prennent la texture du bois, gardant leur teinte
@@ -530,7 +419,6 @@ namespace SAE.EditorTools
                 if (tint.color == Wood) tint.GetComponent<Renderer>().sharedMaterial = CabinArt.Furniture;
         }
 
-        static void NoShadow(GameObject go) => go.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
 
         // Plateau incliné de 25° vers le joueur, posé sur une planche qui suit l'inclinaison + un pied.
         static void BuildBoard(Transform env, Transform mapRoot)

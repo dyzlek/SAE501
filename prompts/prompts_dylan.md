@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Cabane : fais encore mieux
+> Fais encore mieux, dépasse-toi.
+
 ### Cabane plus serrée et vraiment belle
 > J'aimerais encore un peu moins d'espace. Tu peux changer certains éléments, comme les bibliothèques. Je veux que ce soit adapté à la VR, mais vraiment beau, semi-réaliste comme dans le vrai jeu (Bloons TD 6). Surprends-moi.
 
