@@ -255,6 +255,8 @@ namespace SAE.EditorTools
         const float SlotStepY = 0.40f;    // espace entre deux étagères
         const float FirstShelfY = 0.45f;  // rangée la plus basse (accessible à un petit joueur)
         const float TreeScale = 1.6f;     // le palmier de Maxens, agrandi
+        public const float BasketAngle = -156f;   // le panier (HarvesterSetup le déplace aussi dans une scène déjà générée)
+        public const float BasketRadius = 3.7f;
 
         // Position sur le cercle. angle 0 = devant, positif = à droite.
         static Vector3 Around(float angleDeg, float radius, float height = 0f)
@@ -413,7 +415,7 @@ namespace SAE.EditorTools
             var basket = root.transform.Find("Panier");
             if (basket)
             {
-                var basketPos = Around(-157f, Ring - 0.5f);
+                var basketPos = Around(BasketAngle, BasketRadius);   // avancé vers le centre : de la place autour, loin de la table et de la caisse
                 Visuals.Solid("Socle du panier", env, basketPos + Vector3.up * (HandHeight / 2f), new Vector3(0.5f, HandHeight, 0.5f), Wood);
                 basket.position = basketPos + Vector3.up * HandHeight;
             }

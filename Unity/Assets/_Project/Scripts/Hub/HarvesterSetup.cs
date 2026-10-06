@@ -11,8 +11,10 @@ namespace SAE
     {
         const float Ring = 5.0f;              // rayon du cercle du hub, en mètres
         const float MonkeySize = 0.55f;       // taille du singe, en mètres
-        const float HomeAngle = -164f;
-        const float HomeRadius = 3.7f;
+        const float HomeAngle = -171f;
+        const float HomeRadius = 3.4f;
+        const float BasketAngle = -156f;      // mêmes valeurs que PrototypeGenerator.BasketAngle / BasketRadius
+        const float BasketRadius = 3.7f;
         const float PanelAngle = -118f;
         const float PanelRadius = Ring - 0.45f;
         static readonly Color Wood = new Color(0.45f, 0.3f, 0.18f);
@@ -24,6 +26,7 @@ namespace SAE
             var panier = Object.FindAnyObjectByType<Panier>();
             if (!bananier || !panier || !bananier.versCible) return;
 
+            MoveBasket(panier);
             var monkey = BuildMonkey(bananier, panier);
             BuildPanel(monkey);
         }
@@ -32,6 +35,21 @@ namespace SAE
         {
             float a = angleDeg * Mathf.Deg2Rad;
             return new Vector3(Mathf.Sin(a) * radius, 0f, Mathf.Cos(a) * radius);
+        }
+
+        // Le panier était collé à la table et à la caisse : on l'avance vers le centre, avec son socle.
+        // (Le générateur le pose déjà là ; ceci sert pour une scène générée avant le changement.)
+        static void MoveBasket(Panier panier)
+        {
+            var socle = GameObject.Find("Socle du panier");
+            var basket = panier.transform;
+            while (basket.parent && basket.name != "Panier") basket = basket.parent;
+            if (!socle || basket.name != "Panier") return;
+
+            var offset = Around(BasketAngle, BasketRadius) - socle.transform.position;
+            offset.y = 0f;
+            socle.transform.position += offset;
+            basket.position += offset;
         }
 
         static HarvesterMonkey BuildMonkey(Bananier bananier, Panier panier)

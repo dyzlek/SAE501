@@ -17,6 +17,7 @@ namespace SAE
         public float legSwing = 35f;            // en degrés
         public float armSwing = 30f;            // en degrés
         public float bounce = 0.03f;            // en mètres
+        public float headScale = 1.4f;          // grosse tête : on voit bien son visage, c'est le singe « mignon » du hub
 
         HarvesterMonkey monkey;
         Transform leftArm, leftForeArm, rightArm, rightForeArm, leftHand, rightHand;
@@ -34,6 +35,12 @@ namespace SAE
             leftUpLeg = Bone("LeftUpLeg"); leftLeg = Bone("LeftLeg");
             rightUpLeg = Bone("RightUpLeg"); rightLeg = Bone("RightLeg");
             tail = Bone("Tail1");
+
+            // Une grosse tête, et pas de fléchette : c'est un récolteur, pas un singe de combat
+            var head = Bone("Head");
+            if (head) head.localScale *= headScale;
+            foreach (var t in model.GetComponentsInChildren<Transform>(true))
+                if (t.name.Contains("Dart")) t.gameObject.SetActive(false);
 
             bones = new[] { leftArm, rightArm, leftUpLeg, rightUpLeg, tail };
             rest = new Quaternion[bones.Length];

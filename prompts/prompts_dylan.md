@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Retouches du singe récolteur
+> Parfait, sauf un truc : écarte le panier des autres objets. Sur le singe, grossis simplement son visage et enlève sa fléchette.
+
 ### Singe récolteur de bananes
 > J'aimerais pouvoir acheter le service d'un singe qui ramasse les bananes et les met dans le panier. Fais-le gratuit pour le moment, ses améliorations aussi (vitesse de déplacement, etc.). Fais toutes les animations : il marche vers une banane, la porte, se rapproche du panier et la jette dedans. Utilise le singe classique.
 
