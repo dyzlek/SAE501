@@ -14,14 +14,13 @@ namespace SAE.EditorTools
     //   - XR Plug-in Management : OpenXR activé pour Android (le casque) et PC (Quest Link) ;
     //   - OpenXR : support Meta Quest + profils des manettes Touch (pas l'Eye Gaze) ;
     //   - Android : IL2CPP, ARM64, API 32 minimum (exigé par le Quest) ;
-    //   - XRI : couche d'interaction « Teleport » (n° 31, celle des Starter Assets) et simulateur XR lancé
-    //     tout seul dans l'éditeur, pour tester sans casque.
+    //   - XRI : couche d'interaction « Teleport » (n° 31, celle des Starter Assets). Le simulateur XR n'est PAS lancé
+    //     par XRI (il remplacerait le vrai casque) : c'est SimulatorWhenNoHeadset qui le lance, seulement sans casque.
     // Le générateur l'appelle à chaque fois : on peut le relancer sans risque.
     public static class VRSetup
     {
         const string SamplesFolder = "Assets/Samples/XR Interaction Toolkit/3.6.1";
         public const string RigPrefab = SamplesFolder + "/Starter Assets/Prefabs/XR Origin (XR Rig).prefab";
-        const string SimulatorPrefab = SamplesFolder + "/XR Interaction Simulator/XR Interaction Simulator.prefab";
         const string LayerSettings = "Assets/XRI/Settings/Resources/InteractionLayerSettings.asset";
         const string SimulatorSettings = "Assets/XRI/Settings/Resources/XRDeviceSimulatorSettings.asset";
         public const int TeleportLayer = 31;
@@ -43,15 +42,10 @@ namespace SAE.EditorTools
             PlayerSettings.colorSpace = ColorSpace.Linear;
 
             SetAssetProperty(LayerSettings, so => so.FindProperty("m_LayerNames").GetArrayElementAtIndex(TeleportLayer).stringValue = "Teleport");
-            SetAssetProperty(SimulatorSettings, so =>
-            {
-                so.FindProperty("m_AutomaticallyInstantiateSimulatorPrefab").boolValue = true;
-                so.FindProperty("m_AutomaticallyInstantiateInEditorOnly").boolValue = true;   // jamais dans le build casque
-                so.FindProperty("m_SimulatorPrefab").objectReferenceValue = AssetDatabase.LoadAssetAtPath<GameObject>(SimulatorPrefab);
-            });
+            SetAssetProperty(SimulatorSettings, so => so.FindProperty("m_AutomaticallyInstantiateSimulatorPrefab").boolValue = false);
 
             AssetDatabase.SaveAssets();
-            Debug.Log("VR configurée : OpenXR (Android + PC), Meta Quest, couche Teleport, simulateur dans l'éditeur.");
+            Debug.Log("VR configurée : OpenXR (Android + PC), Meta Quest, couche Teleport.");
         }
 
         // Coche « OpenXR » dans Project Settings → XR Plug-in Management pour cette plateforme.
