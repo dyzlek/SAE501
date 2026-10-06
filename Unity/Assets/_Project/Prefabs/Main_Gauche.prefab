@@ -40,7 +40,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6439608384119378576}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0294bfb46d1d9714cbe9bcd70d1ab54f, type: 3}
   m_Name: 
@@ -51,7 +51,7 @@ MonoBehaviour:
       m_Name: 
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: 3f734c0c-71ac-4eae-8102-d58fa0392e67
+      m_Id: 815bcc71-75ae-40e0-8bc0-1df07c5f6c91
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -64,7 +64,7 @@ MonoBehaviour:
       m_Name: 
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: ad20db5c-b8e4-4a93-bbfd-0836ead5b510
+      m_Id: 58dc6039-5cfd-4356-9185-3cadf9a60227
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -76,8 +76,8 @@ MonoBehaviour:
   thumb: {fileID: 8404248472862954244}
   thumbTip: {fileID: 6237279399165039759}
   heldBow: {fileID: 0}
-  fingersCurl: 30
-  thumbCurl: 20
+  fingersCurl: 60
+  thumbCurl: 30
 --- !u!1001 &6073073627072837904
 PrefabInstance:
   m_ObjectHideFlags: 0

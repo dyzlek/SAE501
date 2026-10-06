@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mar. 6 oct. 2026
 
+### Tir VR et mains
+> Les mains ne se ferment pas, et l'arc ne rend pas bien. Surtout : en mode PC le tir fonctionne, mais pas en VR. Quand je clique, la flèche apparaît puis disparaît. Comment as-tu conçu le système de tir en VR ?
+
 ### Retour aux mains simples
 > Finalement, je préférais les mains simples : les nouvelles collent moins au style du jeu. Reprends la main de Quincy d'avant, avec une fermeture légère quand on appuie sur les boutons.
 

@@ -6,10 +6,9 @@ namespace SAE
     // Une main de Quincy (prefab Main_Gauche / Main_Droite) posée sur une manette, qui se ferme selon les boutons,
     // comme le script AnimateHandOnInput du cours (support 3) : le grip plie les doigts, la gâchette plie le pouce.
     // La main qui tient l'arc reste fermée tant que l'arc est sorti.
-    // C'est la main simple de Quincy (un bloc pour les doigts, un pour le pouce) : elle se ferme seulement
-    // un peu, sinon les blocs se cassent. Les doigts tournent autour de l'axe « côté de la main » (celui qui va
-    // vers le pouce, perpendiculaire aux doigts), relevé au lancement dans le repère de la main : ça marche aussi
-    // pour la main droite, qui est la main gauche en miroir.
+    // C'est la main simple de Quincy (un bloc pour les doigts, un pour le pouce). Les doigts tournent autour de
+    // l'axe des articulations (celui qui va vers le pouce, perpendiculaire aux doigts), relevé au lancement dans
+    // le repère de la main : ça marche aussi pour la main droite, qui est la main gauche en miroir.
     public class AnimateHandOnInput : MonoBehaviour
     {
         public InputActionProperty gripValue;      // XRI Left|Right Interaction/Select Value
@@ -18,8 +17,8 @@ namespace SAE
         public Transform thumb, thumbTip;
         public Bow heldBow;                        // l'arc tenu par cette main (main gauche), sinon vide
 
-        public float fingersCurl = 30f;            // pliage maximum, en degrés (léger : main simple)
-        public float thumbCurl = 20f;
+        public float fingersCurl = 60f;            // pliage maximum, en degrés
+        public float thumbCurl = 30f;
 
         Quaternion fingersRest, thumbRest;
         Vector3 curlAxis;                          // axe de pliage, dans le repère de la main

@@ -109,6 +109,10 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
   ![Nouvelles mains de Quincy : à droite, poing fermé](../captures/maxens-mains-quincy-v2.png)
 
 - **Annulé : les mains détaillées** ne collent pas au style du jeu (trop « réalistes » à côté des modèles simples). **Retour à la main simple découpée dans Quincy** (`Quincy_Main.fbx`), en gardant le singe tenu devant la main. La fermeture qui faisait bizarre est corrigée : les doigts tournaient dans le plan de la paume (sur le côté) ; ils tournent maintenant autour de l'axe des articulations, et **seulement un peu** (30° pour les doigts, 20° pour le pouce), pour que les blocs ne se cassent pas. Les fichiers des mains détaillées sont retirés du projet (le script `creer_mains.py` et `Quincy_Mains.blend` restent dans mon dossier Blender).
+- **Corrigé après mon test dans le simulateur VR :**
+  - **le tir en VR ne marchait pas dans le simulateur** : la flèche apparaissait puis disparaissait. Le tir VR suit le vrai geste (on attrape la corde et on recule la main) ; dans le simulateur, la main ne recule pas quand on tient le bouton, donc la tension restait à 0 et la flèche était rangée au lâcher. **Sans casque, la tension monte maintenant toute seule** tant qu'on garde le bouton (1 s pour tendre à fond), comme le clic droit du mode PC ; avec un vrai casque, c'est toujours le geste de la main ;
+  - **les mains se fermaient trop peu** pour qu'on le voie : 60° pour les doigts et 30° pour le pouce maintenant que l'axe est le bon ;
+  - **l'arc cache la vue dans le simulateur** : le simulateur tient les manettes à 30 cm du visage. Au casque, le bras est tendu (60-70 cm), l'arc est donc plus loin et plus petit à l'écran. À vérifier au casque avant de le réduire encore.
 
 **Captures** (bibliothèque avec les singes 3D et leur aura, et singe tenu en main) :
 
@@ -145,6 +149,7 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Tir VR utilisable dans le simulateur (tension au temps sans casque, geste de la main avec casque), mains qui se ferment davantage | À tester au casque |
 | Claude (Code) | Retour à la main simple de Quincy, fermeture corrigée (bon axe, pliage léger) ; singe tenu devant la main gardé | À tester au casque |
 | Claude (Code) | Nouvelles mains de Quincy modélisées et riggées par script Blender (2 phalanges par doigt), pliage phalange par phalange, singe tenu devant la main ; testé en Play | Mains jetées (pas dans le style), singe devant la main gardé |
 | Claude (Code) | Corrections après test : arc plus petit, corde plus facile à attraper (40 cm, grip ou gâchette) ; mains de Quincy riggées (poignet, paume, doigts, pouce) à la place des manettes, qui se ferment avec les boutons ; testé en Play | Arc gardé, mains jetées (refaites) |
