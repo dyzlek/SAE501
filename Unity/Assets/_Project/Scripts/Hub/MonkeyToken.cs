@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit.Attachment;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
@@ -43,6 +44,7 @@ namespace SAE
             var grab = piece.AddComponent<XRGrabInteractable>();
             grab.throwOnDetach = false;
             grab.useDynamicAttach = true;   // il reste dans la main là où on l'a attrapé
+            grab.farAttachMode = InteractableFarAttachMode.Near;   // pris de loin, il vient jusqu'à la main (au lieu de rester au bout du rayon)
             piece.AddComponent<GrabReach>();  // on peut l'attraper de loin, jusqu'à 6 m (GrabReach.Reach)
 
             var token = piece.AddComponent<MonkeyToken>();

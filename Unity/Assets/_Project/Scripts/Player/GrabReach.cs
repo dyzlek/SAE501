@@ -34,7 +34,7 @@ namespace SAE
 
         public bool Process(IXRHoverInteractor interactor, IXRHoverInteractable target) => InReach(interactor.transform);
 
-        // Déjà en main : on ne le lâche pas parce qu'il est loin (en saisie lointaine, il reste au bout du rayon).
+        // Déjà en main : on ne le lâche pas parce qu'il est loin (pris de loin, il vient dans la main).
         public bool Process(IXRSelectInteractor interactor, IXRSelectInteractable target) =>
             interactor.IsSelecting(target) || InReach(interactor.transform);
 

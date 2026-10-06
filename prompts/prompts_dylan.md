@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Le singe vient vers nous
+> J'aimerais que le singe vienne vers nous quand on le prend de loin.
+
 ### Prendre les singes de loin (ça ne marche pas)
 > J'aimerais pouvoir prendre les singes de loin, car ça ne marche pas.
 
