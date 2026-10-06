@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Cabane plus serrée et vraiment belle
+> J'aimerais encore un peu moins d'espace. Tu peux changer certains éléments, comme les bibliothèques. Je veux que ce soit adapté à la VR, mais vraiment beau, semi-réaliste comme dans le vrai jeu (Bloons TD 6). Surprends-moi.
+
 ### Hub dans une cabane en bois (branche de test)
 > Dans une branche de test, j'aimerais que tout ce qu'il y a dans le hub soit mis dans une sorte de cabane en bois fermée, beaucoup plus serrée, avec un tapis au sol. Essaie de tout rapprocher pour que ce soit adapté à la VR.
 
