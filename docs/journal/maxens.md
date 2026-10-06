@@ -40,6 +40,25 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 
 ![Schéma du hub : joueur au centre](../captures/maxens-schema-hub-centre.png)
 
+- **Analyse du rig de Quincy** (notre personnage, avec l'arc comme arme) : fichiers `Art/Quincy/FBX/QuincyLvl3/7/10/20_Rigged.fbx`, analysés dans Unity sans rien modifier.
+  - **Ce qui est bien fait :**
+    - un seul squelette de 28 os, le même pour les 4 niveaux : les mêmes animations serviront pour tous ;
+    - des noms d'os standards (Hips, Spine, Neck, Head, LeftArm, LeftForeArm, LeftHand, LeftUpLeg…) : Unity peut les reconnaître en « Humanoid » pour réutiliser des animations toutes faites ;
+    - bras, jambes et queue ont des poids progressifs entre les os (ils plient proprement), et les coudes et poignets sont bien placés ;
+    - la flèche chargée (`LoadedArrow`) est déjà un objet à part, et l'arc est fait de morceaux de maillage séparés (corps de l'arc, deux pointes, corde) : il sera facile à détacher.
+  - **Ce qui bloque pour un arc utilisable :**
+    1. l'arc n'est pas séparé du personnage : il est dans le même maillage que Quincy et collé à 100 % à l'os `RightHand`. On ne peut donc pas le prendre, le bouger ou le viser indépendamment de la main ;
+    2. l'arc n'a aucun os : la corde est un simple trait droit, impossible à tendre ;
+    3. la flèche (`ArrowSocket`) est accrochée à la main droite, la même que l'arc, alors qu'elle doit suivre la main qui tire la corde ;
+    4. 19 sommets du corps (vers la main droite) dépendent en partie de l'os `ArrowSocket` : si on bouge la flèche, la main se déforme ;
+    5. pas d'os de doigts (une main = un seul os) : la main ne peut pas se refermer sur l'arc ni pincer la corde ;
+    6. bras asymétriques : avant-bras droit de 0,235 m contre 0,14 m à gauche (le bras droit est allongé pour tenir l'arc). À vérifier si on passe en Humanoid ;
+    7. importé en « Generic », sans animation dans les fichiers.
+  - **À faire dans Blender** (`Quincy_Rig.blend`) avant de l'utiliser comme arme :
+    - séparer l'arc (corps, pointes, corde) dans son propre objet et l'exporter à part (`Quincy_Bow.fbx`) ;
+    - lui donner son propre petit squelette : poignée, branche haute, branche basse, et un os au milieu de la corde (point d'encoche) ; la corde en deux segments qui se rejoignent à ce point, pour pouvoir la tirer ;
+    - retirer l'influence d'`ArrowSocket` sur le corps, et mettre à la place des points d'accroche vides : un pour l'arc dans la main qui le tient, un pour la flèche dans la main qui tire ;
+    - si les mains de Quincy sont visibles au casque : ajouter des os de doigts.
 **Captures** (bibliothèque avec les singes 3D et leur aura, et singe tenu en main) :
 
 ![Bibliothèque : singes 3D avec l'aura de leur rareté](../captures/maxens-bibliotheque-singes-3d.png)
@@ -75,6 +94,7 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Analyse du rig de Quincy dans Unity (squelette, poids, séparation arc / bras / mains) et liste de ce qu'il faut corriger dans Blender pour utiliser l'arc comme arme | Gardé |
 | Claude (Code) | Réécriture de mes prompts du jour, plus clairs et mieux structurés (contexte, objectif, contraintes), sans changer leur sens | Gardé |
 | Claude (Code) | Retour à la version d'avant (hub « sans bouger » sur un grand cercle) : générateur et scène remis, `Carousel.cs` supprimé | Gardé |
 | Claude (Code) | Prototype des pistes 1 + 2 : établi à portée de main (plateau, boutons sur socles), deux étagères tournantes (`Carousel`), table des bananes à hauteur de main, textes du coffre réduits ; scène régénérée et testée en Play | Jeté (trop surchargé, annulé après essai) |

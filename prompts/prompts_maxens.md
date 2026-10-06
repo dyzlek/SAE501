@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mar. 6 oct. 2026
 
+### Analyse du rig de Quincy
+> Notre personnage sera Quincy, et son arme sera l'arc. Pour l'instant, analyse uniquement son rig, sans rien modifier : vérifie qu'il est bien construit, et en particulier que les bras et les mains sont correctement séparés de l'arc.
+
 ### Retour à la version précédente du hub
 > Après essai, l'établi et les étagères tournantes surchargent l'espace autour du joueur : on ne distingue plus clairement les éléments. Annule cette dernière version et remets le hub tel qu'il était avant.
 >
