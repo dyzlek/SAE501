@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mar. 6 oct. 2026
 
+### Mise à jour finale
+> Pousse le travail sur ma branche, et mets bien à jour mes prompts utiles et ce que j'ai fait, avec des captures.
+
 ### Tenue de l'arc
 > C'est parfait. Deux améliorations : quand on tient les manettes, les mains sont paume vers le bas, ce qui n'est pas naturel ; il faudrait les incliner un peu, comme sur la capture. Ensuite, la main gauche devrait tenir l'arc sur le côté : aujourd'hui elle est au milieu, et la flèche passe à travers. Enfin, la main droite devrait être accrochée à la corde : il reste un espace entre les deux.
 

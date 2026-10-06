@@ -73,6 +73,18 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 
   ![Quincy tient l'arc séparé (à gauche), l'arc seul avec la corde tirée (à droite)](../captures/maxens-quincy-arc-separe.png)
 
+- **Bilan de l'arme (état final du jour, branche `feat/arc-quincy`)** — le détail de chaque étape suit en dessous :
+  - **au hub, on n'a que les mains de Quincy** (gants simples, dos de la main vers le haut, inclinés pouce relevé) ; elles se ferment avec le grip et la gâchette ; le singe pris est tenu devant la main ;
+  - **sur la carte, l'arc apparaît dans la main gauche**, tenu sur le côté ; on approche la main droite de la corde, on serre, une flèche s'encoche et la main droite reste accrochée à la corde ; on recule la main pour tendre (sans casque, la tension monte en gardant le bouton), on relâche : la flèche part, vole avec la gravité et éclate les ballons ;
+  - **en mode PC** : clic droit maintenu puis relâché ;
+  - testé dans le simulateur VR et en Play ; **reste à tester au vrai casque** (taille de l'arc bras tendu, confort de visée, prise des singes).
+
+  Mes captures dans le simulateur VR : la flèche encochée, mains de Quincy sur l'arc et la corde ; puis les mains au hub, inclinées.
+
+  ![Simulateur VR : flèche encochée, main droite sur la corde](../captures/maxens-vr-fleche-encochee.png)
+
+  ![Simulateur VR : mains de Quincy au hub, inclinées](../captures/maxens-vr-mains-inclinees.png)
+
 - **Fait : le système de l'arc** (branche `feat/arc-quincy`, partie du `main` à jour avec la PR #8, arc séparé de Quincy repris de `feat/prototype-maxens`) :
   - **au hub, seulement les mains** ; l'arc apparaît dans les mains quand on se téléporte sur la carte (bouton JOUER) et se range au retour (`BowHolster`, qui réagit au nouvel événement `PlayerRig.Teleported`) ;
   - **au casque** (`VRArcher`) : l'arc est dans la main gauche ; on approche la main droite de la corde et on serre le grip : une flèche s'encoche ; on recule la main pour tendre, on relâche pour tirer. Vibrations à l'encoche, pendant la tension et au tir ;
