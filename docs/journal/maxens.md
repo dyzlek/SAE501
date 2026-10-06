@@ -2,6 +2,17 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Mar. 6 oct. 2026
+- **Fait :** nouvelle branche `feat/prototype-maxens`, créée depuis le `main` à jour (PR #7 incluse), pour faire mes tests : placer le bananier dans la scène, essayer des réglages, etc.
+- **Mis de côté :** le bananier au tronc 3× plus haut (FBX refait sous Blender) reste sur la branche locale `art/bananier-grand-tronc`, **non poussée**. On n'utilise pas ce modèle pour l'instant ; on pourra le reprendre plus tard si l'arbre paraît trop petit au casque.
+- **Bloque :** —
+
+### IA
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Cowork) | Tronc du bananier rallongé ×3 avec un script Blender, export FBX (branche locale `art/bananier-grand-tronc`) | Mis de côté |
+| Claude (Code) | Mise à jour de `main`, création et push de la branche de test `feat/prototype-maxens`, journal et prompt | Gardé |
+
 ## Lun. 5 oct. 2026
 - **Fait :** prototype du **bananier** (branche `feat/proto-bananier`), testé à la souris dans l'éditeur :
   - le bananier fait tomber des bananes à intervalle régulier, avec un petit « boing » de l'arbre ;
