@@ -5,7 +5,10 @@ namespace SAE
 {
     // Un ballon suit la piste. Ses points de vie = ses couches (la couleur change à chaque couche perdue).
     // Cliquer dessus le touche : c'est la place de l'arc de Quincy en attendant la VR.
-    // Un boss est un gros ballon violet foncé, plus lent, avec beaucoup de couches.
+    // Sa sorte (BalloonKind) change sa taille, sa vitesse et sa résistance :
+    //   Rapide = petit et vif ; Blindé = gris, moitié moins de dégâts, insensible au ralentissement ;
+    //   Boss = gros ballon violet foncé et lent ; Dirigeable = le boss final rouge, énorme, insensible au ralentissement.
+    // S'il atteint la sortie, il retire autant de vies qu'il lui reste de couches.
     public class Balloon : MonoBehaviour, IClickable
     {
         public static readonly List<Balloon> All = new List<Balloon>();
@@ -15,34 +18,58 @@ namespace SAE
             new Color(0.9f, 0.1f, 0.1f), new Color(0.2f, 0.5f, 1f), new Color(0.2f, 0.8f, 0.2f),
             new Color(1f, 0.9f, 0.1f), new Color(1f, 0.4f, 0.8f), new Color(0.1f, 0.1f, 0.1f),
         };
+        static readonly Color ArmorColor = new Color(0.55f, 0.57f, 0.6f);
+        static readonly Color BossColor = new Color(0.35f, 0.1f, 0.45f);
+        static readonly Color BlimpColor = new Color(0.8f, 0.1f, 0.1f);
 
         public float baseSpeed = 2.5f;
-        public float bossSpeedFactor = 0.6f;
-        static readonly Color BossColor = new Color(0.35f, 0.1f, 0.45f);
 
         WaveSpawner spawner;
         List<Vector3> path;
         int nextPoint = 1;
         float hp;
+        float speed;
         float slowFactor = 1f;
         float slowUntil;
         ColorTint tint;
-        bool boss;
+
+        public BalloonKind Kind { get; private set; }
+        bool Armored => Kind == BalloonKind.Blinde || Kind == BalloonKind.Dirigeable;
 
         // Distance parcourue : les singes visent le ballon le plus avancé.
         public float Progress { get; private set; }
 
-        public string GetHint(Vector3 point) => $"{(boss ? "BOSS" : "Ballon")} ({Mathf.CeilToInt(hp)} couche(s)) : tirer";
+        public string GetHint(Vector3 point) => $"{KindName} ({Mathf.CeilToInt(hp)} couche(s)) : tirer";
 
-        public void Init(WaveSpawner owner, List<Vector3> points, int layers, bool isBoss = false)
+        string KindName => Kind switch
         {
-            boss = isBoss;
-            if (boss) baseSpeed *= bossSpeedFactor;
+            BalloonKind.Rapide => "Ballon rapide",
+            BalloonKind.Blinde => "Ballon blindé",
+            BalloonKind.Boss => "BOSS",
+            BalloonKind.Dirigeable => "DIRIGEABLE",
+            _ => "Ballon",
+        };
+
+        public void Init(WaveSpawner owner, List<Vector3> points, int layers, BalloonKind kind)
+        {
             spawner = owner;
             path = points;
             hp = layers;
+            Kind = kind;
             transform.position = path[0];
             tint = GetComponent<ColorTint>();
+
+            // Taille et vitesse selon la sorte
+            (float size, float speedFactor) = kind switch
+            {
+                BalloonKind.Rapide => (0.65f, 1.7f),
+                BalloonKind.Blinde => (1f, 0.8f),
+                BalloonKind.Boss => (1.8f, 0.6f),
+                BalloonKind.Dirigeable => (2.2f, 0.35f),
+                _ => (0.9f, 1f),
+            };
+            transform.localScale = kind == BalloonKind.Dirigeable ? new Vector3(size, size * 1.6f, size) : Vector3.one * size;
+            speed = baseSpeed * speedFactor;
             UpdateColor();
         }
 
@@ -54,7 +81,7 @@ namespace SAE
         public void Hit(float damage)
         {
             if (damage <= 0f || hp <= 0f) return;
-            hp -= damage;
+            hp -= Armored ? damage * 0.5f : damage;
             if (hp <= 0f)
             {
                 Destroy(gameObject);
@@ -65,6 +92,7 @@ namespace SAE
 
         public void Slow(float factor, float duration)
         {
+            if (Armored) return;   // le blindage ne se laisse ni geler ni coller
             slowFactor = Mathf.Min(slowFactor, factor);
             slowUntil = Mathf.Max(slowUntil, Time.time + duration);
         }
@@ -72,10 +100,14 @@ namespace SAE
         void Update()
         {
             if (Time.time > slowUntil) slowFactor = 1f;
-            float step = baseSpeed * slowFactor * Time.deltaTime;
+            float step = speed * slowFactor * Time.deltaTime;
             Progress += step;
 
             var target = path[nextPoint];
+            // Le dirigeable est couché dans le sens de la marche
+            if (Kind == BalloonKind.Dirigeable && target != transform.position)
+                transform.rotation = Quaternion.LookRotation(target - transform.position) * Quaternion.Euler(90f, 0f, 0f);
+
             transform.position = Vector3.MoveTowards(transform.position, target, step);
             if ((transform.position - target).sqrMagnitude < 0.0001f)
             {
@@ -90,9 +122,17 @@ namespace SAE
 
         void UpdateColor()
         {
-            if (boss) { if (tint) tint.Set(BossColor); return; }
-            int layer = Mathf.Clamp(Mathf.CeilToInt(hp) - 1, 0, layerColors.Length - 1);
-            if (tint) tint.Set(layerColors[layer]);
+            if (!tint) return;
+            switch (Kind)
+            {
+                case BalloonKind.Blinde: tint.Set(ArmorColor); break;
+                case BalloonKind.Boss: tint.Set(BossColor); break;
+                case BalloonKind.Dirigeable: tint.Set(BlimpColor); break;
+                default:
+                    int layer = Mathf.Clamp(Mathf.CeilToInt(hp) - 1, 0, layerColors.Length - 1);
+                    tint.Set(layerColors[layer]);
+                    break;
+            }
         }
     }
 }

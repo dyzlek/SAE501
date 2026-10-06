@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Vrai système de vagues et fiche des singes
+> Maintenant, j'aimerais que tu fasses un vrai système de vagues, et qu'on puisse voir les caractéristiques des singes, etc.
+
 ### Singe de départ et chances par type de singe
 > Il faudrait qu'on puisse avoir un singe Classique dès le départ. Mais j'aimerais aussi ajouter des probabilités de drop des personnages : au début, seulement le Classique, puis petit à petit les autres, etc.
 

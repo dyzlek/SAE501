@@ -39,6 +39,22 @@ namespace SAE
         public static Color RarityColor(Rarity r) => rarityColors[(int)r];
         public static bool IsRainbow(Rarity r) => r == Rarity.ArcEnCiel;
 
+        // Ce que fait chaque type, en une phrase (fiche du singe).
+        public static string Effect(MonkeyType t) => t switch
+        {
+            MonkeyType.Classique => "Tire sur le ballon le plus avancé",
+            MonkeyType.Boomerang => "Touche 2 ballons à chaque lancer",
+            MonkeyType.Canon => "Explosion : touche tout autour de la cible",
+            MonkeyType.Sniper => "Tire sur toute la carte, gros dégâts",
+            MonkeyType.Punaise => "Touche 4 ballons proches",
+            MonkeyType.Glace => "Ralentit tous les ballons à portée",
+            MonkeyType.Colle => "Colle un ballon : très lent pendant 3 s",
+            _ => "",
+        };
+
+        // Tirs par seconde (plus parlant que le délai entre deux tirs).
+        public static float FireRate(Monkey m) => 1f / FireDelay(m);
+
         // --- Statistiques de combat (prototype) ---
         public static float Range(Monkey m) => m.type switch
         {

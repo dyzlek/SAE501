@@ -84,6 +84,7 @@ namespace SAE.EditorTools
 
             player.AddComponent<PlayerController>().reach = 60f;
             player.AddComponent<BananaHand>();   // prendre les bananes (clic maintenu)
+            player.AddComponent<MonkeyInfoCard>();   // fiche du singe visé, dans le décor
             return player.transform;
         }
 
@@ -116,9 +117,9 @@ namespace SAE.EditorTools
             var root = new GameObject("Tableau de la vague").transform;
             root.SetParent(parent, false);
             root.SetPositionAndRotation(pos, rotation);
-            Visuals.Box("Cadre", root, Vector3.zero, new Vector3(1.2f, 0.6f, 0.06f), Wood);
-            Visuals.Box("Fond", root, new Vector3(0, 0, -0.035f), new Vector3(1.1f, 0.5f, 0.02f), new Color(0.12f, 0.1f, 0.08f));
-            var text = Visuals.Label(root, "", new Vector3(0, 0, -0.06f), 0.11f, new Color(1f, 0.9f, 0.6f));
+            Visuals.Box("Cadre", root, Vector3.zero, new Vector3(1.7f, 0.8f, 0.06f), Wood);
+            Visuals.Box("Fond", root, new Vector3(0, 0, -0.035f), new Vector3(1.6f, 0.7f, 0.02f), new Color(0.12f, 0.1f, 0.08f));
+            var text = Visuals.Label(root, "", new Vector3(0, 0, -0.06f), 0.1f, new Color(1f, 0.9f, 0.6f));
             Object.DestroyImmediate(text.GetComponent<Billboard>());
             var board = root.gameObject.AddComponent<WaveBoard>();
             board.spawner = spawner;
