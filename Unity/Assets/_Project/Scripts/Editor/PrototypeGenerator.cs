@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion.Teleportation;
 using UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets;
@@ -114,24 +115,17 @@ namespace SAE.EditorTools
             return rig;
         }
 
-        // Le rayon de chaque manette (Near-Far Interactor des Starter Assets) : par défaut il ne fait que 25 cm
-        // et il est presque transparent. On le veut toujours visible devant la manette, pour viser de loin
-        // les boutons, les bananes et les singes. Il devient bleu quand il touche quelque chose d'utilisable.
+        // Le rayon de chaque manette : celui des Starter Assets (courbé, 25 cm, presque transparent) est éteint,
+        // et remplacé par notre HandRay, droit et toujours visible, qui part de l'interacteur Near-Far de la manette.
         static void ShowRays(GameObject rig)
         {
-            var white = new Gradient();
-            white.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
-                          new[] { new GradientAlphaKey(0.9f, 0f), new GradientAlphaKey(0.15f, 1f) });
             foreach (var visual in rig.GetComponentsInChildren<CurveVisualController>(true))
+                visual.gameObject.SetActive(false);
+            foreach (var nearFar in rig.GetComponentsInChildren<NearFarInteractor>(true))
             {
-                var so = new SerializedObject(visual);
-                so.FindProperty("m_LineDynamicsMode").enumValueIndex = (int)LineDynamicsMode.Traditional;   // ne se rétracte pas
-                so.FindProperty("m_RestingVisualLineLength").floatValue = 3f;    // 3 m devant la manette quand il ne touche rien
-                so.FindProperty("m_ExtendLineToEmptyHit").boolValue = true;
-                so.FindProperty("m_NoValidHitProperties.m_StartWidth").floatValue = 0.006f;
-                so.FindProperty("m_NoValidHitProperties.m_EndWidth").floatValue = 0.004f;
-                so.FindProperty("m_NoValidHitProperties.m_Gradient").gradientValue = white;
-                so.ApplyModifiedPropertiesWithoutUndo();
+                var ray = new GameObject("Rayon");
+                ray.transform.SetParent(nearFar.transform, false);
+                ray.AddComponent<HandRay>().interactor = nearFar;
             }
         }
 
@@ -167,7 +161,7 @@ namespace SAE.EditorTools
             cube.AddComponent<RayPress>();   // on peut aussi l'enfoncer de loin, en le visant
             a.action = action;
             a.destination = destination;
-            var text = Visuals.Label(cube.transform, label, new Vector3(0, 0.9f, 0), 0.12f);
+            var text = Visuals.Label(cube.transform, label, new Vector3(0, 1.3f, 0), 0.12f);   // bien au-dessus : on voit le cube d'en haut
             text.transform.localScale = Vector3.one / size; // le cube parent est mis à l'échelle : on compense
             return a;
         }
