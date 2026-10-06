@@ -5,55 +5,48 @@ using UnityEngine;
 namespace SAE.EditorTools
 {
     // Menu SAE → Préparer les mains : fabrique Prefabs/Main_Gauche.prefab et Prefabs/Main_Droite.prefab
-    // à partir de la main de Quincy (Art/Quincy/FBX/Quincy_Main.fbx, sortie du personnage par creer_mains.py).
-    // Dans chaque prefab : le poignet à l'origine, les doigts vers +Z, le pouce vers +Y ; la main droite est
-    // la gauche en miroir (échelle X = -1). Le générateur pose les mains sur les manettes.
+    // à partir des gants de Quincy (Art/Quincy/FBX/Quincy_Main_Gauche|Droite.fbx, créés par creer_mains.py).
+    // Dans chaque prefab : le poignet à l'origine, les doigts vers +Z (vers l'avant de la manette),
+    // le dos de la main vers +Y. Le générateur pose les mains sur les manettes.
     public static class HandSetup
     {
-        const string HandModel = "Assets/_Project/Art/Quincy/FBX/Quincy_Main.fbx";
+        const string ModelFolder = "Assets/_Project/Art/Quincy/FBX/";
         const string LeftPath = "Assets/_Project/Prefabs/Main_Gauche.prefab";
         const string RightPath = "Assets/_Project/Prefabs/Main_Droite.prefab";
+        static readonly string[] Fingers = { "Index", "Majeur", "Annulaire", "Auriculaire" };
 
         [MenuItem("SAE/Préparer les mains")]
         public static void Setup()
         {
-            // La main utilise la texture de Quincy (comme le reste de ses modèles)
-            var importer = (ModelImporter)AssetImporter.GetAtPath(HandModel);
-            var mat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Art/Quincy/Materiaux/Quincy_Mat.mat");
-            if (importer.GetExternalObjectMap().Count == 0)
-            {
-                importer.AddRemap(new AssetImporter.SourceAssetIdentifier(typeof(Material), "Quincy"), mat);
-                importer.SaveAndReimport();
-            }
-            Build(LeftPath, mirror: false);
-            Build(RightPath, mirror: true);
+            Build("Gauche", LeftPath);
+            Build("Droite", RightPath);
         }
 
         public static AnimateHandOnInput Left => AssetDatabase.LoadAssetAtPath<AnimateHandOnInput>(LeftPath);
         public static AnimateHandOnInput Right => AssetDatabase.LoadAssetAtPath<AnimateHandOnInput>(RightPath);
 
-        static void Build(string path, bool mirror)
+        static void Build(string side, string path)
         {
-            var root = new GameObject(mirror ? "Main droite" : "Main gauche");
-            var model = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(HandModel));
+            var root = new GameObject("Main " + side.ToLower());
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(ModelFolder + "Quincy_Main_" + side + ".fbx");
+            var model = (GameObject)PrefabUtility.InstantiatePrefab(asset);
             model.name = "Modele";
             model.transform.SetParent(root.transform, false);
 
+            // On tourne le modèle : les doigts (Paume -> Majeur_1) vers +Z, le dos de la main vers +Y, puis le poignet à l'origine
             var wrist = Find(model, "Poignet");
-            var fingers = Find(model, "Doigts");
-            var thumb = Find(model, "Pouce");
-            // On tourne le modèle pour que les doigts aillent vers +Z et le pouce vers +Y, puis le poignet à l'origine
-            var fingerDir = Find(model, "Doigts_Bout").position - wrist.position;
-            var thumbDir = thumb.position - wrist.position;
-            model.transform.rotation = Quaternion.Inverse(Quaternion.LookRotation(fingerDir, thumbDir)) * model.transform.rotation;
-            model.transform.position -= wrist.position;
-            if (mirror) root.transform.localScale = new Vector3(-1f, 1f, 1f);
+            var palm = Find(model, "Paume");
+            var back = Find(model, "Dos");
+            var forward = Find(model, "Majeur_1").position - palm.position;
+            var up = back.position - palm.position;
+            model.transform.rotation = Quaternion.Inverse(Quaternion.LookRotation(forward, up)) * model.transform.rotation;
+            model.transform.position -= palm.position;
 
             var hand = root.AddComponent<AnimateHandOnInput>();
-            hand.fingers = fingers;
-            hand.fingersTip = Find(model, "Doigts_Bout");
-            hand.thumb = thumb;
-            hand.thumbTip = Find(model, "Pouce_Bout");
+            hand.palm = palm;
+            hand.back = back;
+            hand.fingerBones = Fingers.SelectMany(f => new[] { Find(model, f + "_1"), Find(model, f + "_2") }).ToArray();
+            hand.thumbBones = new[] { Find(model, "Pouce_1"), Find(model, "Pouce_2") };
             foreach (var r in model.GetComponentsInChildren<SkinnedMeshRenderer>()) r.updateWhenOffscreen = true;
 
             PrefabUtility.SaveAsPrefabAsset(root, path);

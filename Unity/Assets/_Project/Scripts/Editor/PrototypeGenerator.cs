@@ -25,7 +25,7 @@ namespace SAE.EditorTools
         const float HandHeight = 0.9f;   // table des bananes et socle du panier : à hauteur de main, pas au sol
         const int IgnoreRaycast = 2;     // couche Unity « Ignore Raycast »
         const float DesktopBowScale = 0.5f;   // en mode PC, l'arc est collé à la caméra : plus petit
-        static readonly Vector3 HandOffset = new Vector3(0f, -0.02f, -0.07f);   // le poignet, un peu derrière la manette
+        static readonly Vector3 HandOffset = new Vector3(0f, -0.01f, -0.06f);   // la paume, un peu derrière l'avant de la manette
         static readonly Vector3 BowInHand = new Vector3(0f, -0.01f, 0.02f);     // la poignée de l'arc, au creux de la main
         static readonly Vector3 MapCenter = new Vector3(0f, 0f, 40f);
 

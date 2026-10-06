@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mar. 6 oct. 2026
 
+### Refaire les mains
+> Les mains se ferment de façon étrange : il faudrait sans doute les refaire. Autre problème : quand on prend un singe, il se retrouve à l'intérieur de la main.
+
 ### Corrections de l'arc et mains de Quincy
 > Au casque, l'arc est beaucoup trop gros et je n'arrive pas à tirer : c'est sans doute lié aux commandes. Corrige ces deux points.
 >

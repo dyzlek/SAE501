@@ -99,6 +99,15 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 
   ![La main gauche de Quincy refermée sur l'arc](../captures/maxens-main-quincy-arc.png)
 
+- **Refait après mon test : les mains se fermaient bizarrement** (le gant de Quincy n'avait que 2 gros blocs, doigts et pouce, qui se cassaient en se pliant, et il était énorme vu de près), et **le singe pris se retrouvait dans la main** :
+  - **nouvelles mains modélisées dans Blender par script** (`creer_mains.py`, fichier `Quincy_Mains.blend`), dans le style de Quincy : gant noir, bouts des doigts bruns, manchette orange, environ 18 cm. **4 doigts à 2 phalanges + un pouce à 2 phalanges**, chaque morceau suivant un seul os : ils plient comme de vraies articulations. Une main gauche et une main droite exportées (`Quincy_Main_Gauche.fbx`, `Quincy_Main_Droite.fbx`), 288 sommets chacune ;
+  - `AnimateHandOnInput` plie maintenant chaque phalange vers la paume : grip = poing fermé, gâchette = pouce plié ;
+  - **le singe pris est tenu à 12 cm devant la main** (point de prise du XR Grab décalé dans `MonkeyToken`), plus dedans ;
+  - l'ancienne main découpée dans le personnage (`Quincy_Main.fbx`) est supprimée.
+  - Testé en Play : mains visibles et bien orientées, poing fermé propre, point de prise présent sur les singes. La prise réelle d'un singe reste à voir au casque.
+
+  ![Nouvelles mains de Quincy : à droite, poing fermé](../captures/maxens-mains-quincy-v2.png)
+
 **Captures** (bibliothèque avec les singes 3D et leur aura, et singe tenu en main) :
 
 ![Bibliothèque : singes 3D avec l'aura de leur rareté](../captures/maxens-bibliotheque-singes-3d.png)
@@ -134,7 +143,8 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
-| Claude (Code) | Corrections après test : arc plus petit, corde plus facile à attraper (40 cm, grip ou gâchette) ; mains de Quincy riggées (poignet, paume, doigts, pouce) à la place des manettes, qui se ferment avec les boutons ; testé en Play | À tester au casque |
+| Claude (Code) | Nouvelles mains de Quincy modélisées et riggées par script Blender (2 phalanges par doigt), pliage phalange par phalange, singe tenu devant la main ; testé en Play | À tester au casque |
+| Claude (Code) | Corrections après test : arc plus petit, corde plus facile à attraper (40 cm, grip ou gâchette) ; mains de Quincy riggées (poignet, paume, doigts, pouce) à la place des manettes, qui se ferment avec les boutons ; testé en Play | Arc gardé, mains jetées (refaites) |
 | Claude (Code) | Système de l'arc : arc seulement sur la carte, tir au casque (main droite sur la corde) et au PC (clic droit), corde et branches animées, flèche qui vole et éclate les ballons ; prefabs, générateur, testé en Play | À tester au casque |
 | Claude (Code) | Séparation de l'arc de Quincy par un script Blender (sur une copie) : arc à part avec son squelette (poignée, branches, corde à tirer), os de la flèche en points d'accroche, point `BowGrip` dans la main, export FBX, matériau ; testé dans Unity | À tester au casque |
 | Claude (Code) | Analyse du rig de Quincy dans Unity puis dans Blender en lecture seule (squelette, poids, séparation arc / bras / mains) et liste de ce qu'il faut corriger dans Blender pour utiliser l'arc comme arme | Gardé |
