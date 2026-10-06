@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mar. 6 oct. 2026
 
+### Hub sans bouger
+> Enlève les textes au-dessus des singes. Je veux aussi faire un test : dans le hub, on ne peut pas se déplacer, on fait tout en tournant la tête et en prenant les objets. Le plateau est trop petit, on ne voit pas bien les différences entre les singes. Regarde le schéma : on serait au milieu, on aurait accès à tout avec le regard, et on aurait une portée assez longue.
+
 ### Suivre les cours
 > Attention : est-ce que tu as lu les cours qu'on a eus ? Prends exemple dessus.
 >

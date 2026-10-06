@@ -70,7 +70,7 @@ namespace SAE.EditorTools
                     if (corps) size = corps.localScale.x;
                     Object.DestroyImmediate(child.gameObject);
                 }
-                Visuals.MonkeyPiece(new Monkey(slot.type, slot.level), slot.transform, Vector3.zero, size, withLabel: false);
+                Visuals.MonkeyPiece(new Monkey(slot.type, slot.level), slot.transform, Vector3.zero, size);
                 EditorUtility.SetDirty(slot);
             }
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());

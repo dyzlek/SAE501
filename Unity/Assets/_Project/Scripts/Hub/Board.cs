@@ -58,7 +58,7 @@ namespace SAE
             // (le proxy prend la taille du cube du singe). Sinon, on copie simplement le mesh (ballons, joueur).
             var view = m.GetComponentInParent<MonkeyView>();
             if (view && view.model)
-                Visuals.MonkeyPiece(view.monkey, proxy.transform, Vector3.zero, 1f, withLabel: false);
+                Visuals.MonkeyPiece(view.monkey, proxy.transform, Vector3.zero, 1f);
             else
             {
                 proxy.AddComponent<MeshFilter>().sharedMesh = m.GetComponent<MeshFilter>().sharedMesh;

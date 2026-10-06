@@ -14,7 +14,7 @@ namespace SAE.EditorTools
     {
         const string Folder = "Assets/_Project/Scenes";
         const string ScenePath = Folder + "/Jeu.unity";
-        const float BoardTile = 0.2f;    // plateau de 1,6 m : l'élément principal du hub
+        const float BoardTile = 0.3f;    // plateau de 2,4 m : l'élément principal du hub (on doit y reconnaître chaque singe)
         static readonly Vector3 MapCenter = new Vector3(0f, 0f, 40f);
 
         static readonly Color Floor = new Color(0.35f, 0.35f, 0.38f);
@@ -34,23 +34,24 @@ namespace SAE.EditorTools
             var defaultCam = GameObject.FindWithTag("MainCamera");
             if (defaultCam) Object.DestroyImmediate(defaultCam); // la caméra est celle du joueur
 
-            var hubSpawn = Spawn("Spawn Hub", Vector3.zero);
-            var mapSpawn = Spawn("Spawn Carte", MapCenter + new Vector3(0, 0, -MapLayout.HalfExtent - 3f));
+            var hubSpawn = Spawn("Spawn Hub", Vector3.zero, canWalk: false);   // au hub, on fait tout du regard
+            var mapSpawn = Spawn("Spawn Carte", MapCenter + new Vector3(0, 0, -MapLayout.HalfExtent - 3f), canWalk: true);
 
             var mapRoot = BuildMap(hubSpawn);
             var spawner = mapRoot.GetComponent<WaveSpawner>();
             var hub = BuildHub(mapRoot, mapSpawn, spawner);   // avant le joueur : l'installeur des bananes ajoute son TestSouris à Camera.main s'il en trouve une
             var player = Player(hubSpawn.position);
-            BuildChest(hub, Around(132f, Ring - 0.3f), player);
+            BuildChest(hub, Around(ChestAngle, Ring - 0.3f), player);
 
             EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), ScenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
             Debug.Log("Prototype généré : " + ScenePath);
         }
 
-        static Transform Spawn(string name, Vector3 pos)
+        static Transform Spawn(string name, Vector3 pos, bool canWalk)
         {
             var go = new GameObject(name);
+            go.AddComponent<SpawnPoint>().canWalk = canWalk;
             go.transform.position = pos;
             return go.transform;
         }
@@ -82,8 +83,10 @@ namespace SAE.EditorTools
             cam.AddComponent<Camera>().nearClipPlane = 0.05f;
             cam.AddComponent<AudioListener>();
 
-            player.AddComponent<PlayerController>().reach = 60f;
-            player.AddComponent<BananaHand>();   // prendre les bananes (clic maintenu)
+            var controller = player.AddComponent<PlayerController>();
+            controller.reach = 60f;
+            controller.canWalk = false;           // on apparaît au hub
+            player.AddComponent<BananaHand>().reach = HubReach;   // prendre les bananes (clic maintenu), même de loin
             player.AddComponent<MonkeyInfoCard>();   // fiche du singe visé, dans le décor
             return player.transform;
         }
@@ -127,16 +130,18 @@ namespace SAE.EditorTools
         }
 
         // ---------------- HUB ----------------
-        // Tout ce qui compte est disposé EN ROND autour du joueur (point d'apparition au centre, regard vers +Z),
-        // chaque élément tourné vers lui :
-        //   devant (0°)           : le plateau incliné (la carte en direct), reculé sur le cercle,
-        //                           avec LANCER (-32°), JOUER (-20°) et Vider (+20°) de part et d'autre,
-        //                           et le tableau de la vague au-dessus
-        //   côtés (±72°)          : les deux meubles de la bibliothèque, courbés le long du cercle
-        //   derrière (180°)       : le bananier de Maxens (agrandi), sa zone de chute devant lui (-172°),
-        //                           le panier (-150°) et la caisse (-140°), le panneau d'amélioration (160°)
-        //   derrière (132°)       : le coffre de Nicolas, avec son prix au-dessus et le panneau des chances
-        const float Ring = 5.0f;          // rayon du cercle : tout est posé dessus, le centre reste libre pour circuler
+        // Le joueur reste AU CENTRE (il ne marche pas au hub) et fait tout en tournant la tête :
+        // tout est disposé en rond autour de lui, assez près pour être vu et pris de loin (schéma de Maxens).
+        // Angles : 0° = devant, positif = à droite.
+        //   devant (0°)            : le grand plateau incliné (la carte en direct), le tableau de la vague au-dessus,
+        //                            JOUER à droite (+31°), LANCER et Vider à gauche (-31°)
+        //   côtés (±70°)           : les deux meubles de la bibliothèque, courbés le long du cercle
+        //   derrière-gauche        : le coffre de Nicolas (-118°), le panneau d'amélioration du bananier (-155°)
+        //   derrière-droite        : le bananier (+162°), sa zone de chute qui descend vers le joueur,
+        //                            le panier (+122°) et la caisse (+104°)
+        const float Ring = 3.5f;          // rayon du cercle : tout est à portée du regard depuis le centre
+        const float HubReach = 6f;        // portée pour prendre les bananes depuis le centre (m)
+        const float ChestAngle = -118f;
         const float SlotSize = 0.24f;     // ancienne taille ×1,1
         const float SlotStepX = 0.36f;    // espace entre deux raretés
         const float SlotStepY = 0.40f;    // espace entre deux étagères
@@ -155,26 +160,25 @@ namespace SAE.EditorTools
             var env = new GameObject("Hub").transform;
             Visuals.Solid("Sol", env, new Vector3(0, -0.05f, 0), new Vector3(15, 0.1f, 15), Floor);
 
-            // Devant, sur le cercle : le plateau, avec JOUER et Vider de part et d'autre
+            // Devant : le plateau, JOUER à droite, LANCER et Vider à gauche (LANCER : on lance la vague
+            // depuis le hub et on la regarde sur le plateau), le tableau de la vague au-dessus
             BuildBoard(env, mapRoot);
-            MakeActionCube(env, "Jouer", Around(-20f, Ring - 0.5f, 1.0f), 0.35f, new Color(0.2f, 0.85f, 0.3f),
+            MakeActionCube(env, "Jouer", Around(31f, Ring - 0.5f, 1.0f), 0.35f, new Color(0.2f, 0.85f, 0.3f),
                 "JOUER", ActionCube.Action.Teleport, mapSpawn, "Aller sur la carte");
-            MakeActionCube(env, "Vider", Around(20f, Ring - 0.5f, 0.9f), 0.25f, new Color(0.6f, 0.6f, 0.6f),
+            MakeLaunchCube(env, Around(-31f, Ring - 0.5f, 1.15f), 0.3f, spawner);
+            MakeActionCube(env, "Vider", Around(-31f, Ring - 0.5f, 0.6f), 0.25f, new Color(0.6f, 0.6f, 0.6f),
                 "Vider", ActionCube.Action.ClearBoard, null, "Vider le plateau");
-            // LANCER à côté de JOUER (on peut lancer depuis le hub et regarder la vague sur le plateau),
-            // et le tableau de la vague au-dessus du plateau
-            MakeLaunchCube(env, Around(-32f, Ring - 0.5f, 1.0f), 0.3f, spawner);
-            BuildWaveBoard(env, Around(0f, Ring + 0.1f, 2.1f), Quaternion.identity, spawner);
+            BuildWaveBoard(env, Around(0f, Ring + 0.1f, 2.2f), Quaternion.identity, spawner);
 
             // Sur les côtés : les deux meubles de la bibliothèque, qui suivent le cercle (4 types + 3 types)
-            BuildShelf(env, "Bibliotheque gauche", -72f, 0, 4);
-            BuildShelf(env, "Bibliotheque droite", 72f, 4, 3);
+            BuildShelf(env, "Bibliotheque gauche", -70f, 0, 4);
+            BuildShelf(env, "Bibliotheque droite", 70f, 4, 3);
 
-            // Derrière : le bananier sur le cercle, sa zone de chute devant lui, le panier et la caisse d'un côté,
-            // le panneau d'amélioration de l'autre (le coffre est placé après le joueur, derrière-droite)
-            var bananier = BuildBananas(env, Around(180f, Ring + 0.7f), 180f);
-            BuildMoneyBoard(env, -140f);
-            if (bananier) BuildUpgradePanel(env, bananier, 160f);
+            // Derrière : le bananier à droite avec son panier et la caisse, le panneau d'amélioration à gauche
+            // (le coffre est placé après le joueur, à gauche aussi)
+            var bananier = BuildBananas(env, Around(162f, Ring + 0.5f), 162f);
+            BuildMoneyBoard(env, 104f);
+            if (bananier) BuildUpgradePanel(env, bananier, -155f);
             return env;
         }
 
@@ -252,7 +256,7 @@ namespace SAE.EditorTools
                     var s = slot.AddComponent<LibrarySlot>();
                     s.type = type;
                     s.level = (Rarity)l;
-                    Visuals.MonkeyPiece(new Monkey(type, (Rarity)l), slot.transform, Vector3.zero, SlotSize, withLabel: false);   // la couleur dit la rareté, le nom s'affiche en visant
+                    Visuals.MonkeyPiece(new Monkey(type, (Rarity)l), slot.transform, Vector3.zero, SlotSize);   // le modèle dit le type, l'aura la rareté
                 }
             }
         }
@@ -277,20 +281,36 @@ namespace SAE.EditorTools
             bananier.transform.localScale *= TreeScale;
             bananier.gameObject.AddComponent<BananaGuard>();   // plus de bananes coincées dans le bac ou sous les feuilles
 
-            // Le panier : à côté du bananier (pas collé à son bac), un peu vers le joueur pour rester à portée
+            // Le panier : à côté du bananier, un peu vers le joueur pour rester à portée
             var basket = root.transform.Find("Panier");
-            if (basket) basket.position = Around(-150f, Ring);
+            if (basket) basket.position = Around(122f, Ring - 0.2f);
 
-            // Zone de chute : un tapis devant le bananier, à l'intérieur du cercle, du côté du panier.
-            // Les bananes tombent dedans (et plus contre le bac ou dans le panier tout seuls).
-            var zonePos = Around(-172f, Ring - 0.5f);
-            var zone = Visuals.Box("Zone de chute des bananes", env, zonePos + Vector3.up * 0.005f, new Vector3(1.6f, 0.01f, 0.9f), new Color(0.95f, 0.85f, 0.35f));
-            zone.transform.rotation = Quaternion.LookRotation(new Vector3(zonePos.x, 0, zonePos.z) - new Vector3(pos.x, 0, pos.z));
+            // Zone de chute : un long tapis qui part du pied du bananier et descend vers le joueur.
+            // Les bananes tombent tout le long (de dMin, le bord du bac, à dMin + longueur) : elles arrivent
+            // à portée du regard depuis le centre, sans jamais tomber dans le bac ou dans le panier.
+            var treePos = new Vector3(pos.x, 0, pos.z);
+            var towardPlayer = (DropTarget - treePos).normalized;
+            float dMin = TreeEdge(bananier);
+            float length = Vector3.Distance(treePos, DropTarget) - dMin;
+            var zonePos = treePos + towardPlayer * (dMin + length / 2f);
+            var zone = Visuals.Box("Zone de chute des bananes", env, zonePos + Vector3.up * 0.005f, new Vector3(0.9f, 0.01f, length), new Color(0.95f, 0.85f, 0.35f));
+            zone.transform.rotation = Quaternion.LookRotation(towardPlayer);
             bananier.versCible = zone.transform;
-            bananier.margePanier = 0f;
-            bananier.largeurZone = 0.8f;
-            bananier.angleDispersion = 18f;
+            bananier.largeurZone = length;
+            bananier.margePanier = -length / 2f;   // la cible est le milieu du tapis : on autorise jusqu'au bout
+            bananier.angleDispersion = 8f;           // reste dans la largeur du tapis
             return bananier;
+        }
+
+        // Bout de la zone de chute, côté joueur : à 1,5 m de lui, vers le bananier et le panier.
+        static readonly Vector3 DropTarget = Around(140f, 1.5f);
+
+        // Distance du centre du bananier au bord de son bac (même calcul que Bananier.Start, qui la recalcule en jeu).
+        static float TreeEdge(Bananier bananier)
+        {
+            if (!bananier.socle) return bananier.distanceMin;
+            var e = bananier.socle.bounds.extents;
+            return Mathf.Max(e.x, e.z) + bananier.margeSocle;
         }
 
         // La caisse : un panneau en bois avec l'argent total en gros chiffres dorés, à côté du panier.
@@ -404,6 +424,7 @@ namespace SAE.EditorTools
             var prompt = promptGo.AddComponent<Sae501.Coffres.ChestPrompt>();
 
             var controller = chest.AddComponent<Sae501.Coffres.ChestController>();
+            controller.interactDistance = HubReach;   // le joueur reste au centre : on ouvre le coffre de loin
 
             controller.roulette = roulette;
             controller.prompt = prompt;

@@ -26,6 +26,20 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
   - corrigé au passage : sur la carte et le plateau, l'aura apparaissait d'abord blanche (le prefab démarrait avant de recevoir sa couleur).
   Retesté en Play (bibliothèque, singe en main, carte, plateau du hub) : aucune erreur dans la console.
 
+- **Fait : test d'un hub « sans bouger »** (d'après mon schéma) :
+  - au hub, le joueur reste **au centre** et fait tout en tournant la tête et en prenant les objets de loin : plus de déplacement au hub (ZQSD coupé), on marche toujours sur la carte. C'est le point d'arrivée qui le dit (`SpawnPoint.canWalk`) ;
+  - tout est rapproché en rond autour du joueur (cercle de 3,5 m au lieu de 5 m) : le plateau devant, JOUER à droite, LANCER et Vider à gauche, les deux bibliothèques sur les côtés, le coffre et le panneau d'amélioration derrière à gauche, le bananier, son panier et la caisse derrière à droite ;
+  - la zone de chute des bananes est un long tapis jaune qui part du pied du bananier et descend vers le joueur : les bananes arrivent à portée ;
+  - portée plus longue : 6 m pour prendre les bananes et pour ouvrir le coffre depuis le centre ;
+  - **plateau plus grand** : 2,4 m au lieu de 1,6 m, pour bien reconnaître chaque singe posé ;
+  - **plus de texte au-dessus des singes** (carte, plateau, main, coffre) : le modèle dit le type, l'aura dit la rareté.
+  Scène `Jeu.unity` régénérée avec le menu **SAE → Générer le prototype** (sur ma branche). Testé en Play : on ne peut pas marcher au hub, le coffre s'ouvre de loin, les bananes tombent sur le tapis, aucune erreur.
+- **Confort VR :** rester au centre sans se déplacer, c'est le plus confortable (aucune locomotion, donc aucun risque de nausée). En revanche, prendre « de loin » demandera un rayon (Ray Interactor, support 5) au casque, pas seulement les mains.
+
+Mon schéma du hub (le joueur au centre, tout à portée du regard) :
+
+![Schéma du hub : joueur au centre](../captures/maxens-schema-hub-centre.png)
+
 **Captures** (bibliothèque avec les singes 3D et leur aura, et singe tenu en main) :
 
 ![Bibliothèque : singes 3D avec l'aura de leur rareté](../captures/maxens-bibliotheque-singes-3d.png)
@@ -33,7 +47,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 ![Singe tenu en main avec son aura, plateau du hub](../captures/maxens-singe-en-main-aura.webp)
 
 - **À vérifier au casque :** les fps avec beaucoup d'auras allumées (≤ 80 particules par singe, seulement sur les cases possédées).
-- **Attention (équipe) :** ça touche des scripts de Dylan (`Visuals`, `LibrarySlot`, `ChestReward`, `PlacementSurface`, `Board`, `PrototypeGenerator`).
+- **Attention (équipe) :** ça touche des scripts de Dylan (`Visuals`, `LibrarySlot`, `ChestReward`, `PlacementSurface`, `Board`, `TowerManager`, `PlayerController`, `PrototypeGenerator`) et sa scène `Jeu.unity`.
 - **Rangé :** changements parasites d'Unity annulés (`Jeu.unity`, réglages URP, réécrits à l'ouverture du projet) ; le package MCP for Unity reste installé sur mon PC seulement (non commité).
 - **Bloque :** —
 
@@ -41,6 +55,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
 | Claude (Cowork) | Tronc du bananier rallongé ×3 avec un script Blender, export FBX | Gardé (intégré sur `feat/prototype-maxens`) |
+| Claude (Code) | Test du hub « sans bouger » d'après mon schéma : joueur fixé au centre, tout rapproché en rond, plateau agrandi, zone de chute vers le joueur, portée 6 m, plus de textes au-dessus des singes ; scène régénérée et testée en Play | À tester au casque |
 | Claude (Code) | Lecture des PDF du cours (installation de `pypdf`), relecture du code avec le guide : aura en prefab réglable dans l'Inspector, renderers gardés en mémoire, constantes nommées, aura blanche corrigée | À tester au casque |
 | Claude (Code) | Corrections après mon test : singe 3D aussi en miniature sur le plateau, aura élargie pour le Canon et le Tireur, Canon retourné, menu pour mettre les singes 3D dans la scène hors Play (scène `Jeu.unity` enregistrée, 1,5 Mo) ; testé en Play et hors Play, aucune erreur | À tester au casque |
 | Claude (Code) | Modèles 3D des singes dans la bibliothèque (et coffre, main, carte) + aura « Dragon Ball » en particules à la couleur de la rareté, outil d'éditeur pour brancher les modèles, testé en Play via Unity MCP | À tester au casque |

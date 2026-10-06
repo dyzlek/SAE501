@@ -54,10 +54,11 @@ namespace SAE
             return tm;
         }
 
-        // Un singe = son modèle 3D (s'il existe, sinon un cube couleur de sa rareté), son aura de la couleur
-        // de la rareté, et son type écrit au-dessus. Tout tient dans un cube de côté size, centré sur localPos.
+        // Un singe = son modèle 3D (s'il existe, sinon un cube couleur de sa rareté) et son aura de la couleur
+        // de la rareté. Pas de texte au-dessus : le modèle dit le type, l'aura dit la rareté, et la fiche
+        // du singe (MonkeyInfoCard) donne le détail quand on le vise. Tout tient dans un cube de côté size.
         // Le modèle regarde vers -Z local, comme la face du cube tournée vers le joueur (voir MonkeyVisuals.yaw).
-        public static GameObject MonkeyPiece(Monkey m, Transform parent, Vector3 localPos, float size, bool withLabel = true)
+        public static GameObject MonkeyPiece(Monkey m, Transform parent, Vector3 localPos, float size)
         {
             var root = new GameObject($"Singe {m}");
             root.transform.SetParent(parent, false);
@@ -77,8 +78,6 @@ namespace SAE
             // L'aura n'est créée qu'en jeu : les particules ne bougent pas hors Play, et enregistrées dans la scène
             // pour chaque case elles l'alourdiraient beaucoup. Les cases de la bibliothèque la créent au lancement.
             if (Application.isPlaying) view.aura = Aura.Add(root, m.level, bodySize);
-            if (withLabel)
-                Label(root.transform, $"{MonkeyData.ShortName(m.type)}{(int)m.level + 1}", new Vector3(0, size * 0.9f, 0), size * 0.45f, Color.black);
             return root;
         }
 

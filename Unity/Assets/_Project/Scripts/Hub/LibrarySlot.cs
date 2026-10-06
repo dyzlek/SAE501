@@ -46,7 +46,7 @@ namespace SAE
                 if (corps) size = corps.localScale.x;
                 Destroy(child.gameObject);
             }
-            view = Visuals.MonkeyPiece(Monkey, transform, Vector3.zero, size, withLabel: false).GetComponent<MonkeyView>();
+            view = Visuals.MonkeyPiece(Monkey, transform, Vector3.zero, size).GetComponent<MonkeyView>();
 
             // Le nombre possédé, devant le singe, côté joueur (-Z local)
             bool hasModel = view.model;

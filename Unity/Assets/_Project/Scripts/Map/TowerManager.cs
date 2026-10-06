@@ -40,8 +40,7 @@ namespace SAE
                 go.tag = Tags.Singe;
                 go.AddComponent<BoxCollider>().size = Vector3.one * TowerSize; // pour le prendre sur la carte
                 go.AddComponent<Tower>().Init(p.monkey);
-                var body = go.transform.Find("Corps");
-                body.gameObject.AddComponent<Mirrored>().label = go.GetComponentInChildren<TextMesh>().text;
+                go.transform.Find("Corps").gameObject.AddComponent<Mirrored>();   // miniature sur le plateau, sans texte
                 towers.Add(p, go);
             }
         }

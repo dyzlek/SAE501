@@ -4,13 +4,15 @@ using UnityEngine.InputSystem;
 namespace SAE
 {
     // Joueur clavier/souris pour le prototype (sans casque).
-    // ZQSD/WASD : marcher · souris : regarder · clic gauche : interagir · clic droit : lâcher · Échap : libérer la souris.
+    // ZQSD/WASD : marcher (seulement là où c'est permis, voir SpawnPoint) · souris : regarder
+    // · clic gauche : interagir · clic droit : lâcher · Échap : libérer la souris.
     [RequireComponent(typeof(CharacterController))]
     public class PlayerController : MonoBehaviour
     {
         public float speed = 3.5f;
         public float mouseSensitivity = 0.1f;
         public float reach = 5f;
+        public bool canWalk = true;      // faux au hub : on reste au centre et on fait tout du regard
 
         // Ce que le joueur vise : lu par le plateau pour afficher l'aperçu du singe à poser.
         public static PlayerController Local { get; private set; }
@@ -27,12 +29,15 @@ namespace SAE
         void Awake() => Local = this;
 
         // Téléportation (cube Jouer / Hub). Le CharacterController doit être coupé pendant le déplacement.
+        // Le point d'arrivée dit si l'on peut marcher dans cette zone.
         public void TeleportTo(Transform spot)
         {
             controller.enabled = false;
             transform.SetPositionAndRotation(spot.position, spot.rotation);
             controller.enabled = true;
             pitch = 0f;
+            var point = spot.GetComponent<SpawnPoint>();
+            canWalk = !point || point.canWalk;
         }
 
         void Start()
@@ -68,6 +73,7 @@ namespace SAE
             if (kb.sKey.isPressed) input.y -= 1;
             if (kb.dKey.isPressed) input.x += 1;
             if (kb.aKey.isPressed) input.x -= 1;
+            if (!canWalk) input = Vector2.zero;
             var move = transform.TransformDirection(new Vector3(input.x, 0f, input.y).normalized) * speed;
             verticalSpeed = controller.isGrounded ? -1f : verticalSpeed - 9.81f * Time.deltaTime;
             move.y = verticalSpeed;
