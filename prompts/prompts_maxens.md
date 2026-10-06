@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mar. 6 oct. 2026
 
+### Établi et étagères tournantes
+> Je suis d'accord avec toi : les pistes 1 et 2 (un établi à portée de main et des étagères tournantes pour la bibliothèque).
+
 ### Problème VR du hub
 > Note dans les problèmes, avec la capture, que ce n'est pas adapté à la VR, pour les boutons par exemple. Il faudrait trouver un moyen : soit réagencer les bibliothèques, soit changer complètement le fonctionnement. Dis-moi ce qui serait possible.
 

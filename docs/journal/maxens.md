@@ -47,7 +47,7 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 ![Singe tenu en main avec son aura, plateau du hub](../captures/maxens-singe-en-main-aura.webp)
 
 - **À vérifier au casque :** les fps avec beaucoup d'auras allumées (≤ 80 particules par singe, seulement sur les cases possédées).
-- **Attention (équipe) :** ça touche des scripts de Dylan (`Visuals`, `LibrarySlot`, `ChestReward`, `PlacementSurface`, `Board`, `TowerManager`, `PlayerController`, `PrototypeGenerator`) et sa scène `Jeu.unity`.
+- **Attention (équipe) :** ça touche des scripts de Dylan (`Visuals`, `LibrarySlot`, `ChestReward`, `PlacementSurface`, `Board`, `TowerManager`, `PlayerController`, `PrototypeGenerator`) et sa scène `Jeu.unity` ; la bibliothèque courbe est remplacée par les étagères tournantes.
 - **Rangé :** changements parasites d'Unity annulés (`Jeu.unity`, réglages URP, réécrits à l'ouverture du projet) ; le package MCP for Unity reste installé sur mon PC seulement (non commité).
 - **Bloque : le hub « sans bouger » n'est pas adapté à la VR.** Depuis le centre, tout est à 2,5-4 m : les boutons (JOUER, LANCER, Vider, améliorations), les 56 cases de la bibliothèque et le plateau sont **hors de portée des mains**. Au casque, il faudrait viser de loin avec un rayon pour tout, ce qui ressemble à un jeu à la souris (« test de l'écran » raté) et va contre la règle « tout à portée de bras ». Les 56 cases (7 types × 8 raretés) prennent aussi trop de place pour tenir près du joueur.
 
@@ -60,10 +60,21 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
   4. **Garder la disposition et viser au rayon** (Ray Interactor, support 5) : le moins de travail, mais le moins « VR ».
 
   **Mon avis (proposé par Claude) :** 1 + 2 ensemble. L'établi pour le plateau et les boutons, le carrousel pour les singes. Le rayon seulement pour ce qui reste loin (prendre une banane au sol, par exemple).
+- **Fait : pistes 1 + 2 retenues et prototypées** (sur ma branche, scène régénérée) : **tout est à portée de main** autour du joueur, qui reste au centre :
+  - **devant, l'établi** : le plateau incliné à 30°, le bord le plus proche à 0,45 m (1,4 m de côté) ; JOUER, LANCER et Vider sont des boutons sur des socles à hauteur de main (0,7 m du joueur) ; le tableau de la vague est plus loin, seulement à lire ;
+  - **sur les côtés, deux étagères tournantes** (nouveau script `Hub/Carousel.cs`) : un meuble carré par côté, une face par type de singe, 8 cases par face ; la face avant est à 0,7 m. On clique sur la manivelle jaune du dessus pour faire un quart de tour (au casque : la tourner à la main) ;
+  - **derrière** : le coffre et le panneau d'amélioration à gauche ; à droite le bananier, dont les bananes tombent maintenant **sur une table à hauteur de main** qui vient jusqu'au joueur (plus de ramassage au sol), avec le panier juste à côté ;
+  - les textes du coffre (consigne, roulette, chances, prix) et des boutons sont réduits, sinon ils prenaient tout l'écran de près.
+  Testé en Play : l'étagère tourne, les bananes se posent sur la table près du panier, le coffre s'ouvre depuis le centre, aucune erreur.
+
+  ![Hub à portée de main : établi, étagères tournantes, table des bananes](../captures/maxens-hub-a-portee-de-main.png)
+
+  **Reste à faire pour la VR :** de vrais gestes au casque (enfoncer les boutons, tourner la manivelle, prendre un singe ou une banane à la main avec XR Grab), et vérifier les tailles au casque.
 
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Prototype des pistes 1 + 2 : établi à portée de main (plateau, boutons sur socles), deux étagères tournantes (`Carousel`), table des bananes à hauteur de main, textes du coffre réduits ; scène régénérée et testée en Play | À tester au casque |
 | Claude (Code) | Analyse du problème VR du hub « sans bouger » (portée des boutons et de la bibliothèque) et 4 pistes de solution, capture ajoutée | À décider en équipe |
 | Claude (Cowork) | Tronc du bananier rallongé ×3 avec un script Blender, export FBX | Gardé (intégré sur `feat/prototype-maxens`) |
 | Claude (Code) | Test du hub « sans bouger » d'après mon schéma : joueur fixé au centre, tout rapproché en rond, plateau agrandi, zone de chute vers le joueur, portée 6 m, plus de textes au-dessus des singes ; scène régénérée et testée en Play | À tester au casque |

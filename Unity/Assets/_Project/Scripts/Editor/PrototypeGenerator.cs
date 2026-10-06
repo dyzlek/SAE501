@@ -14,7 +14,7 @@ namespace SAE.EditorTools
     {
         const string Folder = "Assets/_Project/Scenes";
         const string ScenePath = Folder + "/Jeu.unity";
-        const float BoardTile = 0.3f;    // plateau de 2,4 m : l'élément principal du hub (on doit y reconnaître chaque singe)
+        const float BoardTile = 0.175f;  // plateau de 1,4 m, sur l'établi : assez grand pour reconnaître chaque singe, assez près pour l'atteindre
         static readonly Vector3 MapCenter = new Vector3(0f, 0f, 40f);
 
         static readonly Color Floor = new Color(0.35f, 0.35f, 0.38f);
@@ -41,7 +41,7 @@ namespace SAE.EditorTools
             var spawner = mapRoot.GetComponent<WaveSpawner>();
             var hub = BuildHub(mapRoot, mapSpawn, spawner);   // avant le joueur : l'installeur des bananes ajoute son TestSouris à Camera.main s'il en trouve une
             var player = Player(hubSpawn.position);
-            BuildChest(hub, Around(ChestAngle, Ring - 0.3f), player);
+            BuildChest(hub, Around(ChestAngle, ChestDistance), player);
 
             EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), ScenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
@@ -130,23 +130,24 @@ namespace SAE.EditorTools
         }
 
         // ---------------- HUB ----------------
-        // Le joueur reste AU CENTRE (il ne marche pas au hub) et fait tout en tournant la tête :
-        // tout est disposé en rond autour de lui, assez près pour être vu et pris de loin (schéma de Maxens).
-        // Angles : 0° = devant, positif = à droite.
-        //   devant (0°)            : le grand plateau incliné (la carte en direct), le tableau de la vague au-dessus,
-        //                            JOUER à droite (+31°), LANCER et Vider à gauche (-31°)
-        //   côtés (±70°)           : les deux meubles de la bibliothèque, courbés le long du cercle
-        //   derrière-gauche        : le coffre de Nicolas (-118°), le panneau d'amélioration du bananier (-155°)
-        //   derrière-droite        : le bananier (+162°), sa zone de chute qui descend vers le joueur,
-        //                            le panier (+122°) et la caisse (+104°)
-        const float Ring = 3.5f;          // rayon du cercle : tout est à portée du regard depuis le centre
-        const float HubReach = 6f;        // portée pour prendre les bananes depuis le centre (m)
-        const float ChestAngle = -118f;
-        const float SlotSize = 0.24f;     // ancienne taille ×1,1
-        const float SlotStepX = 0.36f;    // espace entre deux raretés
-        const float SlotStepY = 0.40f;    // espace entre deux étagères
-        const float FirstShelfY = 0.45f;  // rangée la plus basse (accessible à un petit joueur)
-        const float TreeScale = 1.6f;     // le palmier de Maxens, agrandi
+        // Le joueur reste AU CENTRE (il ne marche pas au hub) et TOUT EST À PORTÉE DE MAIN (règle de confort VR) :
+        // on se tourne vers un élément et on tend le bras. Angles : 0° = devant, positif = à droite.
+        //   devant (0°)        : l'établi, avec le plateau incliné (la carte en direct) ; JOUER sur un socle à droite,
+        //                        LANCER et Vider à gauche ; le tableau de la vague plus loin, au-dessus, juste à lire
+        //   côtés (±75°)       : les deux étagères tournantes de la bibliothèque (une face par type de singe)
+        //   derrière-gauche    : le coffre de Nicolas (-112°) et le panneau d'amélioration du bananier (-160°)
+        //   derrière-droite    : le bananier (+140°) ; ses bananes tombent sur une table à hauteur de main qui vient
+        //                        jusqu'au joueur, avec le panier à côté (+105°) et la caisse plus loin (+100°)
+        const float HubReach = 3f;        // portée pour prendre les bananes et ouvrir le coffre depuis le centre (m)
+        const float HandHeight = 0.95f;   // hauteur des boutons et des tables : à hauteur de main
+        const float ChestAngle = -112f;
+        const float ChestDistance = 1.3f;
+        const float CarouselDistance = 1.0f;   // centre de l'étagère tournante : sa face avant est à 0,7 m
+        const float SlotSize = 0.12f;          // un singe sur l'étagère
+        const float SlotStep = 0.14f;          // espace entre deux cases
+        const float TreeAngle = 140f;
+        const float TreeScale = 1.2f;          // le palmier de Maxens (tronc agrandi), un peu agrandi
+        const float CloseUiScale = 0.5f;       // textes du coffre (roulette, consigne, chances, prix) : faits pour être lus de loin, réduits de près
 
         // Position sur le cercle. angle 0 = devant, positif = à droite.
         static Vector3 Around(float angleDeg, float radius, float height = 0f)
@@ -160,39 +161,53 @@ namespace SAE.EditorTools
             var env = new GameObject("Hub").transform;
             Visuals.Solid("Sol", env, new Vector3(0, -0.05f, 0), new Vector3(15, 0.1f, 15), Floor);
 
-            // Devant : le plateau, JOUER à droite, LANCER et Vider à gauche (LANCER : on lance la vague
-            // depuis le hub et on la regarde sur le plateau), le tableau de la vague au-dessus
+            // Devant : l'établi avec le plateau, et les boutons sur des socles à portée de main
             BuildBoard(env, mapRoot);
-            MakeActionCube(env, "Jouer", Around(31f, Ring - 0.5f, 1.0f), 0.35f, new Color(0.2f, 0.85f, 0.3f),
-                "JOUER", ActionCube.Action.Teleport, mapSpawn, "Aller sur la carte");
-            MakeLaunchCube(env, Around(-31f, Ring - 0.5f, 1.15f), 0.3f, spawner);
-            MakeActionCube(env, "Vider", Around(-31f, Ring - 0.5f, 0.6f), 0.25f, new Color(0.6f, 0.6f, 0.6f),
-                "Vider", ActionCube.Action.ClearBoard, null, "Vider le plateau");
-            BuildWaveBoard(env, Around(0f, Ring + 0.1f, 2.2f), Quaternion.identity, spawner);
+            MakeButton(env, 40f, "Jouer", new Color(0.2f, 0.85f, 0.3f), "JOUER", ActionCube.Action.Teleport, "Aller sur la carte").destination = mapSpawn;
+            MakeButton(env, -40f, "Lancer la vague", new Color(0.95f, 0.45f, 0.15f), "LANCER", ActionCube.Action.StartWave, "Lancer la vague").spawner = spawner;
+            MakeButton(env, -52f, "Vider", new Color(0.6f, 0.6f, 0.6f), "Vider", ActionCube.Action.ClearBoard, "Vider le plateau");
+            BuildWaveBoard(env, Around(0f, 2.3f, 1.9f), Quaternion.identity, spawner);
 
-            // Sur les côtés : les deux meubles de la bibliothèque, qui suivent le cercle (4 types + 3 types)
-            BuildShelf(env, "Bibliotheque gauche", -70f, 0, 4);
-            BuildShelf(env, "Bibliotheque droite", 70f, 4, 3);
+            // Sur les côtés : les deux étagères tournantes (4 types à gauche, 3 à droite)
+            BuildCarousel(env, "Bibliotheque gauche", -75f, 0, 4);
+            BuildCarousel(env, "Bibliotheque droite", 75f, 4, 3);
 
-            // Derrière : le bananier à droite avec son panier et la caisse, le panneau d'amélioration à gauche
-            // (le coffre est placé après le joueur, à gauche aussi)
-            var bananier = BuildBananas(env, Around(162f, Ring + 0.5f), 162f);
-            BuildMoneyBoard(env, 104f);
-            if (bananier) BuildUpgradePanel(env, bananier, -155f);
+            // Derrière : le bananier à droite avec sa table, son panier et la caisse ; le panneau d'amélioration
+            // à gauche (le coffre est placé après le joueur, derrière à gauche lui aussi)
+            var bananier = BuildBananas(env, Around(TreeAngle, 2.2f), TreeAngle);
+            BuildMoneyBoard(env, 100f, 1.6f);
+            if (bananier) BuildUpgradePanel(env, bananier, -160f, 1.1f);
             return env;
         }
 
-        // Plateau incliné de 25° vers le joueur, posé sur une planche qui suit l'inclinaison + un pied.
+        // Un bouton à enfoncer (cube) sur un socle, à portée de main.
+        static ActionCube MakeButton(Transform env, float angle, string name, Color color, string label, ActionCube.Action action, string hint)
+        {
+            const float Size = 0.12f;
+            const float Distance = 0.7f;
+            float top = HandHeight - Size / 2f;
+            var socle = Visuals.Solid($"Socle {name}", env, Around(angle, Distance, top / 2f), new Vector3(0.15f, top, 0.15f), Wood);
+            socle.transform.rotation = Quaternion.Euler(0, angle, 0);
+            var button = MakeActionCube(env, name, Around(angle, Distance, HandHeight), Size, color, label, action, null, hint);
+            // Le texte de MakeActionCube est fait pour être lu de loin : de près, on le réduit et on le pose juste au-dessus
+            var text = button.GetComponentInChildren<TextMesh>().transform;
+            text.localPosition = new Vector3(0, 0.75f, 0);
+            text.localScale *= 0.3f;
+            return button;
+        }
+
+        // L'établi : le plateau incliné de 30° vers le joueur, à portée de main, posé sur une planche
+        // qui suit l'inclinaison + un pied.
         static void BuildBoard(Transform env, Transform mapRoot)
         {
             float scale = BoardTile / MapLayout.Tile;
             float side = MapLayout.Size * BoardTile;
-            var center = Around(0f, Ring - 0.9f, 0.95f);   // reculé jusqu'au cercle, devant le joueur
+            var center = Around(0f, 1.05f, HandHeight);   // le bord le plus proche est à 0,45 m du joueur
 
             var boardGo = new GameObject("Plateau");
             boardGo.tag = Tags.Plateau;
             boardGo.transform.SetParent(env, false);
-            boardGo.transform.SetPositionAndRotation(center, Quaternion.Euler(-25f, 0, 0));
+            boardGo.transform.SetPositionAndRotation(center, Quaternion.Euler(-30f, 0, 0));
             var board = boardGo.AddComponent<Board>();
             board.mapRoot = mapRoot;
             board.scale = scale;
@@ -210,49 +225,53 @@ namespace SAE.EditorTools
             Visuals.Solid("Base du pied", env, new Vector3(0, 0.02f, center.z), new Vector3(0.6f, 0.04f, 0.6f), Wood);
         }
 
-        // Un meuble COURBE qui suit le cercle autour du joueur : chaque colonne (une rareté) est tournée vers lui,
-        // donc tout reste lisible depuis le centre (un meuble droit se voyait de biais et les textes se chevauchaient).
-        // Une étagère par type (de firstType à firstType+count-1), une colonne par rareté, de gauche à droite.
-        static void BuildShelf(Transform env, string name, float centerAngle, int firstType, int count)
+        // Une étagère tournante (Carousel) à portée de main : un meuble carré sur un pied, une face par type
+        // (de firstType à firstType+count-1), 8 cases par face (2 rangées de 4 raretés). La face 0 regarde le joueur.
+        // On la fait tourner avec la manivelle du dessus.
+        static void BuildCarousel(Transform env, string name, float angle, int firstType, int count)
         {
-            var shelf = new GameObject(name).transform;
-            shelf.tag = Tags.Bibliotheque;
-            shelf.SetParent(env, false);
+            const int Faces = 4;
+            const int Columns = 4;
+            const float Half = Columns * SlotStep / 2f;            // demi-largeur d'une face
+            float rowLow = HandHeight, rowHigh = HandHeight + SlotStep + 0.04f;
 
-            float step = SlotStepX / Ring * Mathf.Rad2Deg;            // angle entre deux colonnes
-            float height = FirstShelfY + count * SlotStepY;
-            float Angle(float column) => centerAngle + (column - (MonkeyData.LevelCount - 1) / 2f) * step;
-            Quaternion Facing(float angle) => Quaternion.Euler(0, angle, 0);   // +Z local = vers l'extérieur
+            var root = new GameObject(name).transform;
+            root.tag = Tags.Bibliotheque;
+            root.SetParent(env, false);
+            root.SetPositionAndRotation(Around(angle, CarouselDistance), Quaternion.Euler(0, angle, 0));   // -Z local = vers le joueur
+            root.gameObject.AddComponent<Carousel>().faces = Faces;
 
-            // Fond et planches : un morceau par colonne (+ un en plus de chaque côté pour les noms des types)
-            for (int c = -1; c <= MonkeyData.LevelCount; c++)
+            // Pied, cœur du meuble, une planche sous chaque rangée, et la manivelle sur le dessus
+            Visuals.Box("Pied", root, new Vector3(0, (rowLow - 0.1f) / 2f, 0), new Vector3(0.1f, rowLow - 0.1f, 0.1f), Wood);
+            Visuals.Box("Coeur", root, new Vector3(0, (rowLow + rowHigh) / 2f, 0), new Vector3(Half * 2f - 0.1f, rowHigh - rowLow + SlotSize + 0.06f, Half * 2f - 0.1f), Wood);
+            foreach (float y in new[] { rowLow, rowHigh })
+                Visuals.Box("Planche", root, new Vector3(0, y - SlotSize / 2f - 0.01f, 0), new Vector3(Half * 2f + 0.08f, 0.02f, Half * 2f + 0.08f), Wood);
+            var crank = GameObject.CreatePrimitive(PrimitiveType.Cylinder);   // son collider sert à cliquer pour tourner
+            crank.name = "Manivelle";
+            crank.transform.SetParent(root, false);
+            crank.transform.localPosition = new Vector3(0, rowHigh + SlotSize / 2f + 0.06f, 0);
+            crank.transform.localScale = new Vector3(0.16f, 0.03f, 0.16f);
+            crank.AddComponent<ColorTint>().Set(new Color(0.95f, 0.75f, 0.2f));
+
+            for (int f = 0; f < count; f++)
             {
-                float a = Angle(c);
-                var fond = Visuals.Solid($"Fond {c}", shelf, Around(a, Ring + 0.25f, height / 2f), new Vector3(SlotStepX + 0.02f, height, 0.05f), Wood);
-                fond.transform.rotation = Facing(a);
-                for (int i = 0; i < count; i++)
-                {
-                    float y = FirstShelfY + i * SlotStepY - SlotSize / 2f - 0.02f;
-                    var board = Visuals.Solid($"Etagere {i} {c}", shelf, Around(a, Ring + 0.05f, y), new Vector3(SlotStepX + 0.02f, 0.03f, 0.45f), Wood);
-                    board.transform.rotation = Facing(a);
-                }
-            }
-            Visuals.Label(shelf, "BIBLIOTHÈQUE", Around(centerAngle, Ring, height + 0.15f), 0.1f);
-
-            for (int i = 0; i < count; i++)
-            {
-                var type = (MonkeyType)(firstType + i);
-                float y = FirstShelfY + i * SlotStepY;
-                Visuals.Label(shelf, type.ToString(), Around(Angle(-1), Ring - 0.05f, y), 0.07f);
+                var type = (MonkeyType)(firstType + f);
+                var faceRotation = Quaternion.Euler(0, f * 360f / Faces, 0);
+                // Le nom du type au-dessus de la face, écrit côté extérieur
+                var title = Visuals.Label(root, type.ToString(), faceRotation * new Vector3(0, rowHigh + SlotSize / 2f + 0.02f, -Half - 0.05f), 0.04f);
+                Object.DestroyImmediate(title.GetComponent<Billboard>());
+                title.transform.localRotation = faceRotation;
 
                 for (int l = 0; l < MonkeyData.LevelCount; l++)
                 {
-                    float a = Angle(l);
+                    float x = (l % Columns - (Columns - 1) / 2f) * SlotStep;
+                    float y = l < Columns ? rowHigh : rowLow;                  // raretés basses en haut, à lire en premier
                     var slot = new GameObject($"Slot {type} {(Rarity)l}");
                     slot.tag = Tags.Bibliotheque;
-                    slot.transform.SetParent(shelf, false);
-                    slot.transform.SetPositionAndRotation(Around(a, Ring, y), Facing(a));
-                    slot.AddComponent<BoxCollider>().size = Vector3.one * (SlotSize + 0.04f);
+                    slot.transform.SetParent(root, false);
+                    slot.transform.localPosition = faceRotation * new Vector3(x, y, -Half);
+                    slot.transform.localRotation = faceRotation;                // +Z local = vers le cœur, le singe regarde dehors
+                    slot.AddComponent<BoxCollider>().size = Vector3.one * (SlotSize + 0.02f);
                     var s = slot.AddComponent<LibrarySlot>();
                     s.type = type;
                     s.level = (Rarity)l;
@@ -281,29 +300,36 @@ namespace SAE.EditorTools
             bananier.transform.localScale *= TreeScale;
             bananier.gameObject.AddComponent<BananaGuard>();   // plus de bananes coincées dans le bac ou sous les feuilles
 
-            // Le panier : à côté du bananier, un peu vers le joueur pour rester à portée
+            // Le panier : sur un socle à hauteur de main, au bout de la table, à côté du joueur
+            var basketPos = Around(105f, 0.8f);
+            Visuals.Solid("Socle du panier", env, new Vector3(basketPos.x, HandHeight / 2f - 0.1f, basketPos.z), new Vector3(0.35f, HandHeight - 0.2f, 0.35f), Wood);
             var basket = root.transform.Find("Panier");
-            if (basket) basket.position = Around(122f, Ring - 0.2f);
+            if (basket) basket.position = basketPos + Vector3.up * (HandHeight - 0.2f);
 
-            // Zone de chute : un long tapis qui part du pied du bananier et descend vers le joueur.
-            // Les bananes tombent tout le long (de dMin, le bord du bac, à dMin + longueur) : elles arrivent
-            // à portée du regard depuis le centre, sans jamais tomber dans le bac ou dans le panier.
+            // Table des bananes : elle part du pied du bananier et vient jusqu'au joueur, à hauteur de main
+            // (règle de confort : pas de ramassage au sol). Les bananes tombent tout le long, sur le dessus
+            // (de dMin, le bord du bac, à dMin + longueur), sans jamais tomber dans le bac ou dans le panier.
             var treePos = new Vector3(pos.x, 0, pos.z);
             var towardPlayer = (DropTarget - treePos).normalized;
             float dMin = TreeEdge(bananier);
             float length = Vector3.Distance(treePos, DropTarget) - dMin;
             var zonePos = treePos + towardPlayer * (dMin + length / 2f);
-            var zone = Visuals.Box("Zone de chute des bananes", env, zonePos + Vector3.up * 0.005f, new Vector3(0.9f, 0.01f, length), new Color(0.95f, 0.85f, 0.35f));
+            var zone = Visuals.Solid("Table des bananes", env, zonePos + Vector3.up * (TableTop - 0.03f), new Vector3(0.6f, 0.06f, length), new Color(0.95f, 0.85f, 0.35f));
             zone.transform.rotation = Quaternion.LookRotation(towardPlayer);
+            var leg = Visuals.Solid("Pied de la table", env, zonePos + Vector3.up * (TableTop - 0.06f) / 2f, new Vector3(0.4f, TableTop - 0.06f, length * 0.8f), Wood);
+            leg.transform.rotation = zone.transform.rotation;
+            bananier.hauteurAuSol = TableTop + 0.05f;   // les bananes se posent sur la table
+            bananier.GetComponent<BananaGuard>().groundY = TableTop + 0.05f;
             bananier.versCible = zone.transform;
             bananier.largeurZone = length;
             bananier.margePanier = -length / 2f;   // la cible est le milieu du tapis : on autorise jusqu'au bout
-            bananier.angleDispersion = 8f;           // reste dans la largeur du tapis
+            bananier.angleDispersion = 6f;           // reste dans la largeur de la table
             return bananier;
         }
 
-        // Bout de la zone de chute, côté joueur : à 1,5 m de lui, vers le bananier et le panier.
-        static readonly Vector3 DropTarget = Around(140f, 1.5f);
+        // Bout de la table des bananes, côté joueur : à 0,6 m de lui, à portée de main.
+        static readonly Vector3 DropTarget = Around(TreeAngle, 0.6f);
+        const float TableTop = HandHeight - 0.1f;   // dessus de la table des bananes
 
         // Distance du centre du bananier au bord de son bac (même calcul que Bananier.Start, qui la recalcule en jeu).
         static float TreeEdge(Bananier bananier)
@@ -314,9 +340,9 @@ namespace SAE.EditorTools
         }
 
         // La caisse : un panneau en bois avec l'argent total en gros chiffres dorés, à côté du panier.
-        static void BuildMoneyBoard(Transform env, float angle)
+        static void BuildMoneyBoard(Transform env, float angle, float distance)
         {
-            var pos = Around(angle, Ring - 0.4f);
+            var pos = Around(angle, distance);
             var root = new GameObject("Caisse").transform;
             root.SetParent(env, false);
             root.SetPositionAndRotation(pos, Quaternion.Euler(0, angle, 0));     // +Z local = vers l'extérieur
@@ -340,9 +366,9 @@ namespace SAE.EditorTools
         }
 
         // Panneau d'amélioration du bananier : 3 gros boutons ronds à enfoncer (production, fraîcheur, valeur).
-        static void BuildUpgradePanel(Transform env, Bananier bananier, float angle)
+        static void BuildUpgradePanel(Transform env, Bananier bananier, float angle, float distance)
         {
-            var pos = Around(angle, Ring - 0.45f);
+            var pos = Around(angle, distance);
             var root = new GameObject("Ameliorations bananier").transform;
             root.SetParent(env, false);
             root.SetPositionAndRotation(pos, Quaternion.Euler(0, angle, 0));     // +Z local = vers l'extérieur
@@ -413,13 +439,15 @@ namespace SAE.EditorTools
 
             var rouletteGo = new GameObject("Roulette");
             rouletteGo.transform.SetParent(env, false);
-            rouletteGo.transform.position = new Vector3(pos.x, top + 1.0f, pos.z);
+            rouletteGo.transform.position = new Vector3(pos.x, top + 0.7f, pos.z);
+            rouletteGo.transform.localScale = Vector3.one * CloseUiScale;
             rouletteGo.AddComponent<Sae501.Coffres.Billboard>();
             var roulette = rouletteGo.AddComponent<Sae501.Coffres.RouletteView>();
 
             var promptGo = new GameObject("PromptCoffre");
             promptGo.transform.SetParent(env, false);
-            promptGo.transform.position = new Vector3(pos.x, top + 0.35f, pos.z);
+            promptGo.transform.position = new Vector3(pos.x, top + 0.25f, pos.z);
+            promptGo.transform.localScale = Vector3.one * CloseUiScale;
             promptGo.AddComponent<Sae501.Coffres.Billboard>();
             var prompt = promptGo.AddComponent<Sae501.Coffres.ChestPrompt>();
 
@@ -446,8 +474,9 @@ namespace SAE.EditorTools
             // Panneau des chances, à côté du coffre (il tourne avec lui, donc reste face au joueur)
             var oddsRoot = new GameObject("Chances du coffre").transform;
             oddsRoot.SetParent(pivot, false);
-            oddsRoot.localPosition = new Vector3(1.0f, 1.35f, 0f);
+            oddsRoot.localPosition = new Vector3(0.6f, 1.0f, 0f);
             oddsRoot.localRotation = Quaternion.Euler(0, 180, 0);   // le pivot regarde le joueur : on retourne le texte pour qu'il soit lisible
+            oddsRoot.localScale = Vector3.one * CloseUiScale;
             Visuals.Box("Fond", oddsRoot, new Vector3(0, 0, 0.02f), new Vector3(1.15f, 1.5f, 0.02f), new Color(0.1f, 0.09f, 0.08f));
             var oddsText = Visuals.Label(oddsRoot, "", Vector3.zero, 0.055f);
             Object.DestroyImmediate(oddsText.GetComponent<Billboard>());
@@ -458,7 +487,8 @@ namespace SAE.EditorTools
             // Prix du coffre, toujours visible au-dessus (doré si on peut payer)
             var tag = new GameObject("Prix du coffre");
             tag.transform.SetParent(env, false);
-            tag.transform.position = new Vector3(pos.x, top + 0.75f, pos.z);
+            tag.transform.position = new Vector3(pos.x, top + 0.5f, pos.z);
+            tag.transform.localScale = Vector3.one * CloseUiScale;
             var priceTag = tag.AddComponent<ChestPriceTag>();
             priceTag.chest = controller;
             priceTag.label = Visuals.Label(tag.transform, "", Vector3.zero, 0.09f);
