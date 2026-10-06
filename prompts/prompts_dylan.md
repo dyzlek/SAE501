@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### « Vider » payant, plus de texte sur le plateau
+> Appuyer sur « Vider » doit coûter des bananes. J'aimerais aussi qu'il n'y ait plus de texte sur le singe quand je l'ai posé sur le plateau.
+
 ### Le singe vient vers nous
 > J'aimerais que le singe vienne vers nous quand on le prend de loin.
 

@@ -65,7 +65,7 @@ namespace SAE
                 proxy.AddComponent<MeshRenderer>().sharedMaterial = m.GetComponent<MeshRenderer>().sharedMaterial;
             }
             proxy.AddComponent<ColorTint>();
-            if (!string.IsNullOrEmpty(m.label))
+            if (!view && !string.IsNullOrEmpty(m.label))   // pas de texte sur les singes posés : le modèle suffit
             {
                 // Label posé au-dessus, à taille fixe (on compense l'échelle du proxy chaque frame)
                 var label = Visuals.Label(proxy.transform, m.label, Vector3.up * 0.9f, 0.04f, Color.black);

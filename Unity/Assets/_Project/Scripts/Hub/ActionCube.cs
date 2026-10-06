@@ -11,12 +11,18 @@ namespace SAE
         public Transform destination;
         public WaveSpawner spawner;   // pour StartWave
 
+        public const int ClearBoardPrice = 10;   // en bananes : vider le plateau n'est pas gratuit
+
         public void Press()
         {
             switch (action)
             {
                 case Action.Teleport: PlayerRig.Local.TeleportTo(destination); break;
-                case Action.ClearBoard: GameState.ClearBoard(); break;
+                case Action.ClearBoard:
+                    // Plateau déjà vide : rien à payer. Pas assez de bananes : rien ne se passe.
+                    if (GameState.Placed.Count > 0 && Economy.TrySpend(ClearBoardPrice, transform.position))
+                        GameState.ClearBoard();
+                    break;
                 case Action.StartWave: spawner.StartWave(); break;
             }
         }

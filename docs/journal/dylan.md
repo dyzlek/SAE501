@@ -84,6 +84,7 @@ Le hub était plus espacé, mais pas encore assez. J'ai dessiné une disposition
 | Claude (Claude Code) | Lecture des 7 supports de cours de D. Di Pierro et synthèse dans `docs/GUIDE_CODE.md` (organisation, style C#, cycle de vie, événements, collisions, mise en place VR, saisie, UI en World Space, tests, perf, check-list avant commit) ; CLAUDE.md demande de le lire avant de coder | À relire par l'équipe |
 | Claude (Claude Code) | Prise de loin des singes qui ne marchait pas : la boîte de collision de chaque case de la bibliothèque englobait le singe, le rayon exact s'arrêtait dessus. La boîte est coupée tant qu'un singe est posé (`LibrarySlot.UpdateCollider`) | À tester |
 | Claude (Claude Code) | Le singe pris de loin vient jusqu'à la main au lieu de rester au bout du rayon (`farAttachMode = Near` dans `MonkeyToken.Create`) | À tester |
+| Claude (Claude Code) | Le bouton « Vider » coûte 10 bananes (`ActionCube.ClearBoardPrice`, rien n'est payé si le plateau est vide ou s'il manque des bananes) ; plus de texte au-dessus des singes posés sur le plateau (`Board`) | À tester |
 
 ## Lun. 5 oct. 2026
 - **Fait :** création du dépôt GitHub, lecture des consignes, première analyse de l'idée et brouillon du GDD, test du prototype v2 et captures, **analyse critique du prototype (personnelle, pas encore discutée avec l'équipe)**, test et analyse des prototypes de Nicolas (coffres) et de Maxens (bananier), intégration des trois prototypes dans un seul projet (branche `feat/integration`).
