@@ -7,7 +7,6 @@ namespace SAE
     // Un singe posé sur la carte : il tire tout seul sur les ballons à sa portée.
     public class Tower : MonoBehaviour
     {
-        static Material lineMaterial;
 
         Monkey monkey;
         float cooldown;
@@ -54,11 +53,9 @@ namespace SAE
         // Trait bref entre le singe et la cible.
         void Shot(Vector3 to)
         {
-            if (!lineMaterial)
-                lineMaterial = new Material(Shader.Find("Sprites/Default") ?? Shader.Find("Universal Render Pipeline/Unlit"));
             var go = new GameObject("Tir");
             var line = go.AddComponent<LineRenderer>();
-            line.sharedMaterial = lineMaterial;
+            line.sharedMaterial = Visuals.LineMaterial;
             line.positionCount = 2;
             line.SetPosition(0, transform.position + Vector3.up * 0.6f);
             line.SetPosition(1, to);

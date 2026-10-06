@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c9f79c8829e68c4592fcc08331c7122, type: 3}
+  m_Name: MonkeyVisuals
+  m_EditorClassIdentifier: Assembly-CSharp::SAE.MonkeyVisuals
+  models:
+  - {fileID: 919132149155446097, guid: 21baebbbe266cb848b6ad5d3a3d0c28e, type: 3}
+  - {fileID: 919132149155446097, guid: 13201dc4488164c4ba2259aa6736edb0, type: 3}
+  - {fileID: 919132149155446097, guid: 2b001dc54215c614e8becd5ba7b26b39, type: 3}
+  - {fileID: 919132149155446097, guid: c79b2cd4f8adbed4ebca4390df9f5bb7, type: 3}
+  - {fileID: 919132149155446097, guid: df9e39064521b264695f86300f2249ba, type: 3}
+  - {fileID: 919132149155446097, guid: 94b2e73d31b0575409f775de47c90a2b, type: 3}
+  - {fileID: 919132149155446097, guid: 9118c7157abd28446a9dc5a8daba00f6, type: 3}
+  yaw:
+  - 180
+  - 180
+  - 180
+  - 180
+  - 0
+  - 180
+  - 180
+  auraPrefab: {fileID: 1706562574611815889, guid: 7196d759ddf70d84aae526f2eb26fc95, type: 3}

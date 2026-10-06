@@ -4,13 +4,12 @@ using Sae501.Coffres;
 
 namespace SAE
 {
-    // Ce que donne le coffre : à l'ouverture, chaque singe gagné sort du coffre avec une aura de la couleur
+    // Ce que donne le coffre : à l'ouverture, chaque singe gagné sort du coffre avec son aura (Visuals.MonkeyPiece) de la couleur
     // de sa rareté, flotte un instant, puis vole jusqu'à sa case de la bibliothèque, où il s'ajoute à l'inventaire.
     // Le coffre tire la rareté ; le TYPE est tiré ici, selon des chances qui s'ouvrent avec les vagues (MonkeyOdds).
     public class ChestReward : MonoBehaviour
     {
         public ChestController chest;
-        public Material auraMaterial;
         public MonkeyOddsSettings typeOdds = new MonkeyOddsSettings();
         public float pieceSize = 0.3f;
         public float riseHeight = 0.8f;
@@ -43,7 +42,6 @@ namespace SAE
             var piece = Visuals.MonkeyPiece(monkey, null, start, pieceSize);
             piece.name = $"Récompense {monkey}";
             piece.transform.position = start;
-            Aura.Add(piece, MonkeyData.RarityColor(monkey.level), auraMaterial, pieceSize * 2.2f);
 
             for (float t = 0; t < 1f; t += Time.deltaTime / 0.6f)
             {

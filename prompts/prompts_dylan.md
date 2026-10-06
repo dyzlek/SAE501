@@ -4,6 +4,46 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Prix de « Vider » affiché, singe tenu de côté (PC) ou dans la main (VR)
+> J'aimerais que le prix pour vider soit affiché. Et quand on prend un singe, en mode PC il doit se mettre sur le côté, et en VR directement dans la main.
+
+### « Vider » payant, plus de texte sur le plateau
+> Appuyer sur « Vider » doit coûter des bananes. J'aimerais aussi qu'il n'y ait plus de texte sur le singe quand je l'ai posé sur le plateau.
+
+### Le singe vient vers nous
+> J'aimerais que le singe vienne vers nous quand on le prend de loin.
+
+### Prendre les singes de loin (ça ne marche pas)
+> J'aimerais pouvoir prendre les singes de loin, car ça ne marche pas.
+
+### Viser vraiment le singe pour interagir
+> Corrige juste ça : je veux qu'il faille pointer sur le singe pour interagir (sur mes captures, le rayon est bleu et interagit alors qu'il passe à côté).
+
+### Prendre les singes et les bananes de loin (2 m)
+> J'aimerais qu'en mode PC, et aussi en VR si ce n'est pas déjà le cas, je puisse prendre les singes et le reste de loin, à environ 2 m.
+
+### La VR dans le travail de Maxens, avec un mode PC
+> Maintenant, prends ce qu'il a fait (commit 1cc56b1) et implémente la VR dedans. Ajoute juste une option pour jouer en VR ou non, pour tester vite fait.
+
+### Plus adapté à la VR : vies, rayon et interactions de loin
+> Ce n'est pas encore adapté à la VR. D'abord, j'aimerais que la vie se réinitialise à chaque niveau. Ensuite, le rayon n'est pas sur les manettes : j'aimerais pouvoir poser les singes sur la carte de loin, et qu'un rayon lumineux parte devant quand on vise, pour appuyer sur les boutons, récupérer les bananes de loin, etc.
+
+### Textes en VR et boutons à distance
+> Je peux me déplacer, mais tous les textes s'affichent mal, et peu de choses sont adaptées à la VR. J'aimerais aussi pouvoir interagir avec les boutons un peu à distance. Je te laisse faire.
+
+### Chantier E : la VR, les gestes de base au casque
+> Maintenant, mettons la VR :
+> - le joueur VR : rig XR avec téléportation et rotation par crans, et le simulateur XR pour continuer à tester sans casque ;
+> - prendre un singe sur l'étagère avec la main (XR Grab) ;
+> - le lâcher au-dessus du plateau, ce qui le pose, avec l'aperçu vert ou rouge sous la main ;
+> - le lâcher sur un singe identique, ce qui les fusionne, avec le halo blanc ;
+> - les bananes : les prendre et les lâcher dans le panier (le prefab est déjà prêt pour la VR). Pour le confort, on évite de ramasser au sol en boucle : les bananes tombent sur un plateau à hauteur de main ;
+> - les boutons (Jouer, lancer la vague, améliorations) s'enfoncent avec la main ;
+> - un premier build sur le casque, au plus tard en début d'après-midi.
+
+### Branche pour la VR et schéma du hub
+> Je vais m'occuper de l'ajout de la VR dans une branche `feat/ajout-vr`. Avant ça, regarde ce que j'ai fait et ajoute l'image de mon schéma du hub.
+
 ### Guide de bonnes pratiques tiré des cours
 > Récupère toutes les informations importantes de mes supports de cours (comment bien structurer son code, etc.) et mets-les soit dans le CLAUDE.md, soit dans un autre fichier .md que tu liras quand tu coderas dans le projet.
 

@@ -4,8 +4,8 @@ using UnityEngine.InputSystem;
 
 namespace SAE
 {
-    // Fiche d'un singe : quand on vise un singe (bibliothèque, plateau ou carte) EN MAINTENANT le bouton d'infos
-    // (touche A du clavier AZERTY, bouton A de la manette droite en VR), une petite carte apparaît
+    // Fiche d'un singe : quand on vise un singe avec la manette droite (bibliothèque, plateau ou carte)
+    // EN MAINTENANT son bouton A (mode PC : viser au centre de l'écran + touche A), une petite carte apparaît
     // DANS LE DÉCOR, au-dessus de lui, avec ses caractéristiques et ce que donnerait une fusion.
     // Sur le plateau et la carte, un cercle montre aussi sa portée.
     // Pas d'affichage collé à l'écran (règle de confort VR) : la carte reste posée près du singe.
@@ -13,9 +13,11 @@ namespace SAE
     {
         public float textHeight = 0.04f;        // hauteur d'une ligne, en mètres, vue de près
         public float readableDistance = 1.2f;   // au-delà, la carte grandit pour rester lisible
+        public float reach = 15f;               // portée de la visée, en mètres
 
-        // Le bouton d'infos. Le clavier est lu par position de touche : « <Keyboard>/q » = la touche A en AZERTY.
+        // Le bouton d'infos : A sur la manette droite.
         InputAction showInfo;
+        Component aimedSurface;                 // ce qu'on vise : sert à incliner le cercle de portée comme le plateau
 
         Transform card;
         TextMesh text;
@@ -26,8 +28,8 @@ namespace SAE
         void OnEnable()
         {
             showInfo = new InputAction("Infos du singe", InputActionType.Button);
-            showInfo.AddBinding("<Keyboard>/q");
             showInfo.AddBinding("<XRController>{RightHand}/primaryButton");
+            showInfo.AddBinding("<Keyboard>/q");   // mode PC : touche A en AZERTY (le clavier est lu par position de touche)
             showInfo.Enable();
         }
 
@@ -43,7 +45,7 @@ namespace SAE
             card.gameObject.SetActive(false);
 
             rangeCircle = new GameObject("Cercle de portée").AddComponent<LineRenderer>();
-            rangeCircle.sharedMaterial = new Material(Shader.Find("Sprites/Default") ?? Shader.Find("Universal Render Pipeline/Unlit"));
+            rangeCircle.sharedMaterial = Visuals.LineMaterial;
             rangeCircle.loop = true;
             rangeCircle.positionCount = 48;
             rangeCircle.startColor = rangeCircle.endColor = new Color(1f, 1f, 1f, 0.8f);
@@ -52,12 +54,19 @@ namespace SAE
 
         void LateUpdate()
         {
-            var player = PlayerController.Local;
+            // On vise avec la manette droite (là où elle pointe), seulement quand le bouton est maintenu
+            var hand = PlayerRig.Local ? PlayerRig.Local.rightHand : null;
             Monkey monkey = default;
             Vector3 anchor = default, rangeCenter = default;
             float rangeScale = 0f;
-            bool visible = showInfo.IsPressed() && player && player.Target is IMonkeyInfo info
-                           && info.TryGetMonkeyInfo(player.AimPoint, out monkey, out anchor, out rangeCenter, out rangeScale);
+            bool visible = false;
+            if (showInfo.IsPressed() && hand
+                && Physics.Raycast(hand.position, hand.forward, out var hit, reach, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+            {
+                var info = hit.collider.GetComponentInParent<IMonkeyInfo>();
+                aimedSurface = info as Component;
+                visible = info != null && info.TryGetMonkeyInfo(hit.point, out monkey, out anchor, out rangeCenter, out rangeScale);
+            }
 
             card.gameObject.SetActive(visible);
             rangeCircle.gameObject.SetActive(visible && rangeScale > 0f && MonkeyData.Range(monkey) < 30f);   // pas de cercle géant pour le Sniper
@@ -88,9 +97,8 @@ namespace SAE
             {
                 float a = i * Mathf.PI * 2f / rangeCircle.positionCount;
                 // Le cercle suit l'inclinaison du plateau : on prend le plan de la surface visée
-                var surface = PlayerController.Local.Target as Component;
-                var right = surface ? surface.transform.right : Vector3.right;
-                var forward = surface ? surface.transform.forward : Vector3.forward;
+                var right = aimedSurface ? aimedSurface.transform.right : Vector3.right;
+                var forward = aimedSurface ? aimedSurface.transform.forward : Vector3.forward;
                 rangeCircle.SetPosition(i, center + (right * Mathf.Cos(a) + forward * Mathf.Sin(a)) * radius);
             }
         }

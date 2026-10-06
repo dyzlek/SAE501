@@ -4,12 +4,11 @@ using UnityEngine;
 namespace SAE
 {
     // Un ballon suit la piste. Ses points de vie = ses couches (la couleur change à chaque couche perdue).
-    // Cliquer dessus le touche : c'est la place de l'arc de Quincy en attendant la VR.
     // Sa sorte (BalloonKind) change sa taille, sa vitesse et sa résistance :
     //   Rapide = petit et vif ; Blindé = gris, moitié moins de dégâts, insensible au ralentissement ;
     //   Boss = gros ballon violet foncé et lent ; Dirigeable = le boss final rouge, énorme, insensible au ralentissement.
     // S'il atteint la sortie, il retire autant de vies qu'il lui reste de couches.
-    public class Balloon : MonoBehaviour, IClickable
+    public class Balloon : MonoBehaviour
     {
         public static readonly List<Balloon> All = new List<Balloon>();
 
@@ -39,17 +38,6 @@ namespace SAE
         // Distance parcourue : les singes visent le ballon le plus avancé.
         public float Progress { get; private set; }
 
-        public string GetHint(Vector3 point) => $"{KindName} ({Mathf.CeilToInt(hp)} couche(s)) : tirer";
-
-        string KindName => Kind switch
-        {
-            BalloonKind.Rapide => "Ballon rapide",
-            BalloonKind.Blinde => "Ballon blindé",
-            BalloonKind.Boss => "BOSS",
-            BalloonKind.Dirigeable => "DIRIGEABLE",
-            _ => "Ballon",
-        };
-
         public void Init(WaveSpawner owner, List<Vector3> points, int layers, BalloonKind kind)
         {
             spawner = owner;
@@ -76,7 +64,6 @@ namespace SAE
         void OnEnable() => All.Add(this);
         void OnDisable() => All.Remove(this);
 
-        public void OnClick(PlayerController player, Vector3 point) => Hit(1f);
 
         public void Hit(float damage)
         {
