@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Singe récolteur de bananes
+> J'aimerais pouvoir acheter le service d'un singe qui ramasse les bananes et les met dans le panier. Fais-le gratuit pour le moment, ses améliorations aussi (vitesse de déplacement, etc.). Fais toutes les animations : il marche vers une banane, la porte, se rapproche du panier et la jette dedans. Utilise le singe classique.
+
 ### Prix de « Vider » affiché, singe tenu de côté (PC) ou dans la main (VR)
 > J'aimerais que le prix pour vider soit affiché. Et quand on prend un singe, en mode PC il doit se mettre sur le côté, et en VR directement dans la main.
 
