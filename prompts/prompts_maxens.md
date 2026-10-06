@@ -1,44 +1,54 @@
 # Prompts de Maxens
 
-_Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/maxens.md)._
+_Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (orthographe, clarté, structure : contexte, objectif, contraintes). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/maxens.md)._
 
 ## Mar. 6 oct. 2026
 
-### Retour en arrière
-> Reviens sur la dernière version, comme elle était avant (sans l'établi ni les étagères tournantes).
+### Retour à la version précédente du hub
+> Après essai, l'établi et les étagères tournantes surchargent l'espace autour du joueur : on ne distingue plus clairement les éléments. Annule cette dernière version et remets le hub tel qu'il était avant.
 >
-> Suite : note bien dans Git qu'au final ça faisait surchargé, donc je suis repassé sur l'ancienne version.
+> Consigne dans le journal et dans le message de commit la raison de ce retour en arrière (interface trop surchargée), pour garder une trace de la décision.
 
-### Établi et étagères tournantes
-> Je suis d'accord avec toi : les pistes 1 et 2 (un établi à portée de main et des étagères tournantes pour la bibliothèque).
+### Prototype : établi et étagères tournantes
+> Je valide ta recommandation de combiner les pistes 1 et 2 : un établi à portée de main pour le plateau et les boutons, et des étagères tournantes pour la bibliothèque. Réalise un premier prototype sur ma branche.
 
-### Problème VR du hub
-> Note dans les problèmes, avec la capture, que ce n'est pas adapté à la VR, pour les boutons par exemple. Il faudrait trouver un moyen : soit réagencer les bibliothèques, soit changer complètement le fonctionnement. Dis-moi ce qui serait possible.
-
-### Hub sans bouger
-> Enlève les textes au-dessus des singes. Je veux aussi faire un test : dans le hub, on ne peut pas se déplacer, on fait tout en tournant la tête et en prenant les objets. Le plateau est trop petit, on ne voit pas bien les différences entre les singes. Regarde le schéma : on serait au milieu, on aurait accès à tout avec le regard, et on aurait une portée assez longue.
-
-### Suivre les cours
-> Attention : est-ce que tu as lu les cours qu'on a eus ? Prends exemple dessus.
+### Analyse : un hub inadapté à la VR
+> Dans la version actuelle, les boutons et la bibliothèque sont hors de portée des mains : le hub n'est pas adapté à la VR. Ajoute ce problème dans la partie « Bloque » de mon journal, avec une capture qui l'illustre.
 >
-> Suite : installe l'outil pour lire les PDF, puis reprends tout.
+> Propose ensuite les solutions possibles, de la plus simple (réorganiser les bibliothèques) à la plus profonde (changer complètement le fonctionnement), avec leurs avantages, leurs limites et ta recommandation.
 
-### Corrections après test
-> C'est pas mal, mais quand je pose le singe sur le plateau, il redevient un cube. L'aura n'est pas très adaptée au Canon et au Tireur, et le Canon est tourné vers le mur. Et pourquoi, quand j'arrête le Play, les singes redeviennent des cubes ?
+### Test : un hub où l'on ne se déplace pas
+> Je veux tester un hub où le joueur reste immobile au centre et fait tout en tournant la tête et en saisissant les objets. Le schéma joint montre la disposition voulue : tous les éléments répartis autour de lui, accessibles du regard, avec une portée d'interaction assez longue.
 >
-> Suite : annule les changements parasites d'Unity, ne committe pas le package MCP, travaille bien sur ma branche, et ajoute mes deux captures dans la partie « Fait » de mon journal. Tout doit y être, même les changements que je vais te demander.
+> Dans la même modification :
+> - supprime les textes affichés au-dessus des singes ;
+> - agrandis le plateau, car on distingue mal les différents singes posés dessus.
 
-### Les singes dans la bibliothèque, avec une aura
-> Dans la scène Unity, je ne vois pas encore les singes dans la bibliothèque. Pense aussi à l'aura : aujourd'hui c'est la couleur du cube, mais ça devra être une sorte d'aura à la Dragon Ball autour des singes.
+### Respect des cours de développement
+> Avant d'aller plus loin : as-tu lu nos supports de cours ? Le code doit suivre les pratiques qui y sont enseignées.
+>
+> Installe l'outil nécessaire pour lire les PDF, relis les supports, puis reprends le code déjà écrit pour qu'il s'y conforme.
 
-### Tous mes modèles sur GitHub
-> J'ai tous mes modèles 3D dans mon dossier `Semestre-5/SAE/SAE-dispositif-interectif/Asset`. Pour le bananier, prends la version du dossier « Grand tronc ». Mets-les tous sur GitHub.
+### Corrections après mon premier test
+> J'ai testé la version avec les singes en 3D. Plusieurs problèmes :
+> - un singe posé sur le plateau redevient un cube ;
+> - l'aura convient mal aux modèles larges et bas (Canon, Tireur) ;
+> - le Canon est tourné vers le mur ;
+> - quand j'arrête le Play, la bibliothèque repasse en cubes : pourquoi ?
+>
+> Côté dépôt : annule les modifications parasites qu'Unity a faites à l'ouverture du projet, ne committe pas le package MCP et travaille uniquement sur ma branche. Ajoute mes deux captures dans la partie « Fait » de mon journal, et consigne-y chaque changement à venir.
 
-### Branche de test
-> Mets le fichier du bananier agrandi de côté. Prends le `main` actuel et crée-moi une branche `feat/prototype-maxens` pour que je puisse faire des tests (placer l'arbre, etc.). Ensuite, pousse la branche et mets à jour mes prompts et mon journal.
+### Les singes en 3D dans la bibliothèque, avec une aura
+> Dans la scène, la bibliothèque affiche encore des cubes : remplace-les par les modèles 3D de mes singes. Aujourd'hui, la rareté est indiquée par la couleur du cube ; elle devra l'être par une aura autour du singe, dans l'esprit des auras de Dragon Ball.
 
-### Bananier plus grand
-> Agrandis le bananier : je veux un tronc plus grand.
+### Intégrer tous mes modèles 3D au dépôt
+> Mes modèles 3D sont dans `Semestre-5/SAE/SAE-dispositif-interectif/Asset`. Ajoute-les tous au projet Unity et pousse-les sur GitHub. Pour le bananier, utilise la version du dossier « Grand tronc ».
+
+### Une branche de test personnelle
+> Laisse de côté le bananier agrandi pour l'instant. Crée une branche `feat/prototype-maxens` à partir du `main` à jour, pour que je puisse faire mes propres tests (placer l'arbre, etc.). Pousse-la, puis mets à jour mon journal et mes prompts.
+
+### Agrandir le bananier
+> Le tronc du bananier est trop court : agrandis-le.
 
 ## Lun. 5 oct. 2026
 

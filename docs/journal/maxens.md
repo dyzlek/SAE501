@@ -75,6 +75,7 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Réécriture de mes prompts du jour, plus clairs et mieux structurés (contexte, objectif, contraintes), sans changer leur sens | Gardé |
 | Claude (Code) | Retour à la version d'avant (hub « sans bouger » sur un grand cercle) : générateur et scène remis, `Carousel.cs` supprimé | Gardé |
 | Claude (Code) | Prototype des pistes 1 + 2 : établi à portée de main (plateau, boutons sur socles), deux étagères tournantes (`Carousel`), table des bananes à hauteur de main, textes du coffre réduits ; scène régénérée et testée en Play | Jeté (trop surchargé, annulé après essai) |
 | Claude (Code) | Analyse du problème VR du hub « sans bouger » (portée des boutons et de la bibliothèque) et 4 pistes de solution, capture ajoutée | À décider en équipe |
