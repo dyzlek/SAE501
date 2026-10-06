@@ -43,7 +43,7 @@ namespace SAE
 
             var grab = piece.AddComponent<XRGrabInteractable>();
             grab.throwOnDetach = false;
-            grab.useDynamicAttach = true;   // il reste dans la main là où on l'a attrapé
+            grab.useDynamicAttach = false;  // il se cale directement dans la main, quel que soit l'endroit visé
             grab.farAttachMode = InteractableFarAttachMode.Near;   // pris de loin, il vient jusqu'à la main (au lieu de rester au bout du rayon)
             piece.AddComponent<GrabReach>();  // on peut l'attraper de loin, jusqu'à 6 m (GrabReach.Reach)
 

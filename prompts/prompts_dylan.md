@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Prix de « Vider » affiché, singe tenu de côté (PC) ou dans la main (VR)
+> J'aimerais que le prix pour vider soit affiché. Et quand on prend un singe, en mode PC il doit se mettre sur le côté, et en VR directement dans la main.
+
 ### « Vider » payant, plus de texte sur le plateau
 > Appuyer sur « Vider » doit coûter des bananes. J'aimerais aussi qu'il n'y ait plus de texte sur le singe quand je l'ai posé sur le plateau.
 

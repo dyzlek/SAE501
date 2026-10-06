@@ -15,6 +15,7 @@ namespace SAE
         public float mouseSensitivity = 0.1f;   // degrés par pixel
         public float reach = 30f;               // portée du clic sur les boutons, en mètres
         public float holdDistance = 0.8f;       // l'objet tenu flotte à cette distance devant les yeux
+        public Vector2 holdOffset = new Vector2(0.35f, -0.25f);   // ... décalé en bas à droite, pour ne pas cacher ce qu'on vise
 
         CharacterController controller;
         Transform cam;
@@ -97,7 +98,7 @@ namespace SAE
 
         void Carry(Transform held)
         {
-            var target = cam.position + cam.forward * holdDistance;
+            var target = cam.position + cam.forward * holdDistance + cam.right * holdOffset.x + cam.up * holdOffset.y;
             held.position = Vector3.Lerp(held.position, target, 1f - Mathf.Exp(-20f * Time.deltaTime));
         }
 

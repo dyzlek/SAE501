@@ -13,6 +13,14 @@ namespace SAE
 
         public const int ClearBoardPrice = 10;   // en bananes : vider le plateau n'est pas gratuit
 
+        // Le prix s'écrit sous le nom du bouton Vider (posé ici pour ne pas avoir à régénérer la scène)
+        void Start()
+        {
+            var label = GetComponentInChildren<TextMesh>();
+            if (action == Action.ClearBoard && label) label.text = $"Vider
+{ClearBoardPrice} bananes";
+        }
+
         public void Press()
         {
             switch (action)
