@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mar. 6 oct. 2026
 
+### Retour en arrière
+> Reviens sur la dernière version, comme elle était avant (sans l'établi ni les étagères tournantes).
+
 ### Établi et étagères tournantes
 > Je suis d'accord avec toi : les pistes 1 et 2 (un établi à portée de main et des étagères tournantes pour la bibliothèque).
 

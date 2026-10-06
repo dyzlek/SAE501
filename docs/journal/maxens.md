@@ -47,7 +47,7 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 ![Singe tenu en main avec son aura, plateau du hub](../captures/maxens-singe-en-main-aura.webp)
 
 - **À vérifier au casque :** les fps avec beaucoup d'auras allumées (≤ 80 particules par singe, seulement sur les cases possédées).
-- **Attention (équipe) :** ça touche des scripts de Dylan (`Visuals`, `LibrarySlot`, `ChestReward`, `PlacementSurface`, `Board`, `TowerManager`, `PlayerController`, `PrototypeGenerator`) et sa scène `Jeu.unity` ; la bibliothèque courbe est remplacée par les étagères tournantes.
+- **Attention (équipe) :** ça touche des scripts de Dylan (`Visuals`, `LibrarySlot`, `ChestReward`, `PlacementSurface`, `Board`, `TowerManager`, `PlayerController`, `PrototypeGenerator`) et sa scène `Jeu.unity`.
 - **Rangé :** changements parasites d'Unity annulés (`Jeu.unity`, réglages URP, réécrits à l'ouverture du projet) ; le package MCP for Unity reste installé sur mon PC seulement (non commité).
 - **Bloque : le hub « sans bouger » n'est pas adapté à la VR.** Depuis le centre, tout est à 2,5-4 m : les boutons (JOUER, LANCER, Vider, améliorations), les 56 cases de la bibliothèque et le plateau sont **hors de portée des mains**. Au casque, il faudrait viser de loin avec un rayon pour tout, ce qui ressemble à un jeu à la souris (« test de l'écran » raté) et va contre la règle « tout à portée de bras ». Les 56 cases (7 types × 8 raretés) prennent aussi trop de place pour tenir près du joueur.
 
@@ -70,11 +70,13 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
   ![Hub à portée de main : établi, étagères tournantes, table des bananes](../captures/maxens-hub-a-portee-de-main.png)
 
   **Reste à faire pour la VR :** de vrais gestes au casque (enfoncer les boutons, tourner la manivelle, prendre un singe ou une banane à la main avec XR Grab), et vérifier les tailles au casque.
+- **Annulé :** après l'avoir essayé, je reviens à la version d'avant (le hub « sans bouger » sur un grand cercle, avec la bibliothèque courbe). L'établi, les étagères tournantes et la table des bananes sont retirés (`Carousel.cs` supprimé, générateur et scène `Jeu.unity` remis comme avant). Le problème VR noté plus haut reste donc ouvert.
 
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
-| Claude (Code) | Prototype des pistes 1 + 2 : établi à portée de main (plateau, boutons sur socles), deux étagères tournantes (`Carousel`), table des bananes à hauteur de main, textes du coffre réduits ; scène régénérée et testée en Play | À tester au casque |
+| Claude (Code) | Retour à la version d'avant (hub « sans bouger » sur un grand cercle) : générateur et scène remis, `Carousel.cs` supprimé | Gardé |
+| Claude (Code) | Prototype des pistes 1 + 2 : établi à portée de main (plateau, boutons sur socles), deux étagères tournantes (`Carousel`), table des bananes à hauteur de main, textes du coffre réduits ; scène régénérée et testée en Play | Jeté (annulé après essai) |
 | Claude (Code) | Analyse du problème VR du hub « sans bouger » (portée des boutons et de la bibliothèque) et 4 pistes de solution, capture ajoutée | À décider en équipe |
 | Claude (Cowork) | Tronc du bananier rallongé ×3 avec un script Blender, export FBX | Gardé (intégré sur `feat/prototype-maxens`) |
 | Claude (Code) | Test du hub « sans bouger » d'après mon schéma : joueur fixé au centre, tout rapproché en rond, plateau agrandi, zone de chute vers le joueur, portée 6 m, plus de textes au-dessus des singes ; scène régénérée et testée en Play | À tester au casque |
