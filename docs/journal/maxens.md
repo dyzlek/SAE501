@@ -54,10 +54,14 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
     5. pas d'os de doigts (une main = un seul os) : la main ne peut pas se refermer sur l'arc ni pincer la corde ;
     6. bras asymétriques : avant-bras droit de 0,235 m contre 0,14 m à gauche (le bras droit est allongé pour tenir l'arc). À vérifier si on passe en Humanoid ;
     7. importé en « Generic », sans animation dans les fichiers.
+  - **Vérifié aussi dans Blender** (`Quincy_Rig.blend`, ouvert en lecture seule) : même constat, avec trois précisions :
+    - les os `ArrowSocket` et `ArrowTip` sont cochés « Deform » : c'est ce qui leur donne des poids sur le corps, alors que ce ne devraient être que des points d'accroche ;
+    - l'os `RightHand` mesure 0,27 m, presque le double de `LeftHand` (0,15 m) : il traverse la poignée de l'arc ;
+    - le fichier contient 4 squelettes identiques (un par niveau) et aucune animation.
   - **À faire dans Blender** (`Quincy_Rig.blend`) avant de l'utiliser comme arme :
     - séparer l'arc (corps, pointes, corde) dans son propre objet et l'exporter à part (`Quincy_Bow.fbx`) ;
     - lui donner son propre petit squelette : poignée, branche haute, branche basse, et un os au milieu de la corde (point d'encoche) ; la corde en deux segments qui se rejoignent à ce point, pour pouvoir la tirer ;
-    - retirer l'influence d'`ArrowSocket` sur le corps, et mettre à la place des points d'accroche vides : un pour l'arc dans la main qui le tient, un pour la flèche dans la main qui tire ;
+    - décocher « Deform » sur `ArrowSocket` et `ArrowTip`, retirer leurs poids sur le corps, et mettre à la place des points d'accroche vides : un pour l'arc dans la main qui le tient, un pour la flèche dans la main qui tire ;
     - si les mains de Quincy sont visibles au casque : ajouter des os de doigts.
 **Captures** (bibliothèque avec les singes 3D et leur aura, et singe tenu en main) :
 
@@ -94,7 +98,7 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
-| Claude (Code) | Analyse du rig de Quincy dans Unity (squelette, poids, séparation arc / bras / mains) et liste de ce qu'il faut corriger dans Blender pour utiliser l'arc comme arme | Gardé |
+| Claude (Code) | Analyse du rig de Quincy dans Unity puis dans Blender en lecture seule (squelette, poids, séparation arc / bras / mains) et liste de ce qu'il faut corriger dans Blender pour utiliser l'arc comme arme | Gardé |
 | Claude (Code) | Réécriture de mes prompts du jour, plus clairs et mieux structurés (contexte, objectif, contraintes), sans changer leur sens | Gardé |
 | Claude (Code) | Retour à la version d'avant (hub « sans bouger » sur un grand cercle) : générateur et scène remis, `Carousel.cs` supprimé | Gardé |
 | Claude (Code) | Prototype des pistes 1 + 2 : établi à portée de main (plateau, boutons sur socles), deux étagères tournantes (`Carousel`), table des bananes à hauteur de main, textes du coffre réduits ; scène régénérée et testée en Play | Jeté (trop surchargé, annulé après essai) |
