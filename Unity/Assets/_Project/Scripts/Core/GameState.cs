@@ -30,8 +30,11 @@ namespace SAE
         public static event Action Changed;
         public static void NotifyChanged() => Changed?.Invoke();
 
-        // Inventaire : nombre de singes rangés dans la bibliothèque, par type et par rareté. Vide au départ.
+        // Inventaire : nombre de singes rangés dans la bibliothèque, par type et par rareté.
         static readonly int[,] owned = new int[MonkeyData.TypeCount, MonkeyData.LevelCount];
+
+        // On commence avec un singe Classique gris, pour pouvoir défendre la première vague.
+        static GameState() => owned[(int)MonkeyType.Classique, (int)Rarity.Gris] = 1;
 
         public static int Count(Monkey m) => owned[(int)m.type, (int)m.level];
 

@@ -425,9 +425,9 @@ namespace SAE.EditorTools
             // Panneau des chances, à côté du coffre (il tourne avec lui, donc reste face au joueur)
             var oddsRoot = new GameObject("Chances du coffre").transform;
             oddsRoot.SetParent(pivot, false);
-            oddsRoot.localPosition = new Vector3(0.9f, 1.15f, 0f);
+            oddsRoot.localPosition = new Vector3(1.0f, 1.35f, 0f);
             oddsRoot.localRotation = Quaternion.Euler(0, 180, 0);   // le pivot regarde le joueur : on retourne le texte pour qu'il soit lisible
-            Visuals.Box("Fond", oddsRoot, new Vector3(0, 0, 0.02f), new Vector3(0.95f, 0.95f, 0.02f), new Color(0.1f, 0.09f, 0.08f));
+            Visuals.Box("Fond", oddsRoot, new Vector3(0, 0, 0.02f), new Vector3(1.15f, 1.5f, 0.02f), new Color(0.1f, 0.09f, 0.08f));
             var oddsText = Visuals.Label(oddsRoot, "", Vector3.zero, 0.055f);
             Object.DestroyImmediate(oddsText.GetComponent<Billboard>());
             var oddsPanel = oddsRoot.gameObject.AddComponent<ChestOddsPanel>();

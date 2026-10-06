@@ -6,24 +6,28 @@ namespace SAE
 {
     // Ce que donne le coffre : à l'ouverture, chaque singe gagné sort du coffre avec une aura de la couleur
     // de sa rareté, flotte un instant, puis vole jusqu'à sa case de la bibliothèque, où il s'ajoute à l'inventaire.
-    // Le coffre ne tire qu'une rareté : le type de singe est choisi au hasard ici.
+    // Le coffre tire la rareté ; le TYPE est tiré ici, selon des chances qui s'ouvrent avec les vagues (MonkeyOdds).
     public class ChestReward : MonoBehaviour
     {
         public ChestController chest;
         public Material auraMaterial;
+        public MonkeyOddsSettings typeOdds = new MonkeyOddsSettings();
         public float pieceSize = 0.3f;
         public float riseHeight = 0.8f;
         public float hoverTime = 1f;
         public float flyTime = 1.2f;
+
+        public float[] CurrentTypeOdds() => MonkeyOdds.Compute(typeOdds, GameState.WavesWon);
 
         void OnEnable() { if (chest) chest.Opened += OnOpened; }
         void OnDisable() { if (chest) chest.Opened -= OnOpened; }
 
         void OnOpened(System.Collections.Generic.List<Sae501.Coffres.Rarity> results)
         {
+            var typeChances = CurrentTypeOdds();
             for (int i = 0; i < results.Count; i++)
             {
-                var type = (MonkeyType)Random.Range(0, MonkeyData.TypeCount);
+                var type = MonkeyOdds.Roll(typeChances);
                 var level = (Rarity)(int)results[i];   // mêmes raretés de Gris à Rouge dans les deux listes
                 StartCoroutine(Deliver(new Monkey(type, level), i * 0.4f, i));
             }
