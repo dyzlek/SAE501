@@ -5,6 +5,9 @@ namespace SAE
     public enum PlacementAction { None, Place, Fuse, PickUp, Blocked }
 
     // Règles de placement, partagées par le plateau du hub et la carte.
+    // Le singe tenu est déjà sorti de l'inventaire : le poser ne change donc pas l'inventaire,
+    // reprendre un singe posé le met en main (clic droit = il retourne dans la bibliothèque),
+    // fusionner consomme le singe tenu + le singe posé pour en créer 1 du niveau suivant.
     // pos = position (x, z) en mètres dans le repère de la carte.
     public static class Placement
     {
@@ -29,7 +32,7 @@ namespace SAE
                 PlacementAction.Fuse => $"FUSION → {target.monkey.Upgraded()}",
                 PlacementAction.Place => $"Poser : {GameState.Held}",
                 PlacementAction.Blocked => target != null ? "Place occupée" : "Impossible : sur la piste ou hors de la carte",
-                _ => "Prends un singe dans la bibliothèque",
+                _ => "Prends un singe dans la bibliothèque (ou ouvre le coffre)",
             };
         }
 

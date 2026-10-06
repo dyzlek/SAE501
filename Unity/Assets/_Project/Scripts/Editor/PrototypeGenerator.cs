@@ -3,6 +3,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace SAE.EditorTools
 {
@@ -408,6 +409,10 @@ namespace SAE.EditorTools
             prompt.chest = controller;
             prompt.player = player;
             chest.AddComponent<ChestClickable>().chest = controller;
+            // Les singes gagnés sortent du coffre avec leur aura et vont se ranger dans la bibliothèque
+            var reward = chest.AddComponent<ChestReward>();
+            reward.chest = controller;
+            reward.auraMaterial = AuraMaterial();
 
             // Le coffre se tourne toujours vers le joueur. L'origine du modèle n'est pas au centre du coffre :
             // on le met dans un pivot placé au centre, et c'est le pivot qui tourne.
@@ -436,6 +441,28 @@ namespace SAE.EditorTools
             var priceTag = tag.AddComponent<ChestPriceTag>();
             priceTag.chest = controller;
             priceTag.label = Visuals.Label(tag.transform, "", Vector3.zero, 0.09f);
+        }
+
+        // Matériau de l'aura : transparent et additif (il éclaircit ce qu'il y a derrière, comme une lueur).
+        // Créé une seule fois dans Assets/_Project/Art/Materials, puis réutilisé.
+        static Material AuraMaterial()
+        {
+            const string path = "Assets/_Project/Art/Materials/Aura.mat";
+            var existing = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (existing) return existing;
+
+            Directory.CreateDirectory("Assets/_Project/Art/Materials");
+            var mat = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            mat.SetFloat("_Surface", 1f);                          // transparent
+            mat.SetFloat("_Blend", 2f);                            // additif
+            mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+            mat.SetFloat("_DstBlend", (float)BlendMode.One);
+            mat.SetFloat("_ZWrite", 0f);
+            mat.SetOverrideTag("RenderType", "Transparent");
+            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            mat.renderQueue = (int)RenderQueue.Transparent;
+            AssetDatabase.CreateAsset(mat, path);
+            return mat;
         }
 
         static Bounds Bounds(GameObject go)

@@ -4,6 +4,13 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Chantier B : un vrai inventaire
+> - La bibliothèque démarre vide. Chaque case affiche le nombre de singes possédés, et une case vide est grisée.
+> - Le coffre ajoute le singe gagné à l'inventaire. Le singe sort du coffre avec la couleur de sa rareté, puis va se ranger sur l'étagère.
+> - Poser un singe le retire de l'inventaire, le reprendre l'y remet, et fusionner en consomme 2 pour en créer 1.
+>
+> J'aimerais aussi qu'une aura de la couleur de sa rareté soit autour de lui.
+
 ### Corriger ma deuxième analyse critique
 > Maintenant, essaie de résoudre tout ce que j'ai relevé.
 

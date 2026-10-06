@@ -82,11 +82,7 @@ namespace SAE
             }
 
             if (mouse.leftButton.wasPressedThisFrame) Target?.OnClick(this, AimPoint);
-            if (mouse.rightButton.wasPressedThisFrame && GameState.Held != null)
-            {
-                GameState.Held = null;
-                GameState.NotifyChanged();
-            }
+            if (mouse.rightButton.wasPressedThisFrame) GameState.ReturnHeld();   // lâcher = ranger dans la bibliothèque
 
             UpdateHeldVisual();
         }
