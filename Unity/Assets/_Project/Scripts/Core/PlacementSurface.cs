@@ -4,9 +4,10 @@ namespace SAE
 {
     // Surface où l'on pose les singes : le plateau du hub (scale = taille réduite) ou la carte (scale = 1).
     // Son repère local = le repère de la carte multiplié par 'scale'.
-    // Aperçu : singe fantôme vert (on peut poser) ou rouge (on ne peut pas),
+    // On y lâche le singe tenu en main (MonkeyToken). Pendant qu'on le tient au-dessus :
+    // singe fantôme vert (on peut poser) ou rouge (on ne peut pas),
     // et halo blanc autour du singe déjà posé quand on peut fusionner.
-    public class PlacementSurface : MonoBehaviour, IClickable, IMonkeyInfo
+    public class PlacementSurface : MonoBehaviour, IMonkeyInfo
     {
         public float scale = 1f;
 
@@ -25,9 +26,16 @@ namespace SAE
 
         Vector3 ToLocal(Vector2 mapPos, float height) => new Vector3(mapPos.x, height, mapPos.y) * scale;
 
-        public string GetHint(Vector3 point) => Placement.Hint(ToMap(point));
-
-        public void OnClick(PlayerController player, Vector3 point) => Placement.Apply(ToMap(point));
+        // Lâcher le singe tenu en 'point' : il est posé, ou fusionné avec le singe identique déjà là.
+        // false si c'est impossible (place prise par un autre singe, sur la piste…) : il retourne alors à la bibliothèque.
+        public bool Drop(Vector3 point)
+        {
+            var pos = ToMap(point);
+            var action = Placement.Evaluate(pos, out _);
+            if (action != PlacementAction.Place && action != PlacementAction.Fuse) return false;
+            Placement.Apply(pos);
+            return true;
+        }
 
         // Fiche du singe posé que l'on vise (sur le plateau ou la carte), avec son cercle de portée.
         public bool TryGetMonkeyInfo(Vector3 point, out Monkey monkey, out Vector3 anchor, out Vector3 rangeCenter, out float rangeScale)
@@ -42,14 +50,14 @@ namespace SAE
 
         void LateUpdate()
         {
-            var player = PlayerController.Local;
-            bool aimed = player && player.enabled && ReferenceEquals(player.Target, this);
+            // Le singe tenu en main est-il juste au-dessus de cette surface ?
+            var held = MonkeyToken.Held;
             var action = PlacementAction.None;
             PlacedMonkey target = null;
             var pos = Vector2.zero;
-            if (aimed)
+            if (held && held.TryGetSurfacePoint(out var surface, out var point) && surface == this)
             {
-                pos = ToMap(player.AimPoint);
+                pos = ToMap(point);
                 action = Placement.Evaluate(pos, out target);
             }
 

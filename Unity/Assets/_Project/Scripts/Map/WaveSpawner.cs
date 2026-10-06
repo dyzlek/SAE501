@@ -7,8 +7,8 @@ namespace SAE
     // Les vagues de ballons, en deux phases :
     // - PRÉPARATION : rien n'attaque, on gère les bananes, le coffre et le plateau, puis on appuie sur LANCER ;
     // - ATTAQUE : la vague suit sa liste de groupes (WaveBook), écrite à l'avance.
-    // Perdre une vague ne fait pas tout recommencer : on reprend AU DÉBUT de cette vague, avec les vies
-    // qu'on avait en la lançant (singes posés et argent gardés).
+    // Chaque vague commence avec toutes les vies (startLives). Perdre une vague ne fait pas tout recommencer :
+    // on reprend AU DÉBUT de cette vague (singes posés et argent gardés).
     // Victoire après la vague 10 (le dirigeable rouge), puis mode infini pour qui veut continuer.
     // Règle du GDD : éclater un ballon ne rapporte rien, finir une vague rapporte de l'argent.
     // Rien n'est affiché à l'écran (nausée en VR) : les tableaux WaveBoard du décor lisent Wave, Lives et Status.
@@ -19,7 +19,6 @@ namespace SAE
         public List<WaveData> waves = WaveBook.Default();
 
         List<Vector3> path;
-        int livesAtWaveStart;
 
         public int Wave { get; private set; } = 1;   // la vague en cours, ou la prochaine à lancer
         public int Lives { get; private set; }
@@ -49,7 +48,7 @@ namespace SAE
         IEnumerator RunWave(WaveData wave)
         {
             Running = true;
-            livesAtWaveStart = Lives;
+            Lives = startLives;   // les vies repartent au maximum à chaque vague
             Status = "Attaque en cours !";
 
             // Les groupes, dans l'ordre
@@ -68,9 +67,9 @@ namespace SAE
 
             if (Lives <= 0)
             {
-                // Perdu : on efface les ballons et on remet la vague à zéro (même numéro, mêmes vies qu'au départ)
+                // Perdu : on efface les ballons et on remet la vague à zéro (même numéro, toutes les vies)
                 foreach (var b in new List<Balloon>(Balloon.All)) Destroy(b.gameObject);
-                Lives = livesAtWaveStart;
+                Lives = startLives;
                 Status = $"Vague {Wave} perdue : relance-la";
             }
             else
@@ -85,6 +84,7 @@ namespace SAE
                 }
                 else Status = $"Vague {Wave} gagnée : +{reward}";
                 Wave++;
+                Lives = startLives;   // la vague suivante repart avec toutes les vies (affiché pendant la préparation)
             }
             Running = false;
         }

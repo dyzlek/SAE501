@@ -4,9 +4,9 @@ namespace SAE
 {
     public enum BananaStat { Frequence, Pourriture, Valeur }
 
-    // Gros bouton rond du panneau d'amélioration du bananier (Maxens) : on appuie, on paie, la stat monte d'un niveau.
+    // Gros bouton rond du panneau d'amélioration du bananier (Maxens) : on l'enfonce avec la main, on paie, la stat monte d'un niveau.
     // Le bouton est vert si on peut payer, gris sinon, doré au niveau max. Il s'enfonce quand on appuie.
-    public class UpgradeButton : MonoBehaviour, IClickable
+    public class UpgradeButton : MonoBehaviour, IPressable
     {
         public Bananier bananier;
         public BananaStat stat;
@@ -43,11 +43,6 @@ namespace SAE
             BananaStat.Pourriture => $"pourrit en {S.Valeur:0} s",
             _ => $"{S.Valeur:0} par banane",
         };
-
-        public string GetHint(Vector3 point) =>
-            S.EstAuMax ? $"{Title} : niveau max" : $"Améliorer {Title.ToLower()} : {S.PrixAmelioration}";
-
-        public void OnClick(PlayerController player, Vector3 point) => Press();
 
         public void Press()
         {

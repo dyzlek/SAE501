@@ -30,6 +30,15 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 - Le cube « Vider » et le pied du plateau gênent le passage devant le joueur.
 - Les vies et la vague sont encore affichées à l'écran (prévu avec le chantier D).
 
+**Mon schéma du hub en cercle**
+Le hub était plus espacé, mais pas encore assez. J'ai dessiné une disposition où tout suit vraiment un cercle (rouge), avec le centre libre pour circuler :
+- le **plateau** (carré marron) est reculé sur le cercle, devant le joueur, avec le bouton **JOUER** (orange) juste à côté ;
+- les deux **bibliothèques** (vert) sont courbes et suivent le cercle sur les côtés ;
+- le **bananier** (BANANE) est au fond, avec le panier (rond marron) et la **zone de chute des bananes** (jaune) devant lui ;
+- le **coffre** (chest) est en haut à gauche, sur le cercle.
+
+![Mon schéma du hub en cercle](../captures/schema-hub-cercle.png)
+
 **Captures du hub en cercle** (base de ma deuxième analyse)
 
 ![Hub en cercle, vue joueur : vies et vague encore affichées en haut à gauche](../captures/hub-cercle-vue.webp)
@@ -59,6 +68,14 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude (Claude Code) | Chantier D, vrai système de vagues : 10 vagues écrites à l'avance (groupes de ballons normaux, **rapides**, **blindés** qui prennent moitié moins de dégâts et ne se ralentissent pas, boss), **dirigeable rouge** à la vague 10, victoire puis mode infini ; tableau de la vague avec la composition de la prochaine vague. **Fiche des singes** dans le décor quand on vise un singe (bibliothèque, plateau, carte) : effet, dégâts, portée, cadence, cibles et gain de la fusion, plus le cercle de portée sur le plateau et la carte | Gardé (testé et validé par moi) |
 | Claude (Claude Code) | La fiche du singe ne s'affiche plus toute seule : il faut viser le singe **en maintenant A** (clavier AZERTY), ou le bouton A de la manette droite en VR ; aide en bas de l'écran mise à jour | Gardé (testé et validé par moi) |
 | Claude (Claude Code) | Scène régénérée commitée, branche `feat/inventaire` poussée et fusionnée dans `main` par Pull Request | Gardé |
+| Claude (Claude Code) | Aide pour le premier build casque (mode développeur, débogage USB autorisé, Build and Run sur « Default device ») ; scène régénérée et réglages du build commités, branche `feat/ajout-vr` poussée | Gardé |
+| Claude (Claude Code) | Rayon toujours pas visible sur les manettes (d'après ma capture) : le rayon des Starter Assets est éteint et remplacé par le nôtre (`HandRay`), droit, qui part de chaque manette, blanc, bleu quand il vise quelque chose d'utilisable, caché quand la main tient un objet ; mots LANCER / JOUER remontés au-dessus des cubes | À tester |
+| Claude (Claude Code) | Plus adapté à la VR : **les vies repartent à 20 à chaque vague** ; **rayon blanc toujours visible** au bout des manettes (3 m, il ne disparaît plus) pour viser les boutons, les bananes et les singes ; boutons et coffre activés en les visant + **gâchette** (ou grip) ; **singe posé de loin** là où pointe le rayon de la main qui le tient (rayon blanc jusqu'au plateau ou à la carte) ; lignes (rayon, cercle de portée, tirs) passées sur le shader compatible casque | À tester |
+| Claude (Claude Code) | Correction d'après ma capture : les textes étaient décalés (sous les cubes, à côté du tableau). Le shader de texte était écrit pour l'ancien rendu de Unity : réécrit pour URP, qui donne la bonne caméra à chaque œil | À tester |
+| Claude (Claude Code) | Textes réparés au casque : nouveau shader « SAE/Texte 3D » (celui de Unity ne gère pas l'affichage stéréo : texte dans un seul œil, visible à travers les murs) et textes qui restent droits face au joueur ; boutons, améliorations et coffre utilisables **de loin** (viser avec le rayon + grip), qui grossissent quand on les vise, avec vibration | À tester |
+| Claude (Claude Code) | Correction : avec Quest Link, la tête et les manettes ne bougeaient pas, car le simulateur XR se lançait quand même et remplaçait le vrai casque. Le simulateur ne démarre plus que si aucun casque n'est branché (`SimulatorWhenNoHeadset`) | À tester |
+| Claude (Claude Code) | Chantier E, la VR (branche `feat/ajout-vr`) : rig XR des Starter Assets (téléportation sur les deux sticks, rotation par crans, pas de déplacement continu) et simulateur XR lancé tout seul dans l'éditeur ; menu **SAE → Configurer la VR** (OpenXR + Meta Quest, Android IL2CPP/ARM64/API 32, couche Teleport) ; singes à saisir sur l'étagère (XR Grab), lâchés au-dessus du plateau = posés, sur un singe identique = fusionnés, ailleurs = rangés, avec l'aperçu vert/rouge et le halo ; boutons, coffre et améliorations enfoncés avec le bout du doigt, avec vibration ; bananes sur une **table à hauteur de main** et panier sur un socle ; fiche du singe en visant avec la manette droite + A ; contrôles clavier/souris retirés | À tester (compile, scène à régénérer, pas encore testé au casque) |
+| Claude (Claude Code) | Ajout de mon schéma du hub en cercle (image + légende) dans ce journal, sur la nouvelle branche `feat/ajout-vr` | Gardé |
 | Claude (Claude Code) | Lecture des 7 supports de cours de D. Di Pierro et synthèse dans `docs/GUIDE_CODE.md` (organisation, style C#, cycle de vie, événements, collisions, mise en place VR, saisie, UI en World Space, tests, perf, check-list avant commit) ; CLAUDE.md demande de le lire avant de coder | À relire par l'équipe |
 
 ## Lun. 5 oct. 2026

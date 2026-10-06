@@ -6,8 +6,7 @@ namespace SAE
 
     // Règles de placement, partagées par le plateau du hub et la carte.
     // Le singe tenu est déjà sorti de l'inventaire : le poser ne change donc pas l'inventaire,
-    // reprendre un singe posé le met en main (clic droit = il retourne dans la bibliothèque),
-    // fusionner consomme le singe tenu + le singe posé pour en créer 1 du niveau suivant.
+    // reprendre un singe posé le met en main, fusionner consomme le singe tenu + le singe posé pour en créer 1 du niveau suivant.
     // pos = position (x, z) en mètres dans le repère de la carte.
     public static class Placement
     {
@@ -21,19 +20,6 @@ namespace SAE
             if (held == null) return target != null ? PlacementAction.PickUp : PlacementAction.None;
             if (target != null) return target.monkey.CanFuseWith(held.Value) ? PlacementAction.Fuse : PlacementAction.Blocked;
             return MapLayout.CanPlace(pos, Radius) ? PlacementAction.Place : PlacementAction.Blocked;
-        }
-
-        public static string Hint(Vector2 pos)
-        {
-            var action = Evaluate(pos, out var target);
-            return action switch
-            {
-                PlacementAction.PickUp => $"Prendre : {target.monkey}",
-                PlacementAction.Fuse => $"FUSION → {target.monkey.Upgraded()}",
-                PlacementAction.Place => $"Poser : {GameState.Held}",
-                PlacementAction.Blocked => target != null ? "Place occupée" : "Impossible : sur la piste ou hors de la carte",
-                _ => "Prends un singe dans la bibliothèque (ou ouvre le coffre)",
-            };
         }
 
         public static void Apply(Vector2 pos)

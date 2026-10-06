@@ -12,9 +12,9 @@ namespace SAE
 
         void LateUpdate()
         {
-            var player = PlayerController.Local;
+            var player = PlayerRig.Local;
             if (!player) return;
-            var dir = player.transform.position - transform.position;
+            var dir = player.head.position - transform.position;
             dir.y = 0f;
             if (dir.sqrMagnitude < 0.01f) return;
             var target = Quaternion.LookRotation(dir) * Quaternion.Euler(0f, yawOffset, 0f);
