@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Plus adapté à la VR : vies, rayon et interactions de loin
+> Ce n'est pas encore adapté à la VR. D'abord, j'aimerais que la vie se réinitialise à chaque niveau. Ensuite, le rayon n'est pas sur les manettes : j'aimerais pouvoir poser les singes sur la carte de loin, et qu'un rayon lumineux parte devant quand on vise, pour appuyer sur les boutons, récupérer les bananes de loin, etc.
+
 ### Textes en VR et boutons à distance
 > Je peux me déplacer, mais tous les textes s'affichent mal, et peu de choses sont adaptées à la VR. J'aimerais aussi pouvoir interagir avec les boutons un peu à distance. Je te laisse faire.
 

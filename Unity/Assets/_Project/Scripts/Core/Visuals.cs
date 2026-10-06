@@ -57,6 +57,10 @@ namespace SAE
             }
         }
 
+        // Matériau des lignes (rayons, cercles, tirs) : le même shader, sans texture, la couleur vient de la ligne.
+        static Material lineMaterial;
+        public static Material LineMaterial => lineMaterial ? lineMaterial : lineMaterial = new Material(Shader.Find("SAE/Texte 3D")) { name = "Lignes" };
+
         // Au lancement du jeu, les textes déjà posés dans la scène prennent le matériau du jeu (créé à ce moment-là).
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void FixSceneTexts()

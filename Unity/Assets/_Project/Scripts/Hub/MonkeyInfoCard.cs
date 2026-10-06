@@ -44,7 +44,7 @@ namespace SAE
             card.gameObject.SetActive(false);
 
             rangeCircle = new GameObject("Cercle de portée").AddComponent<LineRenderer>();
-            rangeCircle.sharedMaterial = new Material(Shader.Find("Sprites/Default") ?? Shader.Find("Universal Render Pipeline/Unlit"));
+            rangeCircle.sharedMaterial = Visuals.LineMaterial;
             rangeCircle.loop = true;
             rangeCircle.positionCount = 48;
             rangeCircle.startColor = rangeCircle.endColor = new Color(1f, 1f, 1f, 0.8f);

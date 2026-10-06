@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion.Teleportation;
 using UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets;
 
@@ -90,6 +91,8 @@ namespace SAE.EditorTools
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
 
+            ShowRays(go);
+
             var rig = go.AddComponent<PlayerRig>();
             rig.head = origin.Camera.transform;
             rig.leftHand = FindChild(go.transform, "Left Controller");
@@ -109,6 +112,27 @@ namespace SAE.EditorTools
             body.AddComponent<ColorTint>().Set(new Color(1f, 0.55f, 0.1f));
             body.AddComponent<Mirrored>().label = "Toi";
             return rig;
+        }
+
+        // Le rayon de chaque manette (Near-Far Interactor des Starter Assets) : par défaut il ne fait que 25 cm
+        // et il est presque transparent. On le veut toujours visible devant la manette, pour viser de loin
+        // les boutons, les bananes et les singes. Il devient bleu quand il touche quelque chose d'utilisable.
+        static void ShowRays(GameObject rig)
+        {
+            var white = new Gradient();
+            white.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                          new[] { new GradientAlphaKey(0.9f, 0f), new GradientAlphaKey(0.15f, 1f) });
+            foreach (var visual in rig.GetComponentsInChildren<CurveVisualController>(true))
+            {
+                var so = new SerializedObject(visual);
+                so.FindProperty("m_LineDynamicsMode").enumValueIndex = (int)LineDynamicsMode.Traditional;   // ne se rétracte pas
+                so.FindProperty("m_RestingVisualLineLength").floatValue = 3f;    // 3 m devant la manette quand il ne touche rien
+                so.FindProperty("m_ExtendLineToEmptyHit").boolValue = true;
+                so.FindProperty("m_NoValidHitProperties.m_StartWidth").floatValue = 0.006f;
+                so.FindProperty("m_NoValidHitProperties.m_EndWidth").floatValue = 0.004f;
+                so.FindProperty("m_NoValidHitProperties.m_Gradient").gradientValue = white;
+                so.ApplyModifiedPropertiesWithoutUndo();
+            }
         }
 
         // Petite sphère au bout de la manette : elle enfonce les boutons qu'elle touche (HandPress).

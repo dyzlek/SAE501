@@ -1,4 +1,4 @@
-// Shader des textes 3D du jeu (TextMesh), écrit pour URP et compatible casque.
+// Shader des textes 3D du jeu (TextMesh) et des lignes (rayons, cercles, tirs), écrit pour URP et compatible casque.
 // Celui de Unity (GUI/Text Shader) ne gère pas le rendu stéréo du Quest : le texte n'apparaît que dans un œil
 // ou se dédouble, et il se dessine par-dessus les murs. Celui-ci est un simple texte transparent :
 // couleur du TextMesh × forme des lettres (alpha de la texture de police), caché par ce qui est devant.

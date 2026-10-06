@@ -1,11 +1,13 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 namespace SAE
 {
-    // Appuyer sur un bouton (ou ouvrir le coffre) DE LOIN : on le vise avec le rayon de la manette et on serre le grip,
-    // comme pour attraper un objet. XR Simple Interactable = un objet qu'on peut viser et « sélectionner » sans le prendre.
+    // Appuyer sur un bouton (ou ouvrir le coffre) DE LOIN : on le vise avec le rayon de la manette et on appuie
+    // sur la gâchette (index) ou on serre le grip (majeur).
+    // XR Simple Interactable = un objet qu'on peut viser et « sélectionner » (grip) sans le prendre.
     // Quand le rayon le survole, il grossit un peu (on sait ce qu'on vise) ; à l'appui, la manette vibre.
     // On peut toujours aussi l'enfoncer en le touchant avec le bout de la manette (HandPress).
     [RequireComponent(typeof(XRSimpleInteractable))]
@@ -49,10 +51,23 @@ namespace SAE
             if (!interactable.isHovered) transform.localScale = baseScale;   // plus aucune main ne le vise
         }
 
-        void OnSelected(SelectEnterEventArgs args)
+        void OnSelected(SelectEnterEventArgs args) => Press(args.interactorObject.transform);
+
+        // La gâchette : on regarde, pour chaque main qui vise ce bouton, si elle vient d'appuyer.
+        void Update()
+        {
+            foreach (var interactor in interactable.interactorsHovering)
+                if (interactor is XRBaseInputInteractor hand && hand.activateInput.ReadWasPerformedThisFrame())
+                {
+                    Press(hand.transform);
+                    return;
+                }
+        }
+
+        void Press(Transform hand)
         {
             target?.Press();
-            PlayerRig.Buzz(args.interactorObject.transform, 0.6f);
+            PlayerRig.Buzz(hand, 0.6f);
         }
     }
 }
