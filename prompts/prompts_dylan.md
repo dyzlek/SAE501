@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Fiche du singe sur un bouton
+> J'aimerais avoir les infos seulement quand j'appuie sur un bouton, par exemple A.
+
 ### Vrai système de vagues et fiche des singes
 > Maintenant, j'aimerais que tu fasses un vrai système de vagues, et qu'on puisse voir les caractéristiques des singes, etc.
 

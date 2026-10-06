@@ -1,9 +1,11 @@
 using System.Text;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace SAE
 {
-    // Fiche d'un singe : quand on vise un singe (bibliothèque, plateau ou carte), une petite carte apparaît
+    // Fiche d'un singe : quand on vise un singe (bibliothèque, plateau ou carte) EN MAINTENANT le bouton d'infos
+    // (touche A du clavier AZERTY, bouton A de la manette droite en VR), une petite carte apparaît
     // DANS LE DÉCOR, au-dessus de lui, avec ses caractéristiques et ce que donnerait une fusion.
     // Sur le plateau et la carte, un cercle montre aussi sa portée.
     // Pas d'affichage collé à l'écran (règle de confort VR) : la carte reste posée près du singe.
@@ -12,11 +14,24 @@ namespace SAE
         public float textHeight = 0.04f;        // hauteur d'une ligne, en mètres, vue de près
         public float readableDistance = 1.2f;   // au-delà, la carte grandit pour rester lisible
 
+        // Le bouton d'infos. Le clavier est lu par position de touche : « <Keyboard>/q » = la touche A en AZERTY.
+        InputAction showInfo;
+
         Transform card;
         TextMesh text;
         LineRenderer rangeCircle;
         Monkey? shown;
         Vector3 smoothAnchor;
+
+        void OnEnable()
+        {
+            showInfo = new InputAction("Infos du singe", InputActionType.Button);
+            showInfo.AddBinding("<Keyboard>/q");
+            showInfo.AddBinding("<XRController>{RightHand}/primaryButton");
+            showInfo.Enable();
+        }
+
+        void OnDisable() => showInfo?.Disable();
 
         void Start()
         {
@@ -41,7 +56,7 @@ namespace SAE
             Monkey monkey = default;
             Vector3 anchor = default, rangeCenter = default;
             float rangeScale = 0f;
-            bool visible = player && player.Target is IMonkeyInfo info
+            bool visible = showInfo.IsPressed() && player && player.Target is IMonkeyInfo info
                            && info.TryGetMonkeyInfo(player.AimPoint, out monkey, out anchor, out rangeCenter, out rangeScale);
 
             card.gameObject.SetActive(visible);
