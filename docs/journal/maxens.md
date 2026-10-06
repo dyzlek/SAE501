@@ -70,13 +70,13 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
   ![Hub à portée de main : établi, étagères tournantes, table des bananes](../captures/maxens-hub-a-portee-de-main.png)
 
   **Reste à faire pour la VR :** de vrais gestes au casque (enfoncer les boutons, tourner la manivelle, prendre un singe ou une banane à la main avec XR Grab), et vérifier les tailles au casque.
-- **Annulé :** après l'avoir essayé, je reviens à la version d'avant (le hub « sans bouger » sur un grand cercle, avec la bibliothèque courbe). L'établi, les étagères tournantes et la table des bananes sont retirés (`Carousel.cs` supprimé, générateur et scène `Jeu.unity` remis comme avant). Le problème VR noté plus haut reste donc ouvert.
+- **Annulé :** après l'avoir essayé, **ça faisait surchargé** (tout entassé autour du joueur, on ne voyait plus rien clairement), donc je reviens à la version d'avant (le hub « sans bouger » sur un grand cercle, avec la bibliothèque courbe). L'établi, les étagères tournantes et la table des bananes sont retirés (`Carousel.cs` supprimé, générateur et scène `Jeu.unity` remis comme avant). Le problème VR noté plus haut reste donc ouvert.
 
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
 | Claude (Code) | Retour à la version d'avant (hub « sans bouger » sur un grand cercle) : générateur et scène remis, `Carousel.cs` supprimé | Gardé |
-| Claude (Code) | Prototype des pistes 1 + 2 : établi à portée de main (plateau, boutons sur socles), deux étagères tournantes (`Carousel`), table des bananes à hauteur de main, textes du coffre réduits ; scène régénérée et testée en Play | Jeté (annulé après essai) |
+| Claude (Code) | Prototype des pistes 1 + 2 : établi à portée de main (plateau, boutons sur socles), deux étagères tournantes (`Carousel`), table des bananes à hauteur de main, textes du coffre réduits ; scène régénérée et testée en Play | Jeté (trop surchargé, annulé après essai) |
 | Claude (Code) | Analyse du problème VR du hub « sans bouger » (portée des boutons et de la bibliothèque) et 4 pistes de solution, capture ajoutée | À décider en équipe |
 | Claude (Cowork) | Tronc du bananier rallongé ×3 avec un script Blender, export FBX | Gardé (intégré sur `feat/prototype-maxens`) |
 | Claude (Code) | Test du hub « sans bouger » d'après mon schéma : joueur fixé au centre, tout rapproché en rond, plateau agrandi, zone de chute vers le joueur, portée 6 m, plus de textes au-dessus des singes ; scène régénérée et testée en Play | À tester au casque |

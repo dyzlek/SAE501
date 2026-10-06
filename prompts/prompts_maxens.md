@@ -6,6 +6,8 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ### Retour en arrière
 > Reviens sur la dernière version, comme elle était avant (sans l'établi ni les étagères tournantes).
+>
+> Suite : note bien dans Git qu'au final ça faisait surchargé, donc je suis repassé sur l'ancienne version.
 
 ### Établi et étagères tournantes
 > Je suis d'accord avec toi : les pistes 1 et 2 (un établi à portée de main et des étagères tournantes pour la bibliothèque).
