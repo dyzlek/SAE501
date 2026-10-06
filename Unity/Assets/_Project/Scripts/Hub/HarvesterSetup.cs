@@ -13,8 +13,8 @@ namespace SAE
         const float MonkeySize = 0.55f;       // taille du singe, en mètres
         const float HomeAngle = -171f;
         const float HomeRadius = 3.4f;
-        const float BasketAngle = -156f;      // mêmes valeurs que PrototypeGenerator.BasketAngle / BasketRadius
-        const float BasketRadius = 3.7f;
+        const float BasketAngle = -160f;      // mêmes valeurs que PrototypeGenerator.BasketAngle / BasketRadius
+        const float BasketRadius = 2.0f;    // loin de la table, vers le plateau : le singe a de la route à faire
         const float PanelAngle = -118f;
         const float PanelRadius = Ring - 0.45f;
         static readonly Color Wood = new Color(0.45f, 0.3f, 0.18f);

@@ -255,8 +255,8 @@ namespace SAE.EditorTools
         const float SlotStepY = 0.40f;    // espace entre deux étagères
         const float FirstShelfY = 0.45f;  // rangée la plus basse (accessible à un petit joueur)
         const float TreeScale = 1.6f;     // le palmier de Maxens, agrandi
-        public const float BasketAngle = -156f;   // le panier (HarvesterSetup le déplace aussi dans une scène déjà générée)
-        public const float BasketRadius = 3.7f;
+        public const float BasketAngle = -160f;   // le panier (HarvesterSetup le déplace aussi dans une scène déjà générée)
+        public const float BasketRadius = 2.0f;
 
         // Position sur le cercle. angle 0 = devant, positif = à droite.
         static Vector3 Around(float angleDeg, float radius, float height = 0f)

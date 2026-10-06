@@ -6,7 +6,8 @@ namespace SAE
     // Chaque image, on remet les os dans leur pose de départ, puis on oriente les bras et les jambes vers une direction :
     //  - marche : les jambes se balancent d'avant en arrière, les bras à l'opposé, le corps rebondit, la queue ondule ;
     //  - porter : les deux bras levés au-dessus de la tête, la banane entre les mains ;
-    //  - lancer : les bras partent en arrière puis vers l'avant.
+    //  - lancer : les bras partent en arrière puis vers l'avant ;
+    //  - fête (après un dunk) : bras levés ; bouderie (après un raté) : il secoue la tête.
     // On vise une direction (« ce bras pointe vers le haut ») plutôt qu'un angle autour d'un axe :
     // ça marche quelle que soit l'orientation des os dans le fichier FBX.
     [RequireComponent(typeof(HarvesterMonkey))]
@@ -21,7 +22,7 @@ namespace SAE
 
         HarvesterMonkey monkey;
         Transform leftArm, leftForeArm, rightArm, rightForeArm, leftHand, rightHand;
-        Transform leftUpLeg, leftLeg, rightUpLeg, rightLeg, tail;
+        Transform leftUpLeg, leftLeg, rightUpLeg, rightLeg, tail, head;
         Transform[] bones;
         Quaternion[] rest;
         Vector3 modelRest, lastPos;
@@ -37,12 +38,12 @@ namespace SAE
             tail = Bone("Tail1");
 
             // Une grosse tête, et pas de fléchette : c'est un récolteur, pas un singe de combat
-            var head = Bone("Head");
+            head = Bone("Head");
             if (head) head.localScale *= headScale;
             foreach (var t in model.GetComponentsInChildren<Transform>(true))
                 if (t.name.Contains("Dart")) t.gameObject.SetActive(false);
 
-            bones = new[] { leftArm, rightArm, leftUpLeg, rightUpLeg, tail };
+            bones = new[] { leftArm, rightArm, leftUpLeg, rightUpLeg, tail, head };
             rest = new Quaternion[bones.Length];
             for (int i = 0; i < bones.Length; i++) if (bones[i]) rest[i] = bones[i].localRotation;
             modelRest = model.localPosition;
@@ -70,7 +71,7 @@ namespace SAE
             phase += moved.magnitude * stepsPerMeter * Mathf.PI;
 
             walkBlend = Mathf.MoveTowards(walkBlend, monkey.Walking ? 1f : 0f, Time.deltaTime * 5f);
-            carryBlend = Mathf.MoveTowards(carryBlend, monkey.Carried ? 1f : 0f, Time.deltaTime * 6f);
+            carryBlend = Mathf.MoveTowards(carryBlend, monkey.Carried || monkey.Cheering ? 1f : 0f, Time.deltaTime * 6f);
 
             for (int i = 0; i < bones.Length; i++) if (bones[i]) bones[i].localRotation = rest[i];
 
@@ -88,6 +89,7 @@ namespace SAE
 
             // Le corps rebondit à chaque pas ; la queue ondule tout le temps
             model.localPosition = modelRest + Vector3.up * (Mathf.Abs(swing) * bounce);
+            if (head && monkey.Sulking) head.rotation = Quaternion.AngleAxis(Mathf.Sin(Time.time * 18f) * 25f, up) * head.rotation;
             if (tail) tail.rotation = Quaternion.AngleAxis(Mathf.Sin(Time.time * 3f) * 20f, up) * tail.rotation;
 
             // La banane portée suit les mains

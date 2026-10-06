@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 6 oct. 2026
 
+### Récolteur plus lent et plus drôle
+> J'aimerais qu'il soit beaucoup plus lent de base, que le panier soit plus loin, vers le plateau, et quelque chose de drôle : parfois il dunke, parfois il rate, etc.
+
 ### Retouches du singe récolteur
 > Parfait, sauf un truc : écarte le panier des autres objets. Sur le singe, grossis simplement son visage et enlève sa fléchette.
 
