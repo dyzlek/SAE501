@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
+### Bilan du jour et plan de demain
+> Ajoute ce qu'il faudrait faire demain et mets à jour ce qu'on a fait dans le GENERAL.md : chercher des assets de boutons ou les faire ; prendre les singes et les jeter ; faire un indicateur avec un effet de traînée ; ajouter la physique sur les bananes (faire des paniers, et donc enlever la poignée).
+
 ### Fusionner le coffre de Maxens et lancer les vagues en VR
 > Fusionne `feat/coffre` (le coffre de Maxens) avec ce que j'ai fait, et corrige le fait que je ne peux pas faire apparaître les ballons simplement en VR. Attends avant de mettre ça sur `main`.
 

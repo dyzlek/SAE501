@@ -8,7 +8,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
   - scène régénérée et testée en mode PC : la cabane, le hub et l'arc de Quincy fonctionnent ensemble.
   - branche `fix-all` : corrections d'une partie des deux critiques (la mienne et celle de Maxens), voir le détail ci-dessous.
 - **Bloque :** sur la carte, l'arc en mode PC est grand et cache le bas de l'écran ; la carte reste en cubes gris (pas encore dans la DA de la cabane).
-- **Demain :** _
+- **Demain :** tester `fix-all` (PC puis casque) et faire la Pull Request vers `main` ; voir le plan du 8 oct. dans le [journal général](GENERAL.md).
 
 **Captures après la fusion (mode PC)**
 
@@ -84,6 +84,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 | Claude (Claude Code) | Critique de Nicolas, 1re partie : fiche du singe restylée et dessinée par-dessus le décor (shader « SAE/Texte 3D » avec ZTest réglable), rondins coupés autour des fenêtres dans `cabane.py` (cabane réexportée), caméras 3 cm à 400 m, `FallGuard` (retour au point d'arrivée le plus proche après une chute) | À tester (compilé, scène à régénérer) |
 | Claude (Claude Code) | Fusion de `feat/coffre-maxens` (nouveau coffre de Maxens) dans `fix-all` : conflits résolus en gardant les deux (générateur : son coffre fixe + mes comptoirs ; pancarte du prix : « COFFRE » pendant l'ouverture ; journal de Maxens : ses deux entrées) ; coffre décalé à 97° (son estrade fait 1,4 m) | À tester |
 | Claude (Claude Code) | LANCER qui ne faisait rien au casque (build) : cause non trouvée sans casque (le lien vers les vagues est bien dans la scène). Ajouts : LANCER devient gris pendant une vague (on voit si elle est partie), il retrouve les vagues tout seul si le lien manque, et le bouton B de la manette droite lance la vague de partout | À tester au casque |
+| Claude (Claude Code) | Journal général : bilan du 7 oct. et plan du 8 oct. (tâches données par l'équipe) | Gardé |
 | Claude (Claude Code) | Mise en forme de l'analyse critique de Nicolas (qu'il m'a transmise) dans son journal, avec ses 2 photos ; rien de corrigé pour l'instant | Gardé |
 
 ## Mar. 6 oct. 2026

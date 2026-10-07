@@ -32,6 +32,18 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 - [ ] Ven. 13 nov. — rendu + oral
 
 ## Semaine 1 · 5-9 oct. — PROUVER
+**Jeu. 8 oct. — à faire**
+| Tâche | Qui |
+|---|---|
+| Tester `fix-all` (régénérer la scène, mode PC puis casque : LANCER et bouton B, coffre, comptoirs, fiche du singe), puis Pull Request vers `main` | Dylan, relu par un autre |
+| Chercher des assets de boutons, ou les faire | Maxens |
+| Prendre les singes et les **jeter** (pour les poser) | _à répartir_ (idée de Maxens) |
+| Un indicateur de trajectoire (effet de traînée) quand on lance | _à répartir_ (idée de Maxens) |
+| De la vraie physique sur les bananes : on les lance dans des paniers (et on enlève la poignée des paniers) | _à répartir_ (idée de Dylan) |
+| Restes des critiques et des objectifs du 7 (voir le bilan ci-dessous) | Tout le monde |
+
+_À vérifier contre le périmètre : lancer les singes et la traînée sont de nouveaux gestes (bons pour la VR, test de l'écran) ; à écrire dans le GDD avant de commencer._
+
 **Mer. 7 oct. — objectifs du jour**
 | Tâche | Qui |
 |---|---|
@@ -43,7 +55,14 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 | Améliorer le labyrinthe | Dylan |
 | Mettre les assets des ballons MOAB | Maxens |
 
-_Avancement (branche `fix-all`, Dylan) : 11 points des deux critiques corrigés en code (bugs, textes, comptoirs, pupitres, récolteurs, étal), à tester après régénération de la scène. Restent : bananier (modèle), carte et montagnes, terrain, singes en T-pose._
+**Mer. 7 oct. — bilan** _(branche `fix-all`, pas encore sur `main` : à tester d'abord)_
+- **Critiques** : les analyses de Dylan, Maxens et Nicolas sont dans leurs journaux. Corrigé en code par Dylan (avec l'IA), à tester après régénération de la scène :
+  - bugs : objets qu'on faisait voler avec la banane, singe récolteur qui traversait les meubles, meubles qui se chevauchaient, chute dans le vide (retour au point d'arrivée), bûches qui débordaient sur les fenêtres ;
+  - hub : pupitres LANCER / SE TP et VIDER, comptoirs d'amélioration avec ardoise et plaques gravées, boutons qui disparaissent au niveau max, jusqu'à 4 singes récolteurs, étal des bananes, tabouret du panier, tonneau et caisses sortis de la cabane ;
+  - textes : deux polices (Bangers, Oswald), ardoises, enseignes et plaques au lieu des textes qui flottent, fiche du singe restylée et toujours visible, plus de « +0 » ;
+  - LANCER : grisé pendant une vague, et bouton B de la manette droite pour lancer la vague (au casque, appuyer sur LANCER ne faisait rien : cause pas encore trouvée).
+- **Coffre (Maxens)** : nouveau coffre modélisé dans le style de la cabane (Blender), couvercle, bananes dedans, roulette avec les vrais singes ; fusionné dans `fix-all`.
+- **Restent** des critiques : bananier (modèle), carte et montagnes, herbe et terrain, singes en T-pose, arc, portée et stats des singes sur le plateau ; et des objectifs du jour : zone de téléportation du hub, séparer le hub et le labyrinthe, améliorer le labyrinthe, ballons MOAB.
 
 _À trancher : l'idée de Maxens d'un mini-jeu (roulette) quand tout est amélioré au maximum est une **nouvelle fonctionnalité**, hors du périmètre actuel (à mettre en POURRAIT dans le GDD)._
 
