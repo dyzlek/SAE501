@@ -36,7 +36,7 @@ namespace SAE.EditorTools
         static readonly Vector3 HandOffset = new Vector3(0f, -0.01f, -0.06f);   // la paume, un peu derrière l'avant de la manette
         static readonly Vector3 BowInHand = new Vector3(0.07f, 0f, 0.02f);      // la poignée de l'arc, sur le côté intérieur de la main : la flèche passe à côté
         const float HandTilt = 35f;   // les mains tournées pouce vers le haut, comme quand on tient les manettes (pas paume à plat)
-        static readonly Vector3 MapCenter = new Vector3(0f, 0f, 500f);   // au-delà de la distance d'affichage (400 m) : le hub ne se voit pas d'ici
+        static readonly Vector3 MapCenter = new Vector3(0f, 0f, 1000f);   // les montagnes du hub (jusqu'à 110 m de lui) restent au-delà de la distance d'affichage (400 m)
 
         static readonly Color Floor = new Color(0.35f, 0.35f, 0.38f);
         static readonly Color Wood = new Color(0.45f, 0.30f, 0.18f);
