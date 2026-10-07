@@ -61,6 +61,7 @@ public class Panier : MonoBehaviour
         if (effetDepot != null) Instantiate(effetDepot, transform.position, Quaternion.identity);
         var son = pourrie ? sonPourrie : sonDepot;
         if (son != null) AudioSource.PlayClipAtPoint(son, transform.position);
+        else SAE.Sfx.Play(pourrie ? SAE.Sfx.Sound.Error : SAE.Sfx.Sound.Coin, transform.position);   // les bruitages du jeu, faute de son réglé
         onDepot.Invoke(gain, Total);
         OnDepotCode?.Invoke(gain, Total);
         return gain;

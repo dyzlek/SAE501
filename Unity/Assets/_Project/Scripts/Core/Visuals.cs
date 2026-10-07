@@ -124,6 +124,7 @@ namespace SAE
             {
                 view.body.GetComponent<Renderer>().enabled = false;   // le cube reste comme collider et repère
                 view.model = FitModel(modelAsset, yaw, root.transform, size, out bodySize);
+                if (Application.isPlaying) MonkeyPose.Relax(view.model.transform, -root.transform.forward);   // plus de T-pose : bras baissés
             }
             // L'aura n'est créée qu'en jeu : les particules ne bougent pas hors Play, et enregistrées dans la scène
             // pour chaque case elles l'alourdiraient beaucoup. Les cases de la bibliothèque la créent au lancement.

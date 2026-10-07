@@ -16,6 +16,7 @@ namespace SAE
     {
         // Les vagues de la scène Labyrinthe (null quand on est au hub)
         public static WaveSpawner Instance { get; private set; }
+        public static event System.Action Victory;   // la vague 10 (le dirigeable rouge) vient d'être gagnée
 
         public float balloonHeight = 1f;
         public int startLives = 20;
@@ -69,6 +70,7 @@ namespace SAE
             Running = true;
             Lives = startLives;   // les vies repartent au maximum à chaque vague
             Status = "Attaque en cours !";
+            PlayForPlayer(Sfx.Sound.Whoosh);
 
             // Les groupes, dans l'ordre
             foreach (var group in wave.groups)
@@ -90,18 +92,21 @@ namespace SAE
                 foreach (var b in new List<Balloon>(Balloon.All)) Destroy(b.gameObject);
                 Lives = startLives;
                 Status = $"Vague {Wave} perdue : relance-la";
+                PlayForPlayer(Sfx.Sound.Error);
             }
             else
             {
                 GameState.WavesWon++;
                 int reward = 20 + Wave * 10;   // à équilibrer avec la banane (5) et le coffre (25 + 20 par vague vaincue)
                 Economy.Earn(reward);
+                PlayForPlayer(Sfx.Sound.Fanfare);
                 if (Wave == LastWrittenWave)
                 {
                     Won = true;
-                    Status = $"VICTOIRE ! +{reward} · mode infini : LANCER";
+                    Status = $"VICTOIRE ! +{reward} bananes · LANCER : mode infini · REJOUER : nouvelle partie";
+                    Victory?.Invoke();
                 }
-                else Status = $"Vague {Wave} gagnée : +{reward}";
+                else Status = $"Vague {Wave} gagnée : +{reward} bananes";
                 Wave++;
                 Lives = startLives;   // la vague suivante repart avec toutes les vies (affiché pendant la préparation)
             }
@@ -119,6 +124,12 @@ namespace SAE
             go.AddComponent<ColorTint>();
             go.AddComponent<Balloon>().Init(this, path, layers, kind);
             PlayerRig.IgnoreCollisions(go);   // le joueur traverse les ballons et les boss ; les flèches les touchent toujours
+        }
+
+        // Un son de vague, joué près du joueur : il l'entend qu'il soit sur la carte ou au hub
+        static void PlayForPlayer(Sfx.Sound sound)
+        {
+            if (PlayerRig.Local) Sfx.Play(sound, PlayerRig.Local.head.position);
         }
 
         public void BalloonEscaped(int layers) => Lives = Mathf.Max(0, Lives - layers);

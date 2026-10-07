@@ -30,6 +30,7 @@ namespace SAE
             nextPress = Time.time + cooldown;
             target.Press();
             PlayerRig.Buzz(transform, 0.6f);
+            Sfx.Play(Sfx.Sound.Click, transform.position);
         }
     }
 }

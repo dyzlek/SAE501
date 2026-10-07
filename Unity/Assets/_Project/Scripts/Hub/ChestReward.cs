@@ -6,7 +6,7 @@ namespace SAE
 {
     // Ce que donne le coffre : à l'ouverture, chaque singe gagné sort du coffre avec son aura (Visuals.MonkeyPiece) de la couleur
     // de sa rareté, flotte un instant, puis vole jusqu'à sa case de la bibliothèque, où il s'ajoute à l'inventaire.
-    // Le coffre tire la rareté et, grâce à rollType, le TYPE selon des chances qui s'ouvrent avec les vagues (MonkeyOdds) :
+    // Le coffre tire la rareté et, grâce à rollType, le TYPE parmi les types débloqués avec des bananes (MonkeyOdds) :
     // les deux sont connus avant la roulette, qui montre ainsi le vrai singe gagné.
     public class ChestReward : MonoBehaviour
     {
@@ -18,7 +18,7 @@ namespace SAE
         public float hoverTime = 1f;
         public float flyTime = 1.2f;
 
-        public float[] CurrentTypeOdds() => MonkeyOdds.Compute(typeOdds, GameState.WavesWon);
+        public float[] CurrentTypeOdds() => MonkeyOdds.Compute(typeOdds);
 
         void OnEnable()
         {
@@ -30,6 +30,7 @@ namespace SAE
 
         void OnOpened(System.Collections.Generic.List<Sae501.Coffres.Rarity> results)
         {
+            Sfx.Play(Sfx.Sound.Fanfare, chest.transform.position);
             var typeChances = CurrentTypeOdds();
             for (int i = 0; i < results.Count; i++)
             {
