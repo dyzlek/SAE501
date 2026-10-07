@@ -77,6 +77,16 @@ Les demandes faites à l'IA sont gardées dans `prompts/` : `prompts_dylan.md`, 
 - On ignore les messages sans intérêt pour le projet (« ok », « push », questions de détail).
 - Même commit que la modification et que la ligne du journal.
 
+## Suivi GitHub (règle n°3)
+Le planning vit sur GitHub : [tableau Project](https://github.com/users/dyzlek/projects/2) (n° 2, owner `dyzlek`), issues, jalons S1/S2/S3. Mode d'emploi : [docs/ORGANISATION.md](docs/ORGANISATION.md). **Claude le tient à jour tout seul, sans qu'on le demande :**
+- **Avant une tâche** : chercher l'issue qui correspond (`gh issue list`). S'il n'y en a pas, la créer (labels `prio:` + `type:`/`zone:`, jalon de la semaine) et l'ajouter au tableau. Passer la carte en **En cours**.
+- **À l'ouverture d'une PR** : écrire `Ferme #N` dans la description ; ajouter la PR au tableau ; carte en **En relecture**.
+- **Après un merge** : vérifier que l'issue est fermée et la carte en **Fait**.
+- **Bug ou idée repérés en passant** : une nouvelle issue (une idée hors GDD → `prio: POURRAIT` ou `hors périmètre`, sans jalon).
+- **Aucune notification mail** : ne jamais assigner quelqu'un (`--assignee`), ne jamais écrire de `@pseudo`, ne pas commenter les issues sans demande. Le responsable s'écrit dans le corps de l'issue (« Qui : Dylan »).
+- Commandes utiles : `gh project item-add 2 --owner dyzlek --url <url>` puis `gh project item-edit` (champ Status). Si `gh` refuse faute de droit, dire à la personne de lancer `gh auth refresh -s project`.
+- Noter ces actions dans la ligne IA du journal, comme le reste.
+
 ## Workflow Git (GitHub flow)
 - `main` = toujours stable (compile, tourne au casque). **Jamais de commit direct sur main.**
 - Une branche courte par tâche : `feat/<sujet>`, `fix/<sujet>`, `docs/<sujet>`, `art/<sujet>` (1-2 jours max).
