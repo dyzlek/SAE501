@@ -21,8 +21,8 @@ namespace SAE.EditorTools
     //   Hub.unity        : la cabane (bananier, coffre, bibliothèque, plateau) ; c'est la scène de départ.
     //   Labyrinthe.unity : la carte et ses vagues, où l'on défend avec l'arc (à 1 km du hub).
     // Le hub charge aussi le labyrinthe (LevelLoader) : les deux tournent ensemble, une vague continue quand on est au hub.
-    // Chaque scène a sa « présence » (son joueur VR et PC, son soleil, ses réglages d'image), allumée seulement
-    // quand on est dans ce niveau (LevelPresence, boutons SE TP / HUB : voir Levels).
+    // Un seul joueur (VR et PC), dans le hub : XRI ne gère bien qu'un joueur VR. SE TP / HUB le déplacent d'une scène
+    // à l'autre ; le soleil et les réglages d'image de chaque scène ne s'allument que quand on y est (voir Levels).
     public static class PrototypeGenerator
     {
         const string Folder = "Assets/_Project/Scenes";
@@ -72,15 +72,14 @@ namespace SAE.EditorTools
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(OldScenePath)) AssetDatabase.DeleteAsset(OldScenePath);
             var mapSpawn = Spawn("Spawn Carte", MapCenter + new Vector3(0, 0, -MapLayout.HalfExtent - 3f), Level.Carte);
             BuildMap();
-            if (!BuildPlayers(mapSpawn.position, withBow: true)) return;
-            BuildPresence(Level.Carte, mapSpawn);
+            BuildPresence(Level.Carte, mapSpawn);   // pas de joueur ici : c'est celui du hub qui vient
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), MapScenePath);
 
             // 2. Le hub
             NewLevelScene();
             var hubSpawn = Spawn("Spawn Hub", Vector3.zero, Level.Hub);
             var hub = BuildHub();   // avant le joueur : l'installeur des bananes ajoute son TestSouris à Camera.main s'il en trouve une
-            var player = BuildPlayers(hubSpawn.position, withBow: false);
+            var player = BuildPlayers(hubSpawn.position);
             if (!player) return;
             BuildChest(hub, Around(97f, Ring - 0.2f), player.head);   // estrade de 1,4 m (le coffre de Maxens) : un peu plus près de VIDER, loin du comptoir du bananier
             UseWoodTexture(hub);   // encore une fois : l'estrade et le cadre du coffre sont posés après le reste du hub
@@ -94,15 +93,13 @@ namespace SAE.EditorTools
             Debug.Log("Prototype généré : " + HubScenePath + " et " + MapScenePath);
         }
 
-        // La « présence » d'un niveau : ce qui n'est allumé que quand on y est (les joueurs et leur PlayerMode, le soleil,
-        // les réglages d'image), rangé sous un seul objet ÉTEINT ; LevelPresence l'allume si c'est le niveau en cours.
+        // La « présence » d'un niveau : ce qui n'est allumé que quand on y est (le soleil, les réglages d'image),
+        // rangé sous un seul objet ÉTEINT ; LevelPresence l'allume si c'est le niveau en cours.
         static void BuildPresence(Level level, Transform spawn)
         {
-            var presence = new GameObject("Présence du joueur");
-            var mode = Object.FindFirstObjectByType<PlayerMode>();
+            var presence = new GameObject("Soleil et réglages du niveau");
             var parts = new[]
             {
-                mode ? mode.gameObject : null, mode ? mode.vrPlayer : null, mode ? mode.pcPlayer : null,
                 Object.FindFirstObjectByType<Light>() ? Object.FindFirstObjectByType<Light>().gameObject : null,
                 Object.FindFirstObjectByType<Volume>() ? Object.FindFirstObjectByType<Volume>().gameObject : null,
             };
@@ -255,14 +252,13 @@ namespace SAE.EditorTools
             Dust("Poussières porte", 180f, DoorWidth, 0.3f, CabinDoorHeight);
         }
 
-        // Les deux joueurs de la scène (VR et PC, PlayerMode active le bon), au point d'arrivée.
-        // withBow : l'arc de Quincy, seulement sur la carte (au hub, les mains servent à prendre et appuyer).
-        // Renvoie le joueur VR (null si les Starter Assets manquent).
-        static PlayerRig BuildPlayers(Vector3 position, bool withBow)
+        // Le joueur, en deux versions (VR et PC, PlayerMode active la bonne), au point d'arrivée du hub.
+        // Il a l'arc de Quincy, qui ne sort que sur la carte (BowHolster). Renvoie le joueur VR (null si les Starter Assets manquent).
+        static PlayerRig BuildPlayers(Vector3 position)
         {
-            var player = Player(position, withBow);
+            var player = Player(position);
             if (!player) return null;
-            var pcPlayer = DesktopPlayerObject(position, withBow);
+            var pcPlayer = DesktopPlayerObject(position);
             player.gameObject.AddComponent<FallGuard>();          // tombé dans le vide : retour au point d'arrivée
             player.gameObject.AddComponent<WaveShortcut>();       // B (manette droite) : lancer la vague
             pcPlayer.AddComponent<FallGuard>();
@@ -298,7 +294,7 @@ namespace SAE.EditorTools
         }
 
         // Le joueur PC (clavier/souris), pour tester vite sans casque : DesktopPlayer, et la caméra sert de tête et de mains.
-        static GameObject DesktopPlayerObject(Vector3 position, bool withBow)
+        static GameObject DesktopPlayerObject(Vector3 position)
         {
             var player = new GameObject("Joueur PC");
             player.tag = Tags.Joueur;
@@ -324,21 +320,19 @@ namespace SAE.EditorTools
             rig.head = rig.leftHand = rig.rightHand = cam.transform;
 
             // L'arc (sur la carte), en bas à droite de la vue, plus petit qu'en VR pour ne pas cacher l'écran (clic droit : tirer)
-            if (withBow)
-            {
-                var bow = ((GameObject)PrefabUtility.InstantiatePrefab(BowSetup.Setup().gameObject)).GetComponent<Bow>();
-                bow.transform.localScale *= DesktopBowScale;
-                bow.maxDraw *= DesktopBowScale;
-                bow.HoldIn(cam.transform, new Vector3(0.3f, -0.3f, 0.7f));
-                var archer = player.AddComponent<DesktopArcher>();
-                archer.bow = bow;
-                archer.aim = cam.transform;
-            }
+            var bow = ((GameObject)PrefabUtility.InstantiatePrefab(BowSetup.Setup().gameObject)).GetComponent<Bow>();
+            bow.transform.localScale *= DesktopBowScale;
+            bow.maxDraw *= DesktopBowScale;
+            bow.HoldIn(cam.transform, new Vector3(0.3f, -0.3f, 0.7f));
+            var archer = player.AddComponent<DesktopArcher>();
+            archer.bow = bow;
+            archer.aim = cam.transform;
+            player.AddComponent<BowHolster>().bow = bow;
             player.AddComponent<MonkeyInfoCard>();
             return player;
         }
 
-        static PlayerRig Player(Vector3 position, bool withBow)
+        static PlayerRig Player(Vector3 position)
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(VRSetup.RigPrefab);
             if (!prefab) { Debug.LogError("Joueur VR : Starter Assets de l'XR Interaction Toolkit introuvables : " + VRSetup.RigPrefab); return null; }
@@ -374,7 +368,7 @@ namespace SAE.EditorTools
             AddFingertip(rig.leftHand);
             AddFingertip(rig.rightHand);
             GiveHands(rig, out var leftHand, out var rightHand);
-            if (withBow) GiveBow(go, rig, leftHand, rightHand);
+            GiveBow(go, rig, leftHand, rightHand);
             go.AddComponent<MonkeyInfoCard>();   // fiche du singe visé, dans le décor
             return rig;
         }
@@ -405,7 +399,7 @@ namespace SAE.EditorTools
         }
 
         // L'arc de Quincy dans la main gauche ; on tire la corde avec la main droite (grip ou gâchette).
-        // Seulement sur la carte ; la main gauche se ferme dessus.
+        // Seulement sur la carte (BowHolster) ; la main gauche se ferme dessus.
         static void GiveBow(GameObject player, PlayerRig rig, AnimateHandOnInput leftHand, AnimateHandOnInput rightHand)
         {
             if (!rig.leftHand || !rig.rightHand) { Debug.LogWarning("Joueur VR : manette introuvable, pas d'arc."); return; }
@@ -418,6 +412,7 @@ namespace SAE.EditorTools
             archer.drawHandVisual = rightHand;
             archer.drawGrip = new InputActionProperty(InputReference("XRI Right Interaction/Select Value"));
             archer.drawTrigger = new InputActionProperty(InputReference("XRI Right Interaction/Activate Value"));
+            player.AddComponent<BowHolster>().bow = bow;
         }
 
         // Une action des contrôles XRI des Starter Assets (même chose que « Use Reference » dans l'Inspector).

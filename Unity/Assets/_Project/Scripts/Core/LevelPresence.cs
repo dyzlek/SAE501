@@ -4,11 +4,10 @@ using UnityEngine.SceneManagement;
 
 namespace SAE
 {
-    // Dans chaque scène : ce qui n'est allumé que quand le joueur est dans ce niveau (« presence » : le joueur VR et PC,
-    // le soleil, les réglages d'image). Le reste de la scène (la carte et sa vague, le bananier, les récolteurs)
-    // continue de tourner même quand on est dans l'autre niveau.
-    // La présence est enregistrée ÉTEINTE dans la scène : c'est ce script qui l'allume si c'est le bon niveau
-    // (sinon le joueur de la carte, chargée en arrière-plan, démarrerait et prendrait la place de celui du hub).
+    // Dans chaque scène : ce qui n'est allumé que quand le joueur est dans ce niveau (« presence » : le soleil et les
+    // réglages d'image ; deux soleils allumés éclaireraient deux fois). Le reste de la scène (la carte et sa vague,
+    // le bananier, les récolteurs) continue de tourner même quand on est dans l'autre niveau.
+    // En arrivant dans ce niveau, le joueur (unique, dans la scène Hub) est posé à son point d'arrivée.
     public class LevelPresence : MonoBehaviour
     {
         public Level level;
