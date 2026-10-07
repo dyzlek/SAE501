@@ -127,35 +127,41 @@ namespace SAE.EditorTools
             return mat;
         }
 
-        // Un rayon de soleil : le prisme de lumière entre une ouverture (4 coins, dans l'ordre) et son ombre au sol,
-        // le long de la direction du soleil. On ne dessine que ses 4 côtés, transparents. Pour que ça ressemble à de la
-        // lumière et pas à du verre, chaque côté est coupé en deux : transparent sur les arêtes, un peu lumineux au milieu
-        // (pas de bord net), et il s'efface vers le sol. Un simple maillage transparent : rien à calculer pour le casque.
-        static void SunBeam(Transform parent, string name, Vector3[] opening, float groundY, float alpha)
+        // Un rayon de soleil : un prisme de lumière qui part d'une ouverture (4 coins, dans l'ordre) et file dans la
+        // direction du soleil sur « length » mètres. On ne dessine que ses 4 côtés, transparents. Pour que ça ressemble
+        // à de la lumière et pas à du verre :
+        //   - en travers, chaque côté est transparent sur les arêtes et un peu lumineux au milieu (pas de bord net) ;
+        //   - en long, il s'efface au bout (et aussi au départ si fadeStart, pour les rayons du ciel : on ne voit aucune extrémité).
+        // Un simple maillage transparent : rien à calculer pour le casque.
+        static void SunBeam(Transform parent, string name, Vector3[] opening, float length, float alpha, bool fadeStart)
         {
             var dir = SunDirection;
-            var clear = new Color(BeamColor.r, BeamColor.g, BeamColor.b, 0f);
-            var glow = new Color(BeamColor.r, BeamColor.g, BeamColor.b, alpha);
-            Vector3 Ground(Vector3 p) => p + dir * ((p.y - groundY) / -dir.y);
+            // Les « rangées » le long du rayon : où (0 = départ, 1 = bout) et quelle part de la lueur
+            float[] along = fadeStart ? new[] { 0f, 0.5f, 1f } : new[] { 0f, 1f };
+            float[] glowAt = fadeStart ? new[] { 0f, 1f, 0f } : new[] { 1f, 0f };
+            Color Light(float strength) => new Color(BeamColor.r, BeamColor.g, BeamColor.b, alpha * strength);
 
             var verts = new List<Vector3>();
             var colors = new List<Color>();
             var tris = new List<int>();
-            // Une moitié de côté : de p à q en haut, et leur ombre au sol. Le haut a la couleur cp, cq ; le sol est effacé.
-            void Half(Vector3 p, Vector3 q, Color cp, Color cq)
+            // Une bande du rayon, de l'arête p à l'arête q (pq = 0 : transparent sur l'arête, 1 : lumineux), rangée par rangée
+            void Strip(Vector3 p, Vector3 q, float pGlow, float qGlow)
             {
-                int k = verts.Count;
-                verts.AddRange(new[] { p, q, Ground(q), Ground(p) });
-                colors.AddRange(new[] { cp, cq, clear, clear });
-                tris.AddRange(new[] { k, k + 1, k + 2, k, k + 2, k + 3 });
+                for (int r = 0; r + 1 < along.Length; r++)
+                {
+                    int k = verts.Count;
+                    verts.AddRange(new[] { p + dir * (length * along[r]), q + dir * (length * along[r]), q + dir * (length * along[r + 1]), p + dir * (length * along[r + 1]) });
+                    colors.AddRange(new[] { Light(pGlow * glowAt[r]), Light(qGlow * glowAt[r]), Light(qGlow * glowAt[r + 1]), Light(pGlow * glowAt[r + 1]) });
+                    tris.AddRange(new[] { k, k + 1, k + 2, k, k + 2, k + 3 });
+                }
             }
             for (int i = 0; i < 4; i++)
             {
                 var a = opening[i];
                 var b = opening[(i + 1) % 4];
                 var m = (a + b) / 2f;
-                Half(a, m, clear, glow);   // de l'arête (transparente) au milieu (lumineux)
-                Half(m, b, glow, clear);   // puis du milieu à l'autre arête
+                Strip(a, m, 0f, 1f);   // de l'arête (transparente) au milieu (lumineux)
+                Strip(m, b, 1f, 0f);   // puis du milieu à l'autre arête
             }
             var mesh = new Mesh { name = name };
             mesh.SetVertices(verts);
@@ -172,9 +178,11 @@ namespace SAE.EditorTools
             r.receiveShadows = false;
         }
 
-        // Dans la cabane : un rayon par ouverture tournée vers le soleil (la porte et les fenêtres de ce côté)
+        // Dans la cabane : une lueur courte à chaque fenêtre tournée vers le soleil. Courte, parce que les comptoirs
+        // sont juste sous les fenêtres : un rayon jusqu'au plancher les traversait. Pas de rayon à la porte (l'étal est devant).
         static readonly float[] CabinWindows = { 60f, 150f, 210f };   // mêmes valeurs que WINDOWS dans cabane.py
-        const float WindowBottom = 1.72f, WindowTop = 2.42f, WindowWidth = 0.9f, DoorWidth = 1.3f;
+        const float WindowBottom = 1.72f, WindowTop = 2.42f, WindowWidth = 0.9f;
+        const float WindowBeamLength = 0.8f;   // en mètres : s'éteint avant les ardoises des comptoirs (à 0,8 m du mur)
 
         static void BuildCabinBeams(Transform env)
         {
@@ -191,11 +199,10 @@ namespace SAE.EditorTools
                 {
                     center - along + Vector3.up * bottom, center + along + Vector3.up * bottom,
                     center + along + Vector3.up * top, center - along + Vector3.up * top,
-                }, 0f, alpha);
+                }, WindowBeamLength, alpha, fadeStart: false);
             }
             // Très légers : une lueur dans l'air, pas un mur de lumière (au casque, trop fort, ça fait artificiel)
-            foreach (var angle in CabinWindows) Opening($"Rayon fenêtre {angle}", angle, WindowWidth, WindowBottom, WindowTop, 0.1f);
-            Opening("Rayon porte", 180f, DoorWidth, 0.05f, CabinDoorHeight, 0.06f);
+            foreach (var angle in CabinWindows) Opening($"Rayon fenêtre {angle}", angle, WindowWidth, WindowBottom, WindowTop, 0.12f);
         }
 
         // Sur la carte : de grands rayons qui tombent du ciel autour de la zone de jeu (comme à travers des nuages)
@@ -209,10 +216,11 @@ namespace SAE.EditorTools
             foreach (var (angle, radius, size) in spots)
             {
                 var ground = Around(angle, radius, groundY);
-                var center = ground - dir * ((Height - groundY) / -dir.y);   // remonter le rayon jusqu'en haut
+                float length = (Height - groundY) / -dir.y;
+                var center = ground - dir * length;   // remonter le rayon jusqu'en haut
                 var h = new Vector3(size / 2f, 0f, 0f);
                 var v = new Vector3(0f, 0f, size / 2f);
-                SunBeam(beams, $"Rayon {angle}", new[] { center - h - v, center + h - v, center + h + v, center - h + v }, groundY, 0.12f);
+                SunBeam(beams, $"Rayon {angle}", new[] { center - h - v, center + h - v, center + h + v, center - h + v }, length, 0.12f, fadeStart: true);
             }
         }
 
