@@ -8,6 +8,8 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 > Rends les deux scènes belles, sans toucher encore au labyrinthe.
 >
 > Suite (précision) : j'aimerais des rayons de soleil, et un peu plus de végétation autour du hub et du labyrinthe.
+>
+> Suite : ce n'est pas mal, mais dans la maison c'est trop artificiel et abusé.
 
 ### Zone de téléportation du hub et deux vraies scènes
 > Fais maintenant « limiter la zone de téléportation dans le hub » et « séparer vraiment les deux niveaux : le hub et le labyrinthe ».

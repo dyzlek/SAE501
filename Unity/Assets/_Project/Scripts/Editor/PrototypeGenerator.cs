@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -127,31 +128,39 @@ namespace SAE.EditorTools
         }
 
         // Un rayon de soleil : le prisme de lumière entre une ouverture (4 coins, dans l'ordre) et son ombre au sol,
-        // le long de la direction du soleil. On ne dessine que ses 4 côtés, transparents : lumineux à l'ouverture,
-        // ils s'effacent vers le sol. Un simple maillage transparent : rien à calculer pour le casque.
+        // le long de la direction du soleil. On ne dessine que ses 4 côtés, transparents. Pour que ça ressemble à de la
+        // lumière et pas à du verre, chaque côté est coupé en deux : transparent sur les arêtes, un peu lumineux au milieu
+        // (pas de bord net), et il s'efface vers le sol. Un simple maillage transparent : rien à calculer pour le casque.
         static void SunBeam(Transform parent, string name, Vector3[] opening, float groundY, float alpha)
         {
             var dir = SunDirection;
-            var verts = new Vector3[16];
-            var colors = new Color[16];
-            var tris = new int[24];
-            var top = new Color(BeamColor.r, BeamColor.g, BeamColor.b, alpha);
-            var bottom = new Color(BeamColor.r, BeamColor.g, BeamColor.b, 0f);
+            var clear = new Color(BeamColor.r, BeamColor.g, BeamColor.b, 0f);
+            var glow = new Color(BeamColor.r, BeamColor.g, BeamColor.b, alpha);
+            Vector3 Ground(Vector3 p) => p + dir * ((p.y - groundY) / -dir.y);
+
+            var verts = new List<Vector3>();
+            var colors = new List<Color>();
+            var tris = new List<int>();
+            // Une moitié de côté : de p à q en haut, et leur ombre au sol. Le haut a la couleur cp, cq ; le sol est effacé.
+            void Half(Vector3 p, Vector3 q, Color cp, Color cq)
+            {
+                int k = verts.Count;
+                verts.AddRange(new[] { p, q, Ground(q), Ground(p) });
+                colors.AddRange(new[] { cp, cq, clear, clear });
+                tris.AddRange(new[] { k, k + 1, k + 2, k, k + 2, k + 3 });
+            }
             for (int i = 0; i < 4; i++)
             {
                 var a = opening[i];
                 var b = opening[(i + 1) % 4];
-                var aGround = a + dir * ((a.y - groundY) / -dir.y);
-                var bGround = b + dir * ((b.y - groundY) / -dir.y);
-                int k = i * 4;
-                verts[k] = a; verts[k + 1] = b; verts[k + 2] = bGround; verts[k + 3] = aGround;
-                colors[k] = colors[k + 1] = top;
-                colors[k + 2] = colors[k + 3] = bottom;
-                int t = i * 6;
-                tris[t] = k; tris[t + 1] = k + 1; tris[t + 2] = k + 2;
-                tris[t + 3] = k; tris[t + 4] = k + 2; tris[t + 5] = k + 3;
+                var m = (a + b) / 2f;
+                Half(a, m, clear, glow);   // de l'arête (transparente) au milieu (lumineux)
+                Half(m, b, glow, clear);   // puis du milieu à l'autre arête
             }
-            var mesh = new Mesh { name = name, vertices = verts, colors = colors, triangles = tris };
+            var mesh = new Mesh { name = name };
+            mesh.SetVertices(verts);
+            mesh.SetColors(colors);
+            mesh.SetTriangles(tris, 0);
             mesh.RecalculateBounds();
 
             var go = new GameObject(name);
@@ -184,8 +193,9 @@ namespace SAE.EditorTools
                     center + along + Vector3.up * top, center - along + Vector3.up * top,
                 }, 0f, alpha);
             }
-            foreach (var angle in CabinWindows) Opening($"Rayon fenêtre {angle}", angle, WindowWidth, WindowBottom, WindowTop, 0.22f);
-            Opening("Rayon porte", 180f, DoorWidth, 0.05f, CabinDoorHeight, 0.16f);
+            // Très légers : une lueur dans l'air, pas un mur de lumière (au casque, trop fort, ça fait artificiel)
+            foreach (var angle in CabinWindows) Opening($"Rayon fenêtre {angle}", angle, WindowWidth, WindowBottom, WindowTop, 0.1f);
+            Opening("Rayon porte", 180f, DoorWidth, 0.05f, CabinDoorHeight, 0.06f);
         }
 
         // Sur la carte : de grands rayons qui tombent du ciel autour de la zone de jeu (comme à travers des nuages)
@@ -194,15 +204,15 @@ namespace SAE.EditorTools
             var beams = new GameObject("Rayons de soleil").transform;
             beams.SetParent(map, false);
             var dir = SunDirection;
-            const float Height = 40f;
-            var spots = new[] { (-30f, 26f, 5f), (25f, 30f, 4f), (110f, 28f, 6f), (160f, 32f, 4f), (215f, 27f, 5f), (290f, 30f, 6f) };
+            const float Height = 150f;   // très haut : on ne voit jamais où ils commencent
+            var spots = new[] { (-30f, 26f, 6f), (25f, 30f, 5f), (110f, 28f, 7f), (160f, 32f, 5f), (215f, 27f, 6f), (290f, 30f, 7f) };
             foreach (var (angle, radius, size) in spots)
             {
                 var ground = Around(angle, radius, groundY);
                 var center = ground - dir * ((Height - groundY) / -dir.y);   // remonter le rayon jusqu'en haut
                 var h = new Vector3(size / 2f, 0f, 0f);
                 var v = new Vector3(0f, 0f, size / 2f);
-                SunBeam(beams, $"Rayon {angle}", new[] { center - h - v, center + h - v, center + h + v, center - h + v }, groundY, 0.09f);
+                SunBeam(beams, $"Rayon {angle}", new[] { center - h - v, center + h - v, center + h + v, center - h + v }, groundY, 0.12f);
             }
         }
 

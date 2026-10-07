@@ -101,6 +101,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 | Claude (Claude Code) | Depuis la carte, on voyait les montagnes du hub dans la brume : carte éloignée à 1 km (au-delà de la distance d'affichage) | À tester |
 | Claude (Claude Code) | Vrai changement de scène à la place du chargement additif : `Levels` (`SceneManager.LoadScene`), un joueur par scène, état gardé en static (`HarvesterCrew`, `UpgradeButton`), `WaveSpawner` reprend au bon numéro et lance à l'arrivée, plateau du hub refait à partir de `GameState`, `LevelLoader`, `BowHolster`, `Mirrored` et `KeepWorldScale` supprimés | À tester (compilé, scènes à générer) |
 | Claude (Claude Code) | Décor : `cabane.py` (massifs d'herbe et de fleurs, plus de buissons, rochers et palmiers ; nouveau `Paysage.glb` pour la carte, zone de jeu libre), rayons de soleil en maillages transparents (porte et fenêtres du hub, grands rayons sur la carte), soleil identique dans les deux scènes, estrade et pupitres de la carte en bois | À tester (compilé, rendus Blender vérifiés, scènes à générer) |
+| Claude (Claude Code) | Rayons trop forts et « artificiels » dans la cabane : beaucoup plus légers et sans bord net (transparents sur les arêtes, lueur au milieu) ; rayons du ciel qui partent de 150 m (on ne voit plus leur sommet en forme de boîte) | À tester |
 | Claude (Claude Code) | Mise en forme de l'analyse critique de Nicolas (qu'il m'a transmise) dans son journal, avec ses 2 photos ; rien de corrigé pour l'instant | Gardé |
 
 ## Mar. 6 oct. 2026
