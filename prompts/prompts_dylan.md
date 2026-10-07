@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
+### Fusionner le coffre de Maxens et lancer les vagues en VR
+> Fusionne `feat/coffre` (le coffre de Maxens) avec ce que j'ai fait, et corrige le fait que je ne peux pas faire apparaître les ballons simplement en VR. Attends avant de mettre ça sur `main`.
+
 ### Fiches des singes, textures qui se chevauchent, chute dans le vide
 > Améliore les fiches des singes (il faut aussi régler le fait qu'elles soient cachées par les meubles), corrige les textures qui se chevauchent selon l'angle (par exemple les bûches du mur sur la fenêtre), et le fait que quand on tombe dans le vide hors de la carte, rien ne nous remet en place.
 

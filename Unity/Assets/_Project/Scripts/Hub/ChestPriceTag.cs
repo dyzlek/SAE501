@@ -12,7 +12,9 @@ namespace SAE
         void Update()
         {
             if (!chest || !label) return;
-            label.text = chest.IsBusy ? "COFFRE" : $"COFFRE  {chest.Price}";
+            var lid = chest.GetComponent<ChestLid>();
+            bool opening = chest.IsBusy || (lid && lid.IsOpen);   // pendant l'ouverture, pas de prix : la pancarte dit juste COFFRE
+            label.text = opening ? "COFFRE" : $"COFFRE  {chest.Price}";
             label.color = Economy.CanAfford(chest.Price) ? new Color(1f, 0.82f, 0.2f) : new Color(0.6f, 0.6f, 0.6f);
         }
     }

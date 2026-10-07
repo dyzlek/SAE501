@@ -3,6 +3,67 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Mer. 7 oct. 2026
+- **À faire ce matin :** (1) le coffre : changer l'asset, améliorer l'animation, voir les singes en sortir ; (2) mettre les assets des ballons MOAB.
+- **Fait : un nouveau coffre dans le style de la cabane** (branche `feat/coffre-maxens`, partie du `main` à jour avec la PR #9). L'ancien coffre téléchargé (`chest_cartoon_animations.glb`) ne collait pas à la direction artistique de la cabane.
+  - modélisé par un script Blender, `Blender/coffre.py`, qui **reprend les textures et l'outil de `cabane.py`** (même bois à veines, même fer) : planches teintées une par une, montants de coin en bois sombre, deux bandes de fer avec rivets dorés, serrure dorée devant, poignées sur les côtés, couvercle bombé en lattes ;
+  - **deux objets** : `Coffre_Caisse` et `Coffre_Couvercle`, dont l'origine est sur la charnière (arrière, en haut) : pour l'ouvrir, il suffit de le tourner autour de X (en négatif). Ça prépare l'animation ;
+  - environ 1 100 triangles (léger pour le casque), exporté en `Art/Coffre/Coffre.glb` ;
+  - **pas encore branché dans la scène** : le jeu utilise toujours l'ancien coffre et son animation ; on remplacera les deux en même temps (étape suivante : l'animation).
+  - À reprendre : l'intérieur de la caisse est plein (on voit le dessus des planches quand il est ouvert) ; à creuser au moment de l'animation, pour voir les singes sortir.
+
+  ![Nouveau coffre fermé](../captures/maxens-coffre-ferme.png)
+
+  ![Nouveau coffre ouvert](../captures/maxens-coffre-ouvert.png)
+
+- **Fait : le nouveau coffre dans le jeu, avec son ouverture et la roulette des singes** :
+  - le coffre de la cabane remplace l'ancien dans la scène ; **il ne tourne plus vers le joueur**, il reste fixe sur son estrade ;
+  - **à l'ouverture** (nouveau script `Hub/ChestLid.cs`) : un petit **« boing »** (le coffre s'écrase puis rebondit), **le couvercle s'ouvre** en tournant sur sa charnière, et **une aura dorée** s'allume (la même aura en flammes que les singes, en or : `Aura.Add` accepte maintenant une couleur). Il se referme quand la roulette disparaît ;
+  - **la roulette montre de vrais singes avec l'aura de leur rareté** à la place des carrés de couleur (fond de case de la couleur de la rareté, assombri) ;
+  - **le singe au centre est bien celui qu'on gagne** : le type du singe est maintenant tiré par le coffre en même temps que la rareté, avant la roulette (avant, il était tiré après, par `ChestReward`) ;
+  - pour le casque : seuls les singes qui passent dans la fenêtre de la roulette sont allumés (environ 7 sur 48).
+  - Testé en Play (en ouvrant le coffre par code) : boing, couvercle, aura dorée, roulette qui s'arrête sur un singe Glace violet, puis ce même singe qui sort du coffre. Aucune erreur.
+
+  ![Ouverture : couvercle ouvert et aura dorée, la roulette commence](../captures/maxens-coffre-ouverture-aura.png)
+
+  ![La roulette s'arrête sur le singe gagné, qui sort du coffre](../captures/maxens-coffre-roulette-singes.png)
+
+- **Corrigé après mon test :**
+  - **le coffre était trop petit** : il fait maintenant 1,1 m de large (au lieu de 0,8), sur une estrade plus grande ;
+  - **il paraissait fermé et ouvert en même temps** : la caisse était pleine, et le dessus des planches ressemblait à un deuxième couvercle fermé. **La caisse est maintenant creuse** (4 parois en planches, un fond sombre) et les bandes de fer sont de simples cerclages à l'extérieur ;
+  - **3 singes sortaient du coffre** : le code donnait 1 singe de plus toutes les 3 vagues gagnées (et mon test avait mis « 8 vagues gagnées », restées en mémoire dans Unity). **Ce n'était pas la règle voulue** : un coffre donne **toujours un seul singe** ; ce qui monte avec les vagues, ce sont **ses chances d'être rare** (à 0 vague : 64 % gris, 36 % vert ; à 9 vagues : du bleu et du violet apparaissent). Corrigé dans `ChestController` (`MonkeysPerChest = 1`), et le panneau des chances n'affiche plus « Singes : X ».
+
+  ![Coffre plus grand, creux, ouvert avec son aura dorée](../captures/maxens-coffre-v2-ouvert.png)
+
+- **Fait : un trésor dans le coffre et un coffre qui appelle le joueur** :
+  - ~~3 régimes de bananes~~ remplacés ensuite (voir plus bas) par les bananes du bananier sur un lit de feuilles ;
+  - **quand on a assez d'argent pour l'ouvrir**, le coffre **se trémousse** toutes les 2,5 s (il se balance de gauche à droite, de moins en moins, jusqu'à 4°), pour inviter le joueur à l'ouvrir. Il s'arrête quand il est ouvert ou si on n'a plus assez d'argent (`ChestLid`).
+  - Testé en Play : le coffre penche bien pendant l'appel (3,5° mesurés), et les bananes sont visibles une fois ouvert.
+
+- **Corrigé après mon test (roulette, sortie du singe, textes, trésor)** :
+  - **la roulette ne montrait que le singe de base** : les autres cases montrent maintenant **tous les types** (Canon, Tireur, Glace, Sniper…), pour le spectacle. La case gagnante reste le vrai tirage, qui suit la règle de Dylan : les types se débloquent avec les vagues (au début, on gagne seulement des Classiques) ;
+  - **ça défile très vite au début** puis ralentit : 100 cases au lieu de 48 sur la même durée. Pour le casque, seuls les singes visibles dans la fenêtre existent (créés quand leur case entre, détruits quand elle sort) ;
+  - **quand le singe est choisi, la barre jaune s'en va** ;
+  - **le singe sort du milieu du coffre** : il part petit (30 %), monte d'1 m en tournant et en grossissant, flotte, puis vole jusqu'à sa case de la bibliothèque (plus de texte « CL1 » au-dessus) ;
+  - **plus de texte quand le coffre est ouvert** : « [Touche] Ouvrir le coffre » et le prix disparaissent tant qu'il est ouvert ;
+  - **le trésor** : les **bananes du bananier** (celles qui tombent de l'arbre) posées sur un **lit de feuilles de bananier**, sur un double fond assez haut pour être bien vu (feuilles ajoutées dans `Blender/coffre.py`, bananes posées par le générateur). Les régimes de la cabane sont retirés.
+  - Testé en Play : défilement de tous les types, barre qui disparaît, singe gagné qui sort du coffre en grossissant, consigne cachée. Aucune erreur.
+
+  ![La roulette fait défiler tous les types ; le coffre ouvert montre les bananes sur les feuilles](../captures/maxens-coffre-roulette-tous-types.png)
+
+  ![Singe choisi : la barre est partie, il sort du milieu du coffre en grossissant](../captures/maxens-coffre-singe-sort.png)
+
+- **Retiré : l'aura dorée du coffre** (elle ne rendait pas bien). À l'ouverture, il reste le boing et le couvercle qui s'ouvre.
+
+### IA
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Code) | Retrait de l'aura dorée du coffre | Gardé |
+| Claude (Code) | Roulette avec tous les types et très rapide au début, barre qui disparaît, singe qui sort du coffre en tournant et grossissant, textes cachés à l'ouverture, bananes du bananier sur des feuilles ; testé en Play | À tester au casque |
+| Claude (Code) | Régimes de bananes dans le coffre, coffre qui se trémousse quand on peut l'ouvrir ; testé en Play | Trémoussement gardé, régimes jetés (remplacés par les bananes du bananier) |
+| Claude (Code) | Coffre agrandi (1,1 m) et creusé (on voit l'intérieur à l'ouverture), cerclages de fer à l'extérieur ; un seul singe par coffre (seules les chances de rareté montent avec les vagues) | À tester au casque |
+| Claude (Code) | Nouveau coffre branché dans la scène (fixe), ouverture boing + couvercle + aura dorée (`ChestLid`), roulette avec les vrais singes et leur aura, type du singe tiré avant la roulette ; testé en Play | À tester au casque |
+| Claude (Code) | Nouveau coffre modélisé par script Blender (`coffre.py`) dans le style de la cabane, couvercle séparé sur sa charnière, rendus d'aperçu | À valider |
+
 **Mon analyse critique du hub et de la carte** _(transmise à Dylan, qui corrige sur la branche `fix-all` ; mise en forme par l'IA)_
 1. **Bibliothèque :** le mot « Bibliothèque » nous regarde (il tourne vers le joueur) ; les textes sont trop simples, un peu moches. Les singes sont en T-pose : à changer peut-être.
 2. **Récolteur :** même remarque sur les textes ; je n'aime pas les boutons jaunes. Le meuble devrait disparaître quand tout est au maximum (la colonne disparaît). Idée : quand tout est à fond, un mini-jeu en plus apparaît à la place, par exemple une roulette.

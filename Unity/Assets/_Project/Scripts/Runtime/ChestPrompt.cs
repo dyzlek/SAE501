@@ -59,7 +59,9 @@ namespace Sae501.Coffres
         void Update()
         {
             bool showError = Time.time < errorUntil;
-            bool showHint = !showError && !chest.IsBusy && chest.IsInRange(player.position);
+            var lid = chest.GetComponent<SAE.ChestLid>();
+            bool open = lid && lid.IsOpen;   // coffre ouvert (roulette, singe qui sort) : pas de consigne
+            bool showHint = !showError && !chest.IsBusy && !open && chest.IsInRange(player.position);
 
             if (showHint)
             {

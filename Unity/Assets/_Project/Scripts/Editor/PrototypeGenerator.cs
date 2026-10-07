@@ -24,6 +24,8 @@ namespace SAE.EditorTools
         const float BoardTile = 0.2f;    // plateau de 1,6 m : l'élément principal du hub
         const float HandHeight = 0.9f;   // table des bananes et socle du panier : à hauteur de main, pas au sol
         const int IgnoreRaycast = 2;     // couche Unity « Ignore Raycast »
+        const float ChestFloor = 0.3f;         // hauteur du double fond du coffre (FLOOR_Y dans Blender/coffre.py)
+        const float ChestBananaScale = 0.8f;   // les bananes du bananier, un peu plus petites dans le coffre
         const float DesktopBowScale = 0.5f;   // en mode PC, l'arc est collé à la caméra : plus petit
         static readonly Vector3 HandOffset = new Vector3(0f, -0.01f, -0.06f);   // la paume, un peu derrière l'avant de la manette
         static readonly Vector3 BowInHand = new Vector3(0.07f, 0f, 0.02f);      // la poignée de l'arc, sur le côté intérieur de la main : la flèche passe à côté
@@ -74,7 +76,7 @@ namespace SAE.EditorTools
             var hub = BuildHub(mapRoot, mapSpawn, spawner);   // avant le joueur : l'installeur des bananes ajoute son TestSouris à Camera.main s'il en trouve une
             var player = Player(hubSpawn.position, mapSpawn);
             if (!player) return;
-            BuildChest(hub, Around(100f, Ring - 0.2f), player.head);
+            BuildChest(hub, Around(97f, Ring - 0.2f), player.head);   // estrade de 1,4 m (le coffre de Maxens) : un peu plus près de VIDER, loin du comptoir du bananier
             UseWoodTexture(hub);   // encore une fois : l'estrade et le cadre du coffre sont posés après le reste du hub
             var pcPlayer = DesktopPlayerObject(hubSpawn.position, mapSpawn);
             AddFallGuard(player.gameObject, hubSpawn, mapSpawn);
@@ -901,11 +903,12 @@ namespace SAE.EditorTools
             return monkey;
         }
 
-        // Le coffre de Nicolas (modèle .glb animé + roulette + texte [E]), monté comme dans son menu SAE501 → 2,
-        // branché sur notre joueur (ChestClickable) et sur l'argent commun (EconomyBridge).
+        // Le coffre : le modèle de la cabane (Art/Coffre/Coffre.glb, fait par Blender/coffre.py), avec la roulette
+        // et le texte de Nicolas, branché sur notre joueur (ChestClickable) et sur l'argent commun.
+        // Il reste fixe, tourné vers le centre ; à l'ouverture : boing et couvercle (ChestLid).
         static void BuildChest(Transform env, Vector3 pos, Transform player)
         {
-            const string ChestModelPath = "Assets/_Project/Art/Chest/chest_cartoon_animations.glb";
+            const string ChestModelPath = "Assets/_Project/Art/Coffre/Coffre.glb";
             var model = AssetDatabase.LoadAssetAtPath<GameObject>(ChestModelPath);
             if (!model) { Debug.LogWarning("Hub : modèle du coffre introuvable (glTFast installé ?), coffre non placé."); return; }
 
@@ -913,13 +916,13 @@ namespace SAE.EditorTools
             chest.name = "Coffre";
             chest.transform.SetParent(env, false);
             var b = Bounds(chest);
-            chest.transform.localScale *= 0.8f / Mathf.Max(b.size.x, b.size.z);    // ~0,8 m de large
+            // taille réelle du modèle (1,1 m de large) : bien visible dans la cabane
             // tourné vers le joueur (au centre), posé au sol
             chest.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(new Vector3(-pos.x, 0, -pos.z)));
             b = Bounds(chest);
             // posé sur une petite estrade en bois (comme un trésor qu'on expose)
             const float Dais = 0.1f;
-            var dais = Visuals.Solid("Estrade du coffre", env, new Vector3(pos.x, Dais / 2f, pos.z), new Vector3(1.0f, Dais, 0.8f), Wood);
+            var dais = Visuals.Solid("Estrade du coffre", env, new Vector3(pos.x, Dais / 2f, pos.z), new Vector3(1.4f, Dais, 1.0f), Wood);
             dais.transform.rotation = Quaternion.Euler(0, AngleOf(pos), 0);
             chest.transform.position += new Vector3(pos.x - b.center.x, Dais - b.min.y, pos.z - b.center.z);
             float top = Bounds(chest).max.y;
@@ -956,13 +959,30 @@ namespace SAE.EditorTools
             var reward = chest.AddComponent<ChestReward>();
             reward.chest = controller;
 
-            // Le coffre se tourne toujours vers le joueur. L'origine du modèle n'est pas au centre du coffre :
-            // on le met dans un pivot placé au centre, et c'est le pivot qui tourne.
-            var pivot = new GameObject("Coffre (pivot)").transform;
-            pivot.SetParent(env, false);
-            pivot.SetPositionAndRotation(new Vector3(pos.x, 0, pos.z), chest.transform.rotation);
-            chest.transform.SetParent(pivot, true);
-            pivot.gameObject.AddComponent<FacePlayer>();
+            // L'ouverture : boing, puis le couvercle (son origine est sur la charnière) ; le singe sort du centre du coffre
+            var glowAnchor = new GameObject("Centre").transform;
+            glowAnchor.SetParent(chest.transform, false);
+            glowAnchor.position = chestBounds.center;
+            // Un trésor dedans : les bananes du bananier, posées sur le lit de feuilles du double fond (Blender/coffre.py)
+            var bananaModel = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Art/Bananier/FBX/Bananes_Collectible.fbx");
+            if (bananaModel)
+            {
+                var spots = new[] { new Vector3(-0.32f, 0f, 0.05f), new Vector3(-0.1f, 0f, -0.08f), new Vector3(0.12f, 0f, 0.08f), new Vector3(0.33f, 0f, -0.05f) };
+                for (int i = 0; i < spots.Length; i++)
+                {
+                    var banana = (GameObject)PrefabUtility.InstantiatePrefab(bananaModel);
+                    banana.name = "Bananes du coffre";
+                    banana.transform.SetParent(chest.transform, false);
+                    banana.transform.localScale = Vector3.one * ChestBananaScale;
+                    var spot = chestBounds.center + chest.transform.right * spots[i].x + chest.transform.forward * spots[i].z;
+                    spot.y = chestBounds.min.y + ChestFloor + ChestBananaScale * 0.12f;
+                    banana.transform.SetPositionAndRotation(spot, Quaternion.Euler(80f, chest.transform.eulerAngles.y + 50f * i + 20f, 0f));   // couchées sur les feuilles
+                }
+            }
+            var lid = chest.AddComponent<ChestLid>();
+            lid.lid = chest.GetComponentsInChildren<Transform>(true).First(t => t.name == "Coffre_Couvercle");
+            lid.glowAnchor = glowAnchor;
+            lid.chest = controller;
 
             // Panneau des chances : un tableau encadré de bois, accroché au mur derrière le coffre (comme la caisse)
             float chestAngle = AngleOf(pos);
@@ -974,7 +994,7 @@ namespace SAE.EditorTools
             oddsPanel.text = oddsText;
 
             // Le prix, sur une petite pancarte plantée devant l'estrade (doré si on peut payer) : il ne flotte plus en l'air.
-            // Devant l'estrade et pas dessus : le coffre tourne vers le joueur et l'aurait cognée.
+            // Devant l'estrade et pas dessus : le couvercle s'ouvre et le singe sort par là.
             var sign = new GameObject("Pancarte du prix").transform;
             sign.SetParent(env, false);
             sign.SetPositionAndRotation(Around(chestAngle, pos.magnitude - 0.55f), Quaternion.Euler(0, chestAngle, 0));

@@ -2,6 +2,31 @@
 
 _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (orthographe, clarté, structure : contexte, objectif, contraintes). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/maxens.md)._
 
+## Mer. 7 oct. 2026
+
+### Roulette, sortie du singe et contenu du coffre
+> Plusieurs corrections :
+> - la roulette ne montre qu'un type de singe (le Classique, à plusieurs niveaux) : il faut voir tous les types (Canon, Tireur…) ;
+> - au début, la roulette doit défiler très vite, avec beaucoup de modèles, puis ralentir ;
+> - quand le singe est choisi, la barre disparaît ; le singe sort du milieu du coffre, monte, tourne et grossit, puis part dans la bibliothèque ;
+> - à l'ouverture, le texte « Toucher pour ouvrir » doit disparaître ;
+> - dans le coffre, remplace les régimes par les bananes qui tombent du bananier, et ajoute par exemple des feuilles.
+
+### Garnir le coffre et inciter à l'ouvrir
+> Mets quelque chose dans le coffre, par exemple des bananes. Et quand le joueur a assez d'argent, le coffre devrait bouger un peu pour l'inciter à l'ouvrir.
+
+### Un seul singe par coffre
+> Ce n'était pas la règle prévue : un coffre donne un seul singe. Ce qui doit augmenter avec les vagues, ce sont seulement les chances d'obtenir un singe de rareté supérieure dans la roulette.
+
+### Corrections du coffre
+> Le coffre est trop petit, on le voit à peine. Il donne l'impression d'être fermé et ouvert en même temps. Et trois singes en sortent au lieu d'un.
+
+### Roulette des singes et ouverture du coffre
+> Restons sur la branche du coffre. Dans la roulette, je veux voir les singes avec leur aura à la place des carrés de couleur. Le coffre ne doit plus bouger dans la scène ; quand on appuie pour l'ouvrir, il fait un petit « boing », s'ouvre et dégage une petite aura dorée. Dis-moi ce que tu en penses.
+
+### Un coffre dans le style de la cabane
+> Récupère le `main` à jour. Ce matin, je m'occupe du coffre (changer l'asset, améliorer l'animation, voir les singes en sortir) puis des assets des ballons MOAB. On commence par le coffre : l'asset actuel ne correspond pas à la direction artistique du reste (la cabane). Refais-en un propre ; on verra l'animation et le reste ensuite.
+
 ## Mar. 6 oct. 2026
 
 ### Mise à jour finale
