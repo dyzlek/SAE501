@@ -25,7 +25,7 @@ namespace SAE
             body = GetComponent<CharacterController>();
         }
 
-        // Chaque scène a son joueur : celui qui s'allume (on arrive dans son niveau) devient le joueur actif
+        // Le joueur actif (VR ou PC, selon PlayerMode)
         void OnEnable()
         {
             Local = this;

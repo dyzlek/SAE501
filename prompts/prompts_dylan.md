@@ -4,6 +4,18 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
+### Critiques de fin de journée et envoi sur main
+> Pousse sur `main`, et ajoute la critique de Maxens et la mienne (listes de remarques de fin de journée).
+>
+> Suite : crée les issues GitHub de toutes ces remarques, et fais le reste.
+
+### Téléportation sur la carte
+> Il y a des bugs de téléportation, surtout sur la carte (là où il y a l'arc) : je ne peux pas me téléporter n'importe où, ce qui n'est pas cool. Corrige-les.
+>
+> Suite : je pense qu'il y a vraiment un bug : en bas, il y a l'indicateur pour se téléporter à un endroit, mais quand je lâche, on ne se téléporte pas.
+>
+> Suite : vraiment tout est buggé en VR (par exemple quand on tourne), patche tout, et corrige aussi ce qui ne va pas dans les menus SAE.
+
 ### Mes captures et tout sur main
 > Mets mes captures dans mon journal et pousse tout sur `main`.
 

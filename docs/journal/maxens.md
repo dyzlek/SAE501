@@ -3,6 +3,21 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Mer. 7 oct. 2026
+**Ma critique après la fusion** _(transmise à Dylan, mise en forme par l'IA ; issues #50 à #64)_
+1. Un bouton assis / debout, ce serait sympa.
+2. Quand on s'apprête à poser un singe, enlever son nom.
+3. Une petite explication des touches (dont l'ajout des informations d'un singe en VR).
+4. Enlever le saut en VR (inutile, on se téléporte).
+5. Plus de bananes dans le coffre.
+6. Améliorer le visuel de la fusion de deux singes : on voit un cercle rouge (on ne peut pas superposer, donc pas poser par-dessus), alors qu'on veut fusionner.
+7. Améliorer certains objets et développer le décor global.
+8. Sur la carte en taille réelle, les textes sont toujours au-dessus des singes.
+9. On peut spammer avec l'arc : le rendre plus réaliste.
+10. Améliorer et développer le décor extérieur (meilleures montagnes, champignons, etc.).
+11. Améliorer la plateforme d'arrivée quand on se téléporte : elle est vide.
+12. Rendre l'argent plus compréhensible (combien ça coûte, etc.).
+13. Savoir combien de bananes on a quand on se téléporte.
+
 - **À faire ce matin :** (1) le coffre : changer l'asset, améliorer l'animation, voir les singes en sortir ; (2) mettre les assets des ballons MOAB.
 - **Fait : un nouveau coffre dans le style de la cabane** (branche `feat/coffre-maxens`, partie du `main` à jour avec la PR #9). L'ancien coffre téléchargé (`chest_cartoon_animations.glb`) ne collait pas à la direction artistique de la cabane.
   - modélisé par un script Blender, `Blender/coffre.py`, qui **reprend les textures et l'outil de `cabane.py`** (même bois à veines, même fer) : planches teintées une par une, montants de coin en bois sombre, deux bandes de fer avec rivets dorés, serrure dorée devant, poignées sur les côtés, couvercle bombé en lattes ;

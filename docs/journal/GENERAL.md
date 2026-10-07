@@ -26,6 +26,7 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 | 2026-10-07 | **Pas de texte qui flotte** : tout est écrit sur un support du décor (ardoise, enseigne, plaque, pancarte), avec deux polices (Bangers pour les titres, Oswald pour lire) | Critiques : texte « dans le vide » moche, textes trop simples |
 | 2026-10-07 | **Deux vraies scènes, avec un vrai changement de scène** : `Hub.unity` (cabane, scène de départ) et `Labyrinthe.unity` (carte, vagues, arc). SE TP charge le labyrinthe, HUB recharge le hub (`SceneManager.LoadScene`) ; chaque scène a son joueur. Ce qui doit rester (argent, inventaire, singes posés, vagues gagnées, améliorations du bananier et des récolteurs) est gardé en static. Conséquences : le plateau du hub montre les singes posés mais plus les ballons en direct ; on ne quitte pas la carte pendant une vague (HUB grisé) ; LANCER au hub emmène sur la carte et lance la vague. `Jeu.unity` est supprimée | Séparer vraiment les deux niveaux, comme dans le cours (Dylan) |
 | 2026-10-07 | **Les deux scènes restent chargées** : on peut revenir au hub pendant une vague, elle continue (et les bananes tombent pendant qu'on défend). Changer de niveau allume la présence (joueur, soleil, réglages d'image) de la scène d'arrivée et éteint l'autre ; le plateau du hub montre la vague en direct | Demande de Dylan : aller chercher des bananes en pleine vague, comme dans Bloons |
+| 2026-10-07 | **Un seul joueur**, dans la scène Hub, déplacé d'une scène à l'autre (plus un joueur par scène) ; l'arc ne sort que sur la carte. On lance toujours le jeu depuis Hub | XRI ne gère bien qu'un joueur VR : avec deux, rotation, rayon, prise et téléportation buguaient (issues #48, #49) |
 | 2026-10-07 | Dans le hub, on ne se téléporte plus que **dans un disque de 1,9 m au centre** de la cabane, devant les meubles | Plus de téléportation dans un meuble, contre un mur ou dehors (Dylan) |
 | 2026-10-07 | **Lumière** : pas de faux rayons dessinés ; vraie lumière du soleil et ombres, poussières dans le soleil, réglages de l'image (`Art/Lumiere.asset`), halo (Bloom) coupé sur le casque | Plus réaliste, et rien de coûteux pour le Quest (Dylan) |
 | 2026-10-07 | **Suivi de projet sur GitHub** : une issue par tâche (responsable, label `prio:` = périmètre du GDD), un jalon par semaine (S1/S2/S3), tableau [Project](https://github.com/users/dyzlek/projects/2) À faire / En cours / En relecture / Fait, PR avec `Ferme #N`. Mode d'emploi : [ORGANISATION.md](../ORGANISATION.md) | Outil de suivi demandé (note de gestion de projet) ; tout au même endroit que le code (Dylan) |
@@ -37,7 +38,7 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 - [ ] Ven. 13 nov. — rendu + oral
 
 ## Semaine 1 · 5-9 oct. — PROUVER
-**Jeu. 8 oct. — à faire**
+**Jeu. 8 oct. — à faire** _(plus les critiques de fin de journée de [Dylan](dylan.md) et [Maxens](maxens.md) : 32 points, devenus les issues #50 à #81 sur le tableau)_
 | Tâche | Qui |
 |---|---|
 | Tester `fix-all` (régénérer la scène, mode PC puis casque : LANCER et bouton B, coffre, comptoirs, fiche du singe), puis Pull Request vers `main` | Dylan, relu par un autre |
