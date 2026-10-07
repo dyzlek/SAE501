@@ -63,6 +63,8 @@ namespace SAE
             transform.localRotation = restRotation;
         }
 
+        public bool IsOpen => isOpen;
+
         public void Open()
         {
             isOpen = true;

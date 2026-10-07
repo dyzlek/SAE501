@@ -12,7 +12,8 @@ namespace SAE
         void Update()
         {
             if (!chest || !label) return;
-            label.text = chest.IsBusy ? "" : $"COFFRE\n{chest.Price}";
+            var lid = chest.GetComponent<ChestLid>();
+            label.text = chest.IsBusy || (lid && lid.IsOpen) ? "" : $"COFFRE\n{chest.Price}";
             label.color = Economy.CanAfford(chest.Price) ? new Color(1f, 0.82f, 0.2f) : new Color(0.6f, 0.6f, 0.6f);
         }
     }

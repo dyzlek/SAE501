@@ -24,6 +24,8 @@ namespace SAE.EditorTools
         const float BoardTile = 0.2f;    // plateau de 1,6 m : l'élément principal du hub
         const float HandHeight = 0.9f;   // table des bananes et socle du panier : à hauteur de main, pas au sol
         const int IgnoreRaycast = 2;     // couche Unity « Ignore Raycast »
+        const float ChestFloor = 0.3f;         // hauteur du double fond du coffre (FLOOR_Y dans Blender/coffre.py)
+        const float ChestBananaScale = 0.8f;   // les bananes du bananier, un peu plus petites dans le coffre
         const float DesktopBowScale = 0.5f;   // en mode PC, l'arc est collé à la caméra : plus petit
         static readonly Vector3 HandOffset = new Vector3(0f, -0.01f, -0.06f);   // la paume, un peu derrière l'avant de la manette
         static readonly Vector3 BowInHand = new Vector3(0.07f, 0f, 0.02f);      // la poignée de l'arc, sur le côté intérieur de la main : la flèche passe à côté
@@ -805,12 +807,21 @@ namespace SAE.EditorTools
             var glowAnchor = new GameObject("Centre (aura)").transform;
             glowAnchor.SetParent(chest.transform, false);
             glowAnchor.position = chestBounds.center;
-            // Un trésor dedans : des régimes de bananes au fond de la caisse (on les voit quand le couvercle s'ouvre)
-            for (int i = -1; i <= 1; i++)
+            // Un trésor dedans : les bananes du bananier, posées sur le lit de feuilles du double fond (Blender/coffre.py)
+            var bananaModel = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Art/Bananier/FBX/Bananes_Collectible.fbx");
+            if (bananaModel)
             {
-                var spot = chestBounds.center + chest.transform.right * (i * 0.27f) + chest.transform.forward * (i == 0 ? 0.05f : -0.06f);
-                spot.y = chestBounds.min.y + 0.07f;
-                Prop(chest.transform, "Regime", spot, chest.transform.eulerAngles.y + 40f * i + 15f, 1.4f);
+                var spots = new[] { new Vector3(-0.32f, 0f, 0.05f), new Vector3(-0.1f, 0f, -0.08f), new Vector3(0.12f, 0f, 0.08f), new Vector3(0.33f, 0f, -0.05f) };
+                for (int i = 0; i < spots.Length; i++)
+                {
+                    var banana = (GameObject)PrefabUtility.InstantiatePrefab(bananaModel);
+                    banana.name = "Bananes du coffre";
+                    banana.transform.SetParent(chest.transform, false);
+                    banana.transform.localScale = Vector3.one * ChestBananaScale;
+                    var spot = chestBounds.center + chest.transform.right * spots[i].x + chest.transform.forward * spots[i].z;
+                    spot.y = chestBounds.min.y + ChestFloor + ChestBananaScale * 0.12f;
+                    banana.transform.SetPositionAndRotation(spot, Quaternion.Euler(80f, chest.transform.eulerAngles.y + 50f * i + 20f, 0f));   // couchées sur les feuilles
+                }
             }
             var lid = chest.AddComponent<ChestLid>();
             lid.lid = chest.GetComponentsInChildren<Transform>(true).First(t => t.name == "Coffre_Couvercle");

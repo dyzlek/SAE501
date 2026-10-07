@@ -12,8 +12,9 @@ namespace SAE
     {
         public ChestController chest;
         public MonkeyOddsSettings typeOdds = new MonkeyOddsSettings();
-        public float pieceSize = 0.3f;
-        public float riseHeight = 0.8f;
+        public float pieceSize = 0.45f;    // taille du singe une fois sorti (il part de 30 % de cette taille), en mètres
+        public float riseHeight = 1.0f;
+        public float riseTime = 1.0f;
         public float hoverTime = 1f;
         public float flyTime = 1.2f;
 
@@ -43,19 +44,23 @@ namespace SAE
         {
             yield return new WaitForSeconds(delay);
 
-            // Sortie du coffre : le singe monte en tournant, un peu décalé s'il y en a plusieurs
-            var start = chest.transform.position + Vector3.up * 0.4f;
-            var top = start + Vector3.up * riseHeight + chest.transform.right * (index % 3 - 1) * 0.4f;
-            var piece = Visuals.MonkeyPiece(monkey, null, start, pieceSize);
+            // Sortie du coffre : le singe part du milieu de la caisse, petit, puis monte en tournant et en grossissant
+            var lid = chest.GetComponent<ChestLid>();
+            var start = lid && lid.glowAnchor ? lid.glowAnchor.position : chest.transform.position + Vector3.up * 0.4f;
+            var top = start + Vector3.up * riseHeight;
+            var piece = Visuals.MonkeyPiece(monkey, null, start, pieceSize, withLabel: false);
             piece.name = $"Récompense {monkey}";
             piece.transform.position = start;
 
-            for (float t = 0; t < 1f; t += Time.deltaTime / 0.6f)
+            for (float t = 0; t < 1f; t += Time.deltaTime / riseTime)
             {
-                piece.transform.position = Vector3.Lerp(start, top, 1f - (1f - t) * (1f - t));
-                piece.transform.Rotate(0, 360f * Time.deltaTime, 0);
+                float k = 1f - (1f - t) * (1f - t);   // part vite, ralentit en haut
+                piece.transform.position = Vector3.Lerp(start, top, k);
+                piece.transform.localScale = Vector3.one * Mathf.Lerp(0.3f, 1f, k);
+                piece.transform.Rotate(0, 540f * (1f - k * 0.6f) * Time.deltaTime, 0);
                 yield return null;
             }
+            piece.transform.localScale = Vector3.one;
             for (float t = 0; t < hoverTime; t += Time.deltaTime)
             {
                 piece.transform.position = top + Vector3.up * 0.05f * Mathf.Sin(t * 6f);

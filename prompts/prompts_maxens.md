@@ -4,6 +4,14 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mer. 7 oct. 2026
 
+### Roulette, sortie du singe et contenu du coffre
+> Plusieurs corrections :
+> - la roulette ne montre qu'un type de singe (le Classique, à plusieurs niveaux) : il faut voir tous les types (Canon, Tireur…) ;
+> - au début, la roulette doit défiler très vite, avec beaucoup de modèles, puis ralentir ;
+> - quand le singe est choisi, la barre disparaît ; le singe sort du milieu du coffre, monte, tourne et grossit, puis part dans la bibliothèque ;
+> - à l'ouverture, le texte « Toucher pour ouvrir » doit disparaître ;
+> - dans le coffre, remplace les régimes par les bananes qui tombent du bananier, et ajoute par exemple des feuilles.
+
 ### Garnir le coffre et inciter à l'ouvrir
 > Mets quelque chose dans le coffre, par exemple des bananes. Et quand le joueur a assez d'argent, le coffre devrait bouger un peu pour l'inciter à l'ouvrir.
 

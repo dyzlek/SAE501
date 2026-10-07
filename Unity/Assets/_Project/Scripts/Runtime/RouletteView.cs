@@ -18,14 +18,16 @@ namespace Sae501.Coffres
         public float gap = 10f;
 
         [Header("Bande")]
-        public int itemCount = 48;
-        public int winnerIndex = 40;   // case sur laquelle la roulette s'arrête
+        public int itemCount = 100;
+        public int winnerIndex = 92;   // case sur laquelle la roulette s'arrête (loin : ça défile très vite au début)
         public int startIndex = 3;     // case centrée au départ
 
         GameObject canvasRoot;
         RectTransform strip;
         Image[] items;
-        GameObject[] pieces;           // le singe 3D de chaque case
+        GameObject[] pieces;           // le singe 3D de chaque case (créé seulement quand la case passe dans la fenêtre)
+        SAE.Monkey[] monkeys;          // le singe de chaque case
+        Image bar;
         RectTransform viewportRt;
         Text message;
         Sprite rainbow;
@@ -63,6 +65,7 @@ namespace Sae501.Coffres
             rainbow = MakeRainbowSprite();
             items = new Image[itemCount];
             pieces = new GameObject[itemCount];
+            monkeys = new SAE.Monkey[itemCount];
             for (int i = 0; i < itemCount; i++)
             {
                 var item = MakeImage(strip, "Case " + i, Color.gray, Vector2.zero, new Vector2(itemWidth, itemHeight));
@@ -74,7 +77,7 @@ namespace Sae501.Coffres
             }
 
             // Barre centrale (au-dessus de la bande).
-            MakeImage(canvasRt, "Barre", new Color(1f, 0.95f, 0.3f, 1f), new Vector2(0f, 50f), new Vector2(8f, itemHeight + 50f));
+            bar = MakeImage(canvasRt, "Barre", new Color(1f, 0.95f, 0.3f, 1f), new Vector2(0f, 50f), new Vector2(8f, itemHeight + 50f));
 
             message = MakeText(canvasRt, "Message", 44, new Vector2(0f, -100f), new Vector2(1060f, 70f));
             message.text = "";
@@ -100,6 +103,7 @@ namespace Sae501.Coffres
         public IEnumerator Spin(Rarity winner, float[] odds, float duration, int winnerType = 0, System.Func<int> rollType = null)
         {
             ShowMessage("", Color.white);
+            bar.enabled = true;
             Fill(winner, odds, winnerType, rollType);
 
             float from = CenteredX(startIndex, 0f);
@@ -114,6 +118,7 @@ namespace Sae501.Coffres
                 yield return null;
             }
             SetStripX(to);
+            bar.enabled = false;   // le singe est choisi : la barre s'en va, il va sortir du coffre
         }
 
         // ---------- Interne ----------
@@ -128,16 +133,19 @@ namespace Sae501.Coffres
             ShowVisiblePieces();
         }
 
-        // Seuls les singes dans la fenêtre sont actifs (le masque de l'interface ne cache pas les objets 3D).
+        // Seuls les singes dans la fenêtre existent : on les crée quand leur case y entre et on les détruit quand
+        // elle en sort (le masque de l'interface ne cache pas les objets 3D, et 100 singes avec leur aura,
+        // ce serait trop lourd pour le casque).
         void ShowVisiblePieces()
         {
-            if (pieces == null) return;
+            if (pieces == null || monkeys == null) return;
             float half = viewportWidth * 0.5f;
             for (int i = 0; i < pieces.Length; i++)
             {
-                if (!pieces[i]) continue;
                 float center = strip.anchoredPosition.x + i * Pitch + itemWidth * 0.5f - half;   // position dans la fenêtre
-                pieces[i].SetActive(Mathf.Abs(center) < half - itemWidth * 0.4f);
+                bool visible = Mathf.Abs(center) < half - itemWidth * 0.4f;
+                if (visible && !pieces[i]) PlacePiece(i);
+                else if (!visible && pieces[i]) { Destroy(pieces[i]); pieces[i] = null; }
             }
         }
 
@@ -148,9 +156,12 @@ namespace Sae501.Coffres
             {
                 bool win = i == winnerIndex;
                 var r = win ? winner : ChestOdds.Roll(odds);
-                int type = win ? winnerType : (rollType != null ? rollType() : Random.Range(0, SAE.MonkeyData.TypeCount));
+                // Les autres cases montrent TOUS les types de singes (pour le spectacle) ; seule la case gagnante
+                // est le vrai tirage (rollType), qui suit les types débloqués par les vagues
+                int type = win ? winnerType : Random.Range(0, SAE.MonkeyData.TypeCount);
                 Paint(items[i], r);
-                PlacePiece(i, r, type);
+                monkeys[i] = new SAE.Monkey((SAE.MonkeyType)type, (SAE.Rarity)(int)r);   // mêmes raretés de Gris à LGBT/Arc-en-ciel
+                if (pieces[i]) { Destroy(pieces[i]); pieces[i] = null; }
             }
             ShowVisiblePieces();
         }
@@ -163,12 +174,10 @@ namespace Sae501.Coffres
         }
 
         // Le singe 3D de la case, devant le fond (côté joueur : -Z), en unités de canvas (pixels).
-        void PlacePiece(int i, Rarity r, int type)
+        void PlacePiece(int i)
         {
-            if (pieces[i]) Destroy(pieces[i]);
-            var monkey = new SAE.Monkey((SAE.MonkeyType)type, (SAE.Rarity)(int)r);   // mêmes raretés de Gris à LGBT/Arc-en-ciel
             float size = itemHeight * 0.7f;
-            pieces[i] = SAE.Visuals.MonkeyPiece(monkey, items[i].rectTransform, new Vector3(itemWidth * 0.5f, 0f, -size * 0.6f), size, withLabel: false);
+            pieces[i] = SAE.Visuals.MonkeyPiece(monkeys[i], items[i].rectTransform, new Vector3(itemWidth * 0.5f, 0f, -size * 0.6f), size, withLabel: false);
         }
 
         static Image MakeImage(RectTransform parent, string name, Color color, Vector2 pos, Vector2 size)

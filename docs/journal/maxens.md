@@ -35,16 +35,28 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
   ![Coffre plus grand, creux, ouvert avec son aura dorée](../captures/maxens-coffre-v2-ouvert.png)
 
 - **Fait : un trésor dans le coffre et un coffre qui appelle le joueur** :
-  - **3 régimes de bananes** au fond de la caisse (le modèle `Regime` de la cabane), qu'on découvre quand le couvercle s'ouvre ;
+  - ~~3 régimes de bananes~~ remplacés ensuite (voir plus bas) par les bananes du bananier sur un lit de feuilles ;
   - **quand on a assez d'argent pour l'ouvrir**, le coffre **se trémousse** toutes les 2,5 s (il se balance de gauche à droite, de moins en moins, jusqu'à 4°), pour inviter le joueur à l'ouvrir. Il s'arrête quand il est ouvert ou si on n'a plus assez d'argent (`ChestLid`).
   - Testé en Play : le coffre penche bien pendant l'appel (3,5° mesurés), et les bananes sont visibles une fois ouvert.
 
-  ![Coffre ouvert : les régimes de bananes au fond](../captures/maxens-coffre-bananes.png)
+- **Corrigé après mon test (roulette, sortie du singe, textes, trésor)** :
+  - **la roulette ne montrait que le singe de base** : les autres cases montrent maintenant **tous les types** (Canon, Tireur, Glace, Sniper…), pour le spectacle. La case gagnante reste le vrai tirage, qui suit la règle de Dylan : les types se débloquent avec les vagues (au début, on gagne seulement des Classiques) ;
+  - **ça défile très vite au début** puis ralentit : 100 cases au lieu de 48 sur la même durée. Pour le casque, seuls les singes visibles dans la fenêtre existent (créés quand leur case entre, détruits quand elle sort) ;
+  - **quand le singe est choisi, la barre jaune s'en va** ;
+  - **le singe sort du milieu du coffre** : il part petit (30 %), monte d'1 m en tournant et en grossissant, flotte, puis vole jusqu'à sa case de la bibliothèque (plus de texte « CL1 » au-dessus) ;
+  - **plus de texte quand le coffre est ouvert** : « [Touche] Ouvrir le coffre » et le prix disparaissent tant qu'il est ouvert ;
+  - **le trésor** : les **bananes du bananier** (celles qui tombent de l'arbre) posées sur un **lit de feuilles de bananier**, sur un double fond assez haut pour être bien vu (feuilles ajoutées dans `Blender/coffre.py`, bananes posées par le générateur). Les régimes de la cabane sont retirés.
+  - Testé en Play : défilement de tous les types, barre qui disparaît, singe gagné qui sort du coffre en grossissant, consigne cachée. Aucune erreur.
+
+  ![La roulette fait défiler tous les types ; le coffre ouvert montre les bananes sur les feuilles](../captures/maxens-coffre-roulette-tous-types.png)
+
+  ![Singe choisi : la barre est partie, il sort du milieu du coffre en grossissant](../captures/maxens-coffre-singe-sort.png)
 
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
-| Claude (Code) | Régimes de bananes dans le coffre, coffre qui se trémousse quand on peut l'ouvrir ; testé en Play | À tester au casque |
+| Claude (Code) | Roulette avec tous les types et très rapide au début, barre qui disparaît, singe qui sort du coffre en tournant et grossissant, textes cachés à l'ouverture, bananes du bananier sur des feuilles ; testé en Play | À tester au casque |
+| Claude (Code) | Régimes de bananes dans le coffre, coffre qui se trémousse quand on peut l'ouvrir ; testé en Play | Trémoussement gardé, régimes jetés (remplacés par les bananes du bananier) |
 | Claude (Code) | Coffre agrandi (1,1 m) et creusé (on voit l'intérieur à l'ouverture), cerclages de fer à l'extérieur ; un seul singe par coffre (seules les chances de rareté montent avec les vagues) | À tester au casque |
 | Claude (Code) | Nouveau coffre branché dans la scène (fixe), ouverture boing + couvercle + aura dorée (`ChestLid`), roulette avec les vrais singes et leur aura, type du singe tiré avant la roulette ; testé en Play | À tester au casque |
 | Claude (Code) | Nouveau coffre modélisé par script Blender (`coffre.py`) dans le style de la cabane, couvercle séparé sur sa charnière, rendus d'aperçu | À valider |

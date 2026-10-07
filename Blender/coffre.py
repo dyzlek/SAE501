@@ -23,6 +23,7 @@ OUT_CHEST = os.path.join(ROOT, "Unity", "Assets", "_Project", "Art", "Coffre")
 W, D, H = 1.1, 0.68, 0.5          # caisse : largeur (X), profondeur (Z), hauteur (Y)
 LID_H = 0.22                      # hauteur du bombé du couvercle
 PLANK = 0.125                      # hauteur d'une planche
+FLOOR_Y = 0.3                     # hauteur du double fond (le trésor posé dessus)
 BAND = 0.045                      # largeur d'une bande de fer
 I3 = Matrix.Identity(3)
 
@@ -60,8 +61,37 @@ def arc_strip(b, x0, x1, inflate, mat, steps, tints=None, y0=0.0):
     return faces
 
 
+def leaf(b, mat, center, yaw_deg, length, width=0.17, segs=8):
+    """Feuille de bananier posée à plat : une longue lame qui s'élargit au milieu, les bouts un peu relevés,
+    pliée le long de sa nervure. center et yaw en mesures Unity (Y en haut)."""
+    a = math.radians(yaw_deg)
+    along = (math.cos(a), math.sin(a))          # direction de la feuille dans le plan (x, z)
+    side = (-along[1], along[0])
+    rows = []
+    for i in range(segs + 1):
+        t = i / segs
+        d = (t - 0.5) * length
+        half = width / 2 * math.sin(math.pi * min(max(t, 0.04), 0.96)) ** 0.7
+        lift = 0.06 * (2 * t - 1) ** 2            # les deux bouts remontent
+        row = []
+        for sv, drop in ((-1, 0.012), (0, 0.0), (1, 0.012)):   # bords un peu plus bas que la nervure
+            x = center[0] + along[0] * d + side[0] * half * sv
+            z = center[2] + along[1] * d + side[1] * half * sv
+            row.append(U(x, center[1] + lift - drop * abs(sv) + 0.012, z))
+        rows.append(row)
+    mi = b.mi(mat)
+    for i in range(segs):
+        for j in range(2):
+            vs = [rows[i][j], rows[i][j + 1], rows[i + 1][j + 1], rows[i + 1][j]]
+            f = b.face(vs, [(j * 0.5, i / segs), ((j + 1) * 0.5, i / segs), ((j + 1) * 0.5, (i + 1) / segs), (j * 0.5, (i + 1) / segs)], mat)
+            f.material_index = mi
+            f.normal_update()
+            if f.normal.z < 0:                    # face visible vers le haut (une seule face dessinée : palme est double face)
+                f.normal_flip()
+
+
 def build_body(M, coll):
-    b = Builder([M["caisse"], M["poutre"], M["fer"], M["or"]])
+    b = Builder([M["caisse"], M["poutre"], M["fer"], M["or"], M["palme"]])
     # Caisse CREUSE (on voit dedans quand le couvercle s'ouvre) : 4 parois en planches horizontales,
     # chacune un peu teintée différemment (comme les rondins), et un fond sombre à l'intérieur
     rows = int(round(H / PLANK))
@@ -75,7 +105,12 @@ def build_body(M, coll):
             box(b, (0, y, sz * (D / 2 - T / 2)), (W, h, T), M["caisse"], **kw)            # avant et arrière
         for sx in (-1, 1):
             box(b, (sx * (W / 2 - T / 2), y, 0), (T, h, D - 2 * T), M["caisse"], **kw)    # côtés
-    box(b, (0, 0.03, 0), (W - 2 * T, 0.03, D - 2 * T), M["poutre"], tint=0.35)          # fond, dans l'ombre
+    # Double fond assez haut (FLOOR_Y) : le trésor est bien visible quand le couvercle s'ouvre
+    box(b, (0, FLOOR_Y - 0.015, 0), (W - 2 * T, 0.03, D - 2 * T), M["poutre"], tint=0.35)
+    # Un lit de feuilles de bananier sur le fond (les bananes, elles, sont posées par Unity)
+    for k, (x, z, yaw, length) in enumerate(((-0.24, 0.06, 12, 0.5), (0.24, -0.07, 172, 0.52), (0.0, 0.0, 0, 0.6),
+                                             (0.3, 0.08, 25, 0.38), (-0.3, -0.1, 160, 0.38))):
+        leaf(b, M["palme"], (x, FLOOR_Y + 0.004 * k, z), yaw, length)
     # Montants de coin en bois sombre
     for sx in (-1, 1):
         for sz in (-1, 1):
