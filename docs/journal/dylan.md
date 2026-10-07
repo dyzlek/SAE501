@@ -87,6 +87,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 | Claude (Claude Code) | Journal général : bilan du 7 oct. et plan du 8 oct. (tâches données par l'équipe) | Gardé |
 | Claude (Claude Code) | `main` fusionné dans `fix-all` (sans conflit), branche poussée, Pull Request [#11](https://github.com/dyzlek/SAE501/pull/11) vers `main` ouverte (à relire et fusionner sur GitHub ; pas encore testée dans Unity) | Gardé |
 | Claude (Claude Code) | Mise en forme de l'analyse critique de Nicolas (qu'il m'a transmise) dans son journal, avec ses 2 photos ; rien de corrigé pour l'instant | Gardé |
+| Claude (Claude Code) | Suivi de projet sur GitHub (branche `docs/organisation-github`, sans toucher au projet Unity) : 17 labels (priorité = périmètre du GDD, type, zone), 3 jalons S1/S2/S3 avec leurs dates, 33 issues tirées du journal général et du GDD (#12 à #44) avec responsables, tableau [Project](https://github.com/users/dyzlek/projects/2) (À faire / En cours / En relecture / Fait, dates, taille) avec les PR déjà fusionnées, modèles d'issue et de PR, `docs/ORGANISATION.md` | Gardé |
 
 ## Mar. 6 oct. 2026
 - **Fait :**

@@ -24,6 +24,7 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 | 2026-10-05 | Git : `main` stable + une branche par tâche + PR relue | Éviter de casser le build commun |
 | 2026-10-07 | **Récolteur** : jusqu'à 4 singes (on en rachète tant que l'équipe n'est pas complète), améliorations communes à l'équipe ; un bouton d'amélioration **disparaît au niveau max** (récolteur et bananier) | Critiques de Dylan et Maxens : un meuble plein de boutons inutiles en fin de partie, et un seul singe, c'est vite limité |
 | 2026-10-07 | **Pas de texte qui flotte** : tout est écrit sur un support du décor (ardoise, enseigne, plaque, pancarte), avec deux polices (Bangers pour les titres, Oswald pour lire) | Critiques : texte « dans le vide » moche, textes trop simples |
+| 2026-10-07 | **Suivi de projet sur GitHub** : une issue par tâche (responsable, label `prio:` = périmètre du GDD), un jalon par semaine (S1/S2/S3), tableau [Project](https://github.com/users/dyzlek/projects/2) À faire / En cours / En relecture / Fait, PR avec `Ferme #N`. Mode d'emploi : [ORGANISATION.md](../ORGANISATION.md) | Outil de suivi demandé (note de gestion de projet) ; tout au même endroit que le code (Dylan) |
 | _à trancher_ | Nom du jeu · assets Bloons ou maison · périmètre définitif | Avant le GDD v1 (ven. 9 oct.) |
 
 ## Jalons
