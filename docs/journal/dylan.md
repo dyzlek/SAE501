@@ -83,6 +83,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 | Claude (Claude Code) | 3e passe : « +0 » supprimé (MoneyBoard ignore un montant nul), plaques des boutons lisibles (bois foncé, texte doré plus grand), texte des ardoises agrandi | À tester (compilé, scène à régénérer) |
 | Claude (Claude Code) | Critique de Nicolas, 1re partie : fiche du singe restylée et dessinée par-dessus le décor (shader « SAE/Texte 3D » avec ZTest réglable), rondins coupés autour des fenêtres dans `cabane.py` (cabane réexportée), caméras 3 cm à 400 m, `FallGuard` (retour au point d'arrivée le plus proche après une chute) | À tester (compilé, scène à régénérer) |
 | Claude (Claude Code) | Fusion de `feat/coffre-maxens` (nouveau coffre de Maxens) dans `fix-all` : conflits résolus en gardant les deux (générateur : son coffre fixe + mes comptoirs ; pancarte du prix : « COFFRE » pendant l'ouverture ; journal de Maxens : ses deux entrées) ; coffre décalé à 97° (son estrade fait 1,4 m) | À tester |
+| Claude (Claude Code) | LANCER qui ne faisait rien au casque (build) : cause non trouvée sans casque (le lien vers les vagues est bien dans la scène). Ajouts : LANCER devient gris pendant une vague (on voit si elle est partie), il retrouve les vagues tout seul si le lien manque, et le bouton B de la manette droite lance la vague de partout | À tester au casque |
 | Claude (Claude Code) | Mise en forme de l'analyse critique de Nicolas (qu'il m'a transmise) dans son journal, avec ses 2 photos ; rien de corrigé pour l'instant | Gardé |
 
 ## Mar. 6 oct. 2026

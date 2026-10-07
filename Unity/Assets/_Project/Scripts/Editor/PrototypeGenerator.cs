@@ -80,6 +80,7 @@ namespace SAE.EditorTools
             UseWoodTexture(hub);   // encore une fois : l'estrade et le cadre du coffre sont posés après le reste du hub
             var pcPlayer = DesktopPlayerObject(hubSpawn.position, mapSpawn);
             AddFallGuard(player.gameObject, hubSpawn, mapSpawn);
+            player.gameObject.AddComponent<WaveShortcut>().spawner = spawner;   // B (manette droite) : lancer la vague
             AddFallGuard(pcPlayer, hubSpawn, mapSpawn);
             BuildPlayerMode(player.gameObject, pcPlayer);
 
