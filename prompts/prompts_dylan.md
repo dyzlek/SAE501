@@ -6,6 +6,8 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ### Téléportation sur la carte
 > Il y a des bugs de téléportation, surtout sur la carte (là où il y a l'arc) : je ne peux pas me téléporter n'importe où, ce qui n'est pas cool. Corrige-les.
+>
+> Suite : je pense qu'il y a vraiment un bug : en bas, il y a l'indicateur pour se téléporter à un endroit, mais quand je lâche, on ne se téléporte pas.
 
 ### Mes captures et tout sur main
 > Mets mes captures dans mon journal et pousse tout sur `main`.

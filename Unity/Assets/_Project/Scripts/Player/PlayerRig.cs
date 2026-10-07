@@ -1,6 +1,7 @@
 using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit.Inputs.Haptics;
+using UnityEngine.XR.Interaction.Toolkit.Locomotion.Teleportation;
 
 namespace SAE
 {
@@ -29,6 +30,7 @@ namespace SAE
         void OnEnable()
         {
             Local = this;
+            UseMyTeleporter();
             // Le texte du coffre (« [Touche] Ouvrir… ») suit le joueur actif
             foreach (var prompt in FindObjectsByType<Sae501.Coffres.ChestPrompt>()) prompt.player = head;
         }
@@ -56,6 +58,18 @@ namespace SAE
                 foreach (var body in player.GetComponentsInChildren<CharacterController>())
                     foreach (var c in held.GetComponentsInChildren<Collider>())
                         Physics.IgnoreCollision(c, body);
+        }
+
+        // Les zones de téléportation (sol du hub, prairie et cases de la carte) envoient la téléportation à un
+        // « téléporteur » (TeleportationProvider). XRI garde en mémoire le premier trouvé, celui du joueur du hub :
+        // sur la carte, la cible s'affichait mais rien ne se passait au relâchement (ce joueur-là est éteint).
+        // Le joueur qui s'allume branche donc toutes les zones des deux scènes sur son propre téléporteur.
+        void UseMyTeleporter()
+        {
+            var mine = GetComponentInChildren<TeleportationProvider>();
+            if (!mine) return;   // mode PC : on marche, pas de téléportation
+            foreach (var area in FindObjectsByType<BaseTeleportationInteractable>(FindObjectsInactive.Include))
+                area.teleportationProvider = mine;
         }
 
         // Petite vibration dans la manette qui contient 'hand' : le retour « c'est fait » de chaque action.
