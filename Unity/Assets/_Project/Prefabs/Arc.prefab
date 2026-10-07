@@ -54,6 +54,7 @@ MonoBehaviour:
   minSpeed: 8
   maxSpeed: 30
   limbBend: 12
+  aim: {fileID: 0}
 --- !u!1001 &289408674325846444
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -97,8 +97,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89119fd0ed655584c99a6570ace7fd3a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SAE.Arrow
-  damage: 2
-  maxBalloons: 3
   lifetime: 4
   stuckTime: 2
 --- !u!1001 &927411769359227290

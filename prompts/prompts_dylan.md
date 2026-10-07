@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
+### Branche fusion avec le travail de Maxens et Nicolas
+> Dans une branche `fusion`, ajoute ce que Maxens et Nicolas ont fait de nouveau.
+
 ### Rendre les deux scènes belles
 > Rends les deux scènes belles, sans toucher encore au labyrinthe.
 >
