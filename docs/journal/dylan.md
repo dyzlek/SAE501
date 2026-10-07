@@ -3,7 +3,7 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Mer. 7 oct. 2026
-**Ma critique après la fusion** _(mise en forme par l'IA ; à trier en issues)_
+**Ma critique après la fusion** _(mise en forme par l'IA ; issues #65 à #81)_
 1. Régler le problème de point d'apparition (spawn).
 2. Améliorer le hub visuellement, surtout les murs.
 3. Régler le problème de téléportation sur le plateau.
@@ -140,6 +140,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 | Claude (Claude Code) | Téléportation au casque : la cible s'affichait mais rien au relâchement. Cause : XRI garde un seul téléporteur (celui du joueur du hub, éteint sur la carte). Correction : le joueur qui s'allume rebranche toutes les zones sur son téléporteur (`PlayerRig.UseMyTeleporter`). Issue #48 créée et ajoutée au tableau, liée à la PR #47 | À tester au casque |
 | Claude (Claude Code) | « Tout bugue en VR » (rotation, commandes) : un joueur VR par scène ne marche pas avec XRI (il ne gère qu'un XR Origin, et un joueur qui s'éteint coupe les commandes communes). Refonte : **un seul joueur**, dans le hub, déplacé d'une scène à l'autre ; seuls le soleil et les réglages d'image changent avec le niveau ; l'arc ne sort que sur la carte (`BowHolster` + `Levels.Changed`) ; ordre éteindre puis allumer ; `UseMyTeleporter` retiré (plus utile). Issue #49 | À tester au casque |
 | Claude (Claude Code) | Critiques de fin de journée (la mienne et celle de Maxens) mises en forme dans nos journaux et le journal général | Gardé |
+| Claude (Claude Code) | Les 32 points des deux critiques transformés en issues GitHub #50 à #81 (responsable dans le corps, labels prio/zone/type, jalon S2 ; casino/banque, cible de fléchettes, bouton assis-debout, décor « champignons » et récolteur en `POURRAIT` / hors périmètre, sans jalon), toutes ajoutées au tableau en « À faire » | Gardé |
 | Claude (Claude Code) | Mise en forme de l'analyse critique de Nicolas (qu'il m'a transmise) dans son journal, avec ses 2 photos ; rien de corrigé pour l'instant | Gardé |
 | Claude (Claude Code) | Suivi de projet sur GitHub (branche `docs/organisation-github`, sans toucher au projet Unity) : 17 labels (priorité = périmètre du GDD, type, zone), 3 jalons S1/S2/S3 avec leurs dates, 33 issues tirées du journal général et du GDD (#12 à #44) avec responsables, tableau [Project](https://github.com/users/dyzlek/projects/2) (À faire / En cours / En relecture / Fait, dates, taille) avec les PR déjà fusionnées, modèles d'issue et de PR, `docs/ORGANISATION.md` | Gardé |
 | Claude (Claude Code) | Règle n°3 dans `CLAUDE.md` : chaque IA tient le suivi GitHub à jour toute seule (issue, carte En cours / En relecture / Fait, `Ferme #N`), sans assigner ni mentionner personne (pas de mails, à ma demande) | Gardé |

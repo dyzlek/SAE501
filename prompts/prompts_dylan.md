@@ -6,6 +6,8 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ### Critiques de fin de journée et envoi sur main
 > Pousse sur `main`, et ajoute la critique de Maxens et la mienne (listes de remarques de fin de journée).
+>
+> Suite : crée les issues GitHub de toutes ces remarques, et fais le reste.
 
 ### Téléportation sur la carte
 > Il y a des bugs de téléportation, surtout sur la carte (là où il y a l'arc) : je ne peux pas me téléporter n'importe où, ce qui n'est pas cool. Corrige-les.

@@ -3,7 +3,7 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Mer. 7 oct. 2026
-**Ma critique après la fusion** _(transmise à Dylan, mise en forme par l'IA ; à trier en issues)_
+**Ma critique après la fusion** _(transmise à Dylan, mise en forme par l'IA ; issues #50 à #64)_
 1. Un bouton assis / debout, ce serait sympa.
 2. Quand on s'apprête à poser un singe, enlever son nom.
 3. Une petite explication des touches (dont l'ajout des informations d'un singe en VR).
