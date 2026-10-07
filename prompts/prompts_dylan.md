@@ -2,6 +2,11 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Mer. 7 oct. 2026
+
+### Fusionner la cabane et l'arc de Maxens
+> Fusionne ce que j'ai fait dans `test/cabane` avec la dernière branche de Maxens.
+
 ## Mar. 6 oct. 2026
 
 ### Même DA partout : coffre, boutons, montagnes, lisibilité

@@ -26,6 +26,65 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
   - corrigé au passage : sur la carte et le plateau, l'aura apparaissait d'abord blanche (le prefab démarrait avant de recevoir sa couleur).
   Retesté en Play (bibliothèque, singe en main, carte, plateau du hub) : aucune erreur dans la console.
 
+- **Fait : test d'un hub « sans bouger »** (d'après mon schéma) :
+  - au hub, le joueur reste **au centre** et fait tout en tournant la tête et en prenant les objets de loin : plus de déplacement au hub (ZQSD coupé), on marche toujours sur la carte. C'est le point d'arrivée qui le dit (`SpawnPoint.canWalk`) ;
+  - tout est rapproché en rond autour du joueur (cercle de 3,5 m au lieu de 5 m) : le plateau devant, JOUER à droite, LANCER et Vider à gauche, les deux bibliothèques sur les côtés, le coffre et le panneau d'amélioration derrière à gauche, le bananier, son panier et la caisse derrière à droite ;
+  - la zone de chute des bananes est un long tapis jaune qui part du pied du bananier et descend vers le joueur : les bananes arrivent à portée ;
+  - portée plus longue : 6 m pour prendre les bananes et pour ouvrir le coffre depuis le centre ;
+  - **plateau plus grand** : 2,4 m au lieu de 1,6 m, pour bien reconnaître chaque singe posé ;
+  - **plus de texte au-dessus des singes** (carte, plateau, main, coffre) : le modèle dit le type, l'aura dit la rareté.
+  Scène `Jeu.unity` régénérée avec le menu **SAE → Générer le prototype** (sur ma branche). Testé en Play : on ne peut pas marcher au hub, le coffre s'ouvre de loin, les bananes tombent sur le tapis, aucune erreur.
+- **Confort VR :** rester au centre sans se déplacer, c'est le plus confortable (aucune locomotion, donc aucun risque de nausée). En revanche, prendre « de loin » demandera un rayon (Ray Interactor, support 5) au casque, pas seulement les mains.
+
+Mon schéma du hub (le joueur au centre, tout à portée du regard) :
+
+![Schéma du hub : joueur au centre](../captures/maxens-schema-hub-centre.png)
+
+- **Analyse du rig de Quincy** (notre personnage, avec l'arc comme arme) : fichiers `Art/Quincy/FBX/QuincyLvl3/7/10/20_Rigged.fbx`, analysés dans Unity sans rien modifier.
+  - **Ce qui est bien fait :**
+    - un seul squelette de 28 os, le même pour les 4 niveaux : les mêmes animations serviront pour tous ;
+    - des noms d'os standards (Hips, Spine, Neck, Head, LeftArm, LeftForeArm, LeftHand, LeftUpLeg…) : Unity peut les reconnaître en « Humanoid » pour réutiliser des animations toutes faites ;
+    - bras, jambes et queue ont des poids progressifs entre les os (ils plient proprement), et les coudes et poignets sont bien placés ;
+    - la flèche chargée (`LoadedArrow`) est déjà un objet à part, et l'arc est fait de morceaux de maillage séparés (corps de l'arc, deux pointes, corde) : il sera facile à détacher.
+  - **Ce qui bloque pour un arc utilisable :**
+    1. l'arc n'est pas séparé du personnage : il est dans le même maillage que Quincy et collé à 100 % à l'os `RightHand`. On ne peut donc pas le prendre, le bouger ou le viser indépendamment de la main ;
+    2. l'arc n'a aucun os : la corde est un simple trait droit, impossible à tendre ;
+    3. la flèche (`ArrowSocket`) est accrochée à la main droite, la même que l'arc, alors qu'elle doit suivre la main qui tire la corde ;
+    4. 19 sommets du corps (vers la main droite) dépendent en partie de l'os `ArrowSocket` : si on bouge la flèche, la main se déforme ;
+    5. pas d'os de doigts (une main = un seul os) : la main ne peut pas se refermer sur l'arc ni pincer la corde ;
+    6. bras asymétriques : avant-bras droit de 0,235 m contre 0,14 m à gauche (le bras droit est allongé pour tenir l'arc). À vérifier si on passe en Humanoid ;
+    7. importé en « Generic », sans animation dans les fichiers.
+  - **Vérifié aussi dans Blender** (`Quincy_Rig.blend`, ouvert en lecture seule) : même constat, avec trois précisions :
+    - les os `ArrowSocket` et `ArrowTip` sont cochés « Deform » : c'est ce qui leur donne des poids sur le corps, alors que ce ne devraient être que des points d'accroche ;
+    - l'os `RightHand` mesure 0,27 m, presque le double de `LeftHand` (0,15 m) : il traverse la poignée de l'arc ;
+    - le fichier contient 4 squelettes identiques (un par niveau) et aucune animation.
+  - **À faire dans Blender** (`Quincy_Rig.blend`) avant de l'utiliser comme arme :
+    - séparer l'arc (corps, pointes, corde) dans son propre objet et l'exporter à part (`Quincy_Bow.fbx`) ;
+    - lui donner son propre petit squelette : poignée, branche haute, branche basse, et un os au milieu de la corde (point d'encoche) ; la corde en deux segments qui se rejoignent à ce point, pour pouvoir la tirer ;
+    - décocher « Deform » sur `ArrowSocket` et `ArrowTip`, retirer leurs poids sur le corps, et mettre à la place des points d'accroche vides : un pour l'arc dans la main qui le tient, un pour la flèche dans la main qui tire ;
+    - si les mains de Quincy sont visibles au casque : ajouter des os de doigts.
+- **Fait : l'arc de Quincy est séparé du personnage** (script Blender lancé sur une **copie** du fichier : `Quincy_Rig_ArcSepare.blend`, l'original `Quincy_Rig.blend` n'est pas modifié ; le script est rangé à côté, `separer_arc.py`) :
+  - pour les 4 niveaux, l'arc (corps, pointes, corde : 152 sommets) sort du maillage du singe : bras et mains sont maintenant seuls dans le maillage du personnage ;
+  - **nouvel objet `Quincy_Bow.fbx`** avec son propre squelette : `Grip` (poignée, le point à saisir), `LimbTop` et `LimbBottom` (les branches), `String` (le milieu de la corde). La corde est droite au repos et **se tend en tirant l'os `String`** (testé : 15 à 20 cm de recul donnent le V de la corde) ;
+  - les os de la flèche (`ArrowSocket`, `ArrowTip`) ne déforment plus le corps : ce sont des points d'accroche, et la flèche chargée y est accrochée comme un objet enfant ;
+  - nouveau point d'accroche **`BowGrip`** dans la main droite : en Unity, on pose l'arc dessus (poignée sur poignée) et il tombe exactement à sa place d'origine ;
+  - les 4 FBX du singe sont remplacés dans `Art/Quincy/FBX/`, et un matériau `Quincy_Mat` (avec la texture de Quincy) est branché sur tous les modèles de Quincy : ils étaient blancs après le nouvel export.
+  - **Reste à faire :** les branches de l'arc ne plient pas encore quand on tire (on pourra tourner `LimbTop` / `LimbBottom`), la flèche chargée est toujours dans la main de l'arc (en VR, elle suivra la main qui tire, gérée par le jeu), et seul l'arc du niveau 3 est exporté (celui du niveau 20 est un peu plus grand).
+
+  ![Quincy tient l'arc séparé (à gauche), l'arc seul avec la corde tirée (à droite)](../captures/maxens-quincy-arc-separe.png)
+
+- **Fait : le système de l'arc** (branche `feat/arc-quincy`, partie du `main` à jour avec la PR #8, arc séparé de Quincy repris de `feat/prototype-maxens`) :
+  - **au hub, seulement les mains** ; l'arc apparaît dans les mains quand on se téléporte sur la carte (bouton JOUER) et se range au retour (`BowHolster`, qui réagit au nouvel événement `PlayerRig.Teleported`) ;
+  - **au casque** (`VRArcher`) : l'arc est dans la main gauche ; on approche la main droite de la corde et on serre le grip : une flèche s'encoche ; on recule la main pour tendre, on relâche pour tirer. Vibrations à l'encoche, pendant la tension et au tir ;
+  - **en mode PC** (`DesktopArcher`) : clic droit maintenu pour tendre (1 s pour la tension maximale), relâcher pour tirer vers le viseur ;
+  - **l'animation** (`Bow`) : la corde recule (jusqu'à 50 cm), les branches plient vers l'archer, la flèche suit la corde ; au lâcher, elle part d'autant plus vite que l'arc était tendu (8 à 30 m/s) ;
+  - **la flèche** (`Arrow`) : elle vole avec la gravité en s'orientant dans le sens de sa course (elle pique du nez), éclate jusqu'à 3 ballons (2 dégâts chacun), se plante dans le reste, puis disparaît ;
+  - prefabs `Prefabs/Arc.prefab` et `Prefabs/Fleche.prefab`, fabriqués par le menu **SAE → Préparer l'arc** (appelé par le générateur de scène) ; scène `Jeu.unity` régénérée.
+  - **Testé en Play** (sans casque, en commandant l'arc par code) : arc caché au hub et visible sur la carte, corde tendue en V avec la flèche encochée, branches qui plient du bon côté, flèche qui vole pointe devant, ballon touché (3 → 1 point de vie). Aucune erreur dans la console.
+  - **À tester au casque :** le geste réel (main droite sur la corde), la taille de l'arc (environ 1 m), et le confort de la visée. Le tir au clic droit en mode PC n'a pas encore été essayé à la main.
+
+  ![L'arc tendu, flèche encochée ; la flèche tirée juste avant vole en haut](../captures/maxens-arc-tendu.png)
+
 **Captures** (bibliothèque avec les singes 3D et leur aura, et singe tenu en main) :
 
 ![Bibliothèque : singes 3D avec l'aura de leur rareté](../captures/maxens-bibliotheque-singes-3d.png)
@@ -33,14 +92,43 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 ![Singe tenu en main avec son aura, plateau du hub](../captures/maxens-singe-en-main-aura.webp)
 
 - **À vérifier au casque :** les fps avec beaucoup d'auras allumées (≤ 80 particules par singe, seulement sur les cases possédées).
-- **Attention (équipe) :** ça touche des scripts de Dylan (`Visuals`, `LibrarySlot`, `ChestReward`, `PlacementSurface`, `Board`, `PrototypeGenerator`).
+- **Attention (équipe) :** ça touche des scripts de Dylan (`Visuals`, `LibrarySlot`, `ChestReward`, `PlacementSurface`, `Board`, `TowerManager`, `PlayerController`, `PrototypeGenerator`) et sa scène `Jeu.unity`.
 - **Rangé :** changements parasites d'Unity annulés (`Jeu.unity`, réglages URP, réécrits à l'ouverture du projet) ; le package MCP for Unity reste installé sur mon PC seulement (non commité).
-- **Bloque :** —
+- **Bloque : le hub « sans bouger » n'est pas adapté à la VR.** Depuis le centre, tout est à 2,5-4 m : les boutons (JOUER, LANCER, Vider, améliorations), les 56 cases de la bibliothèque et le plateau sont **hors de portée des mains**. Au casque, il faudrait viser de loin avec un rayon pour tout, ce qui ressemble à un jeu à la souris (« test de l'écran » raté) et va contre la règle « tout à portée de bras ». Les 56 cases (7 types × 8 raretés) prennent aussi trop de place pour tenir près du joueur.
+
+  ![Hub vu depuis le centre : boutons et bibliothèques hors de portée](../captures/maxens-hub-pas-adapte-vr.png)
+
+  **Pistes** (à décider en équipe) :
+  1. **Réagencer, sans changer le jeu** : un établi en arc de cercle à portée de bras (~0,6 m) avec le plateau incliné au milieu et de vrais boutons à enfoncer sur le bord ; le coffre et le bananier derrière, en se retournant (snap turn). Limite : les 56 cases ne tiennent toujours pas à portée.
+  2. **Changer la bibliothèque** : elle n'affiche plus 56 cases fixes. Une étagère tournante (carrousel) à portée de main, 7 compartiments (un par type) qu'on fait tourner à la main ; chaque compartiment montre seulement les raretés qu'on possède. Geste VR en plus (tourner), et beaucoup moins de place.
+  3. **Inventaire sur la main** (comme le sac de Half-Life Alyx ou la ceinture de Job Simulator) : on ouvre un menu sur le poignet et on y attrape directement le singe. Le plus compact, mais c'est un vrai changement de fonctionnement et plus de travail.
+  4. **Garder la disposition et viser au rayon** (Ray Interactor, support 5) : le moins de travail, mais le moins « VR ».
+
+  **Mon avis (proposé par Claude) :** 1 + 2 ensemble. L'établi pour le plateau et les boutons, le carrousel pour les singes. Le rayon seulement pour ce qui reste loin (prendre une banane au sol, par exemple).
+- **Fait : pistes 1 + 2 retenues et prototypées** (sur ma branche, scène régénérée) : **tout est à portée de main** autour du joueur, qui reste au centre :
+  - **devant, l'établi** : le plateau incliné à 30°, le bord le plus proche à 0,45 m (1,4 m de côté) ; JOUER, LANCER et Vider sont des boutons sur des socles à hauteur de main (0,7 m du joueur) ; le tableau de la vague est plus loin, seulement à lire ;
+  - **sur les côtés, deux étagères tournantes** (nouveau script `Hub/Carousel.cs`) : un meuble carré par côté, une face par type de singe, 8 cases par face ; la face avant est à 0,7 m. On clique sur la manivelle jaune du dessus pour faire un quart de tour (au casque : la tourner à la main) ;
+  - **derrière** : le coffre et le panneau d'amélioration à gauche ; à droite le bananier, dont les bananes tombent maintenant **sur une table à hauteur de main** qui vient jusqu'au joueur (plus de ramassage au sol), avec le panier juste à côté ;
+  - les textes du coffre (consigne, roulette, chances, prix) et des boutons sont réduits, sinon ils prenaient tout l'écran de près.
+  Testé en Play : l'étagère tourne, les bananes se posent sur la table près du panier, le coffre s'ouvre depuis le centre, aucune erreur.
+
+  ![Hub à portée de main : établi, étagères tournantes, table des bananes](../captures/maxens-hub-a-portee-de-main.png)
+
+  **Reste à faire pour la VR :** de vrais gestes au casque (enfoncer les boutons, tourner la manivelle, prendre un singe ou une banane à la main avec XR Grab), et vérifier les tailles au casque.
+- **Annulé :** après l'avoir essayé, **ça faisait surchargé** (tout entassé autour du joueur, on ne voyait plus rien clairement), donc je reviens à la version d'avant (le hub « sans bouger » sur un grand cercle, avec la bibliothèque courbe). L'établi, les étagères tournantes et la table des bananes sont retirés (`Carousel.cs` supprimé, générateur et scène `Jeu.unity` remis comme avant). Le problème VR noté plus haut reste donc ouvert.
 
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Système de l'arc : arc seulement sur la carte, tir au casque (main droite sur la corde) et au PC (clic droit), corde et branches animées, flèche qui vole et éclate les ballons ; prefabs, générateur, testé en Play | À tester au casque |
+| Claude (Code) | Séparation de l'arc de Quincy par un script Blender (sur une copie) : arc à part avec son squelette (poignée, branches, corde à tirer), os de la flèche en points d'accroche, point `BowGrip` dans la main, export FBX, matériau ; testé dans Unity | À tester au casque |
+| Claude (Code) | Analyse du rig de Quincy dans Unity puis dans Blender en lecture seule (squelette, poids, séparation arc / bras / mains) et liste de ce qu'il faut corriger dans Blender pour utiliser l'arc comme arme | Gardé |
+| Claude (Code) | Réécriture de mes prompts du jour, plus clairs et mieux structurés (contexte, objectif, contraintes), sans changer leur sens | Gardé |
+| Claude (Code) | Retour à la version d'avant (hub « sans bouger » sur un grand cercle) : générateur et scène remis, `Carousel.cs` supprimé | Gardé |
+| Claude (Code) | Prototype des pistes 1 + 2 : établi à portée de main (plateau, boutons sur socles), deux étagères tournantes (`Carousel`), table des bananes à hauteur de main, textes du coffre réduits ; scène régénérée et testée en Play | Jeté (trop surchargé, annulé après essai) |
+| Claude (Code) | Analyse du problème VR du hub « sans bouger » (portée des boutons et de la bibliothèque) et 4 pistes de solution, capture ajoutée | À décider en équipe |
 | Claude (Cowork) | Tronc du bananier rallongé ×3 avec un script Blender, export FBX | Gardé (intégré sur `feat/prototype-maxens`) |
+| Claude (Code) | Test du hub « sans bouger » d'après mon schéma : joueur fixé au centre, tout rapproché en rond, plateau agrandi, zone de chute vers le joueur, portée 6 m, plus de textes au-dessus des singes ; scène régénérée et testée en Play | À tester au casque |
 | Claude (Code) | Lecture des PDF du cours (installation de `pypdf`), relecture du code avec le guide : aura en prefab réglable dans l'Inspector, renderers gardés en mémoire, constantes nommées, aura blanche corrigée | À tester au casque |
 | Claude (Code) | Corrections après mon test : singe 3D aussi en miniature sur le plateau, aura élargie pour le Canon et le Tireur, Canon retourné, menu pour mettre les singes 3D dans la scène hors Play (scène `Jeu.unity` enregistrée, 1,5 Mo) ; testé en Play et hors Play, aucune erreur | À tester au casque |
 | Claude (Code) | Modèles 3D des singes dans la bibliothèque (et coffre, main, carte) + aura « Dragon Ball » en particules à la couleur de la rareté, outil d'éditeur pour brancher les modèles, testé en Play via Unity MCP | À tester au casque |

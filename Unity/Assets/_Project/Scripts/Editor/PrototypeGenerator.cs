@@ -5,6 +5,7 @@ using Unity.XR.CoreUtils;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
@@ -23,6 +24,7 @@ namespace SAE.EditorTools
         const float BoardTile = 0.2f;    // plateau de 1,6 m : l'élément principal du hub
         const float HandHeight = 0.9f;   // table des bananes et socle du panier : à hauteur de main, pas au sol
         const int IgnoreRaycast = 2;     // couche Unity « Ignore Raycast »
+        const float DesktopBowScale = 0.5f;   // en mode PC, l'arc est collé à la caméra : plus petit
         static readonly Vector3 MapCenter = new Vector3(0f, 0f, 40f);
 
         static readonly Color Floor = new Color(0.35f, 0.35f, 0.38f);
@@ -56,11 +58,11 @@ namespace SAE.EditorTools
             var mapRoot = BuildMap(hubSpawn);
             var spawner = mapRoot.GetComponent<WaveSpawner>();
             var hub = BuildHub(mapRoot, mapSpawn, spawner);   // avant le joueur : l'installeur des bananes ajoute son TestSouris à Camera.main s'il en trouve une
-            var player = Player(hubSpawn.position);
+            var player = Player(hubSpawn.position, mapSpawn);
             if (!player) return;
             BuildChest(hub, Around(100f, Ring - 0.2f), player.head);
             UseWoodTexture(hub);   // encore une fois : l'estrade et le cadre du coffre sont posés après le reste du hub
-            BuildPlayerMode(player.gameObject, DesktopPlayerObject(hubSpawn.position));
+            BuildPlayerMode(player.gameObject, DesktopPlayerObject(hubSpawn.position, mapSpawn));
 
             EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), ScenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
@@ -89,7 +91,7 @@ namespace SAE.EditorTools
         }
 
         // Le joueur PC (clavier/souris), pour tester vite sans casque : DesktopPlayer, et la caméra sert de tête et de mains.
-        static GameObject DesktopPlayerObject(Vector3 position)
+        static GameObject DesktopPlayerObject(Vector3 position, Transform mapSpawn)
         {
             var player = new GameObject("Joueur PC");
             player.tag = Tags.Joueur;
@@ -121,11 +123,21 @@ namespace SAE.EditorTools
             player.AddComponent<DesktopPlayer>();
             var rig = player.AddComponent<PlayerRig>();
             rig.head = rig.leftHand = rig.rightHand = cam.transform;
+
+            // L'arc, en bas à droite de la vue, plus petit qu'en VR pour ne pas cacher l'écran (clic droit : tirer)
+            var bow = ((GameObject)PrefabUtility.InstantiatePrefab(BowSetup.Setup().gameObject)).GetComponent<Bow>();
+            bow.transform.localScale *= DesktopBowScale;
+            bow.maxDraw *= DesktopBowScale;
+            bow.HoldIn(cam.transform, new Vector3(0.3f, -0.3f, 0.7f));
+            var archer = player.AddComponent<DesktopArcher>();
+            archer.bow = bow;
+            archer.aim = cam.transform;
+            GiveHolster(player, bow, mapSpawn);
             player.AddComponent<MonkeyInfoCard>();
             return player;
         }
 
-        static PlayerRig Player(Vector3 position)
+        static PlayerRig Player(Vector3 position, Transform mapSpawn)
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(VRSetup.RigPrefab);
             if (!prefab) { Debug.LogError("Joueur VR : Starter Assets de l'XR Interaction Toolkit introuvables : " + VRSetup.RigPrefab); return null; }
@@ -157,6 +169,7 @@ namespace SAE.EditorTools
             rig.rightHand = FindChild(go.transform, "Right Controller");
             AddFingertip(rig.leftHand);
             AddFingertip(rig.rightHand);
+            GiveBow(go, rig, mapSpawn);
             go.AddComponent<MonkeyInfoCard>();   // fiche du singe visé, dans le décor
 
             // Corps : invisible pour soi, mais c'est lui qu'on voit en miniature sur le plateau (et plus tard un 2e joueur).
@@ -170,6 +183,35 @@ namespace SAE.EditorTools
             body.AddComponent<ColorTint>().Set(new Color(1f, 0.55f, 0.1f));
             body.AddComponent<Mirrored>().label = "Toi";
             return rig;
+        }
+
+        // L'arc de Quincy dans la main gauche ; on tire la corde avec la main droite (grip). Rangé au hub (BowHolster).
+        static void GiveBow(GameObject player, PlayerRig rig, Transform mapSpawn)
+        {
+            if (!rig.leftHand || !rig.rightHand) { Debug.LogWarning("Joueur VR : manette introuvable, pas d'arc."); return; }
+            var bow = ((GameObject)PrefabUtility.InstantiatePrefab(BowSetup.Setup().gameObject)).GetComponent<Bow>();
+            bow.HoldIn(rig.leftHand, Vector3.zero);
+            var archer = player.AddComponent<VRArcher>();
+            archer.bow = bow;
+            archer.drawHand = rig.rightHand;
+            archer.drawGrip = new InputActionProperty(InputReference("XRI Right Interaction/Select Value"));
+            GiveHolster(player, bow, mapSpawn);
+        }
+
+        static void GiveHolster(GameObject player, Bow bow, Transform mapSpawn)
+        {
+            var holster = player.AddComponent<BowHolster>();
+            holster.bow = bow;
+            holster.mapSpawn = mapSpawn;
+        }
+
+        // Une action des contrôles XRI des Starter Assets (même chose que « Use Reference » dans l'Inspector).
+        static InputActionReference InputReference(string name)
+        {
+            var path = VRSetup.SamplesFolder + "/Starter Assets/XRI Default Input Actions.inputactions";
+            var reference = AssetDatabase.LoadAllAssetsAtPath(path).OfType<InputActionReference>().FirstOrDefault(r => r.name == name);
+            if (!reference) Debug.LogWarning("Action introuvable : " + name);
+            return reference;
         }
 
         // Le rayon de chaque manette : celui des Starter Assets (courbé, 25 cm, presque transparent) est éteint,
