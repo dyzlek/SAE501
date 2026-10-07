@@ -8,7 +8,7 @@
 # Le coffre est en deux objets, pour pouvoir l'animer dans Unity :
 #   Coffre_Caisse    : la caisse (planches, coins et bandes de fer, serrure) ;
 #   Coffre_Couvercle : le couvercle bombé, son origine sur la charnière (arrière, en haut) : il s'ouvre en tournant autour de X.
-# Repère Unity : Y en haut, +Z = devant (côté serrure, vers le joueur). Taille : 0,8 × 0,5 × 0,55 m (avec le couvercle).
+# Repère Unity : Y en haut, +Z = devant (côté serrure, vers le joueur). Taille : 1,1 × 0,68 × 0,72 m (avec le couvercle) : bien visible dans la cabane.
 
 import os, sys, math
 
@@ -20,9 +20,9 @@ exec(compile(source.rsplit("\nmain()", 1)[0], "cabane.py", "exec"))
 
 OUT_CHEST = os.path.join(ROOT, "Unity", "Assets", "_Project", "Art", "Coffre")
 
-W, D, H = 0.8, 0.5, 0.36          # caisse : largeur (X), profondeur (Z), hauteur (Y)
-LID_H = 0.16                      # hauteur du bombé du couvercle
-PLANK = 0.12                      # hauteur d'une planche
+W, D, H = 1.1, 0.68, 0.5          # caisse : largeur (X), profondeur (Z), hauteur (Y)
+LID_H = 0.22                      # hauteur du bombé du couvercle
+PLANK = 0.125                      # hauteur d'une planche
 BAND = 0.045                      # largeur d'une bande de fer
 I3 = Matrix.Identity(3)
 
@@ -62,20 +62,35 @@ def arc_strip(b, x0, x1, inflate, mat, steps, tints=None, y0=0.0):
 
 def build_body(M, coll):
     b = Builder([M["caisse"], M["poutre"], M["fer"], M["or"]])
-    # Planches horizontales, chacune un peu teintée différemment (comme les rondins)
+    # Caisse CREUSE (on voit dedans quand le couvercle s'ouvre) : 4 parois en planches horizontales,
+    # chacune un peu teintée différemment (comme les rondins), et un fond sombre à l'intérieur
     rows = int(round(H / PLANK))
+    T = 0.035                                   # épaisseur des planches
     for i in range(rows):
         y = (i + 0.5) * H / rows
+        h = H / rows - 0.006
         tint = 0.86 + 0.14 * ((i * 37) % 5) / 4
-        box(b, (0, y, 0), (W, H / rows - 0.006, D), M["caisse"], uv_scale=1 / 0.6, uv_offset=(0.13 * i, 0.31 * i), bevel=0.006, tint=tint)
+        kw = dict(uv_scale=1 / 0.6, uv_offset=(0.13 * i, 0.31 * i), bevel=0.006, tint=tint)
+        for sz in (-1, 1):
+            box(b, (0, y, sz * (D / 2 - T / 2)), (W, h, T), M["caisse"], **kw)            # avant et arrière
+        for sx in (-1, 1):
+            box(b, (sx * (W / 2 - T / 2), y, 0), (T, h, D - 2 * T), M["caisse"], **kw)    # côtés
+    box(b, (0, 0.03, 0), (W - 2 * T, 0.03, D - 2 * T), M["poutre"], tint=0.35)          # fond, dans l'ombre
     # Montants de coin en bois sombre
     for sx in (-1, 1):
         for sz in (-1, 1):
             box(b, (sx * (W / 2 - 0.02), H / 2, sz * (D / 2 - 0.02)), (0.07, H + 0.01, 0.07), M["poutre"], uv_scale=1 / 0.6, bevel=0.008)
     # Bandes de fer : 2 qui font le tour (avant, dessous, arrière) et une en bas tout autour
+    # (des cerclages fins à l'extérieur : la caisse est creuse, ils ne doivent pas la traverser)
+    F = 0.012                                   # épaisseur du fer
     for x in (-W * 0.28, W * 0.28):
-        box(b, (x, H / 2, 0), (BAND, H + 0.012, D + 0.014), M["fer"], bevel=0.004)
-    box(b, (0, 0.035, 0), (W + 0.014, BAND, D + 0.014), M["fer"], bevel=0.004)
+        for sz in (-1, 1):
+            box(b, (x, H / 2, sz * (D / 2 + F / 2)), (BAND, H + 0.012, F), M["fer"], bevel=0.003)
+        box(b, (x, -F / 2, 0), (BAND, F, D + 2 * F), M["fer"], bevel=0.003)   # sous le fond
+    for sz in (-1, 1):
+        box(b, (0, 0.035, sz * (D / 2 + F / 2)), (W + 2 * F, BAND, F), M["fer"], bevel=0.003)
+    for sx in (-1, 1):
+        box(b, (sx * (W / 2 + F / 2), 0.035, 0), (F, BAND, D + 2 * F), M["fer"], bevel=0.003)
     # Rivets dorés sur les bandes, devant et derrière
     for x in (-W * 0.28, W * 0.28):
         for y in (0.1, H - 0.08):
@@ -133,7 +148,7 @@ def chest_preview(objs, folder):
     cam.data.lens = 50
     os.makedirs(folder, exist_ok=True)
     lid = next(o for o in objs if o.name == "Coffre_Couvercle")
-    for name, loc, open_deg in (("coffre_ferme", U(1.3, 0.9, 1.8), 0), ("coffre_ouvert", U(1.2, 1.2, 1.7), 70)):
+    for name, loc, open_deg in (("coffre_ferme", U(1.8, 1.2, 2.4), 0), ("coffre_ouvert", U(1.4, 1.7, 2.2), 70)):
         lid.rotation_euler = (math.radians(-open_deg), 0, 0)   # autour de la charnière ; le signe se vérifie sur l'image
         cam.location = loc
         target = U(0, 0.25, 0)

@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mer. 7 oct. 2026
 
+### Corrections du coffre
+> Le coffre est trop petit, on le voit à peine. Il donne l'impression d'être fermé et ouvert en même temps. Et trois singes en sortent au lieu d'un.
+
 ### Roulette des singes et ouverture du coffre
 > Restons sur la branche du coffre. Dans la roulette, je veux voir les singes avec leur aura à la place des carrés de couleur. Le coffre ne doit plus bouger dans la scène ; quand on appuie pour l'ouvrir, il fait un petit « boing », s'ouvre et dégage une petite aura dorée. Dis-moi ce que tu en penses.
 

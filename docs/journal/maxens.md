@@ -27,9 +27,17 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
   ![La roulette s'arrête sur le singe gagné, qui sort du coffre](../captures/maxens-coffre-roulette-singes.png)
 
+- **Corrigé après mon test :**
+  - **le coffre était trop petit** : il fait maintenant 1,1 m de large (au lieu de 0,8), sur une estrade plus grande ;
+  - **il paraissait fermé et ouvert en même temps** : la caisse était pleine, et le dessus des planches ressemblait à un deuxième couvercle fermé. **La caisse est maintenant creuse** (4 parois en planches, un fond sombre) et les bandes de fer sont de simples cerclages à l'extérieur ;
+  - **3 singes sortaient du coffre** : ce n'était pas un bug du coffre. Le coffre donne plus de singes à mesure que l'on gagne des vagues (1 singe + 1 toutes les 3 vagues gagnées, règle de Nicolas). Pendant mon test, j'avais mis « 8 vagues gagnées » par code pour voir des singes rares, et cette valeur est restée en mémoire dans Unity (elle ne se remet à zéro qu'à la recompilation). Avec une partie normale (0 vague), il n'en sort qu'un.
+
+  ![Coffre plus grand, creux, ouvert avec son aura dorée](../captures/maxens-coffre-v2-ouvert.png)
+
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Coffre agrandi (1,1 m) et creusé (on voit l'intérieur à l'ouverture), cerclages de fer à l'extérieur ; explication des 3 singes (valeur de test restée en mémoire) | À tester au casque |
 | Claude (Code) | Nouveau coffre branché dans la scène (fixe), ouverture boing + couvercle + aura dorée (`ChestLid`), roulette avec les vrais singes et leur aura, type du singe tiré avant la roulette ; testé en Play | À tester au casque |
 | Claude (Code) | Nouveau coffre modélisé par script Blender (`coffre.py`) dans le style de la cabane, couvercle séparé sur sa charnière, rendus d'aperçu | À valider |
 

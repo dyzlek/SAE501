@@ -758,13 +758,13 @@ namespace SAE.EditorTools
             chest.name = "Coffre";
             chest.transform.SetParent(env, false);
             var b = Bounds(chest);
-            chest.transform.localScale *= 0.8f / Mathf.Max(b.size.x, b.size.z);    // ~0,8 m de large
+            // taille réelle du modèle (1,1 m de large) : bien visible dans la cabane
             // tourné vers le joueur (au centre), posé au sol
             chest.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(new Vector3(-pos.x, 0, -pos.z)));
             b = Bounds(chest);
             // posé sur une petite estrade en bois (comme un trésor qu'on expose)
             const float Dais = 0.1f;
-            var dais = Visuals.Solid("Estrade du coffre", env, new Vector3(pos.x, Dais / 2f, pos.z), new Vector3(1.0f, Dais, 0.8f), Wood);
+            var dais = Visuals.Solid("Estrade du coffre", env, new Vector3(pos.x, Dais / 2f, pos.z), new Vector3(1.4f, Dais, 1.0f), Wood);
             dais.transform.rotation = Quaternion.Euler(0, AngleOf(pos), 0);
             chest.transform.position += new Vector3(pos.x - b.center.x, Dais - b.min.y, pos.z - b.center.z);
             float top = Bounds(chest).max.y;
