@@ -100,6 +100,7 @@ namespace SAE
             go.AddComponent<ColorTint>();
             go.AddComponent<Mirrored>();
             go.AddComponent<Balloon>().Init(this, path, layers, kind);
+            PlayerRig.IgnoreCollisions(go);   // le joueur traverse les ballons et les boss ; les flèches les touchent toujours
         }
 
         public void BalloonEscaped(int layers) => Lives = Mathf.Max(0, Lives - layers);
