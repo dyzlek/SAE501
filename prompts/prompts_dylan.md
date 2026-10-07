@@ -4,6 +4,11 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
+### Ranger le tableau GitHub
+> Vérifie tout ce que j'ai fait sur le tableau GitHub et corrige ce qui ne va pas.
+>
+> Suite : il y a des objectifs de la semaine et des petites modifications au même niveau, ça n'a pas de sens : sépare-les (chantiers et tâches).
+
 ### Point de fin de journée
 > Mets à jour le README et le journal général, et liste ce qu'il faut faire en urgence demain.
 

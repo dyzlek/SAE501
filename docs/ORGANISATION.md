@@ -20,6 +20,15 @@ _Comment on suit le projet (note de gestion de projet, N. Maurin). Tout se passe
 
 Une issue sans jalon = une idée pas encore validée dans le GDD (souvent `prio: POURRAIT` ou `hors périmètre`).
 
+## Trois niveaux : objectif, chantier, tâche
+On ne met pas tout au même niveau : un objectif de la semaine n'est pas une petite correction.
+- **Objectif de la semaine = le jalon** (S1, S2, S3) : on le suit dans [Milestones](https://github.com/dyzlek/SAE501/milestones), avec son %.
+- **Chantier = une issue « parente »** (label `chantier`) qui regroupe les tâches liées en **sous-issues** et affiche sa progression :
+  [#85 Jouable du début à la fin](https://github.com/dyzlek/SAE501/issues/85) · [#86 Tutoriel et 2 premières minutes](https://github.com/dyzlek/SAE501/issues/86) · [#87 Confort et VR](https://github.com/dyzlek/SAE501/issues/87) · [#88 Visuel et DA](https://github.com/dyzlek/SAE501/issues/88) · [#89 Économie et coffre](https://github.com/dyzlek/SAE501/issues/89) · [#90 Gestion et rendu](https://github.com/dyzlek/SAE501/issues/90).
+- **Tâche = une issue concrète**, rangée sous son chantier (sur l'issue : *Relationships → Add parent*). C'est elle qu'on déplace sur le tableau.
+
+Sur le tableau, le champ **Niveau** (Chantier / Tâche) sert à filtrer : vue des tâches avec le filtre `niveau:Tâche`, vue des chantiers avec `niveau:Chantier`.
+
 ## Les labels
 - **Priorité = périmètre du GDD :** `prio: DOIT`, `prio: DEVRAIT`, `prio: POURRAIT`, `hors périmètre` (NE FERA PAS).
 - **Type :** `type: feature`, `bug`, `type: art`, `documentation`, `type: test`, `type: gestion`, `vr-confort`.
