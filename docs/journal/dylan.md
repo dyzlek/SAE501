@@ -17,11 +17,38 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
 ![Carte : l'arc de Quincy en bas à droite, la carte encore en cubes](../captures/cabane-arc-carte.webp)
 
+**Ma troisième analyse critique** _(bugs et défauts à corriger sur la branche `fix-all`)_
+1. **On peut faire voler des objets avec la banane** (« prop fly ») : en tenant une banane, on pousse les objets du décor et on peut les envoyer en l'air.
+2. **L'affichage sur les écrans n'est pas beau**, même s'il reste lisible.
+
+   ![Affichage d'un écran du hub](../captures/critique3-1.png)
+   ![Affichage d'un autre écran du hub](../captures/critique3-2.png)
+3. **Des objets se superposent.**
+
+   ![Objets du hub qui se chevauchent](../captures/critique3-3.png)
+   ![Autres objets qui se chevauchent](../captures/critique3-4.png)
+4. **Le texte qui flotte dans le vide est moche**, par exemple sur la bibliothèque : il faudrait le mettre sur une pancarte ou un support.
+
+   ![Texte flottant au-dessus de la bibliothèque](../captures/critique3-5.png)
+5. **Les panneaux et certains objets ne sont pas beaux.**
+
+   ![Panneaux et objets du hub](../captures/critique3-6.png)
+6. **Les bornes d'amélioration ne sont vraiment pas belles.**
+
+   ![Bornes et boutons d'amélioration](../captures/critique3-7.png)
+7. **Le petit singe (récolteur) rentre dans les objets.**
+
+   ![Le singe récolteur qui traverse un objet](../captures/critique3-8.png)
+8. **Le terrain n'est pas beau.**
+
+   ![Le terrain autour de la cabane](../captures/critique3-9.png)
+
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
 | Claude (Claude Code) | Fusion `test/cabane` + `feat/arc-quincy` (Maxens) dans `feat/cabane-arc`, conflit du `PrototypeGenerator` résolu en gardant les deux | À tester |
 | Claude (Claude Code) | 2e fusion avec les derniers commits de Maxens sur `feat/arc-quincy` (mains de Quincy riggées, arc plus petit, tir dans le simulateur VR), sans conflit ; PR #9 ouverte (le merge par Claude a été bloqué faute de relecture, fusionnée ensuite sur GitHub) | Gardé (testé par moi en mode PC) |
 | Claude (Claude Code) | Mise à jour de mon journal et du journal général avec mes 3 captures | Gardé |
+| Claude (Claude Code) | Mise en forme de ma troisième analyse critique (depuis mon fichier Word, avec ses 9 captures) et des objectifs du jour dans le journal général, branche `fix-all` ; rien de corrigé pour l'instant | Gardé |
 
 ## Mar. 6 oct. 2026
 - **Fait :**
