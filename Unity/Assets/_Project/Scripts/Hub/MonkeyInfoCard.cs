@@ -9,18 +9,27 @@ namespace SAE
     // DANS LE DÉCOR, au-dessus de lui, avec ses caractéristiques et ce que donnerait une fusion.
     // Sur le plateau et la carte, un cercle montre aussi sa portée.
     // Pas d'affichage collé à l'écran (règle de confort VR) : la carte reste posée près du singe.
+    // Elle se dessine PAR-DESSUS le décor (shader avec ZTest Always) : sinon une étagère ou un meuble la cachait.
+    // Même style que les ardoises du hub : cadre en bois, fond ardoise, titre doré, texte à la craie.
     public class MonkeyInfoCard : MonoBehaviour
     {
         public float textHeight = 0.04f;        // hauteur d'une ligne, en mètres, vue de près
         public float readableDistance = 1.2f;   // au-delà, la carte grandit pour rester lisible
         public float reach = 15f;               // portée de la visée, en mètres
 
+        const float CardWidth = 0.95f, CardHeight = 0.4f;   // en mètres, vue de près
+        const int OnTopQueue = 4000;                         // après tout le reste (file « Overlay ») : la fiche passe devant
+        static readonly Color FrameColor = new Color(0.45f, 0.3f, 0.18f);
+        static readonly Color BackColor = new Color(0.1f, 0.13f, 0.12f, 0.95f);
+        static readonly Color TitleColor = new Color(1f, 0.83f, 0.35f);
+        static readonly Color ChalkColor = new Color(0.95f, 0.94f, 0.88f);
+
         // Le bouton d'infos : A sur la manette droite.
         InputAction showInfo;
         Component aimedSurface;                 // ce qu'on vise : sert à incliner le cercle de portée comme le plateau
 
         Transform card;
-        TextMesh text;
+        TextMesh title, text;
         LineRenderer rangeCircle;
         Monkey? shown;
         Vector3 smoothAnchor;
@@ -38,10 +47,16 @@ namespace SAE
         void Start()
         {
             card = new GameObject("Fiche du singe").transform;
-            card.gameObject.AddComponent<Billboard>();
-            Visuals.Box("Fond", card, new Vector3(0, 0, 0.01f), new Vector3(0.95f, 0.3f, 0.01f), new Color(0.08f, 0.07f, 0.06f));
-            text = Visuals.Label(card, "", Vector3.zero, textHeight);
-            Destroy(text.GetComponent<Billboard>());   // c'est la carte entière qui fait face au joueur
+            card.gameObject.AddComponent<Billboard>();   // c'est la carte entière qui fait face au joueur
+            var frame = Visuals.Box("Cadre", card, new Vector3(0, 0, 0.004f), new Vector3(CardWidth + 0.04f, CardHeight + 0.04f, 0.002f), FrameColor);
+            var back = Visuals.Box("Fond", card, new Vector3(0, 0, 0.002f), new Vector3(CardWidth, CardHeight, 0.002f), BackColor);
+            title = Visuals.Text(card, "", new Vector3(0, CardHeight / 2f - 0.055f, 0), textHeight * 1.6f, TitleColor, title: true);
+            text = Visuals.Text(card, "", new Vector3(0, -0.035f, 0), textHeight, ChalkColor);
+            // Dessinés dans l'ordre (cadre, fond, textes), par-dessus tout le décor
+            DrawOnTop(frame.GetComponent<Renderer>(), null, OnTopQueue);
+            DrawOnTop(back.GetComponent<Renderer>(), null, OnTopQueue + 1);
+            DrawOnTop(title.GetComponent<Renderer>(), title.GetComponent<Renderer>().sharedMaterial, OnTopQueue + 2);
+            DrawOnTop(text.GetComponent<Renderer>(), text.GetComponent<Renderer>().sharedMaterial, OnTopQueue + 2);
             card.gameObject.SetActive(false);
 
             rangeCircle = new GameObject("Cercle de portée").AddComponent<LineRenderer>();
@@ -51,6 +66,20 @@ namespace SAE
             rangeCircle.startColor = rangeCircle.endColor = new Color(1f, 1f, 1f, 0.8f);
             rangeCircle.gameObject.SetActive(false);
         }
+
+        // Donne au rendu un matériau à lui (copie de celui du texte, ou neuf pour le cadre et le fond)
+        // qui ignore la profondeur : il se dessine même si un meuble est devant.
+        static void DrawOnTop(Renderer r, Material textMaterial, int queue)
+        {
+            var m = textMaterial ? new Material(textMaterial) : new Material(Shader.Find("SAE/Texte 3D"));
+            if (!textMaterial) m.SetFloat("_VertexColor", 0f);   // un cube n'a pas de couleur de sommets : la teinte vient de ColorTint
+            m.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
+            m.renderQueue = queue;
+            r.sharedMaterial = m;
+        }
+
+        // Unity peut agrandir la texture d'une police quand de nouvelles lettres apparaissent : on la redonne à nos copies
+        static void RefreshFont(TextMesh tm) => tm.GetComponent<Renderer>().sharedMaterial.mainTexture = tm.font.material.mainTexture;
 
         void LateUpdate()
         {
@@ -76,7 +105,10 @@ namespace SAE
             if (!shown.HasValue || !shown.Value.Equals(monkey))
             {
                 shown = monkey;
+                title.text = monkey.type.ToString().ToUpper();
                 text.text = Describe(monkey);
+                RefreshFont(title);
+                RefreshFont(text);
                 smoothAnchor = anchor;
             }
 
@@ -108,8 +140,8 @@ namespace SAE
         {
             string hex = ColorUtility.ToHtmlStringRGB(MonkeyData.RarityColor(m.level));
             var sb = new StringBuilder();
-            sb.AppendLine($"<b>{m.type}</b>  <color=#{hex}>{MonkeyData.RarityName(m.level)}</color>  (niv {(int)m.level + 1})");
-            sb.AppendLine($"<color=#CCCCCC>{MonkeyData.Effect(m.type)}</color>");
+            sb.AppendLine($"<color=#{hex}>{MonkeyData.RarityName(m.level)}</color>  ·  niveau {(int)m.level + 1}");
+            sb.AppendLine($"<color=#B8C8B8>{MonkeyData.Effect(m.type)}</color>");
             sb.AppendLine($"Dégâts {MonkeyData.Damage(m):0.#}   Portée {Range(m)}");
             sb.AppendLine($"Cadence {MonkeyData.FireRate(m):0.#} tir/s   Cibles {Targets(m)}");
             if (m.level < Rarity.Blanc)

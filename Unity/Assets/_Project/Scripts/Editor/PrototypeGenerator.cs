@@ -76,13 +76,25 @@ namespace SAE.EditorTools
             if (!player) return;
             BuildChest(hub, Around(100f, Ring - 0.2f), player.head);
             UseWoodTexture(hub);   // encore une fois : l'estrade et le cadre du coffre sont posés après le reste du hub
-            BuildPlayerMode(player.gameObject, DesktopPlayerObject(hubSpawn.position, mapSpawn));
+            var pcPlayer = DesktopPlayerObject(hubSpawn.position, mapSpawn);
+            AddFallGuard(player.gameObject, hubSpawn, mapSpawn);
+            AddFallGuard(pcPlayer, hubSpawn, mapSpawn);
+            BuildPlayerMode(player.gameObject, pcPlayer);
 
             EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), ScenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
             PlayerModeMenu.Apply();   // VR ou PC, selon le menu SAE → Mode de jeu
             Debug.Log("Prototype généré : " + ScenePath);
         }
+
+        // Si le joueur tombe dans le vide, il revient au point d'arrivée le plus proche (voir FallGuard)
+        static void AddFallGuard(GameObject player, params Transform[] spawns) =>
+            player.AddComponent<FallGuard>().spawns = spawns;
+
+        // Distance d'affichage de la caméra : assez loin pour les montagnes (la brume finit à 230 m), mais pas plus.
+        // Une plage courte (près 3 cm, loin 400 m) rend la profondeur plus précise : moins de surfaces qui
+        // « clignotent » l'une sur l'autre selon l'angle (les bûches sur les fenêtres, par exemple).
+        const float NearClip = 0.03f, FarClip = 400f;
 
         static Transform Spawn(string name, Vector3 pos)
         {
@@ -131,7 +143,9 @@ namespace SAE.EditorTools
             cam.tag = "MainCamera";
             cam.transform.SetParent(player.transform, false);
             cam.transform.localPosition = new Vector3(0, 1.6f, 0);
-            cam.AddComponent<Camera>().nearClipPlane = 0.05f;
+            var camera = cam.AddComponent<Camera>();
+            camera.nearClipPlane = NearClip;
+            camera.farClipPlane = FarClip;
             cam.AddComponent<AudioListener>();
 
             player.AddComponent<DesktopPlayer>();
@@ -164,6 +178,8 @@ namespace SAE.EditorTools
 
             var origin = go.GetComponent<XROrigin>();
             origin.RequestedTrackingOriginMode = XROrigin.TrackingOriginMode.Floor;   // la vraie taille du joueur
+            origin.Camera.nearClipPlane = NearClip;
+            origin.Camera.farClipPlane = FarClip;
 
             // Confort : pas de déplacement continu (il donne la nausée). Les deux sticks téléportent,
             // le stick droit tourne par crans (snap turn, réglage par défaut des Starter Assets).

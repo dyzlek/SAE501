@@ -15,6 +15,8 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 9. **Arc :** l'arc et son animation de tir ne rendent pas très bien, en mode PC comme en VR.
 10. **Plateau 3D :** quand on pose un singe, on ne voit pas sa portée, ni un rappel de ses dégâts, de ses tirs par seconde, etc.
 
+_Corrigé par Dylan (avec l'IA) sur `fix-all`, à tester : points 3 (fiche par-dessus le décor, restylée), 4 (bûches et fenêtres) et 6 (retour au point d'arrivée après une chute)._
+
 _Note : les deux photos ont été prises avant les corrections de Dylan sur `fix-all` (anciennes polices, ancien comptoir), donc le point 1 est peut-être déjà réglé._
 
 ![Photo 1 : la fiche du singe (touche A) en partie cachée par la bibliothèque](../captures/nicolas-critique-1.webp)
