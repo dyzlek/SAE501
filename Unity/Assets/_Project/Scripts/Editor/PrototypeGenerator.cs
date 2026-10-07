@@ -83,7 +83,8 @@ namespace SAE.EditorTools
             var player = BuildPlayers(hubSpawn.position);
             if (!player) return;
             BuildChest(hub, Around(97f, Ring - 0.2f));   // estrade de 1,4 m (le coffre de Maxens) : un peu plus près de VIDER, loin du comptoir du bananier
-            UseWoodTexture(hub);   // encore une fois : l'estrade et le cadre du coffre sont posés après le reste du hub
+            BuildTutorial(hub);
+            UseWoodTexture(hub);   // encore une fois : l'estrade, le cadre du coffre et l'ardoise de Pat sont posés après le reste du hub
             BuildPresence(Level.Hub, hubSpawn);
             new GameObject("Chargement du labyrinthe").AddComponent<LevelLoader>();
 
@@ -1257,6 +1258,35 @@ namespace SAE.EditorTools
             var priceTag = sign.gameObject.AddComponent<ChestPriceTag>();
             priceTag.chest = controller;
             priceTag.label = Visuals.Text(plank, "", new Vector3(0, 0, -0.02f), 0.065f, TitleGold, title: true);
+        }
+
+        // Le tutoriel (Tutorial) : l'ardoise de Pat Fusty accrochée au mur, à gauche du tableau de la vague, avec Pat assis
+        // dessus (un singe Classique doré), et la flèche dorée qui montre quoi utiliser. Il retrouve les objets par leur nom.
+        static void BuildTutorial(Transform env)
+        {
+            const float Angle = -25f;
+            var slate = BuildChalkboard(env, "Ardoise de Pat Fusty", Around(Angle, HubLayout.CabinRadius - 0.25f, 1.95f),
+                Quaternion.Euler(0, Angle, 0), 1.1f, 0.6f);
+            Visuals.MonkeyPiece(new Monkey(MonkeyType.Classique, Rarity.Jaune), slate, new Vector3(-0.4f, 0.55f, -0.05f), 0.45f, withLabel: false)
+                .name = "Pat Fusty";
+
+            var arrow = new GameObject("Flèche du tutoriel").transform;   // un chevron doré qui pointe vers le bas
+            arrow.SetParent(env, false);
+            for (int side = -1; side <= 1; side += 2)
+                Visuals.Box("Branche", arrow, new Vector3(side * 0.088f, 0.088f, 0f), new Vector3(0.06f, 0.25f, 0.06f), TitleGold)
+                    .transform.localRotation = Quaternion.Euler(0f, 0f, -side * 45f);
+
+            var tuto = slate.gameObject.AddComponent<Tutorial>();
+            tuto.text = Visuals.Text(slate, "", new Vector3(0, 0, -0.05f), 0.05f, Chalk);
+            tuto.arrow = arrow;
+            tuto.bananier = env.GetComponentInChildren<Bananier>();
+            tuto.panier = env.GetComponentInChildren<Panier>();
+            tuto.chest = env.GetComponentInChildren<Sae501.Coffres.ChestController>();
+            tuto.stall = env.Find("Etal des bananes");
+            tuto.library = env.Find("Bibliotheque");
+            tuto.board = env.Find("Plateau");
+            var launch = env.GetComponentsInChildren<ActionCube>().FirstOrDefault(a => a.action == ActionCube.Action.StartWave);
+            tuto.launchButton = launch ? launch.transform : null;
         }
 
         static Bounds Bounds(GameObject go)
