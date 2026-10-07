@@ -73,6 +73,14 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
   - **le même paysage autour du labyrinthe** : prairie, végétation, palmiers et montagnes à la place du sol gris ; estrade, pupitre et poteaux du tableau en bois ;
   - **lumière** : après plusieurs essais de rayons dessinés (trop artificiels, ils traversaient les meubles), on garde la vraie lumière : soleil chaud aux ombres douces (taches de soleil sur le plancher derrière les fenêtres), lumière ambiante en trois tons, poussières dorées qui flottent dans le soleil aux fenêtres et à la porte, et réglages de l'image (tons naturels, couleurs un peu plus vives, léger halo, coupé sur le casque pour tenir 72 i/s).
 
+**Captures dans Unity (mode PC), après la fusion :**
+
+![Le labyrinthe dans sa scène : prairie, palmiers, montagnes, la vague en cours](../captures/deux-scenes-labyrinthe.webp)
+
+![Le hub : comptoirs du bananier et du récolteur, étal des bananes, bibliothèque](../captures/deux-scenes-hub-comptoirs.webp)
+
+![Le hub pendant une vague : les ballons avancent en direct sur le plateau](../captures/deux-scenes-hub-plateau.webp)
+
 ![Rendu Blender : la cabane et sa végétation](../captures/cabane-vegetation-dehors.png)
 
 ![Rendu Blender : les massifs d'herbe et de fleurs](../captures/cabane-vegetation-horizon.png)
@@ -107,6 +115,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 | Claude (Claude Code) | Branche `fusion` (depuis `feat/deux-scenes` + `main`) : ajout des ballons de Maxens (`feat/coffre-maxens` : modèles, MOAB, BFB, cœur) et des améliorations de l'arc de Nicolas (`feat/arc-upgrade`). Conflits : plateau du hub gardé en version deux scènes (la miniature des ballons de Maxens ne sert plus, la carte n'étant plus chargée au hub), `Balloon` réunit la régénération du cœur (Maxens) et la perforation par couches (Nicolas), le pupitre ARC est posé sur l'estrade de la nouvelle scène Labyrinthe | À tester (compilé) |
 | Claude (Claude Code) | Pouvoir revenir au hub pendant une vague (la vague continue) : les deux scènes restent chargées (le hub charge le labyrinthe en arrière-plan), chaque scène a sa « présence » (joueur, soleil, réglages d'image) allumée seulement quand on y est (`Levels.Go`, `LevelPresence`) ; HUB n'est plus grisé pendant une vague ; le plateau du hub montre de nouveau les ballons en direct (miniatures de Maxens réutilisées) ; récolteurs et bananier redeviennent normaux (plus besoin de static) | À tester (compilé) |
 | Claude (Claude Code) | Journal de Nicolas : ses 4 captures de l'arc (tableau des améliorations, visée, tir triple, tir explosif) ; fusion de `docs/organisation-github` dans `fusion` (conflits de journaux : les deux côtés gardés) | Gardé |
+| Claude (Claude Code) | Mes captures dans mon journal ; scènes générées (`Hub.unity`, `Labyrinthe.unity`, `Lumiere.asset`, `Poussiere.mat`, suppression de `Jeu.unity`) commitées ; branche `fusion` poussée et Pull Request vers `main` | Gardé (testé par moi en mode PC) |
 | Claude (Claude Code) | Mise en forme de l'analyse critique de Nicolas (qu'il m'a transmise) dans son journal, avec ses 2 photos ; rien de corrigé pour l'instant | Gardé |
 | Claude (Claude Code) | Suivi de projet sur GitHub (branche `docs/organisation-github`, sans toucher au projet Unity) : 17 labels (priorité = périmètre du GDD, type, zone), 3 jalons S1/S2/S3 avec leurs dates, 33 issues tirées du journal général et du GDD (#12 à #44) avec responsables, tableau [Project](https://github.com/users/dyzlek/projects/2) (À faire / En cours / En relecture / Fait, dates, taille) avec les PR déjà fusionnées, modèles d'issue et de PR, `docs/ORGANISATION.md` | Gardé |
 | Claude (Claude Code) | Règle n°3 dans `CLAUDE.md` : chaque IA tient le suivi GitHub à jour toute seule (issue, carte En cours / En relecture / Fait, `Ferme #N`), sans assigner ni mentionner personne (pas de mails, à ma demande) | Gardé |

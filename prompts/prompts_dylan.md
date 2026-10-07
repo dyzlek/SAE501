@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
+### Mes captures et tout sur main
+> Mets mes captures dans mon journal et pousse tout sur `main`.
+
 ### Captures de l'arc dans le journal de Nicolas
 > Mets à jour le journal de Nicolas avec ses captures : le tableau des améliorations de l'arc (pour le bêta-test), la prévisualisation du tir, le tir triple et le tir explosif. Ajoute aussi `docs/organisation-github`.
 
