@@ -38,7 +38,7 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 - [ ] Ven. 13 nov. — rendu + oral
 
 ## Semaine 1 · 5-9 oct. — PROUVER
-**Jeu. 8 oct. — à faire**
+**Jeu. 8 oct. — à faire** _(plus les critiques de fin de journée de [Dylan](dylan.md) et [Maxens](maxens.md) : 31 points à trier en issues)_
 | Tâche | Qui |
 |---|---|
 | Tester `fix-all` (régénérer la scène, mode PC puis casque : LANCER et bouton B, coffre, comptoirs, fiche du singe), puis Pull Request vers `main` | Dylan, relu par un autre |

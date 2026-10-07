@@ -3,6 +3,26 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Mer. 7 oct. 2026
+**Ma critique après la fusion** _(mise en forme par l'IA ; à trier en issues)_
+1. Régler le problème de point d'apparition (spawn).
+2. Améliorer le hub visuellement, surtout les murs.
+3. Régler le problème de téléportation sur le plateau.
+4. Déplacer le bananier dehors avec une animation de la porte, et mettre à sa place le casino ; mettre une banque.
+5. Ne pas dire ce qu'il y a dans la vague.
+6. Une meilleure présentation des caractéristiques : stats du singe à droite, (…) à gauche.
+7. Enlever le texte au-dessus du coffre.
+8. Améliorer le visuel des objets.
+9. Pouvoir jouer à la cible de fléchettes (easter egg).
+10. Une animation quand les bananes pourrissent.
+11. Le singe récolteur devrait porter les bananes devant lui (Maxens).
+12. Améliorer l'aspect lumineux du jeu.
+13. Flèche explosive : ajouter un effet (étincelles).
+14. Le tracé de la flèche ne doit pas être blanc.
+15. Améliorer le système de vie des ballons.
+16. Bloquer la zone de téléportation pour ne pas sortir de la carte.
+17. Améliorer l'interface de la roulette (plus boisée).
+18. Débloquer les singes seulement avec des bananes, plus par vague.
+
 - **Fait :** fusion de ma cabane (`test/cabane`) avec l'arc de Maxens (`feat/arc-quincy`) dans une nouvelle branche `feat/cabane-arc`. Un seul conflit, dans le générateur de scène : on garde la place du coffre de la cabane (estrade, texture bois) et le passage du point d'apparition sur la carte au joueur PC (pour l'étui de l'arc).
   - ajout des derniers commits de Maxens (mains de Quincy, arc plus petit, tir dans le simulateur) ; Pull Request [#9](https://github.com/dyzlek/SAE501/pull/9) fusionnée dans `main` ;
   - scène régénérée et testée en mode PC : la cabane, le hub et l'arc de Quincy fonctionnent ensemble.
@@ -119,6 +139,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 | Claude (Claude Code) | Téléportation sur la carte : on ne pouvait se poser que sur l'estrade et une bande d'herbe ; maintenant toute la prairie et les cases du labyrinthe sont des zones de téléportation (branche `fix/tp-carte`) | À tester (compilé, scènes à régénérer) |
 | Claude (Claude Code) | Téléportation au casque : la cible s'affichait mais rien au relâchement. Cause : XRI garde un seul téléporteur (celui du joueur du hub, éteint sur la carte). Correction : le joueur qui s'allume rebranche toutes les zones sur son téléporteur (`PlayerRig.UseMyTeleporter`). Issue #48 créée et ajoutée au tableau, liée à la PR #47 | À tester au casque |
 | Claude (Claude Code) | « Tout bugue en VR » (rotation, commandes) : un joueur VR par scène ne marche pas avec XRI (il ne gère qu'un XR Origin, et un joueur qui s'éteint coupe les commandes communes). Refonte : **un seul joueur**, dans le hub, déplacé d'une scène à l'autre ; seuls le soleil et les réglages d'image changent avec le niveau ; l'arc ne sort que sur la carte (`BowHolster` + `Levels.Changed`) ; ordre éteindre puis allumer ; `UseMyTeleporter` retiré (plus utile). Issue #49 | À tester au casque |
+| Claude (Claude Code) | Critiques de fin de journée (la mienne et celle de Maxens) mises en forme dans nos journaux et le journal général | Gardé |
 | Claude (Claude Code) | Mise en forme de l'analyse critique de Nicolas (qu'il m'a transmise) dans son journal, avec ses 2 photos ; rien de corrigé pour l'instant | Gardé |
 | Claude (Claude Code) | Suivi de projet sur GitHub (branche `docs/organisation-github`, sans toucher au projet Unity) : 17 labels (priorité = périmètre du GDD, type, zone), 3 jalons S1/S2/S3 avec leurs dates, 33 issues tirées du journal général et du GDD (#12 à #44) avec responsables, tableau [Project](https://github.com/users/dyzlek/projects/2) (À faire / En cours / En relecture / Fait, dates, taille) avec les PR déjà fusionnées, modèles d'issue et de PR, `docs/ORGANISATION.md` | Gardé |
 | Claude (Claude Code) | Règle n°3 dans `CLAUDE.md` : chaque IA tient le suivi GitHub à jour toute seule (issue, carte En cours / En relecture / Fait, `Ferme #N`), sans assigner ni mentionner personne (pas de mails, à ma demande) | Gardé |
