@@ -10,6 +10,8 @@
 #                  2 lanternes murales, tapis rond à franges, cible de fléchettes, herbe, rochers et buissons dehors ;
 #                  plus des repères vides (Repere_*, Lumiere_*) que Unity lit pour s'aligner et poser ses lumières.
 #   Tonneau.glb, Caisse.glb, Regime.glb : les accessoires que Unity pose lui-même (PrototypeGenerator.BuildDecor).
+#   Paysage.glb  : le même paysage (prairie, végétation, palmiers, montagnes) pour la scène Labyrinthe,
+#                  avec la zone de jeu laissée libre au centre.
 #
 # Repère : on raisonne comme dans Unity (Y en haut, +Z = devant le joueur, angle 0 = devant, positif = à droite).
 # P() convertit un point Unity en point Blender. Les mesures sont celles de HubLayout.cs (à garder identiques).
@@ -316,6 +318,9 @@ def build_materials():
     M["montagne"] = material("Montagne", rough=0.95, vcol=True)
     M["palme"] = material("Palme", color=(0.25, 0.55, 0.16), rough=0.7)
     M["palme"].use_backface_culling = False            # les feuilles de palmier sont des plans fins
+    # Herbes hautes et fleurs : la couleur vient des sommets (vert foncé au pied, clair à la pointe ; pétales colorés)
+    M["vegetation"] = material("Vegetation", vcol=True, rough=0.85)
+    M["vegetation"].use_backface_culling = False       # brins et pétales sont des plans fins, vus des deux côtés
     M["plume_rouge"] = material("Plume", color=(0.85, 0.12, 0.1), rough=0.6)
     M["plume_rouge"].use_backface_culling = False     # les ailettes des fléchettes sont de simples plans
     return M
@@ -782,8 +787,30 @@ def build_dartboard(M, coll):
     return b.finish("Cible", coll)
 
 
-def build_outside(M, coll):
-    """Dehors : une prairie, des rochers et des buissons (vus par la porte et les fenêtres)."""
+# Zones à laisser libres (repère Unity : x à droite, z devant) : la cabane et sa terrasse, ou la zone de jeu de la carte
+def hub_clear(x, z):
+    return math.hypot(x, z) < 5.2 or (abs(x) < 4.6 and -6.4 < z < 4.6)
+
+
+def map_clear(x, z):
+    return abs(x) < 17 and -23 < z < 17          # le labyrinthe (24 x 24 m), l'estrade et le pupitre devant
+
+
+def scatter(g, count, rmin, rmax, clear):
+    """Des points au hasard entre rmin et rmax du centre, hors de la zone libre : (x, z, angle)."""
+    pts = []
+    while len(pts) < count:
+        ang = g.uniform(0, 360)
+        dist = rmin + (rmax - rmin) * math.sqrt(g.random())       # répartis sur la surface, pas serrés au centre
+        x, z = math.sin(math.radians(ang)) * dist, math.cos(math.radians(ang)) * dist
+        if not clear(x, z):
+            pts.append((x, z, ang))
+    return pts
+
+
+def build_outside(M, coll, clear=hub_clear, seed=5, suffix="", palm_ring=(8, 16), palm_count=14):
+    """Dehors : une prairie, des rochers, des buissons, des herbes hautes, des fleurs, des palmiers et les montagnes.
+    clear(x, z) : la zone à laisser libre (la cabane, ou la zone de jeu de la carte)."""
     b = Builder([M["herbe"]])
     n = 64
     rad = 95.0                                   # jusqu'au pied des montagnes
@@ -795,19 +822,15 @@ def build_outside(M, coll):
         f.normal_update()
         if f.normal.z < 0:
             f.normal_flip()
-    ground = b.finish("Prairie", coll, recalc=False)
+    ground = b.finish("Prairie" + suffix, coll, recalc=False)
 
     deco = []
-    g = random.Random(5)
+    g = random.Random(seed)
     for kind in ("roche", "buisson"):
         bm = bmesh.new()
-        count = 14 if kind == "roche" else 26
-        for i in range(count):
-            ang = g.uniform(0, 360)
-            if kind == "buisson" and -30 < ((ang + 180) % 360 - 180) < 30:
-                continue                                        # rien devant : on garde la vue vers la carte
-            dist = g.uniform(6.0, 15.0)
-            pos = polar(ang, dist, GROUND_Y)
+        count = 22 if kind == "roche" else 60
+        for (x, z, ang) in scatter(g, count, 6.0, 30.0, clear):
+            pos = P(x, GROUND_Y, z)
             for j in range(1 if kind == "roche" else 3):
                 size = g.uniform(0.3, 0.9) if kind == "roche" else g.uniform(0.45, 0.85)
                 off = Vector((g.uniform(-0.5, 0.5), g.uniform(-0.5, 0.5), 0)) if j else Vector()
@@ -817,16 +840,69 @@ def build_outside(M, coll):
                     v.co.z *= 0.6 if kind == "roche" else 0.85
                     v.co += v.co.normalized() * g.uniform(-0.08, 0.08) * size
                     v.co += pos + off + Vector((0, 0, size * (0.15 if kind == "roche" else 0.5)))
-        me = bpy.data.meshes.new(kind)
+        me = bpy.data.meshes.new(kind + suffix)
         bm.to_mesh(me)
         bm.free()
         me.materials.append(M[kind])
         for p in me.polygons:
             p.use_smooth = kind == "buisson"
-        ob = bpy.data.objects.new("Rochers" if kind == "roche" else "Buissons", me)
+        ob = bpy.data.objects.new(("Rochers" if kind == "roche" else "Buissons") + suffix, me)
         coll.objects.link(ob)
         deco.append(ob)
-    return [ground] + deco + [build_mountains(M, coll), build_palms(M, coll)]
+    deco.append(build_grass_and_flowers(M, coll, g, clear, suffix))
+    mountains = build_mountains(M, coll, suffix)
+    return [ground] + deco + [mountains, build_palms(M, coll, clear, suffix, palm_ring, palm_count)]
+
+
+def build_grass_and_flowers(M, coll, g, clear, suffix):
+    """Des touffes d'herbe haute (brins fins, vert foncé au pied, clair à la pointe) et des fleurs (tige, 5 pétales colorés).
+    Peu de triangles par touffe : on en met beaucoup sans ralentir le casque."""
+    b = Builder([M["vegetation"]])
+    dark, light = lin((0.16, 0.36, 0.1)), lin((0.5, 0.75, 0.28))
+    petals = [lin(c) for c in ((0.95, 0.85, 0.2), (0.95, 0.4, 0.45), (0.98, 0.98, 0.95), (0.6, 0.45, 0.9), (1.0, 0.6, 0.2))]
+
+    def tri(a, b_, c_, cols):
+        f = b.face([a, b_, c_], [(0, 0), (1, 0), (0.5, 1)], M["vegetation"])
+        for loop, col in zip(f.loops, cols):
+            loop[b.col] = (*col, 1)
+        f.tag = True
+
+    def patch(cx, cz, spread, n):
+        """n points autour de (cx, cz), en massif, hors de la zone libre"""
+        out = []
+        for _ in range(n):
+            x, z = cx + g.gauss(0, spread), cz + g.gauss(0, spread)
+            if not clear(x, z):
+                out.append((x, z))
+        return out
+
+    # L'herbe haute en massifs (plus beau que des brins isolés), plus serrée près du centre
+    for (cx, cz, _) in scatter(g, 110, 5.0, 30.0, clear):
+        for (x, z) in patch(cx, cz, 1.2, 9):
+            base = P(x, GROUND_Y, z)
+            for k in range(7):                               # 7 brins en éventail
+                yaw = g.uniform(0, 2 * math.pi)
+                d = Vector((math.cos(yaw), math.sin(yaw), 0))
+                side = Vector((-d.y, d.x, 0)) * 0.035
+                h = g.uniform(0.35, 0.8)
+                tip = base + d * g.uniform(0.08, 0.25) + Vector((0, 0, h))
+                tri(base - side, base + side, tip, (dark, dark, light))
+
+    # Les fleurs en massifs d'une seule couleur, comme dans un pré
+    for (cx, cz, _) in scatter(g, 45, 5.0, 26.0, clear):
+        col = petals[g.randrange(len(petals))]
+        for (x, z) in patch(cx, cz, 0.7, 8):
+            base = P(x, GROUND_Y, z)
+            h = g.uniform(0.3, 0.55)
+            head = base + Vector((g.uniform(-0.05, 0.05), g.uniform(-0.05, 0.05), h))
+            tri(base - Vector((0.015, 0, 0)), base + Vector((0.015, 0, 0)), head, (dark, dark, dark))   # tige
+            rot = g.uniform(0, 2 * math.pi)
+            for k in range(5):                               # 5 pétales autour d'un cœur jaune
+                a0 = rot + 2 * math.pi * k / 5
+                p1 = head + Vector((math.cos(a0 - 0.4), math.sin(a0 - 0.4), 0.015)) * 0.11
+                p2 = head + Vector((math.cos(a0 + 0.4), math.sin(a0 + 0.4), 0.015)) * 0.11
+                tri(head, p1, p2, (lin((1.0, 0.85, 0.2)), col, col))
+    return b.finish("Herbes et fleurs" + suffix, coll, recalc=False)
 
 
 def outward(face, center):
@@ -837,10 +913,10 @@ def outward(face, center):
         face.normal_flip()
 
 
-def build_mountains(M, coll):
+def build_mountains(M, coll, suffix=""):
     """Une couronne de montagnes à l'horizon : pentes vertes, roche, neige au sommet (couleurs par sommet).
-    Devant (la carte de jeu est à 40 m) elles reculent derrière la carte."""
-    g = random.Random(11)
+    Devant, elles reculent un peu (plus de profondeur)."""
+    g = random.Random(11 if not suffix else 23)
     b = Builder([M["montagne"]])
     grass, rock, snow = lin((0.36, 0.55, 0.24)), lin((0.52, 0.48, 0.44)), lin((0.95, 0.96, 0.98))
     count = 22
@@ -894,20 +970,18 @@ def build_mountains(M, coll):
                     c = colour(loop.vert.co.z)
                     loop[b.col] = (*c, 1)
                 f.tag = True
-    ob = b.finish("Montagnes", coll, recalc=False)
+    ob = b.finish("Montagnes" + suffix, coll, recalc=False)
     for p in ob.data.polygons:
         p.use_smooth = False                                         # facettes nettes : style « low poly »
     return ob
 
 
-def build_palms(M, coll):
-    """Des palmiers autour de la cabane : tronc courbe en anneaux, couronne de palmes arquées."""
-    g = random.Random(17)
+def build_palms(M, coll, clear=hub_clear, suffix="", ring=(8, 16), count=14):
+    """Des palmiers tout autour : tronc courbe en anneaux, couronne de palmes arquées."""
+    g = random.Random(17 if not suffix else 29)
     b = Builder([M["poutre"], M["bout"], M["palme"]])
-    spots = [a for a in range(0, 360, 31) if not (-40 < ((a + 180) % 360 - 180) < 40)]
-    for idx, ang in enumerate(spots):
-        dist = g.uniform(8, 16)
-        base = polar(ang + g.uniform(-8, 8), dist, GROUND_Y)
+    for idx, (x, z, ang) in enumerate(scatter(g, count, ring[0], ring[1], clear)):
+        base = P(x, GROUND_Y, z)
         height = g.uniform(5, 8)
         lean = Vector((g.uniform(-1, 1), g.uniform(-1, 1), 0)).normalized() * g.uniform(0.6, 1.4)
         pts = [base + lean * (t * t) + Vector((0, 0, height * t)) for t in np.linspace(0, 1, 7)]
@@ -928,7 +1002,7 @@ def build_palms(M, coll):
                 if prev_l is not None:
                     b.face([prev_l, prev_r, r, l], [(0, t), (1, t), (1, t), (0, t)], M["palme"])
                 prev_l, prev_r = l, r
-    return b.finish("Palmiers", coll, recalc=False)
+    return b.finish("Palmiers" + suffix, coll, recalc=False)
 
 
 # ============================================================ accessoires (posés par Unity)
@@ -1121,6 +1195,17 @@ def main():
 
     tris = sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in objs if o.type == "MESH")
     print("triangles de la cabane :", tris)
+
+    # Le paysage de la carte (scène Labyrinthe) : même style, la zone de jeu laissée libre, plus de palmiers
+    land = bpy.data.collections.new("Paysage")
+    bpy.context.scene.collection.children.link(land)
+    scenery = build_outside(M, land, clear=map_clear, seed=41, suffix=" carte", palm_ring=(18, 34), palm_count=22)
+    scenery.append(empty("Repere_Porte", polar(DOOR, R), land))      # mêmes repères que la cabane : Unity l'aligne pareil
+    scenery.append(empty("Repere_Droite", polar(90, R), land))
+    export(scenery, os.path.join(OUT, "Paysage.glb"))
+    for o in scenery:
+        o.hide_render = True                                       # pas dans les aperçus de la cabane
+    print("triangles du paysage :", sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in scenery if o.type == "MESH"))
 
     if "--render" in argv:
         cam = setup_preview(objs)

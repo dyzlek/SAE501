@@ -68,6 +68,14 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 - **Mes objectifs du jour** (branche `feat/deux-scenes`, partie de `fix-all`) :
   - **deux vraies scènes** : `Hub.unity` et `Labyrinthe.unity`, avec un **vrai changement de scène** (SE TP / HUB) ; chaque scène a son joueur (l'arc seulement sur la carte) ; argent, inventaire, singes posés, vagues gagnées, niveaux du bananier et récolteurs sont gardés ; LANCER au hub emmène sur la carte et lance la vague ; HUB est grisé pendant une vague ; le plateau du hub montre les singes posés (plus les ballons en direct) ;
   - **zone de téléportation du hub** : seulement un disque de 1,9 m au centre de la cabane.
+- **Décor des deux scènes** (sans toucher au labyrinthe) :
+  - **plus de végétation** autour de la cabane : massifs d'herbe haute, massifs de fleurs, plus de buissons, de rochers et de palmiers (modèle Blender) ;
+  - **le même paysage autour du labyrinthe** : prairie, végétation, palmiers et montagnes à la place du sol gris ; estrade, pupitre et poteaux du tableau en bois ;
+  - **rayons de soleil** : des faisceaux de lumière qui entrent par la porte et les fenêtres côté soleil, et de grands rayons qui tombent du ciel autour de la carte (le soleil est réglé pareil dans les deux scènes).
+
+![Rendu Blender : la cabane et sa végétation](../captures/cabane-vegetation-dehors.png)
+
+![Rendu Blender : les massifs d'herbe et de fleurs](../captures/cabane-vegetation-horizon.png)
 - **Critique de Nicolas (1re partie)** :
   - **fiche du singe** (touche A) refaite comme les ardoises du hub (cadre en bois, titre doré, texte à la craie) et dessinée par-dessus le décor : un meuble ne la cache plus ;
   - **bûches qui débordaient sur les fenêtres** : dans `cabane.py`, les rondins qui touchent une fenêtre sont coupés et leurs bouts se cachent dans les montants, un panneau bouche le vide sous l'appui ; caméras réglées (affichage de 3 cm à 400 m) pour que les surfaces proches clignotent moins ;
@@ -92,6 +100,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 | Claude (Claude Code) | Deux scènes (`Hub` + `Labyrinthe`, chargement additif par `LevelLoader`, points d'arrivée `LevelSpawn`, `WaveSpawner.Instance` au lieu des liens entre scènes, carte à 500 m sur une prairie, `Jeu.unity` supprimée à la génération) et zone de téléportation du hub limitée à un disque de 1,9 m | À tester (compilé, scènes à générer) |
 | Claude (Claude Code) | Depuis la carte, on voyait les montagnes du hub dans la brume : carte éloignée à 1 km (au-delà de la distance d'affichage) | À tester |
 | Claude (Claude Code) | Vrai changement de scène à la place du chargement additif : `Levels` (`SceneManager.LoadScene`), un joueur par scène, état gardé en static (`HarvesterCrew`, `UpgradeButton`), `WaveSpawner` reprend au bon numéro et lance à l'arrivée, plateau du hub refait à partir de `GameState`, `LevelLoader`, `BowHolster`, `Mirrored` et `KeepWorldScale` supprimés | À tester (compilé, scènes à générer) |
+| Claude (Claude Code) | Décor : `cabane.py` (massifs d'herbe et de fleurs, plus de buissons, rochers et palmiers ; nouveau `Paysage.glb` pour la carte, zone de jeu libre), rayons de soleil en maillages transparents (porte et fenêtres du hub, grands rayons sur la carte), soleil identique dans les deux scènes, estrade et pupitres de la carte en bois | À tester (compilé, rendus Blender vérifiés, scènes à générer) |
 | Claude (Claude Code) | Mise en forme de l'analyse critique de Nicolas (qu'il m'a transmise) dans son journal, avec ses 2 photos ; rien de corrigé pour l'instant | Gardé |
 
 ## Mar. 6 oct. 2026

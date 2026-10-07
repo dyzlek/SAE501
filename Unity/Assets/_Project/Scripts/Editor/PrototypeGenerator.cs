@@ -92,6 +92,13 @@ namespace SAE.EditorTools
         static void NewLevelScene()
         {
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+            var sun = Object.FindFirstObjectByType<Light>();
+            if (sun)
+            {
+                sun.name = "Soleil";
+                sun.transform.rotation = SunRotation;         // les rayons de soleil (SunBeam) suivent cette direction
+                sun.color = new Color(1f, 0.95f, 0.85f);      // un peu chaud, comme en fin d'après-midi
+            }
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.Linear;
             RenderSettings.fogStartDistance = 60f;
@@ -99,6 +106,104 @@ namespace SAE.EditorTools
             RenderSettings.fogColor = new Color(0.72f, 0.82f, 0.93f);
             var defaultCam = GameObject.FindWithTag("MainCamera");
             if (defaultCam) Object.DestroyImmediate(defaultCam);
+        }
+
+        // ---------------- SOLEIL ET RAYONS ----------------
+        // Le soleil vient de l'arrière-droite du hub (150°), assez haut : il entre par la porte et deux fenêtres.
+        static readonly Quaternion SunRotation = Quaternion.Euler(50f, -30f, 0f);
+        static Vector3 SunDirection => SunRotation * Vector3.forward;   // le sens où va la lumière
+        static readonly Color BeamColor = new Color(1f, 0.92f, 0.7f);
+        const string BeamMaterialPath = "Assets/_Project/Art/Cabane/Rayons.mat";
+
+        // Le matériau des rayons : notre shader transparent (« SAE/Texte 3D »), la couleur et la transparence
+        // viennent des sommets du rayon. Enregistré comme fichier pour être gardé dans la scène et le build.
+        static Material BeamMaterial()
+        {
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(BeamMaterialPath);
+            if (mat) return mat;
+            mat = new Material(Shader.Find("SAE/Texte 3D")) { name = "Rayons" };
+            AssetDatabase.CreateAsset(mat, BeamMaterialPath);
+            return mat;
+        }
+
+        // Un rayon de soleil : le prisme de lumière entre une ouverture (4 coins, dans l'ordre) et son ombre au sol,
+        // le long de la direction du soleil. On ne dessine que ses 4 côtés, transparents : lumineux à l'ouverture,
+        // ils s'effacent vers le sol. Un simple maillage transparent : rien à calculer pour le casque.
+        static void SunBeam(Transform parent, string name, Vector3[] opening, float groundY, float alpha)
+        {
+            var dir = SunDirection;
+            var verts = new Vector3[16];
+            var colors = new Color[16];
+            var tris = new int[24];
+            var top = new Color(BeamColor.r, BeamColor.g, BeamColor.b, alpha);
+            var bottom = new Color(BeamColor.r, BeamColor.g, BeamColor.b, 0f);
+            for (int i = 0; i < 4; i++)
+            {
+                var a = opening[i];
+                var b = opening[(i + 1) % 4];
+                var aGround = a + dir * ((a.y - groundY) / -dir.y);
+                var bGround = b + dir * ((b.y - groundY) / -dir.y);
+                int k = i * 4;
+                verts[k] = a; verts[k + 1] = b; verts[k + 2] = bGround; verts[k + 3] = aGround;
+                colors[k] = colors[k + 1] = top;
+                colors[k + 2] = colors[k + 3] = bottom;
+                int t = i * 6;
+                tris[t] = k; tris[t + 1] = k + 1; tris[t + 2] = k + 2;
+                tris[t + 3] = k; tris[t + 4] = k + 2; tris[t + 5] = k + 3;
+            }
+            var mesh = new Mesh { name = name, vertices = verts, colors = colors, triangles = tris };
+            mesh.RecalculateBounds();
+
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            go.AddComponent<MeshFilter>().sharedMesh = mesh;
+            var r = go.AddComponent<MeshRenderer>();
+            r.sharedMaterial = BeamMaterial();
+            r.shadowCastingMode = ShadowCastingMode.Off;
+            r.receiveShadows = false;
+        }
+
+        // Dans la cabane : un rayon par ouverture tournée vers le soleil (la porte et les fenêtres de ce côté)
+        static readonly float[] CabinWindows = { 60f, 150f, 210f };   // mêmes valeurs que WINDOWS dans cabane.py
+        const float WindowBottom = 1.72f, WindowTop = 2.42f, WindowWidth = 0.9f, DoorWidth = 1.3f;
+
+        static void BuildCabinBeams(Transform env)
+        {
+            var beams = new GameObject("Rayons de soleil").transform;
+            beams.SetParent(env, false);
+            var toSun = -new Vector3(SunDirection.x, 0f, SunDirection.z).normalized;
+            void Opening(string name, float angle, float width, float bottom, float top, float alpha)
+            {
+                var outward = Around(angle, 1f);
+                if (Vector3.Dot(outward, toSun) < 0.3f) return;   // ce mur est à l'ombre
+                var center = Around(angle, HubLayout.CabinRadius);
+                var along = new Vector3(outward.z, 0f, -outward.x) * (width / 2f);   // le long du mur
+                SunBeam(beams, name, new[]
+                {
+                    center - along + Vector3.up * bottom, center + along + Vector3.up * bottom,
+                    center + along + Vector3.up * top, center - along + Vector3.up * top,
+                }, 0f, alpha);
+            }
+            foreach (var angle in CabinWindows) Opening($"Rayon fenêtre {angle}", angle, WindowWidth, WindowBottom, WindowTop, 0.22f);
+            Opening("Rayon porte", 180f, DoorWidth, 0.05f, CabinDoorHeight, 0.16f);
+        }
+
+        // Sur la carte : de grands rayons qui tombent du ciel autour de la zone de jeu (comme à travers des nuages)
+        static void BuildSkyBeams(Transform map, float groundY)
+        {
+            var beams = new GameObject("Rayons de soleil").transform;
+            beams.SetParent(map, false);
+            var dir = SunDirection;
+            const float Height = 40f;
+            var spots = new[] { (-30f, 26f, 5f), (25f, 30f, 4f), (110f, 28f, 6f), (160f, 32f, 4f), (215f, 27f, 5f), (290f, 30f, 6f) };
+            foreach (var (angle, radius, size) in spots)
+            {
+                var ground = Around(angle, radius, groundY);
+                var center = ground - dir * ((Height - groundY) / -dir.y);   // remonter le rayon jusqu'en haut
+                var h = new Vector3(size / 2f, 0f, 0f);
+                var v = new Vector3(0f, 0f, size / 2f);
+                SunBeam(beams, $"Rayon {angle}", new[] { center - h - v, center + h - v, center + h + v, center - h + v }, groundY, 0.09f);
+            }
         }
 
         // Les deux joueurs de la scène (VR et PC, PlayerMode active le bon), au point d'arrivée.
@@ -430,6 +535,7 @@ namespace SAE.EditorTools
         {
             var env = new GameObject("Hub").transform;
             BuildCabin(env);
+            BuildCabinBeams(env);
 
             // Devant : le plateau ; à sa gauche un pupitre avec LANCER (la vague) et SE TP (aller sur la carte),
             // à sa droite le pupitre VIDER, puis le panier
@@ -463,6 +569,7 @@ namespace SAE.EditorTools
         const string CabinFolder = "Assets/_Project/Art/Cabane/";
         const int CabinSides = 12;
         const float CabinDoorHeight = 2.4f;
+        const float BlenderGroundY = -0.35f;   // GROUND_Y dans cabane.py : la hauteur de la prairie du modèle
         const float TeleportRadius = Ring - 0.9f;   // 1,9 m : les meubles commencent un peu au-delà   // même valeur que DOOR_H dans cabane.py : la porte est derrière (180°)
 
         static void BuildCabin(Transform env)
@@ -514,9 +621,28 @@ namespace SAE.EditorTools
                 else if (t.name.StartsWith("Lumiere_Lanterne")) AddLight(t, 3.5f, 1.3f);
             }
 
-            // Rien ici ne bouge : Unity regroupe les maillages (moins d'appels de dessin, plus de fps dans le casque)
-            foreach (var t in cabin.GetComponentsInChildren<Transform>())
+            MakeStatic(cabin);
+        }
+
+        // Rien ici ne bouge : Unity regroupe les maillages (moins d'appels de dessin, plus de fps dans le casque)
+        static void MakeStatic(GameObject model)
+        {
+            foreach (var t in model.GetComponentsInChildren<Transform>())
                 GameObjectUtility.SetStaticEditorFlags(t.gameObject, StaticEditorFlags.BatchingStatic);
+        }
+
+        // Le paysage autour de la carte (Blender/cabane.py → Art/Cabane/Paysage.glb) : prairie, herbes hautes, fleurs,
+        // buissons, palmiers et montagnes, comme autour de la cabane ; la zone de jeu est laissée libre.
+        static void BuildScenery(Transform map, float groundY)
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(CabinFolder + "Paysage.glb");
+            if (!asset) { Debug.LogWarning("Carte : Paysage.glb introuvable. Lancer Blender/cabane.py (voir l'en-tête du script)."); return; }
+            var scenery = (GameObject)PrefabUtility.InstantiatePrefab(asset);
+            scenery.name = "Paysage";
+            scenery.transform.SetParent(map, false);
+            AlignCabin(scenery.transform);                                       // mêmes repères que la cabane
+            scenery.transform.localPosition = new Vector3(0f, groundY - BlenderGroundY, 0f);   // la prairie au niveau du sol de la carte
+            MakeStatic(scenery);
         }
 
         // Le modèle passe de Blender (Z en haut) à Unity (Y en haut) : selon l'importeur, il peut arriver tourné ou en miroir.
@@ -1055,16 +1181,26 @@ namespace SAE.EditorTools
             map.AddComponent<WaveSpawner>();
 
             float edge = MapLayout.HalfExtent;
-            Teleportable(Visuals.Solid("Estrade", map.transform, new Vector3(0, -0.25f, -edge - 2.5f), new Vector3(8, 0.5f, 5), Floor));
-            Teleportable(Visuals.Solid("Sol autour", map.transform, new Vector3(0, -0.6f, 0), new Vector3(edge * 2 + 20, 0.1f, edge * 2 + 20), Floor));
-            // Une grande prairie sous la carte : le labyrinthe n'est pas une île grise dans le ciel (on ne s'y téléporte pas)
-            Visuals.Solid("Prairie", map.transform, new Vector3(0, -0.7f, 0), new Vector3(300f, 0.1f, 300f), Grass2);
+            const float GroundY = -0.55f;   // le dessus de l'herbe, autour du plateau de jeu
+            Teleportable(Visuals.Solid("Estrade", map.transform, new Vector3(0, -0.25f, -edge - 2.5f), new Vector3(8, 0.5f, 5), Wood));
+            // Le sol autour du labyrinthe : on voit l'herbe du paysage, ces deux blocs ne servent qu'à marcher (invisibles).
+            // Le premier est la zone de téléportation, le second empêche de tomber si on marche plus loin (mode PC).
+            var around = Visuals.Solid("Sol autour (collider)", map.transform, new Vector3(0, GroundY - 0.05f, 0), new Vector3(edge * 2 + 20, 0.1f, edge * 2 + 20), Floor);
+            around.GetComponent<Renderer>().enabled = false;
+            Teleportable(around);
+            var meadow = Visuals.Solid("Prairie (collider)", map.transform, new Vector3(0, GroundY - 0.06f, 0), new Vector3(180f, 0.1f, 180f), Floor);
+            meadow.GetComponent<Renderer>().enabled = false;
+            BuildScenery(map.transform, GroundY);
+            BuildSkyBeams(map.transform, GroundY);
 
             // Le même pupitre qu'au hub, un peu à droite du point d'arrivée : le passage vers la carte reste libre
             var commands = BuildConsole(map.transform, "Carte", new Vector3(1.5f, 0f, -edge - 2f), 2, 0f);
             ConsoleButton(commands, -ConsoleStep / 2f, "LANCER", LaunchColor, ActionCube.Action.StartWave);
             ConsoleButton(commands, ConsoleStep / 2f, "HUB", HubColor, ActionCube.Action.Teleport, Level.Hub);
             BuildWaveBoard(map.transform, new Vector3(0, 2.4f, -edge - 0.3f), Quaternion.identity);
+            for (int side = -1; side <= 1; side += 2)   // le tableau tient sur deux poteaux plantés dans le sol (il ne flotte pas)
+                Visuals.Solid("Poteau du tableau", map.transform, new Vector3(side * 0.92f, (2.4f + GroundY) / 2f, -edge - 0.25f), new Vector3(0.1f, 2.4f - GroundY, 0.1f), Wood);
+            UseWoodTexture(map.transform);   // l'estrade, les pupitres et les poteaux, en bois comme au hub
             return map.transform;
         }
     }
