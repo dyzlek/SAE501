@@ -7,6 +7,8 @@ namespace SAE
     // Sa sorte (BalloonKind) change sa taille, sa vitesse et sa résistance :
     //   Rapide = petit et vif ; Blindé = gris, moitié moins de dégâts, insensible au ralentissement ;
     //   Boss = gros ballon violet foncé et lent ; Dirigeable = le boss final rouge, énorme, insensible au ralentissement.
+    // Avec les modèles 3D (BalloonVisuals) : Normal et Rapide = Ballon_Normal teinté par couche,
+    //   Blindé = Ballon_Blindage, Boss = MOAB, Dirigeable = BFB.
     // S'il atteint la sortie, il retire autant de vies qu'il lui reste de couches.
     public class Balloon : MonoBehaviour
     {
@@ -31,9 +33,12 @@ namespace SAE
         float slowFactor = 1f;
         float slowUntil;
         ColorTint tint;
+        ColorTint[] modelTints;   // les morceaux du modèle 3D qui prennent la couleur de la couche
+        bool hasModel;
 
         public BalloonKind Kind { get; private set; }
         bool Armored => Kind == BalloonKind.Blinde || Kind == BalloonKind.Dirigeable;
+        bool IsBlimp => Kind == BalloonKind.Boss || Kind == BalloonKind.Dirigeable;
 
         // Distance parcourue : les singes visent le ballon le plus avancé.
         public float Progress { get; private set; }
@@ -56,9 +61,50 @@ namespace SAE
                 BalloonKind.Dirigeable => (2.2f, 0.35f),
                 _ => (0.9f, 1f),
             };
-            transform.localScale = kind == BalloonKind.Dirigeable ? new Vector3(size, size * 1.6f, size) : Vector3.one * size;
+            var modelAsset = BalloonVisuals.Model(kind);
+            hasModel = modelAsset;
+            if (hasModel)
+            {
+                // Les dirigeables (MOAB, BFB) sont longs : leur taille est leur longueur, on les grandit un peu.
+                if (IsBlimp) size *= 1.5f;
+                transform.localScale = Vector3.one * size;
+                AddModel(modelAsset);
+            }
+            else
+                transform.localScale = kind == BalloonKind.Dirigeable ? new Vector3(size, size * 1.6f, size) : Vector3.one * size;
             speed = baseSpeed * speedFactor;
             UpdateColor();
+        }
+
+        // Pose le modèle 3D dans la sphère (de diamètre 1 avant l'échelle) et cache la sphère,
+        // qui reste comme collider et comme miniature sur le plateau du hub.
+        void AddModel(GameObject asset)
+        {
+            GetComponent<Renderer>().enabled = false;
+            var model = Instantiate(asset);
+            model.name = "Modele";
+            model.transform.SetPositionAndRotation(Vector3.zero, asset.transform.rotation);
+
+            var renderers = model.GetComponentsInChildren<Renderer>();
+            var bounds = renderers[0].bounds;
+            foreach (var r in renderers) bounds.Encapsulate(r.bounds);
+
+            // Un dirigeable avance dans le sens de son grand axe : on le tourne pour qu'il soit le long de +Z.
+            var turn = Quaternion.identity;
+            if (IsBlimp && bounds.size.x > bounds.size.z) turn = Quaternion.Euler(0f, 90f, 0f);
+            float scale = 1f / Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
+
+            model.transform.SetParent(transform, false);
+            model.transform.localRotation = turn * asset.transform.rotation;
+            model.transform.localScale = asset.transform.localScale * scale;
+            model.transform.localPosition = turn * -bounds.center * scale;
+
+            // Les ballons normaux et rapides changent de couleur à chaque couche ; les autres gardent leur texture.
+            if (Kind == BalloonKind.Normal || Kind == BalloonKind.Rapide)
+            {
+                modelTints = new ColorTint[renderers.Length];
+                for (int i = 0; i < renderers.Length; i++) modelTints[i] = renderers[i].gameObject.AddComponent<ColorTint>();
+            }
         }
 
         void OnEnable() => All.Add(this);
@@ -92,8 +138,12 @@ namespace SAE
 
             var target = path[nextPoint];
             // Le dirigeable est couché dans le sens de la marche
-            if (Kind == BalloonKind.Dirigeable && target != transform.position)
-                transform.rotation = Quaternion.LookRotation(target - transform.position) * Quaternion.Euler(90f, 0f, 0f);
+            // (avec un modèle, le MOAB et le BFB regardent simplement vers où ils vont)
+            if (hasModel ? IsBlimp : Kind == BalloonKind.Dirigeable)
+            {
+                if (target != transform.position)
+                    transform.rotation = Quaternion.LookRotation(target - transform.position) * (hasModel ? Quaternion.identity : Quaternion.Euler(90f, 0f, 0f));
+            }
 
             transform.position = Vector3.MoveTowards(transform.position, target, step);
             if ((transform.position - target).sqrMagnitude < 0.0001f)
@@ -118,6 +168,7 @@ namespace SAE
                 default:
                     int layer = Mathf.Clamp(Mathf.CeilToInt(hp) - 1, 0, layerColors.Length - 1);
                     tint.Set(layerColors[layer]);
+                    if (modelTints != null) foreach (var t in modelTints) t.Set(layerColors[layer]);
                     break;
             }
         }

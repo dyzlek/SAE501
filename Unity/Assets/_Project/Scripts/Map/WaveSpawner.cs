@@ -91,7 +91,10 @@ namespace SAE
 
         void Spawn(BalloonKind kind, int layers)
         {
-            var go = GameObject.CreatePrimitive(kind == BalloonKind.Dirigeable ? PrimitiveType.Capsule : PrimitiveType.Sphere);
+            // La sphère (ou la capsule du dirigeable sans modèle) sert de collider et de miniature sur le plateau ;
+            // le modèle 3D, s'il existe, est ajouté par Balloon.Init.
+            bool capsule = kind == BalloonKind.Dirigeable && !BalloonVisuals.Model(kind);
+            var go = GameObject.CreatePrimitive(capsule ? PrimitiveType.Capsule : PrimitiveType.Sphere);
             go.name = kind.ToString();
             go.tag = Tags.Ballon;
             go.AddComponent<ColorTint>();
