@@ -615,6 +615,8 @@ namespace SAE.EditorTools
             var bananier = BuildBananas(env, Around(180f, Ring + 1.3f), 180f, out var panier);
             BuildMoneyBoard(env, HubLayout.HarvesterPanelAngle);
             if (bananier) BuildUpgradePanel(env, bananier, 137f);
+            var door = env.GetComponentInChildren<DoorSwing>();
+            if (door) door.bananier = bananier;   // une banane qui tombe ouvre la porte
             if (bananier && panier) BuildHarvesters(env, bananier, panier);
 
             BuildDecor(env);
@@ -693,9 +695,46 @@ namespace SAE.EditorTools
 
             MakeStatic(cabin);
 
+            BuildDoor(env, cabin);
+
             // La cible de fléchettes du modèle devient jouable (petit bonus caché)
             var dartboard = cabin.GetComponentsInChildren<Transform>().FirstOrDefault(t => t.name == "Cible");
             if (dartboard) BuildDarts(env, dartboard.gameObject);
+        }
+
+        // La grande porte qui s'ouvre et se ferme (DoorSwing) : le battant du modèle est accroché à une charnière posée
+        // sur le repère « Repere_Charniere ». Le modèle est fait porte ouverte ; pour savoir dans quel sens elle se ferme
+        // (la cabane a pu être retournée en miroir à l'import), on essaie les deux sens et on garde celui qui bouche l'embrasure.
+        static void BuildDoor(Transform env, GameObject cabin)
+        {
+            var parts = cabin.GetComponentsInChildren<Transform>();
+            var leaf = parts.FirstOrDefault(t => t.name == "Porte_Battant");
+            var mark = parts.FirstOrDefault(t => t.name == "Repere_Charniere");
+            if (!leaf || !mark) { Debug.LogWarning("Hub : battant ou charnière de la porte introuvable (relancer Blender/cabane.py)."); return; }
+
+            var hinge = new GameObject("Charnière de la porte").transform;
+            hinge.SetParent(env, false);
+            hinge.position = mark.position;
+            leaf.SetParent(hinge, true);
+            GameObjectUtility.SetStaticEditorFlags(leaf.gameObject, 0);   // elle bouge : pas de regroupement statique
+
+            var doorway = new GameObject("Embrasure de la porte").transform;
+            doorway.SetParent(env, false);
+            doorway.position = Around(180f, HubLayout.CabinRadius, CabinDoorHeight / 2f);
+
+            float BlockedBy(float angle)   // distance entre le battant tourné de 'angle' et le milieu de l'embrasure
+            {
+                hinge.rotation = Quaternion.Euler(0f, angle, 0f);
+                float d = Vector3.Distance(Bounds(leaf.gameObject).center, doorway.position);
+                hinge.rotation = Quaternion.identity;
+                return d;
+            }
+            const float Swing = 100f;   // le battant du modèle est ouvert à 100°
+            float closeBy = BlockedBy(Swing) < BlockedBy(-Swing) ? Swing : -Swing;
+
+            var swing = hinge.gameObject.AddComponent<DoorSwing>();
+            swing.openAngle = -closeBy;
+            swing.doorway = doorway;
         }
 
         // La cible jouable : un collider plat devant la cible du modèle (DartBoard), une petite ardoise des points en dessous,
