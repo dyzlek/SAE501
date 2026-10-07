@@ -14,6 +14,10 @@ namespace SAE
     // Rien n'est affiché à l'écran (nausée en VR) : les tableaux WaveBoard du décor lisent Wave, Lives et Status.
     public class WaveSpawner : MonoBehaviour
     {
+        // La seule réserve de vagues du jeu, dans la scène Labyrinthe. Le hub (LANCER, tableau, raccourci B) passe
+        // par ici, car il est dans une autre scène et ne peut pas garder de lien direct vers elle.
+        public static WaveSpawner Instance { get; private set; }
+
         public float balloonHeight = 1f;
         public int startLives = 20;
         public List<WaveData> waves = WaveBook.Default();
@@ -29,6 +33,9 @@ namespace SAE
         public int LastWrittenWave => waves.Count;
         public WaveData Current => Wave <= waves.Count ? waves[Wave - 1] : WaveBook.Endless(Wave);
         public int BossCount => Current.BossCount;
+
+        void Awake() => Instance = this;
+        void OnDestroy() { if (Instance == this) Instance = null; }
 
         void Start()
         {

@@ -7,8 +7,6 @@ namespace SAE
     // Le pupitre LANCER reste le geste « normal » ; le raccourci évite d'aller jusqu'au pupitre pour tester.
     public class WaveShortcut : MonoBehaviour
     {
-        public WaveSpawner spawner;
-
         InputAction launch;
 
         void OnEnable()
@@ -26,6 +24,7 @@ namespace SAE
 
         void OnLaunch(InputAction.CallbackContext ctx)
         {
+            var spawner = WaveSpawner.Instance;
             if (!spawner || spawner.Running) return;
             spawner.StartWave();
             if (PlayerRig.Local) PlayerRig.Buzz(PlayerRig.Local.rightHand, 0.6f);   // « c'est parti »

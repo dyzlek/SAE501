@@ -8,13 +8,14 @@ namespace SAE
     public class BowHolster : MonoBehaviour
     {
         public Bow bow;
-        public Transform mapSpawn;   // le point d'arrivée sur la carte
 
         void Start() => bow.gameObject.SetActive(false);   // on commence au hub
 
         void OnEnable() => PlayerRig.Teleported += OnTeleported;
         void OnDisable() => PlayerRig.Teleported -= OnTeleported;
 
-        void OnTeleported(Transform spot) => bow.gameObject.SetActive(spot == mapSpawn);
+        // L'arc sort quand on arrive sur la carte (le point d'arrivée de la scène Labyrinthe)
+        void OnTeleported(Transform spot) =>
+            bow.gameObject.SetActive(spot.TryGetComponent<LevelSpawn>(out var arrival) && arrival.level == Level.Carte);
     }
 }

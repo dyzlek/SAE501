@@ -7,6 +7,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
+using UnityEngine.SceneManagement;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion.Teleportation;
@@ -14,13 +15,18 @@ using UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets;
 
 namespace SAE.EditorTools
 {
-    // Menu SAE → Générer le prototype : construit la scène Jeu en cubes (greybox).
-    // Une seule scène, deux zones : le hub (autour de l'origine) et la carte (plus loin en Z).
-    // Ainsi le plateau du hub montre la carte en direct. Relancer le menu écrase la scène.
+    // Menu SAE → Générer le prototype : construit les DEUX scènes du jeu (relancer le menu les écrase).
+    //   Hub.unity        : la cabane, les joueurs, le plateau ; c'est la scène qu'on lance.
+    //   Labyrinthe.unity : la carte et ses vagues, loin du hub (on ne voit pas l'un depuis l'autre).
+    // Au lancement, le hub charge le labyrinthe en plus de lui (LevelLoader) : les deux tournent ensemble,
+    // et le plateau du hub montre la carte en direct. Les liens d'une scène à l'autre (boutons de téléportation,
+    // LANCER, tableau de la vague) sont retrouvés au lancement (LevelSpawn, WaveSpawner.Instance).
     public static class PrototypeGenerator
     {
         const string Folder = "Assets/_Project/Scenes";
-        const string ScenePath = Folder + "/Jeu.unity";
+        const string HubScenePath = Folder + "/Hub.unity";
+        const string MapScenePath = Folder + "/Labyrinthe.unity";   // même nom que LevelLoader.mapScene
+        const string OldScenePath = Folder + "/Jeu.unity";          // l'ancienne scène unique, supprimée à la génération
         const float BoardTile = 0.2f;    // plateau de 1,6 m : l'élément principal du hub
         const float HandHeight = 0.9f;   // table des bananes et socle du panier : à hauteur de main, pas au sol
         const int IgnoreRaycast = 2;     // couche Unity « Ignore Raycast »
@@ -30,7 +36,7 @@ namespace SAE.EditorTools
         static readonly Vector3 HandOffset = new Vector3(0f, -0.01f, -0.06f);   // la paume, un peu derrière l'avant de la manette
         static readonly Vector3 BowInHand = new Vector3(0.07f, 0f, 0.02f);      // la poignée de l'arc, sur le côté intérieur de la main : la flèche passe à côté
         const float HandTilt = 35f;   // les mains tournées pouce vers le haut, comme quand on tient les manettes (pas paume à plat)
-        static readonly Vector3 MapCenter = new Vector3(0f, 0f, 40f);
+        static readonly Vector3 MapCenter = new Vector3(0f, 0f, 500f);   // au-delà de la distance d'affichage (400 m) : le hub ne se voit pas d'ici
 
         static readonly Color Floor = new Color(0.35f, 0.35f, 0.38f);
         static readonly Color Wood = new Color(0.45f, 0.30f, 0.18f);
@@ -58,6 +64,15 @@ namespace SAE.EditorTools
             VRSetup.Configure();
             CabinArt.Build();   // la texture de bois des meubles du hub (la cabane elle-même vient de Blender)
 
+            // 1. Le labyrinthe, dans sa propre scène (ni caméra ni lumière : ce sont celles du hub)
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            // L'ancienne scène unique (hub et carte ensemble) est remplacée par Hub + Labyrinthe : on la supprime
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(OldScenePath)) AssetDatabase.DeleteAsset(OldScenePath);
+            Spawn("Spawn Carte", MapCenter + new Vector3(0, 0, -MapLayout.HalfExtent - 3f), Level.Carte);
+            BuildMap();
+            EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), MapScenePath);
+
+            // 2. Le hub
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
             // Une brume légère au loin : les montagnes s'estompent dans le ciel, on sent la profondeur
             RenderSettings.fog = true;
@@ -68,41 +83,37 @@ namespace SAE.EditorTools
             var defaultCam = GameObject.FindWithTag("MainCamera");
             if (defaultCam) Object.DestroyImmediate(defaultCam); // la caméra est celle du joueur
 
-            var hubSpawn = Spawn("Spawn Hub", Vector3.zero);
-            var mapSpawn = Spawn("Spawn Carte", MapCenter + new Vector3(0, 0, -MapLayout.HalfExtent - 3f));
-
-            var mapRoot = BuildMap(hubSpawn);
-            var spawner = mapRoot.GetComponent<WaveSpawner>();
-            var hub = BuildHub(mapRoot, mapSpawn, spawner);   // avant le joueur : l'installeur des bananes ajoute son TestSouris à Camera.main s'il en trouve une
-            var player = Player(hubSpawn.position, mapSpawn);
+            var hubSpawn = Spawn("Spawn Hub", Vector3.zero, Level.Hub);
+            var hub = BuildHub();   // avant le joueur : l'installeur des bananes ajoute son TestSouris à Camera.main s'il en trouve une
+            var player = Player(hubSpawn.position);
             if (!player) return;
             BuildChest(hub, Around(97f, Ring - 0.2f), player.head);   // estrade de 1,4 m (le coffre de Maxens) : un peu plus près de VIDER, loin du comptoir du bananier
             UseWoodTexture(hub);   // encore une fois : l'estrade et le cadre du coffre sont posés après le reste du hub
-            var pcPlayer = DesktopPlayerObject(hubSpawn.position, mapSpawn);
-            AddFallGuard(player.gameObject, hubSpawn, mapSpawn);
-            player.gameObject.AddComponent<WaveShortcut>().spawner = spawner;   // B (manette droite) : lancer la vague
-            AddFallGuard(pcPlayer, hubSpawn, mapSpawn);
+            var pcPlayer = DesktopPlayerObject(hubSpawn.position);
+            player.gameObject.AddComponent<FallGuard>();          // tombé dans le vide : retour au point d'arrivée le plus proche
+            player.gameObject.AddComponent<WaveShortcut>();       // B (manette droite) : lancer la vague
+            pcPlayer.AddComponent<FallGuard>();
             BuildPlayerMode(player.gameObject, pcPlayer);
+            new GameObject("Chargement du labyrinthe").AddComponent<LevelLoader>();
 
-            EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), ScenePath);
-            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
+            EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), HubScenePath);
+            // Le hub en premier : c'est lui qu'on lance, il charge le labyrinthe
+            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(HubScenePath, true), new EditorBuildSettingsScene(MapScenePath, true) };
             PlayerModeMenu.Apply();   // VR ou PC, selon le menu SAE → Mode de jeu
-            Debug.Log("Prototype généré : " + ScenePath);
+            Debug.Log("Prototype généré : " + HubScenePath + " et " + MapScenePath);
         }
-
-        // Si le joueur tombe dans le vide, il revient au point d'arrivée le plus proche (voir FallGuard)
-        static void AddFallGuard(GameObject player, params Transform[] spawns) =>
-            player.AddComponent<FallGuard>().spawns = spawns;
 
         // Distance d'affichage de la caméra : assez loin pour les montagnes (la brume finit à 230 m), mais pas plus.
         // Une plage courte (près 3 cm, loin 400 m) rend la profondeur plus précise : moins de surfaces qui
         // « clignotent » l'une sur l'autre selon l'angle (les bûches sur les fenêtres, par exemple).
         const float NearClip = 0.03f, FarClip = 400f;
 
-        static Transform Spawn(string name, Vector3 pos)
+        // Un point d'arrivée (hub ou carte), retrouvé par son niveau depuis l'autre scène
+        static Transform Spawn(string name, Vector3 pos, Level level)
         {
             var go = new GameObject(name);
             go.transform.position = pos;
+            go.AddComponent<LevelSpawn>().level = level;
             return go.transform;
         }
 
@@ -120,7 +131,7 @@ namespace SAE.EditorTools
         }
 
         // Le joueur PC (clavier/souris), pour tester vite sans casque : DesktopPlayer, et la caméra sert de tête et de mains.
-        static GameObject DesktopPlayerObject(Vector3 position, Transform mapSpawn)
+        static GameObject DesktopPlayerObject(Vector3 position)
         {
             var player = new GameObject("Joueur PC");
             player.tag = Tags.Joueur;
@@ -163,12 +174,12 @@ namespace SAE.EditorTools
             var archer = player.AddComponent<DesktopArcher>();
             archer.bow = bow;
             archer.aim = cam.transform;
-            GiveHolster(player, bow, mapSpawn);
+            GiveHolster(player, bow);
             player.AddComponent<MonkeyInfoCard>();
             return player;
         }
 
-        static PlayerRig Player(Vector3 position, Transform mapSpawn)
+        static PlayerRig Player(Vector3 position)
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(VRSetup.RigPrefab);
             if (!prefab) { Debug.LogError("Joueur VR : Starter Assets de l'XR Interaction Toolkit introuvables : " + VRSetup.RigPrefab); return null; }
@@ -203,7 +214,7 @@ namespace SAE.EditorTools
             AddFingertip(rig.leftHand);
             AddFingertip(rig.rightHand);
             GiveHands(rig, out var leftHand, out var rightHand);
-            GiveBow(go, rig, mapSpawn, leftHand, rightHand);
+            GiveBow(go, rig, leftHand, rightHand);
             go.AddComponent<MonkeyInfoCard>();   // fiche du singe visé, dans le décor
 
             // Corps : invisible pour soi, mais c'est lui qu'on voit en miniature sur le plateau (et plus tard un 2e joueur).
@@ -246,7 +257,7 @@ namespace SAE.EditorTools
 
         // L'arc de Quincy dans la main gauche ; on tire la corde avec la main droite (grip ou gâchette).
         // Rangé au hub (BowHolster) ; la main gauche se ferme dessus tant qu'il est sorti.
-        static void GiveBow(GameObject player, PlayerRig rig, Transform mapSpawn, AnimateHandOnInput leftHand, AnimateHandOnInput rightHand)
+        static void GiveBow(GameObject player, PlayerRig rig, AnimateHandOnInput leftHand, AnimateHandOnInput rightHand)
         {
             if (!rig.leftHand || !rig.rightHand) { Debug.LogWarning("Joueur VR : manette introuvable, pas d'arc."); return; }
             var bow = ((GameObject)PrefabUtility.InstantiatePrefab(BowSetup.Setup().gameObject)).GetComponent<Bow>();
@@ -258,15 +269,10 @@ namespace SAE.EditorTools
             archer.drawHandVisual = rightHand;
             archer.drawGrip = new InputActionProperty(InputReference("XRI Right Interaction/Select Value"));
             archer.drawTrigger = new InputActionProperty(InputReference("XRI Right Interaction/Activate Value"));
-            GiveHolster(player, bow, mapSpawn);
+            GiveHolster(player, bow);
         }
 
-        static void GiveHolster(GameObject player, Bow bow, Transform mapSpawn)
-        {
-            var holster = player.AddComponent<BowHolster>();
-            holster.bow = bow;
-            holster.mapSpawn = mapSpawn;
-        }
+        static void GiveHolster(GameObject player, Bow bow) => player.AddComponent<BowHolster>().bow = bow;
 
         // Une action des contrôles XRI des Starter Assets (même chose que « Use Reference » dans l'Inspector).
         static InputActionReference InputReference(string name)
@@ -347,7 +353,7 @@ namespace SAE.EditorTools
 
         // Un bouton du pupitre : une bague en laiton, un gros bouton rond de couleur (ActionCube, qui s'enfonce avec la main
         // ou se vise avec le rayon), et une plaque en laiton gravée à son nom, couchée sur le pupitre devant lui.
-        static ActionCube ConsoleButton(Transform top, float x, string label, Color color, ActionCube.Action action, Transform destination = null)
+        static ActionCube ConsoleButton(Transform top, float x, string label, Color color, ActionCube.Action action, Level destination = Level.Hub)
         {
             var ring = Visuals.Box("Bague", top, new Vector3(x, 0.005f, 0.07f), new Vector3(0.2f, 0.01f, 0.2f), Brass);
             ring.GetComponent<MeshFilter>().sharedMesh = Cylinder;
@@ -398,13 +404,11 @@ namespace SAE.EditorTools
 
         // Tableau de la vague dans le décor (vague, vies, état) : remplace l'affichage à l'écran.
         // Comme la caisse : panneau fixe, +Z local tourné à l'opposé du joueur, texte côté joueur.
-        static void BuildWaveBoard(Transform parent, Vector3 localPos, Quaternion rotation, WaveSpawner spawner)
+        static void BuildWaveBoard(Transform parent, Vector3 localPos, Quaternion rotation)
         {
             var root = BuildChalkboard(parent, "Tableau de la vague", localPos, rotation, 1.6f, 0.7f);
             var text = Visuals.Text(root, "", new Vector3(0, 0, -0.05f), 0.1f, Chalk);
-            var board = root.gameObject.AddComponent<WaveBoard>();
-            board.spawner = spawner;
-            board.text = text;
+            root.gameObject.AddComponent<WaveBoard>().text = text;   // il lit les vagues (WaveSpawner.Instance), même depuis l'autre scène
         }
 
         // ---------------- HUB ----------------
@@ -432,20 +436,20 @@ namespace SAE.EditorTools
             return new Vector3(Mathf.Sin(a) * radius, height, Mathf.Cos(a) * radius);
         }
 
-        static Transform BuildHub(Transform mapRoot, Transform mapSpawn, WaveSpawner spawner)
+        static Transform BuildHub()
         {
             var env = new GameObject("Hub").transform;
             BuildCabin(env);
 
             // Devant : le plateau ; à sa gauche un pupitre avec LANCER (la vague) et SE TP (aller sur la carte),
             // à sa droite le pupitre VIDER, puis le panier
-            BuildBoard(env, mapRoot);
+            BuildBoard(env);
             var commands = BuildConsole(env, "Commandes", Around(-41f, Ring - 0.5f), 2);
-            ConsoleButton(commands, -ConsoleStep / 2f, "LANCER", LaunchColor, ActionCube.Action.StartWave).spawner = spawner;
-            ConsoleButton(commands, ConsoleStep / 2f, "SE TP", PlayColor, ActionCube.Action.Teleport, mapSpawn);   // va sur la carte
+            ConsoleButton(commands, -ConsoleStep / 2f, "LANCER", LaunchColor, ActionCube.Action.StartWave);
+            ConsoleButton(commands, ConsoleStep / 2f, "SE TP", PlayColor, ActionCube.Action.Teleport, Level.Carte);   // va sur la carte
             var clear = BuildConsole(env, "Vider", Around(37f, Ring - 0.5f), 1);
             ConsoleButton(clear, 0f, $"VIDER  {ActionCube.ClearBoardPrice}", ClearColor, ActionCube.Action.ClearBoard);
-            BuildWaveBoard(env, Around(0f, HubLayout.CabinRadius - 0.25f, 2.25f), Quaternion.identity, spawner);   // accroché au mur
+            BuildWaveBoard(env, Around(0f, HubLayout.CabinRadius - 0.25f, 2.25f), Quaternion.identity);   // accroché au mur
 
             // À gauche : la bibliothèque (tous les types dans un seul meuble)
             BuildShelf(env, "Bibliotheque", -82f, 0, MonkeyData.TypeCount);
@@ -468,7 +472,8 @@ namespace SAE.EditorTools
         // la zone de téléportation et les vraies lumières (aux repères « Lumiere_* » placés dans le modèle).
         const string CabinFolder = "Assets/_Project/Art/Cabane/";
         const int CabinSides = 12;
-        const float CabinDoorHeight = 2.4f;   // même valeur que DOOR_H dans cabane.py : la porte est derrière (180°)
+        const float CabinDoorHeight = 2.4f;
+        const float TeleportRadius = Ring - 0.9f;   // 1,9 m : les meubles commencent un peu au-delà   // même valeur que DOOR_H dans cabane.py : la porte est derrière (180°)
 
         static void BuildCabin(Transform env)
         {
@@ -485,7 +490,17 @@ namespace SAE.EditorTools
             var floorBox = floor.AddComponent<BoxCollider>();
             floorBox.center = new Vector3(0f, -0.05f, -0.8f);
             floorBox.size = new Vector3(8f, 0.1f, 9.6f);
-            Teleportable(floor);
+
+            // La zone de téléportation : un disque au centre de la cabane, devant tous les meubles. Le reste du plancher
+            // arrête le rayon de téléportation : on ne se pose plus dans un meuble, contre un mur ou dehors.
+            var zone = new GameObject("Zone de téléportation");
+            zone.transform.SetParent(env, false);
+            zone.transform.localPosition = new Vector3(0f, 0.005f, 0f);
+            zone.transform.localScale = new Vector3(TeleportRadius * 2f, 0.005f, TeleportRadius * 2f);   // 1 cm d'épaisseur
+            var disc = zone.AddComponent<MeshCollider>();
+            disc.sharedMesh = Cylinder;
+            disc.convex = true;
+            Teleportable(zone);
 
             // Un collider par mur : on ne traverse pas, ni en marchant ni en se téléportant (sauf par la porte)
             float r = HubLayout.CabinRadius, h = HubLayout.CabinHeight;
@@ -587,7 +602,7 @@ namespace SAE.EditorTools
 
 
         // Plateau incliné de 25° vers le joueur, posé sur une planche qui suit l'inclinaison + un pied.
-        static void BuildBoard(Transform env, Transform mapRoot)
+        static void BuildBoard(Transform env)
         {
             float scale = BoardTile / MapLayout.Tile;
             float side = MapLayout.Size * BoardTile;
@@ -598,7 +613,6 @@ namespace SAE.EditorTools
             boardGo.transform.SetParent(env, false);
             boardGo.transform.SetPositionAndRotation(center, Quaternion.Euler(-25f, 0, 0));
             var board = boardGo.AddComponent<Board>();
-            board.mapRoot = mapRoot;
             board.scale = scale;
             boardGo.AddComponent<PlacementSurface>().scale = scale;
             var col = boardGo.AddComponent<BoxCollider>();
@@ -1041,24 +1055,26 @@ namespace SAE.EditorTools
         }
 
         // ---------------- CARTE ----------------
-        static Transform BuildMap(Transform hubSpawn)
+        static Transform BuildMap()
         {
             var map = new GameObject("Carte");
             map.transform.position = MapCenter;
             BuildGrid(map.transform, MapLayout.Tile, 0.5f, true);
             map.AddComponent<TowerManager>();
             map.AddComponent<PlacementSurface>().scale = 1f; // prendre / poser / fusionner directement sur la carte
-            var spawner = map.AddComponent<WaveSpawner>();
+            map.AddComponent<WaveSpawner>();
 
             float edge = MapLayout.HalfExtent;
             Teleportable(Visuals.Solid("Estrade", map.transform, new Vector3(0, -0.25f, -edge - 2.5f), new Vector3(8, 0.5f, 5), Floor));
             Teleportable(Visuals.Solid("Sol autour", map.transform, new Vector3(0, -0.6f, 0), new Vector3(edge * 2 + 20, 0.1f, edge * 2 + 20), Floor));
+            // Une grande prairie sous la carte : le labyrinthe n'est plus une île grise dans le ciel (on ne s'y téléporte pas)
+            Visuals.Solid("Prairie", map.transform, new Vector3(0, -0.7f, 0), new Vector3(300f, 0.1f, 300f), Grass2);
 
             // Le même pupitre qu'au hub, un peu à droite du point d'arrivée : le passage vers la carte reste libre
             var commands = BuildConsole(map.transform, "Carte", new Vector3(1.5f, 0f, -edge - 2f), 2, 0f);
-            ConsoleButton(commands, -ConsoleStep / 2f, "LANCER", LaunchColor, ActionCube.Action.StartWave).spawner = spawner;
-            ConsoleButton(commands, ConsoleStep / 2f, "HUB", HubColor, ActionCube.Action.Teleport, hubSpawn);
-            BuildWaveBoard(map.transform, new Vector3(0, 2.4f, -edge - 0.3f), Quaternion.identity, spawner);
+            ConsoleButton(commands, -ConsoleStep / 2f, "LANCER", LaunchColor, ActionCube.Action.StartWave);
+            ConsoleButton(commands, ConsoleStep / 2f, "HUB", HubColor, ActionCube.Action.Teleport, Level.Hub);
+            BuildWaveBoard(map.transform, new Vector3(0, 2.4f, -edge - 0.3f), Quaternion.identity);
             return map.transform;
         }
     }

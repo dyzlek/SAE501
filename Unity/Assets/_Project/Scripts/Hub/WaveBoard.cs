@@ -7,11 +7,11 @@ namespace SAE
     // Remplace l'affichage collé à l'écran, qui donne la nausée en VR.
     public class WaveBoard : MonoBehaviour
     {
-        public WaveSpawner spawner;
         public TextMesh text;
 
         void Update()
         {
+            var spawner = WaveSpawner.Instance;   // dans la scène Labyrinthe (le tableau du hub ne peut pas garder de lien direct)
             if (!spawner || !text) return;
             var sb = new StringBuilder();
             string number = spawner.Wave <= spawner.LastWrittenWave ? $"{spawner.Wave} / {spawner.LastWrittenWave}" : $"{spawner.Wave} (infini)";

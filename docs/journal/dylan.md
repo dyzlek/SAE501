@@ -65,6 +65,9 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
   - meubles trop collés : écarts agrandis (pupitres, panier, comptoirs, étal un peu moins large), vérifiés par calcul ;
   - JOUER devient « SE TP ».
 - **3e passe** : plus de « +0 » qui flotte quand une amélioration est gratuite ; plaques des boutons en bois foncé avec le texte doré, plus grand (le texte foncé sur le laiton ne se lisait pas) ; texte des ardoises un peu plus grand.
+- **Mes objectifs du jour** (branche `feat/deux-scenes`, partie de `fix-all`) :
+  - **deux vraies scènes** : `Hub.unity` et `Labyrinthe.unity` ; le hub charge le labyrinthe en plus de lui au lancement, le labyrinthe est loin (500 m, on ne voit plus la cabane depuis la carte) et posé sur une prairie ; les boutons SE TP / HUB, LANCER, le tableau de la vague, l'arc et le retour après une chute retrouvent l'autre scène au lancement ;
+  - **zone de téléportation du hub** : seulement un disque de 1,9 m au centre de la cabane.
 - **Critique de Nicolas (1re partie)** :
   - **fiche du singe** (touche A) refaite comme les ardoises du hub (cadre en bois, titre doré, texte à la craie) et dessinée par-dessus le décor : un meuble ne la cache plus ;
   - **bûches qui débordaient sur les fenêtres** : dans `cabane.py`, les rondins qui touchent une fenêtre sont coupés et leurs bouts se cachent dans les montants, un panneau bouche le vide sous l'appui ; caméras réglées (affichage de 3 cm à 400 m) pour que les surfaces proches clignotent moins ;
@@ -86,6 +89,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 | Claude (Claude Code) | LANCER qui ne faisait rien au casque (build) : cause non trouvée sans casque (le lien vers les vagues est bien dans la scène). Ajouts : LANCER devient gris pendant une vague (on voit si elle est partie), il retrouve les vagues tout seul si le lien manque, et le bouton B de la manette droite lance la vague de partout | À tester au casque |
 | Claude (Claude Code) | Journal général : bilan du 7 oct. et plan du 8 oct. (tâches données par l'équipe) | Gardé |
 | Claude (Claude Code) | `main` fusionné dans `fix-all` (sans conflit), branche poussée, Pull Request [#11](https://github.com/dyzlek/SAE501/pull/11) vers `main` ouverte (à relire et fusionner sur GitHub ; pas encore testée dans Unity) | Gardé |
+| Claude (Claude Code) | Deux scènes (`Hub` + `Labyrinthe`, chargement additif par `LevelLoader`, points d'arrivée `LevelSpawn`, `WaveSpawner.Instance` au lieu des liens entre scènes, carte à 500 m sur une prairie, `Jeu.unity` supprimée à la génération) et zone de téléportation du hub limitée à un disque de 1,9 m | À tester (compilé, scènes à générer) |
 | Claude (Claude Code) | Mise en forme de l'analyse critique de Nicolas (qu'il m'a transmise) dans son journal, avec ses 2 photos ; rien de corrigé pour l'instant | Gardé |
 
 ## Mar. 6 oct. 2026

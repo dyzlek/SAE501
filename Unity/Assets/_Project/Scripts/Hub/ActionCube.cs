@@ -10,8 +10,7 @@ namespace SAE
         public enum Action { Teleport, ClearBoard, StartWave }
 
         public Action action;
-        public Transform destination;
-        public WaveSpawner spawner;   // pour StartWave
+        public Level destination;     // pour Teleport : le niveau où aller (son point d'arrivée est retrouvé au moment voulu)
 
         static readonly Color Busy = new Color(0.4f, 0.4f, 0.42f);   // LANCER pendant une vague
 
@@ -27,14 +26,13 @@ namespace SAE
             rest = transform.localPosition;
             tint = GetComponent<ColorTint>();
             if (tint) idleColor = tint.color;
-            // Filet de sécurité : sans lien vers les vagues, LANCER ne ferait rien du tout
-            if (action == Action.StartWave && !spawner) spawner = FindAnyObjectByType<WaveSpawner>();
         }
 
         void Update()
         {
             pressed = Mathf.MoveTowards(pressed, 0f, Time.deltaTime * 5f);
             transform.localPosition = rest + Vector3.down * (0.012f * pressed);
+            var spawner = WaveSpawner.Instance;
             if (action == Action.StartWave && tint && spawner)
             {
                 var color = spawner.Running ? Busy : idleColor;
@@ -47,13 +45,16 @@ namespace SAE
             pressed = 1f;
             switch (action)
             {
-                case Action.Teleport: PlayerRig.Local.TeleportTo(destination); break;
+                case Action.Teleport:
+                    var spot = LevelSpawn.Of(destination);
+                    if (spot) PlayerRig.Local.TeleportTo(spot);
+                    break;
                 case Action.ClearBoard:
                     // Plateau déjà vide : rien à payer. Pas assez de bananes : rien ne se passe.
                     if (GameState.Placed.Count > 0 && Economy.TrySpend(ClearBoardPrice, transform.position))
                         GameState.ClearBoard();
                     break;
-                case Action.StartWave: if (spawner) spawner.StartWave(); break;
+                case Action.StartWave: if (WaveSpawner.Instance) WaveSpawner.Instance.StartWave(); break;
             }
         }
     }

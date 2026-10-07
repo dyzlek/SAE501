@@ -8,18 +8,20 @@ namespace SAE
     // La pose des singes est gérée par PlacementSurface, sur le même objet.
     public class Board : MonoBehaviour
     {
-        public Transform mapRoot;          // le centre de la vraie carte
         public float scale = 0.05f;        // taille du plateau / taille de la carte
 
         readonly Dictionary<Mirrored, GameObject> proxies = new Dictionary<Mirrored, GameObject>();
         readonly List<Mirrored> toRemove = new List<Mirrored>();
+
+        Transform mapRoot;                 // le centre de la vraie carte (scène Labyrinthe), retrouvé grâce à ses vagues
 
         Vector3 MapToBoard(Vector3 worldOnMap) =>
             transform.TransformPoint(mapRoot.InverseTransformPoint(worldOnMap) * scale);
 
         void LateUpdate()
         {
-            if (!mapRoot) return;
+            if (!mapRoot && WaveSpawner.Instance) mapRoot = WaveSpawner.Instance.transform;
+            if (!mapRoot) return;   // le labyrinthe n'est pas encore chargé
 
             foreach (var m in Mirrored.All)
             {
