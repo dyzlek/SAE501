@@ -8,6 +8,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
@@ -93,13 +94,7 @@ namespace SAE.EditorTools
         static void NewLevelScene()
         {
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
-            var sun = Object.FindFirstObjectByType<Light>();
-            if (sun)
-            {
-                sun.name = "Soleil";
-                sun.transform.rotation = SunRotation;         // les rayons de soleil (SunBeam) suivent cette direction
-                sun.color = new Color(1f, 0.95f, 0.85f);      // un peu chaud, comme en fin d'après-midi
-            }
+            SetUpLighting();
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.Linear;
             RenderSettings.fogStartDistance = 60f;
@@ -109,119 +104,129 @@ namespace SAE.EditorTools
             if (defaultCam) Object.DestroyImmediate(defaultCam);
         }
 
-        // ---------------- SOLEIL ET RAYONS ----------------
+        // ---------------- LUMIÈRE ----------------
+        // Pas de faux rayons dessinés (ils faisaient artificiel) : la vraie lumière du soleil et ses ombres font des taches
+        // de soleil sur le plancher derrière les fenêtres, des poussières dorées flottent dans le soleil, et un réglage
+        // de l'image (tons, couleurs, léger halo) donne une ambiance chaude de fin d'après-midi.
         // Le soleil vient de l'arrière-droite du hub (150°), assez haut : il entre par la porte et deux fenêtres.
         static readonly Quaternion SunRotation = Quaternion.Euler(50f, -30f, 0f);
         static Vector3 SunDirection => SunRotation * Vector3.forward;   // le sens où va la lumière
-        static readonly Color BeamColor = new Color(1f, 0.92f, 0.7f);
-        const string BeamMaterialPath = "Assets/_Project/Art/Cabane/Rayons.mat";
+        static readonly Color SunColor = new Color(1f, 0.93f, 0.8f);
+        const string LightingProfilePath = "Assets/_Project/Art/Lumiere.asset";
+        const string DustMaterialPath = "Assets/_Project/Art/Cabane/Poussiere.mat";
 
-        // Le matériau des rayons : notre shader transparent (« SAE/Texte 3D »), la couleur et la transparence
-        // viennent des sommets du rayon. Enregistré comme fichier pour être gardé dans la scène et le build.
-        static Material BeamMaterial()
+        // La lumière d'une scène : le soleil (ombres douces), une lumière ambiante en trois tons (ciel bleuté,
+        // horizon neutre, sol chaud) et un volume de réglages de l'image
+        static void SetUpLighting()
         {
-            var mat = AssetDatabase.LoadAssetAtPath<Material>(BeamMaterialPath);
+            var sun = Object.FindFirstObjectByType<Light>();
+            if (sun)
+            {
+                sun.name = "Soleil";
+                sun.transform.rotation = SunRotation;
+                sun.color = SunColor;
+                sun.intensity = 1.3f;
+                sun.shadows = LightShadows.Soft;
+                sun.shadowStrength = 0.85f;   // les ombres restent un peu éclairées par le ciel
+            }
+            RenderSettings.ambientMode = AmbientMode.Trilight;
+            RenderSettings.ambientSkyColor = new Color(0.55f, 0.65f, 0.8f);
+            RenderSettings.ambientEquatorColor = new Color(0.5f, 0.48f, 0.42f);
+            RenderSettings.ambientGroundColor = new Color(0.3f, 0.24f, 0.17f);
+
+            var volume = new GameObject("Réglages de l'image").AddComponent<Volume>();
+            volume.isGlobal = true;
+            volume.sharedProfile = LightingProfile();
+            volume.gameObject.AddComponent<MobileLighting>();   // sur le casque : sans le halo (trop coûteux)
+        }
+
+        // Les réglages de l'image, enregistrés dans un fichier (Art/Lumiere.asset) pour pouvoir les retoucher dans l'Inspector
+        static VolumeProfile LightingProfile()
+        {
+            var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(LightingProfilePath);
+            if (profile) return profile;
+            profile = ScriptableObject.CreateInstance<VolumeProfile>();
+            AssetDatabase.CreateAsset(profile, LightingProfilePath);
+            var tone = profile.Add<Tonemapping>(true);
+            tone.mode.value = TonemappingMode.Neutral;                 // des couleurs naturelles, sans blanc brûlé
+            var colors = profile.Add<ColorAdjustments>(true);
+            colors.postExposure.value = 0.15f;
+            colors.contrast.value = 12f;
+            colors.saturation.value = 15f;                             // un peu plus vif, comme un dessin animé
+            var white = profile.Add<WhiteBalance>(true);
+            white.temperature.value = 10f;                             // légèrement chaud
+            var bloom = profile.Add<Bloom>(true);
+            bloom.threshold.value = 0.9f;                              // seules les choses très claires brillent (soleil, flammes)
+            bloom.intensity.value = 0.35f;
+            bloom.scatter.value = 0.6f;
+            foreach (var component in profile.components) AssetDatabase.AddObjectToAsset(component, profile);
+            AssetDatabase.SaveAssets();
+            return profile;
+        }
+
+        // La caméra d'un joueur applique les réglages de l'image
+        static void UsePostProcessing(Camera camera) => camera.GetUniversalAdditionalCameraData().renderPostProcessing = true;
+
+        // Le matériau des poussières : notre shader transparent, avec la petite tache ronde et floue des particules de Unity
+        static Material DustMaterial()
+        {
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(DustMaterialPath);
             if (mat) return mat;
-            mat = new Material(Shader.Find("SAE/Texte 3D")) { name = "Rayons" };
-            AssetDatabase.CreateAsset(mat, BeamMaterialPath);
+            mat = new Material(Shader.Find("SAE/Texte 3D")) { name = "Poussiere" };
+            mat.mainTexture = AssetDatabase.GetBuiltinExtraResource<Texture2D>("Default-Particle.psd");
+            AssetDatabase.CreateAsset(mat, DustMaterialPath);
             return mat;
         }
 
-        // Un rayon de soleil : un prisme de lumière qui part d'une ouverture (4 coins, dans l'ordre) et file dans la
-        // direction du soleil sur « length » mètres. On ne dessine que ses 4 côtés, transparents. Pour que ça ressemble
-        // à de la lumière et pas à du verre :
-        //   - en travers, chaque côté est transparent sur les arêtes et un peu lumineux au milieu (pas de bord net) ;
-        //   - en long, il s'efface au bout (et aussi au départ si fadeStart, pour les rayons du ciel : on ne voit aucune extrémité).
-        // Un simple maillage transparent : rien à calculer pour le casque.
-        static void SunBeam(Transform parent, string name, Vector3[] opening, float length, float alpha, bool fadeStart)
-        {
-            var dir = SunDirection;
-            // Les « rangées » le long du rayon : où (0 = départ, 1 = bout) et quelle part de la lueur
-            float[] along = fadeStart ? new[] { 0f, 0.5f, 1f } : new[] { 0f, 1f };
-            float[] glowAt = fadeStart ? new[] { 0f, 1f, 0f } : new[] { 1f, 0f };
-            Color Light(float strength) => new Color(BeamColor.r, BeamColor.g, BeamColor.b, alpha * strength);
-
-            var verts = new List<Vector3>();
-            var colors = new List<Color>();
-            var tris = new List<int>();
-            // Une bande du rayon, de l'arête p à l'arête q (pq = 0 : transparent sur l'arête, 1 : lumineux), rangée par rangée
-            void Strip(Vector3 p, Vector3 q, float pGlow, float qGlow)
-            {
-                for (int r = 0; r + 1 < along.Length; r++)
-                {
-                    int k = verts.Count;
-                    verts.AddRange(new[] { p + dir * (length * along[r]), q + dir * (length * along[r]), q + dir * (length * along[r + 1]), p + dir * (length * along[r + 1]) });
-                    colors.AddRange(new[] { Light(pGlow * glowAt[r]), Light(qGlow * glowAt[r]), Light(qGlow * glowAt[r + 1]), Light(pGlow * glowAt[r + 1]) });
-                    tris.AddRange(new[] { k, k + 1, k + 2, k, k + 2, k + 3 });
-                }
-            }
-            for (int i = 0; i < 4; i++)
-            {
-                var a = opening[i];
-                var b = opening[(i + 1) % 4];
-                var m = (a + b) / 2f;
-                Strip(a, m, 0f, 1f);   // de l'arête (transparente) au milieu (lumineux)
-                Strip(m, b, 1f, 0f);   // puis du milieu à l'autre arête
-            }
-            var mesh = new Mesh { name = name };
-            mesh.SetVertices(verts);
-            mesh.SetColors(colors);
-            mesh.SetTriangles(tris, 0);
-            mesh.RecalculateBounds();
-
-            var go = new GameObject(name);
-            go.transform.SetParent(parent, false);
-            go.AddComponent<MeshFilter>().sharedMesh = mesh;
-            var r = go.AddComponent<MeshRenderer>();
-            r.sharedMaterial = BeamMaterial();
-            r.shadowCastingMode = ShadowCastingMode.Off;
-            r.receiveShadows = false;
-        }
-
-        // Dans la cabane : une lueur courte à chaque fenêtre tournée vers le soleil. Courte, parce que les comptoirs
-        // sont juste sous les fenêtres : un rayon jusqu'au plancher les traversait. Pas de rayon à la porte (l'étal est devant).
+        // Des poussières dorées qui flottent lentement dans le soleil, devant chaque fenêtre éclairée (et la porte) :
+        // c'est ce qui rend un rayon de soleil visible dans une vraie pièce.
         static readonly float[] CabinWindows = { 60f, 150f, 210f };   // mêmes valeurs que WINDOWS dans cabane.py
-        const float WindowBottom = 1.72f, WindowTop = 2.42f, WindowWidth = 0.9f;
-        const float WindowBeamLength = 0.8f;   // en mètres : s'éteint avant les ardoises des comptoirs (à 0,8 m du mur)
+        const float WindowBottom = 1.72f, WindowTop = 2.42f, WindowWidth = 0.9f, DoorWidth = 1.3f;
 
-        static void BuildCabinBeams(Transform env)
+        static void BuildSunDust(Transform env)
         {
-            var beams = new GameObject("Rayons de soleil").transform;
-            beams.SetParent(env, false);
+            var root = new GameObject("Poussières dans le soleil").transform;
+            root.SetParent(env, false);
             var toSun = -new Vector3(SunDirection.x, 0f, SunDirection.z).normalized;
-            void Opening(string name, float angle, float width, float bottom, float top, float alpha)
+            void Dust(string name, float angle, float width, float bottom, float top)
             {
-                var outward = Around(angle, 1f);
-                if (Vector3.Dot(outward, toSun) < 0.3f) return;   // ce mur est à l'ombre
-                var center = Around(angle, HubLayout.CabinRadius);
-                var along = new Vector3(outward.z, 0f, -outward.x) * (width / 2f);   // le long du mur
-                SunBeam(beams, name, new[]
-                {
-                    center - along + Vector3.up * bottom, center + along + Vector3.up * bottom,
-                    center + along + Vector3.up * top, center - along + Vector3.up * top,
-                }, WindowBeamLength, alpha, fadeStart: false);
-            }
-            // Très légers : une lueur dans l'air, pas un mur de lumière (au casque, trop fort, ça fait artificiel)
-            foreach (var angle in CabinWindows) Opening($"Rayon fenêtre {angle}", angle, WindowWidth, WindowBottom, WindowTop, 0.12f);
-        }
+                if (Vector3.Dot(Around(angle, 1f), toSun) < 0.3f) return;   // ce mur est à l'ombre
+                var opening = Around(angle, HubLayout.CabinRadius, (bottom + top) / 2f);
+                const float Depth = 1.6f;                                   // sur 1,6 m dans le rayon
+                var go = new GameObject(name);
+                go.transform.SetParent(root, false);
+                go.transform.SetPositionAndRotation(opening + SunDirection * (Depth / 2f), Quaternion.LookRotation(SunDirection));
 
-        // Sur la carte : de grands rayons qui tombent du ciel autour de la zone de jeu (comme à travers des nuages)
-        static void BuildSkyBeams(Transform map, float groundY)
-        {
-            var beams = new GameObject("Rayons de soleil").transform;
-            beams.SetParent(map, false);
-            var dir = SunDirection;
-            const float Height = 150f;   // très haut : on ne voit jamais où ils commencent
-            var spots = new[] { (-30f, 26f, 6f), (25f, 30f, 5f), (110f, 28f, 7f), (160f, 32f, 5f), (215f, 27f, 6f), (290f, 30f, 7f) };
-            foreach (var (angle, radius, size) in spots)
-            {
-                var ground = Around(angle, radius, groundY);
-                float length = (Height - groundY) / -dir.y;
-                var center = ground - dir * length;   // remonter le rayon jusqu'en haut
-                var h = new Vector3(size / 2f, 0f, 0f);
-                var v = new Vector3(0f, 0f, size / 2f);
-                SunBeam(beams, $"Rayon {angle}", new[] { center - h - v, center + h - v, center + h + v, center - h + v }, length, 0.12f, fadeStart: true);
+                var ps = go.AddComponent<ParticleSystem>();
+                var main = ps.main;
+                main.startLifetime = 8f;
+                main.startSpeed = 0f;
+                main.startSize = new ParticleSystem.MinMaxCurve(0.006f, 0.016f);
+                main.startColor = new Color(1f, 0.9f, 0.65f, 0.7f);
+                main.maxParticles = 50;
+                main.simulationSpace = ParticleSystemSimulationSpace.World;
+                main.prewarm = true;                                        // déjà là quand on arrive
+                var emission = ps.emission;
+                emission.rateOverTime = 6f;
+                var shape = ps.shape;
+                shape.shapeType = ParticleSystemShapeType.Box;
+                shape.scale = new Vector3(width, top - bottom, Depth);     // le volume du rayon, dans son axe
+                var noise = ps.noise;                                       // elles dérivent doucement, au hasard
+                noise.enabled = true;
+                noise.strength = 0.03f;
+                noise.frequency = 0.3f;
+                var fade = ps.colorOverLifetime;                            // elles apparaissent et disparaissent en douceur
+                fade.enabled = true;
+                var gradient = new Gradient();
+                gradient.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                                 new[] { new GradientAlphaKey(0f, 0f), new GradientAlphaKey(1f, 0.3f), new GradientAlphaKey(1f, 0.7f), new GradientAlphaKey(0f, 1f) });
+                fade.color = gradient;
+                var r = go.GetComponent<ParticleSystemRenderer>();
+                r.sharedMaterial = DustMaterial();
+                r.shadowCastingMode = ShadowCastingMode.Off;
             }
+            foreach (var angle in CabinWindows) Dust($"Poussières fenêtre {angle}", angle, WindowWidth, WindowBottom, WindowTop);
+            Dust("Poussières porte", 180f, DoorWidth, 0.3f, CabinDoorHeight);
         }
 
         // Les deux joueurs de la scène (VR et PC, PlayerMode active le bon), au point d'arrivée.
@@ -285,6 +290,7 @@ namespace SAE.EditorTools
             var camera = cam.AddComponent<Camera>();
             camera.nearClipPlane = NearClip;
             camera.farClipPlane = FarClip;
+            UsePostProcessing(camera);
             cam.AddComponent<AudioListener>();
 
             player.AddComponent<DesktopPlayer>();
@@ -321,6 +327,7 @@ namespace SAE.EditorTools
             origin.RequestedTrackingOriginMode = XROrigin.TrackingOriginMode.Floor;   // la vraie taille du joueur
             origin.Camera.nearClipPlane = NearClip;
             origin.Camera.farClipPlane = FarClip;
+            UsePostProcessing(origin.Camera);
 
             // Confort : pas de déplacement continu (il donne la nausée). Les deux sticks téléportent,
             // le stick droit tourne par crans (snap turn, réglage par défaut des Starter Assets).
@@ -553,7 +560,7 @@ namespace SAE.EditorTools
         {
             var env = new GameObject("Hub").transform;
             BuildCabin(env);
-            BuildCabinBeams(env);
+            BuildSunDust(env);
 
             // Devant : le plateau ; à sa gauche un pupitre avec LANCER (la vague) et SE TP (aller sur la carte),
             // à sa droite le pupitre VIDER, puis le panier
@@ -1209,7 +1216,6 @@ namespace SAE.EditorTools
             var meadow = Visuals.Solid("Prairie (collider)", map.transform, new Vector3(0, GroundY - 0.06f, 0), new Vector3(180f, 0.1f, 180f), Floor);
             meadow.GetComponent<Renderer>().enabled = false;
             BuildScenery(map.transform, GroundY);
-            BuildSkyBeams(map.transform, GroundY);
 
             // Le même pupitre qu'au hub, un peu à droite du point d'arrivée : le passage vers la carte reste libre
             var commands = BuildConsole(map.transform, "Carte", new Vector3(1.5f, 0f, -edge - 2f), 2, 0f);

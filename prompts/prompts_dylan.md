@@ -12,6 +12,8 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 > Suite : ce n'est pas mal, mais dans la maison c'est trop artificiel et abusé.
 >
 > Suite : ça traverse encore, et ce n'est pas encore centré.
+>
+> Suite : toujours pas centré, et la lumière aux fenêtres n'est pas réaliste, donc améliore. Essaie de rendre le jeu vraiment beau avec la lumière, je te laisse faire.
 
 ### Zone de téléportation du hub et deux vraies scènes
 > Fais maintenant « limiter la zone de téléportation dans le hub » et « séparer vraiment les deux niveaux : le hub et le labyrinthe ».

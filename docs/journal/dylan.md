@@ -71,7 +71,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 - **Décor des deux scènes** (sans toucher au labyrinthe) :
   - **plus de végétation** autour de la cabane : massifs d'herbe haute, massifs de fleurs, plus de buissons, de rochers et de palmiers (modèle Blender) ;
   - **le même paysage autour du labyrinthe** : prairie, végétation, palmiers et montagnes à la place du sol gris ; estrade, pupitre et poteaux du tableau en bois ;
-  - **rayons de soleil** : des faisceaux de lumière qui entrent par la porte et les fenêtres côté soleil, et de grands rayons qui tombent du ciel autour de la carte (le soleil est réglé pareil dans les deux scènes).
+  - **lumière** : après plusieurs essais de rayons dessinés (trop artificiels, ils traversaient les meubles), on garde la vraie lumière : soleil chaud aux ombres douces (taches de soleil sur le plancher derrière les fenêtres), lumière ambiante en trois tons, poussières dorées qui flottent dans le soleil aux fenêtres et à la porte, et réglages de l'image (tons naturels, couleurs un peu plus vives, léger halo, coupé sur le casque pour tenir 72 i/s).
 
 ![Rendu Blender : la cabane et sa végétation](../captures/cabane-vegetation-dehors.png)
 
@@ -103,6 +103,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 | Claude (Claude Code) | Décor : `cabane.py` (massifs d'herbe et de fleurs, plus de buissons, rochers et palmiers ; nouveau `Paysage.glb` pour la carte, zone de jeu libre), rayons de soleil en maillages transparents (porte et fenêtres du hub, grands rayons sur la carte), soleil identique dans les deux scènes, estrade et pupitres de la carte en bois | À tester (compilé, rendus Blender vérifiés, scènes à générer) |
 | Claude (Claude Code) | Rayons trop forts et « artificiels » dans la cabane : beaucoup plus légers et sans bord net (transparents sur les arêtes, lueur au milieu) ; rayons du ciel qui partent de 150 m (on ne voit plus leur sommet en forme de boîte) | À tester |
 | Claude (Claude Code) | Rayons qui traversaient les comptoirs et bouts visibles dans le ciel : lueurs courtes aux fenêtres (0,8 m, s'éteignent avant les ardoises), plus de rayon à la porte ; rayons du ciel effacés aux deux bouts | À tester |
+| Claude (Claude Code) | Rayons dessinés abandonnés (jeté : toujours artificiels). À la place : soleil réglé (ombres douces, couleur chaude), ambiance en trois tons, poussières dorées en particules dans le soleil, volume de réglages de l'image (`Art/Lumiere.asset` : tons, couleurs, balance des blancs, halo coupé sur le casque par `MobileLighting`), ombres du Quest sur 25 m (plus nettes) | À tester |
 | Claude (Claude Code) | Mise en forme de l'analyse critique de Nicolas (qu'il m'a transmise) dans son journal, avec ses 2 photos ; rien de corrigé pour l'instant | Gardé |
 
 ## Mar. 6 oct. 2026
