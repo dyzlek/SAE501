@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
+### Point de fin de journée
+> Mets à jour le README et le journal général, et liste ce qu'il faut faire en urgence demain.
+
 ### Critiques de fin de journée et envoi sur main
 > Pousse sur `main`, et ajoute la critique de Maxens et la mienne (listes de remarques de fin de journée).
 >
