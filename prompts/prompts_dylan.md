@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
+### Captures de l'arc dans le journal de Nicolas
+> Mets à jour le journal de Nicolas avec ses captures : le tableau des améliorations de l'arc (pour le bêta-test), la prévisualisation du tir, le tir triple et le tir explosif. Ajoute aussi `docs/organisation-github`.
+
 ### Revenir au hub pendant une vague
 > Quand je lance la vague, j'aimerais pouvoir quand même revenir au hub depuis l'autre niveau, etc.
 >
