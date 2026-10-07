@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
+### Arc, bananes lancées, vague, portée
+> C'est tout bon : ajoute la capture dans mon journal. Puis fais : « Flèche explosive : effet d'étincelles », « Vraie physique des bananes : on les lance dans des paniers (sans poignée) », « Tracé de la flèche : autre couleur que blanc (voir la trajectoire qu'elle aura) », « Ne pas annoncer le contenu de la vague », et afficher la portée quand on s'apprête à poser un singe sur le plateau. Mets-moi comme responsable.
+
 ### Textes du coffre et des singes, visuel de fusion
 > Dans une autre branche, fais : « Enlever le texte au-dessus du coffre », « Carte en taille réelle : enlever les textes au-dessus des singes » et « Fusion : remplacer le cercle rouge par un visuel "fusion possible" ».
 
