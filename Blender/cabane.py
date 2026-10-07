@@ -709,9 +709,10 @@ def build_chandelier(M, coll):
 
 
 def build_lanterns(M, coll):
-    """Deux lanternes en fer accrochées aux murs, une bougie allumée derrière les vitres."""
+    """Deux lanternes en fer accrochées aux murs, une bougie allumée derrière les vitres.
+    À -28° (au-dessus du pupitre LANCER / JOUER) : à -60°, elle tombait dans la bibliothèque."""
     b = Builder([M["fer"], M["vitre_lanterne"]])
-    for i, ang in enumerate((120, -60)):
+    for i, ang in enumerate((120, -28)):
         B = basis(ang)
         wall = polar(ang, R - LOG_R - 0.02)
         c = wall + B @ Vector((0, -0.24, 2.35))

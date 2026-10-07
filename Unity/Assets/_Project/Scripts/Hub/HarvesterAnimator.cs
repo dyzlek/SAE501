@@ -96,7 +96,7 @@ namespace SAE
             if (monkey.Carried)
             {
                 var hands = leftHand && rightHand ? (leftHand.position + rightHand.position) / 2f
-                                                  : transform.position + up * monkey.Height * 1.1f;
+                                                  : transform.position + up * monkey.height * 1.1f;
                 monkey.Carried.transform.position = hands + up * 0.04f;
             }
         }

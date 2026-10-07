@@ -50,6 +50,7 @@ public class Banane : MonoBehaviour
         if (!GetComponent<SAE.GrabReach>()) gameObject.AddComponent<SAE.GrabReach>();   // attrapable de loin, jusqu'à 6 m (GrabReach.Reach)
         rends = GetComponentsInChildren<Renderer>();
         mpb = new MaterialPropertyBlock();
+        SAE.PlayerRig.IgnoreCollisions(gameObject);   // on ne peut pas monter sur une banane tenue et s'envoler
     }
 
     public void Initialiser(Bananier bananier, int valeur, float pourriture, Vector3 cible)

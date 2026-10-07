@@ -2,21 +2,17 @@ using UnityEngine;
 
 namespace SAE
 {
-    // Bouton rond du panneau « RÉCOLTEUR » : acheter le singe, ou améliorer sa vitesse, sa cadence, son rendement.
-    // Même fonctionnement que les boutons du bananier (UpgradeButton) : on l'enfonce avec la main ou on le vise
-    // avec le rayon ; vert si on peut, gris sinon, doré au niveau max, flash rouge si refusé.
+    // Bouton rond du comptoir « RÉCOLTEUR » : acheter un singe de plus, ou améliorer la vitesse, la cadence, le rendement
+    // de toute l'équipe. Même fonctionnement que les boutons du bananier (UpgradeButton) : on l'enfonce avec la main
+    // ou on le vise avec le rayon ; vert si on peut, gris sinon, flash rouge si refusé.
+    // Quand c'est fini (niveau max, ou équipe complète), le bouton disparaît et l'ardoise affiche MAX.
     public class HarvesterButton : MonoBehaviour, IPressable
     {
-        public HarvesterMonkey monkey;
-        public bool isBuyButton;               // true : bouton d'achat ; false : amélioration de « stat »
+        public HarvesterCrew crew;
+        public bool isBuyButton;               // true : acheter un singe ; false : amélioration de « stat »
         public HarvesterStat stat;
         public Transform cap;                  // le dessus du bouton, qui s'enfonce
-        public TextMesh label;
-
-        static readonly Color Available = new Color(0.25f, 0.85f, 0.35f);
-        static readonly Color Unavailable = new Color(0.45f, 0.45f, 0.48f);
-        static readonly Color Done = new Color(1f, 0.8f, 0.2f);
-        static readonly Color Refused = new Color(0.95f, 0.25f, 0.25f);
+        public TextMesh label;                 // le texte sur l'ardoise, au-dessus du bouton
 
         Vector3 capRest;
         float pressed, refused;
@@ -25,7 +21,7 @@ namespace SAE
         public void Press()
         {
             pressed = 1f;
-            bool ok = isBuyButton ? monkey.Buy() : monkey.Upgrade(stat);
+            bool ok = isBuyButton ? crew.Buy() : crew.Upgrade(stat);
             if (!ok) refused = 1f;
         }
 
@@ -37,22 +33,24 @@ namespace SAE
 
         void Update()
         {
+            bool done = isBuyButton ? crew.Full : crew.IsMax(stat);
+            label.text = Text(done, isBuyButton ? crew.PriceToBuy : crew.Price(stat));
+            if (done) { gameObject.SetActive(false); return; }   // plus rien à acheter ici : le bouton s'en va
+
             pressed = Mathf.MoveTowards(pressed, 0f, Time.deltaTime * 5f);
             refused = Mathf.MoveTowards(refused, 0f, Time.deltaTime * 2f);
             cap.localPosition = capRest + Vector3.down * (0.03f * pressed);
 
-            bool done = isBuyButton ? monkey.Bought : monkey.IsMax(stat);
-            int price = isBuyButton ? monkey.PriceToBuy : monkey.Price(stat);
-            bool usable = isBuyButton || monkey.Bought;   // on n'améliore pas un singe qu'on n'a pas
-            var color = done ? Done : usable && Economy.CanAfford(price) ? Available : Unavailable;
-            capTint.Set(Color.Lerp(color, Refused, refused));
-            label.text = Text(done, price);
+            int price = isBuyButton ? crew.PriceToBuy : crew.Price(stat);
+            bool usable = isBuyButton || crew.Count > 0;   // on n'améliore pas une équipe vide
+            var color = usable && Economy.CanAfford(price) ? UpgradeButton.Affordable : UpgradeButton.TooExpensive;
+            capTint.Set(Color.Lerp(color, UpgradeButton.Refused, refused));
         }
 
         string Text(bool done, int price)
         {
-            string cost = price == 0 ? "GRATUIT" : price.ToString();
-            if (isBuyButton) return done ? "SINGE\nRÉCOLTEUR\nau travail !" : $"SINGE\nRÉCOLTEUR\nacheter\n{cost}";
+            if (isBuyButton)
+                return UpgradeButton.Board("SINGES", $"{crew.Count} / {crew.monkeys.Length}", "un de plus", price, done);
 
             string title = stat switch
             {
@@ -62,11 +60,11 @@ namespace SAE
             };
             string effect = stat switch
             {
-                HarvesterStat.Vitesse => $"{monkey.Speed:0.0} m/s",
-                HarvesterStat.Cadence => $"pause {monkey.Pause:0.0} s",
-                _ => $"{monkey.Share * 100f:0} % payé",
+                HarvesterStat.Vitesse => $"{crew.Speed:0.0} m/s",
+                HarvesterStat.Cadence => $"pause {crew.Pause:0.0} s",
+                _ => $"{crew.Share * 100f:0} % payé",
             };
-            return $"{title}\nniv {monkey.Level(stat)}\n{effect}\n{(done ? "MAX" : cost)}";
+            return UpgradeButton.Board(title, $"niv {crew.Level(stat)} / {HarvesterCrew.MaxLevel}", effect, price, done);
         }
     }
 }

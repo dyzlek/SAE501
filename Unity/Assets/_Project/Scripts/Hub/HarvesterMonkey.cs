@@ -5,22 +5,23 @@ using Random = UnityEngine.Random;
 
 namespace SAE
 {
-    public enum HarvesterStat { Vitesse, Cadence, Rendement }
-
-    // Le singe récolteur (un singe classique) : un service qu'on achète au panneau « RÉCOLTEUR ».
+    // Un singe récolteur (un singe classique) : on l'achète au comptoir « RÉCOLTEUR » (voir HarvesterCrew, qui garde
+    // le nombre de singes et leurs améliorations, communes à toute l'équipe).
     // Il marche jusqu'à une banane (sur la table, ou n'importe où si le joueur l'a lâchée ailleurs), saute pour l'attraper, la porte au-dessus de sa tête,
     // marche jusqu'au panier et la jette dedans. Puis il souffle un peu et recommence.
     // Pour rire, le lancer n'est pas toujours le même : parfois il DUNK (saute au-dessus du panier, l'y écrase et fête ça),
     // parfois il RATE (la banane tombe à côté, il boude, la ramasse et recommence).
     // Il garde une commission : seule une part de la banane (Rendement) est payée.
     // Les animations (marche, porter, lancer) sont faites par HarvesterAnimator, qui lit les états publics d'ici.
-    // Pour l'instant tout est gratuit (Free) : les prix sont calculés mais pas demandés.
+    // Les meubles sont contre les murs : pour ne pas les traverser, il passe par le milieu de la pièce (voir WalkTo).
     public class HarvesterMonkey : MonoBehaviour
     {
-        public const bool Free = true;          // à passer à false quand on voudra faire payer
-        public const int BuyPrice = 200;        // prix du service (en bananes), si Free = false
-        public const int MaxLevel = 5;
+        const float FreeRadius = 1.4f;          // en mètres : autour du centre du hub, il n'y a aucun meuble
+        const float ThrowDistance = 0.6f;       // en mètres, du centre du panier : devant son tabouret, pas dedans
+        const float DunkDistance = 0.45f;
+        const float ShortWalk = 1f;             // en mètres : en dessous, pas de crochet par le centre
 
+        public HarvesterCrew crew;
         public Bananier bananier;
         public Panier panier;
         public Transform table;                 // la table des bananes (Bananier.versCible)
@@ -32,40 +33,18 @@ namespace SAE
         [Range(0f, 1f)] public float dunkChance = 0.2f;   // chance de dunker au lieu de lancer
         [Range(0f, 1f)] public float missChance = 0.25f;  // chance de rater un lancer normal
 
-        public bool Bought { get; private set; }
         public bool Walking { get; private set; }
         public Banane Carried { get; private set; }
         public float ThrowPhase { get; private set; }   // 0 = rien, monte à 1 pendant le geste du lancer
-        public float Height { get; set; }               // taille du singe en mètres (posée par HarvesterSetup)
+        public float height = 0.55f;                    // taille du singe, en mètres
         public bool Cheering { get; private set; }      // bras levés : il fête son dunk
         public bool Sulking { get; private set; }       // il secoue la tête : il a raté
 
-        readonly int[] levels = { 1, 1, 1 };
-
-        public int Level(HarvesterStat s) => levels[(int)s];
-        public bool IsMax(HarvesterStat s) => Level(s) >= MaxLevel;
-        public int Price(HarvesterStat s) => Free ? 0 : Mathf.RoundToInt(100 * Mathf.Pow(1.6f, Level(s) - 1));
-        public int PriceToBuy => Free ? 0 : BuyPrice;
-
-        // Les trois améliorations, niveau 1 à 5
-        public float Speed => 0.25f + 0.2f * (Level(HarvesterStat.Vitesse) - 1);       // m/s : 0,25 (il flâne) → 1,05
-        public float Pause => 3f - 0.6f * (Level(HarvesterStat.Cadence) - 1);           // s entre deux trajets : 3 → 0,6
-        public float Share => 0.6f + 0.1f * (Level(HarvesterStat.Rendement) - 1);       // part payée : 60 % → 100 %
-
-        public bool Buy()
+        // Appelé par l'équipe quand on achète ce singe : il apparaît et se met au travail
+        public void StartWork()
         {
-            if (Bought || !Economy.TrySpend(PriceToBuy, transform.position)) return false;
-            Bought = true;
             gameObject.SetActive(true);
             StartCoroutine(Work());
-            return true;
-        }
-
-        public bool Upgrade(HarvesterStat s)
-        {
-            if (!Bought || IsMax(s) || !Economy.TrySpend(Price(s), transform.position)) return false;
-            levels[(int)s]++;
-            return true;
         }
 
         // La boucle de travail : chercher, aller, attraper, porter, lancer, souffler.
@@ -81,15 +60,22 @@ namespace SAE
                     continue;
                 }
 
-                // Le joueur peut la prendre avant nous : on abandonne et on en cherche une autre
-                Func<bool> lost = () => !banana || banana.EnMain || banana.Deposee;
-                yield return WalkTo(PickSpot(banana.transform.position), lost);
-                if (lost()) continue;
-
-                yield return JumpAndGrab(banana);
-                yield return Deliver();
-                yield return new WaitForSeconds(Pause);
+                crew.Claim(banana);   // les autres singes la laissent : c'est la sienne
+                yield return Fetch(banana);
+                crew.Unclaim(banana);
+                yield return new WaitForSeconds(crew.Pause);
             }
+        }
+
+        IEnumerator Fetch(Banane banana)
+        {
+            // Le joueur peut la prendre avant nous : on abandonne et on en cherche une autre
+            Func<bool> lost = () => !banana || banana.EnMain || banana.Deposee;
+            yield return WalkTo(PickSpot(banana.transform.position), lost);
+            if (lost()) yield break;
+
+            yield return JumpAndGrab(banana);
+            yield return Deliver();
         }
 
         // La banane posée sur la table depuis le plus longtemps (la plus proche de pourrir), que personne ne tient
@@ -98,7 +84,7 @@ namespace SAE
             Banane best = null;
             foreach (var b in bananier.BananesAuSol)
             {
-                if (!b || b.EnMain || b.Deposee || b.EstPourrie || !AtRest(b)) continue;
+                if (!b || b.EnMain || b.Deposee || b.EstPourrie || crew.IsClaimed(b) || !AtRest(b)) continue;
                 if (!best || b.Progression > best.Progression) best = b;
             }
             return best;
@@ -147,7 +133,30 @@ namespace SAE
             return spot;
         }
 
+        // Marcher jusqu'à target. Si le trajet est long et que la ligne droite longe les murs (là où sont les meubles), il fait un crochet
+        // par le milieu de la pièce : on prend le point de la ligne le plus proche du centre, ramené à FreeRadius.
         IEnumerator WalkTo(Vector3 target, Func<bool> abort)
+        {
+            var from = transform.position;
+            var closest = ClosestToCenter(new Vector2(from.x, from.z), new Vector2(target.x, target.z));
+            bool longWalk = Vector3.Distance(from, target) > ShortWalk;   // un petit pas à côté d'un meuble : tout droit
+            if (longWalk && closest.magnitude > FreeRadius)
+            {
+                var detour = closest.normalized * FreeRadius;
+                yield return WalkStraight(new Vector3(detour.x, target.y, detour.y), abort);
+            }
+            yield return WalkStraight(target, abort);
+        }
+
+        // Le point du segment [a, b] le plus proche du centre du hub (vu de dessus)
+        static Vector2 ClosestToCenter(Vector2 a, Vector2 b)
+        {
+            var ab = b - a;
+            float t = ab.sqrMagnitude < 0.0001f ? 0f : Mathf.Clamp01(Vector2.Dot(-a, ab) / ab.sqrMagnitude);
+            return a + ab * t;
+        }
+
+        IEnumerator WalkStraight(Vector3 target, Func<bool> abort)
         {
             Walking = true;
             while (true)
@@ -157,7 +166,7 @@ namespace SAE
                 to.y = 0f;
                 if (to.magnitude < 0.05f) break;
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(to), turnSpeed * Time.deltaTime);
-                transform.position = Vector3.MoveTowards(transform.position, target, Speed * Time.deltaTime);
+                transform.position = Vector3.MoveTowards(transform.position, target, crew.Speed * Time.deltaTime);
                 yield return null;
             }
             Walking = false;
@@ -171,7 +180,7 @@ namespace SAE
             if (look.sqrMagnitude > 0.0001f) transform.rotation = Quaternion.LookRotation(look);
 
             // Assez haut pour que ses mains levées atteignent la banane
-            float jumpHeight = Mathf.Max(0.1f, banana.transform.position.y - (home.y + Height * 1.1f));
+            float jumpHeight = Mathf.Max(0.1f, banana.transform.position.y - (home.y + height * 1.1f));
             var ground = transform.position;
             for (float t = 0f; t < 1f; t += Time.deltaTime / jumpDuration)
             {
@@ -200,11 +209,11 @@ namespace SAE
             {
                 if (Random.value < dunkChance)
                 {
-                    yield return WalkTo(BasketSpot(0.3f), null);
+                    yield return WalkTo(BasketSpot(DunkDistance), null);
                     yield return Dunk();
                     yield break;
                 }
-                yield return WalkTo(BasketSpot(0.55f), null);
+                yield return WalkTo(BasketSpot(ThrowDistance), null);
                 bool miss = Random.value < missChance;
                 yield return Throw(miss);
                 if (!miss) yield break;
@@ -241,7 +250,7 @@ namespace SAE
                     to.y = home.y + 0.05f;
                 }
                 yield return Fly(banana, to, throwDuration);
-                if (banana && !miss) panier.RecevoirPart(banana, Share);
+                if (banana && !miss) panier.RecevoirPart(banana, crew.Share);
             }
             ThrowPhase = 0f;
         }
@@ -250,7 +259,7 @@ namespace SAE
         IEnumerator Dunk()
         {
             FaceBasket();
-            float jumpHeight = Mathf.Max(0.3f, panier.transform.position.y + 0.25f - (home.y + Height * 1.1f));
+            float jumpHeight = Mathf.Max(0.3f, panier.transform.position.y + 0.25f - (home.y + height * 1.1f));
             var ground = transform.position;
             for (float t = 0f; t < 1f; t += Time.deltaTime / 0.8f)
             {
@@ -281,7 +290,7 @@ namespace SAE
         IEnumerator SlamInto(Banane banana)
         {
             yield return Fly(banana, panier.transform.position, 0.12f, 0f);
-            if (banana) panier.RecevoirPart(banana, Share);
+            if (banana) panier.RecevoirPart(banana, crew.Share);
         }
 
         // Il boude : il secoue la tête et tape deux fois du pied (deux petits sauts)

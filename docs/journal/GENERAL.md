@@ -22,6 +22,8 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 | 2026-10-06 | **Deux modes de jeu** (menu SAE → Mode de jeu) : **VR** (casque, Quest Link) ou **PC** (clavier-souris) pour tester vite ; le build casque est toujours en VR | Tester sans casque sans passer par le simulateur XR (Dylan) |
 | 2026-10-07 | **Le hub est une cabane modélisée dans Blender** (script `cabane.py`, source unique) ; Unity n'ajoute que colliders, téléportation et lumières. Même DA autour (prairie, montagnes, palmiers) | Un hub beau et cohérent, semi-réaliste comme Bloons TD 6 (Dylan) |
 | 2026-10-05 | Git : `main` stable + une branche par tâche + PR relue | Éviter de casser le build commun |
+| 2026-10-07 | **Récolteur** : jusqu'à 4 singes (on en rachète tant que l'équipe n'est pas complète), améliorations communes à l'équipe ; un bouton d'amélioration **disparaît au niveau max** (récolteur et bananier) | Critiques de Dylan et Maxens : un meuble plein de boutons inutiles en fin de partie, et un seul singe, c'est vite limité |
+| 2026-10-07 | **Pas de texte qui flotte** : tout est écrit sur un support du décor (ardoise, enseigne, plaque, pancarte), avec deux polices (Bangers pour les titres, Oswald pour lire) | Critiques : texte « dans le vide » moche, textes trop simples |
 | _à trancher_ | Nom du jeu · assets Bloons ou maison · périmètre définitif | Avant le GDD v1 (ven. 9 oct.) |
 
 ## Jalons
@@ -40,6 +42,8 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 | Séparer vraiment les deux niveaux : le hub et le labyrinthe | Dylan |
 | Améliorer le labyrinthe | Dylan |
 | Mettre les assets des ballons MOAB | Maxens |
+
+_Avancement (branche `fix-all`, Dylan) : 11 points des deux critiques corrigés en code (bugs, textes, comptoirs, pupitres, récolteurs, étal), à tester après régénération de la scène. Restent : bananier (modèle), carte et montagnes, terrain, singes en T-pose._
 
 _À trancher : l'idée de Maxens d'un mini-jeu (roulette) quand tout est amélioré au maximum est une **nouvelle fonctionnalité**, hors du périmètre actuel (à mettre en POURRAIT dans le GDD)._
 

@@ -46,6 +46,17 @@ namespace SAE
             Teleported?.Invoke(spot);
         }
 
+        // Le joueur ne se cogne pas à cet objet (banane, singe à saisir) : sinon, en le tenant sous ses pieds,
+        // son CharacterController monte dessus et il s'envole (le bug du « prop fly »). Le joueur actif seulement :
+        // c'est le seul qui marche (l'autre mode est désactivé).
+        public static void IgnoreCollisions(GameObject held)
+        {
+            foreach (var player in GameObject.FindGameObjectsWithTag(Tags.Joueur))
+                foreach (var body in player.GetComponentsInChildren<CharacterController>())
+                    foreach (var c in held.GetComponentsInChildren<Collider>())
+                        Physics.IgnoreCollision(c, body);
+        }
+
         // Petite vibration dans la manette qui contient 'hand' : le retour « c'est fait » de chaque action.
         public static void Buzz(Transform hand, float strength = 0.5f, float duration = 0.08f)
         {

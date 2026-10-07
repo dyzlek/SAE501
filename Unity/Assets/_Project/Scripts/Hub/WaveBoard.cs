@@ -15,7 +15,7 @@ namespace SAE
             if (!spawner || !text) return;
             var sb = new StringBuilder();
             string number = spawner.Wave <= spawner.LastWrittenWave ? $"{spawner.Wave} / {spawner.LastWrittenWave}" : $"{spawner.Wave} (infini)";
-            sb.AppendLine($"<b>VAGUE {number}</b>");
+            sb.AppendLine($"<color=#FFD45A>VAGUE {number}</color>");
             string lives = spawner.Lives <= 5 ? $"<color=#FF5555>{spawner.Lives}</color>" : spawner.Lives.ToString();
             sb.AppendLine($"Vies : {lives}");
             sb.AppendLine($"<size=30>{spawner.Status}</size>");

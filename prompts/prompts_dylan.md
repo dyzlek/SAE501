@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
+### Corriger une partie des critiques
+> Pour l'instant, corrige seulement ces points : les objets qu'on peut faire voler avec la banane ; les objets qui se superposent (les caisses rentrent dans l'armoire) ; le petit singe récolteur qui rentre dans les objets ; l'affichage des écrans, pas beau même s'il est lisible ; le texte qui flotte dans le vide (il faudrait une pancarte, et le mot « Bibliothèque » tourne vers le joueur) ; les textes trop simples (bibliothèque et récolteur) ; les panneaux et certains objets pas beaux ; les bornes d'amélioration pas belles et les boutons jaunes du récolteur. Pour le meuble du récolteur, enlever seulement le bouton quand il est au maximum, et permettre d'avoir plusieurs singes ; pareil pour le bananier. Refaire le bananier et toute sa zone, les boutons LANCER et JOUER (horribles), et enlever le tonneau.
+
 ### Ma critique et les objectifs du jour, dans une branche fix-all
 > Dans une branche `fix-all`, mets d'abord ma critique (mon fichier Word « analyse critique ») et les objectifs qu'on s'est fixés aujourd'hui : analyse critique et bugs (tout le monde, Dylan corrige) ; coffre : changer l'asset, améliorer l'animation, voir les singes (Maxens) ; limiter la zone de téléportation dans le hub (Dylan) ; améliorer l'arc (Nicolas) ; séparer vraiment les deux niveaux, le hub et le labyrinthe (Dylan) ; améliorer le labyrinthe (Dylan) ; mettre les assets des ballons MOAB (Maxens).
 >

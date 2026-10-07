@@ -37,6 +37,7 @@ namespace SAE
             // sinon le XR Grab garderait un collider détruit.
             foreach (var c in piece.GetComponentsInChildren<Collider>()) DestroyImmediate(c);
             piece.AddComponent<BoxCollider>().size = Vector3.one * size;   // avant le XR Grab : il récupère les colliders à sa création
+            PlayerRig.IgnoreCollisions(piece);   // on ne peut pas monter sur le singe tenu et s'envoler
 
             var rb = piece.AddComponent<Rigidbody>();
             rb.isKinematic = true;     // il attend sur l'étagère sans tomber

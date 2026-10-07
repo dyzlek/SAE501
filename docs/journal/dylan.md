@@ -6,6 +6,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 - **Fait :** fusion de ma cabane (`test/cabane`) avec l'arc de Maxens (`feat/arc-quincy`) dans une nouvelle branche `feat/cabane-arc`. Un seul conflit, dans le générateur de scène : on garde la place du coffre de la cabane (estrade, texture bois) et le passage du point d'apparition sur la carte au joueur PC (pour l'étui de l'arc).
   - ajout des derniers commits de Maxens (mains de Quincy, arc plus petit, tir dans le simulateur) ; Pull Request [#9](https://github.com/dyzlek/SAE501/pull/9) fusionnée dans `main` ;
   - scène régénérée et testée en mode PC : la cabane, le hub et l'arc de Quincy fonctionnent ensemble.
+  - branche `fix-all` : corrections d'une partie des deux critiques (la mienne et celle de Maxens), voir le détail ci-dessous.
 - **Bloque :** sur la carte, l'arc en mode PC est grand et cache le bas de l'écran ; la carte reste en cubes gris (pas encore dans la DA de la cabane).
 - **Demain :** _
 
@@ -45,6 +46,19 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 
    ![Le terrain autour de la cabane](../captures/critique3-9.png)
 
+**Corrigé sur `fix-all`** _(code écrit par l'IA, compilé, pas encore testé dans Unity : il faut régénérer la scène)_
+- **Objets qui volent avec la banane** : le joueur ne se cogne plus aux bananes ni au singe qu'il tient ; avant, il pouvait monter dessus et s'envoler.
+- **Objets superposés** : LANCER et JOUER sont réunis sur un seul pupitre ; les caisses et le tonneau sortent de la cabane (caisses sur la terrasse et sous l'étal) ; la lanterne qui tombait dans la bibliothèque est déplacée au-dessus du pupitre (modèle Blender réexporté).
+- **Singe récolteur qui traversait les meubles** : sur un long trajet, il passe par le milieu de la pièce ; il s'arrête devant le tabouret du panier au lieu de rentrer dedans.
+- **Textes et écrans** : deux vraies polices (Bangers pour les titres, Oswald pour lire, licence libre) ; tous les tableaux deviennent des ardoises encadrées, titres dorés, texte à la craie.
+- **Texte dans le vide** : « BIBLIOTHÈQUE » sur une enseigne posée sur le meuble (il ne se tourne plus vers le joueur), les noms des types sur des plaques, le prix du coffre sur une petite pancarte devant l'estrade.
+- **Bornes d'amélioration** : de vrais comptoirs en bois (portes, plateau foncé), une ardoise avec une colonne par bouton, une enseigne avec le titre ; boutons ronds cerclés de laiton, verts ou gris (plus de jaune).
+- **Récolteur** : on peut acheter **jusqu'à 4 singes** (le bouton d'achat reste) ; les améliorations valent pour toute l'équipe ; deux singes ne courent jamais après la même banane. Les boutons au niveau max **disparaissent** (récolteur et bananier) et l'ardoise affiche MAX.
+- **Zone du bananier** : la table jaune sur un seul pied devient un étal en bois (4 pieds, rebords, étagère basse avec une caisse) avec une feuille de bananier : les bananes ressortent sur le vert. Le panier est sur un tabouret rond au lieu d'un cube.
+- **LANCER / JOUER** : un pupitre au dessus incliné, gros boutons ronds cerclés de laiton, nom gravé sur une plaque devant chaque bouton (même pupitre sur la carte avec LANCER / HUB, et VIDER à droite du plateau).
+- **Tonneau** : retiré de la cabane.
+- _Pas encore traité :_ le modèle du bananier lui-même (c'est l'asset de Maxens), le texte « [Touche] Ouvrir le coffre » et la roulette (le coffre est la tâche de Maxens aujourd'hui).
+
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
 | Claude (Claude Code) | Fusion `test/cabane` + `feat/arc-quincy` (Maxens) dans `feat/cabane-arc`, conflit du `PrototypeGenerator` résolu en gardant les deux | À tester |
@@ -52,6 +66,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 | Claude (Claude Code) | Mise à jour de mon journal et du journal général avec mes 3 captures | Gardé |
 | Claude (Claude Code) | Mise en forme de ma troisième analyse critique (depuis mon fichier Word, avec ses 9 captures) et des objectifs du jour dans le journal général, branche `fix-all` ; rien de corrigé pour l'instant | Gardé |
 | Claude (Claude Code) | Mise en forme de l'analyse critique de Maxens (qu'il m'a transmise) dans son journal, pour la corriger sur `fix-all` | Gardé |
+| Claude (Claude Code) | Corrections sur `fix-all` de 11 points des deux critiques : bug des objets qui volent (`PlayerRig.IgnoreCollisions`), pupitres de commande, comptoirs d'amélioration avec ardoise, boutons qui disparaissent au max, jusqu'à 4 singes récolteurs (`HarvesterCrew` ; `HarvesterSetup` supprimé, tout est construit par le générateur), trajets des singes par le centre, polices Bangers et Oswald, enseignes et pancartes au lieu des textes flottants, étal des bananes, tabouret du panier, lanterne déplacée dans `cabane.py` | À tester (compilé, scène à régénérer) |
 
 ## Mar. 6 oct. 2026
 - **Fait :**
