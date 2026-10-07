@@ -2,7 +2,38 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Mer. 7 oct. 2026
+
+### Fusionner la cabane et l'arc de Maxens
+> Fusionne ce que j'ai fait dans `test/cabane` avec la dernière branche de Maxens.
+>
+> Suite : c'est bien `feat/arc-quincy` sur GitHub (prends sa dernière version).
+
 ## Mar. 6 oct. 2026
+
+### Même DA partout : coffre, boutons, montagnes, lisibilité
+> J'aimerais que le coffre corresponde au style et que les boutons soient plus intégrés au décor. Ajoute des montagnes et d'autres éléments autour de la maison pour la déco : je veux que tout soit dans la même DA. Améliore aussi la lisibilité de certains éléments.
+
+### Cabane : fais encore mieux
+> Fais encore mieux, dépasse-toi.
+
+### Cabane plus serrée et vraiment belle
+> J'aimerais encore un peu moins d'espace. Tu peux changer certains éléments, comme les bibliothèques. Je veux que ce soit adapté à la VR, mais vraiment beau, semi-réaliste comme dans le vrai jeu (Bloons TD 6). Surprends-moi.
+
+### Hub dans une cabane en bois (branche de test)
+> Dans une branche de test, j'aimerais que tout ce qu'il y a dans le hub soit mis dans une sorte de cabane en bois fermée, beaucoup plus serrée, avec un tapis au sol. Essaie de tout rapprocher pour que ce soit adapté à la VR.
+
+### Panier à côté du plateau, le récolteur va chercher partout
+> J'aimerais vraiment que le panier soit à côté du plateau où on pose les singes. Et quand on prend une banane et qu'on la pose ailleurs, le singe va la chercher.
+
+### Récolteur plus lent et plus drôle
+> J'aimerais qu'il soit beaucoup plus lent de base, que le panier soit plus loin, vers le plateau, et quelque chose de drôle : parfois il dunke, parfois il rate, etc.
+
+### Retouches du singe récolteur
+> Parfait, sauf un truc : écarte le panier des autres objets. Sur le singe, grossis simplement son visage et enlève sa fléchette.
+
+### Singe récolteur de bananes
+> J'aimerais pouvoir acheter le service d'un singe qui ramasse les bananes et les met dans le panier. Fais-le gratuit pour le moment, ses améliorations aussi (vitesse de déplacement, etc.). Fais toutes les animations : il marche vers une banane, la porte, se rapproche du panier et la jette dedans. Utilise le singe classique.
 
 ### Prix de « Vider » affiché, singe tenu de côté (PC) ou dans la main (VR)
 > J'aimerais que le prix pour vider soit affiché. Et quand on prend un singe, en mode PC il doit se mettre sur le côté, et en VR directement dans la main.

@@ -2,6 +2,16 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Mer. 7 oct. 2026
+- **Fait :** fusion de ma cabane (`test/cabane`) avec l'arc de Maxens (`feat/arc-quincy`) dans une nouvelle branche `feat/cabane-arc`. Un seul conflit, dans le générateur de scène : on garde la place du coffre de la cabane (estrade, texture bois) et le passage du point d'apparition sur la carte au joueur PC (pour l'étui de l'arc).
+- **Bloque :** il faut régénérer la scène Jeu dans Unity (menu SAE) et tester l'arc dans la cabane. Mes réglages Unity non commités (XR Rig, build Quest, URP, scène) sont mis de côté dans un `git stash`.
+- **Demain :** _
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | Fusion `test/cabane` + `feat/arc-quincy` (Maxens) dans `feat/cabane-arc`, conflit du `PrototypeGenerator` résolu en gardant les deux | À tester |
+| Claude (Claude Code) | 2e fusion avec les derniers commits de Maxens sur `feat/arc-quincy` (mains de Quincy riggées, arc plus petit, tir dans le simulateur VR), sans conflit | À tester |
+
 ## Mar. 6 oct. 2026
 - **Fait :**
   - remarque de départ : le palmier de Maxens est trop petit dans le hub, il faut l'agrandir (fait : ×1,6) ;
@@ -18,6 +28,32 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 ![Hub avec la caisse, le panneau du bananier et le coffre](../captures/economie-hub-vue.webp)
 
 ![Hub vu du dessus](../captures/economie-hub-dessus.webp)
+
+**Captures du singe récolteur** _(branche `feat/singe-recolteur`, mode PC)_
+
+![Panneau RÉCOLTEUR à côté de la caisse, toutes les améliorations au max](../captures/recolteur-panneau.webp)
+
+![Le singe récolteur traverse le hub, du bananier vers le panier à côté du plateau](../captures/recolteur-hub.webp)
+
+![Le singe arrive au panier, posé à côté du bouton Vider (10 bananes)](../captures/recolteur-panier.webp)
+
+![Le hub vu du dessus dans l'éditeur (scène hors jeu : le panier et le récolteur, posés au lancement, n'y sont pas)](../captures/recolteur-hub-dessus.webp)
+
+**Cabane v1** _(branche `test/cabane`, avant la v2 plus serrée et texturée)_
+
+![Cabane v1 : murs en planches, tapis rouge, tout sur un cercle de 3,5 m](../captures/cabane-v1.webp)
+
+**Cabane v3** _(rendus Blender de `Blender/cabane.py`, sans les meubles du jeu)_
+
+![Cabane v3 vue de l'intérieur : rondins, fenêtres, grande porte ouverte sur la terrasse](../captures/cabane-v3-dedans.webp)
+
+![Cabane v3 vue de dehors : toit de chaume, volets verts, terrasse sur pilotis](../captures/cabane-v3-dehors.webp)
+
+**Cabane v4** _(rendus Blender : montagnes et palmiers autour)_
+
+![Cabane v4 : montagnes enneigées et palmiers autour de la cabane](../captures/cabane-v4-dehors.webp)
+
+![Cabane v4 : la vue depuis la terrasse](../captures/cabane-v4-horizon.webp)
 
 **Mon analyse critique** _(corrigée dans la foulée, à tester)_
 1. **Le hub est trop petit.** On est trop serré, les éléments sont les uns devant les autres : c'est compliqué de circuler et d'utiliser les objets.
@@ -87,6 +123,15 @@ Le hub était plus espacé, mais pas encore assez. J'ai dessiné une disposition
 | Claude (Claude Code) | Le bouton « Vider » coûte 10 bananes (`ActionCube.ClearBoardPrice`, rien n'est payé si le plateau est vide ou s'il manque des bananes) ; plus de texte au-dessus des singes posés sur le plateau (`Board`) | À tester |
 | Claude (Claude Code) | Prix écrit sur le bouton « Vider » (`ActionCube.Start`) ; en mode PC le singe tenu est décalé en bas à droite (`DesktopPlayer.holdOffset`) ; en VR il se cale directement dans la main (`useDynamicAttach = false`) | À tester |
 | Claude (Claude Code) | Correction d'une erreur de compilation que j'avais introduite (retour à la ligne dans le texte du bouton Vider), qui empêchait de lancer le jeu | Gardé |
+| Claude (Claude Code) | Singe récolteur (branche `feat/singe-recolteur`) : un singe classique qu'on achète au panneau « RÉCOLTEUR » (gratuit pour l'instant), qui marche jusqu'à une banane de la table, saute pour la prendre, la porte au-dessus de sa tête, marche au panier et la jette dedans ; 3 améliorations gratuites (vitesse, cadence, rendement) ; animations faites en code sur le squelette du modèle (marche, porter, lancer), car le FBX n'a aucune animation. Installé au lancement par `HarvesterSetup`, sans toucher la scène | À tester |
+| Claude (Claude Code) | Retouches du récolteur : tête plus grosse (×1,4), fléchette retirée ; panier avancé vers le centre (−156°, 3,7 m), loin de la table et de la caisse (générateur + déplacement au lancement pour la scène actuelle) | À tester |
+| Claude (Claude Code) | Récolteur plus drôle : beaucoup plus lent de base (0,25 m/s, jusqu'à 1,05) ; panier éloigné vers le plateau (−160°, 2 m du centre) ; 20 % de dunks (grand saut, banane écrasée dans le panier, tour sur lui-même bras levés), 25 % de lancers ratés (la banane tombe à côté, il secoue la tête et tape du pied, la ramasse et retente) | À tester |
+| Claude (Claude Code) | Panier déplacé à côté du plateau des singes (+32°, après « Vider ») ; le récolteur va aussi chercher les bananes que le joueur a lâchées ailleurs (par terre, sur un meuble), une fois immobiles | À tester |
+| Claude (Claude Code) | Branche de test `test/cabane` : le hub devient une cabane en bois fermée (12 murs en planches, poteaux, plafond à poutres, lampe), avec un tapis rond au centre ; tout est resserré (cercle de 5 m → 3,5 m, angles réajustés) pour que tout soit proche en VR. Mesures partagées dans `HubLayout` | À tester |
+| Claude (Claude Code) | Cabane v2, « vraiment belle » et plus serrée (cercle 3,5 → 2,8 m, murs à 3,4 m) : murs en rondins, toit conique en planches avec charpente, grande porte ouverte sur le bananier (dehors, sur une terrasse), 3 fenêtres, lustre en roue de charrette et 2 lanternes, tapis rond oriental ; textures de bois et de tapis dessinées par le code (`CabinArt`) ; une seule bibliothèque compacte (7 × 8, plus haute rangée à 2,1 m) ; caisse accrochée au mur ; caisses, tonneaux et régimes de bananes en déco | À tester |
+| Claude (Claude Code) | Cabane v3 : la cabane devient un vrai modèle 3D fait dans **Blender par un script** (`Blender/cabane.py`, lancé en ligne de commande, sans rien télécharger) : textures dessinées par le code (bois, rondins, bois de bout, chaume, tapis à franges, cible, herbe, avec relief), murs en rondins croisés aux angles avec joints, toit de chaume conique et charpente, porte au battant ouvert, fenêtres à volets peints, lustre en roue de charrette, lanternes, cible de fléchettes, terrasse sur pilotis, prairie avec rochers et buissons ; tonneau, caisse et régime de bananes en accessoires. Vérifié sur des rendus Blender à chaque essai (4 itérations : grain trop tourbillonnant, rondins illisibles → joints + ombrage par sommet, couleurs unies trop claires → conversion sRGB/linéaire). Unity pose le .glb, l'aligne avec ses repères, ajoute colliders, téléportation et lumières | À tester |
+| Claude (Claude Code) | Tout dans la même DA : montagnes enneigées en couronne (low poly, couleurs par hauteur) et palmiers autour de la cabane, prairie jusqu'à l'horizon, brume légère au loin ; JOUER / LANCER / Vider (et les boutons de la carte) deviennent des bornes en bois avec un gros bouton cerclé de laiton et une plaque gravée ; coffre sur une estrade, panneau des chances encadré de bois et accroché au mur (il traversait les rondins), prix plus gros ; diagonales des caisses corrigées (elles dépassaient), régimes de bananes plus gros | À tester |
+| Claude (Claude Code) | Ajout de mes 3 captures du singe récolteur dans ce journal (converties en .webp dans `docs/captures/`), puis la vue du dessus du hub | Gardé |
 
 ## Lun. 5 oct. 2026
 - **Fait :** création du dépôt GitHub, lecture des consignes, première analyse de l'idée et brouillon du GDD, test du prototype v2 et captures, **analyse critique du prototype (personnelle, pas encore discutée avec l'équipe)**, test et analyse des prototypes de Nicolas (coffres) et de Maxens (bananier), intégration des trois prototypes dans un seul projet (branche `feat/integration`).

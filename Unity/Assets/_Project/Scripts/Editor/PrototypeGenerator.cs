@@ -5,6 +5,7 @@ using Unity.XR.CoreUtils;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
@@ -23,6 +24,10 @@ namespace SAE.EditorTools
         const float BoardTile = 0.2f;    // plateau de 1,6 m : l'élément principal du hub
         const float HandHeight = 0.9f;   // table des bananes et socle du panier : à hauteur de main, pas au sol
         const int IgnoreRaycast = 2;     // couche Unity « Ignore Raycast »
+        const float DesktopBowScale = 0.5f;   // en mode PC, l'arc est collé à la caméra : plus petit
+        static readonly Vector3 HandOffset = new Vector3(0f, -0.01f, -0.06f);   // la paume, un peu derrière l'avant de la manette
+        static readonly Vector3 BowInHand = new Vector3(0.07f, 0f, 0.02f);      // la poignée de l'arc, sur le côté intérieur de la main : la flèche passe à côté
+        const float HandTilt = 35f;   // les mains tournées pouce vers le haut, comme quand on tient les manettes (pas paume à plat)
         static readonly Vector3 MapCenter = new Vector3(0f, 0f, 40f);
 
         static readonly Color Floor = new Color(0.35f, 0.35f, 0.38f);
@@ -38,8 +43,15 @@ namespace SAE.EditorTools
             Directory.CreateDirectory(Folder);
             TagSetup.EnsureTags();
             VRSetup.Configure();
+            CabinArt.Build();   // la texture de bois des meubles du hub (la cabane elle-même vient de Blender)
 
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+            // Une brume légère au loin : les montagnes s'estompent dans le ciel, on sent la profondeur
+            RenderSettings.fog = true;
+            RenderSettings.fogMode = FogMode.Linear;
+            RenderSettings.fogStartDistance = 60f;
+            RenderSettings.fogEndDistance = 230f;
+            RenderSettings.fogColor = new Color(0.72f, 0.82f, 0.93f);
             var defaultCam = GameObject.FindWithTag("MainCamera");
             if (defaultCam) Object.DestroyImmediate(defaultCam); // la caméra est celle du joueur
 
@@ -49,10 +61,11 @@ namespace SAE.EditorTools
             var mapRoot = BuildMap(hubSpawn);
             var spawner = mapRoot.GetComponent<WaveSpawner>();
             var hub = BuildHub(mapRoot, mapSpawn, spawner);   // avant le joueur : l'installeur des bananes ajoute son TestSouris à Camera.main s'il en trouve une
-            var player = Player(hubSpawn.position);
+            var player = Player(hubSpawn.position, mapSpawn);
             if (!player) return;
-            BuildChest(hub, Around(132f, Ring - 0.3f), player.head);
-            BuildPlayerMode(player.gameObject, DesktopPlayerObject(hubSpawn.position));
+            BuildChest(hub, Around(100f, Ring - 0.2f), player.head);
+            UseWoodTexture(hub);   // encore une fois : l'estrade et le cadre du coffre sont posés après le reste du hub
+            BuildPlayerMode(player.gameObject, DesktopPlayerObject(hubSpawn.position, mapSpawn));
 
             EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), ScenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
@@ -81,7 +94,7 @@ namespace SAE.EditorTools
         }
 
         // Le joueur PC (clavier/souris), pour tester vite sans casque : DesktopPlayer, et la caméra sert de tête et de mains.
-        static GameObject DesktopPlayerObject(Vector3 position)
+        static GameObject DesktopPlayerObject(Vector3 position, Transform mapSpawn)
         {
             var player = new GameObject("Joueur PC");
             player.tag = Tags.Joueur;
@@ -113,11 +126,21 @@ namespace SAE.EditorTools
             player.AddComponent<DesktopPlayer>();
             var rig = player.AddComponent<PlayerRig>();
             rig.head = rig.leftHand = rig.rightHand = cam.transform;
+
+            // L'arc, en bas à droite de la vue, plus petit qu'en VR pour ne pas cacher l'écran (clic droit : tirer)
+            var bow = ((GameObject)PrefabUtility.InstantiatePrefab(BowSetup.Setup().gameObject)).GetComponent<Bow>();
+            bow.transform.localScale *= DesktopBowScale;
+            bow.maxDraw *= DesktopBowScale;
+            bow.HoldIn(cam.transform, new Vector3(0.3f, -0.3f, 0.7f));
+            var archer = player.AddComponent<DesktopArcher>();
+            archer.bow = bow;
+            archer.aim = cam.transform;
+            GiveHolster(player, bow, mapSpawn);
             player.AddComponent<MonkeyInfoCard>();
             return player;
         }
 
-        static PlayerRig Player(Vector3 position)
+        static PlayerRig Player(Vector3 position, Transform mapSpawn)
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(VRSetup.RigPrefab);
             if (!prefab) { Debug.LogError("Joueur VR : Starter Assets de l'XR Interaction Toolkit introuvables : " + VRSetup.RigPrefab); return null; }
@@ -149,6 +172,8 @@ namespace SAE.EditorTools
             rig.rightHand = FindChild(go.transform, "Right Controller");
             AddFingertip(rig.leftHand);
             AddFingertip(rig.rightHand);
+            GiveHands(rig, out var leftHand, out var rightHand);
+            GiveBow(go, rig, mapSpawn, leftHand, rightHand);
             go.AddComponent<MonkeyInfoCard>();   // fiche du singe visé, dans le décor
 
             // Corps : invisible pour soi, mais c'est lui qu'on voit en miniature sur le plateau (et plus tard un 2e joueur).
@@ -162,6 +187,64 @@ namespace SAE.EditorTools
             body.AddComponent<ColorTint>().Set(new Color(1f, 0.55f, 0.1f));
             body.AddComponent<Mirrored>().label = "Toi";
             return rig;
+        }
+
+        // Les mains de Quincy à la place des modèles de manettes : elles se ferment avec le grip et la gâchette.
+        // Renvoie la main gauche (celle qui tiendra l'arc).
+        static void GiveHands(PlayerRig rig, out AnimateHandOnInput left, out AnimateHandOnInput right)
+        {
+            left = right = null;
+            if (!rig.leftHand || !rig.rightHand) return;
+            if (!HandSetup.Left || !HandSetup.Right) HandSetup.Setup();   // refaits seulement s'ils manquent (menu SAE → Préparer les mains)
+            right = PutHand(HandSetup.Right, rig.rightHand, "Right");
+            left = PutHand(HandSetup.Left, rig.leftHand, "Left");
+        }
+
+        static AnimateHandOnInput PutHand(AnimateHandOnInput prefab, Transform controller, string side)
+        {
+            var visual = controller.Find(side + " Controller Visual");
+            if (visual) visual.gameObject.SetActive(false);   // on cache la manette blanche des Starter Assets
+            var hand = ((GameObject)PrefabUtility.InstantiatePrefab(prefab.gameObject)).GetComponent<AnimateHandOnInput>();
+            hand.transform.SetParent(controller, false);
+            hand.transform.localPosition = HandOffset;
+            // Pouce relevé vers l'intérieur : la main gauche tourne dans un sens, la droite (en miroir) dans l'autre
+            hand.transform.localRotation = Quaternion.Euler(0f, 0f, side == "Left" ? HandTilt : -HandTilt);
+            hand.gripValue = new InputActionProperty(InputReference($"XRI {side} Interaction/Select Value"));
+            hand.triggerValue = new InputActionProperty(InputReference($"XRI {side} Interaction/Activate Value"));
+            return hand;
+        }
+
+        // L'arc de Quincy dans la main gauche ; on tire la corde avec la main droite (grip ou gâchette).
+        // Rangé au hub (BowHolster) ; la main gauche se ferme dessus tant qu'il est sorti.
+        static void GiveBow(GameObject player, PlayerRig rig, Transform mapSpawn, AnimateHandOnInput leftHand, AnimateHandOnInput rightHand)
+        {
+            if (!rig.leftHand || !rig.rightHand) { Debug.LogWarning("Joueur VR : manette introuvable, pas d'arc."); return; }
+            var bow = ((GameObject)PrefabUtility.InstantiatePrefab(BowSetup.Setup().gameObject)).GetComponent<Bow>();
+            bow.HoldIn(rig.leftHand, BowInHand);
+            if (leftHand) leftHand.heldBow = bow;
+            var archer = player.AddComponent<VRArcher>();
+            archer.bow = bow;
+            archer.drawHand = rig.rightHand;
+            archer.drawHandVisual = rightHand;
+            archer.drawGrip = new InputActionProperty(InputReference("XRI Right Interaction/Select Value"));
+            archer.drawTrigger = new InputActionProperty(InputReference("XRI Right Interaction/Activate Value"));
+            GiveHolster(player, bow, mapSpawn);
+        }
+
+        static void GiveHolster(GameObject player, Bow bow, Transform mapSpawn)
+        {
+            var holster = player.AddComponent<BowHolster>();
+            holster.bow = bow;
+            holster.mapSpawn = mapSpawn;
+        }
+
+        // Une action des contrôles XRI des Starter Assets (même chose que « Use Reference » dans l'Inspector).
+        static InputActionReference InputReference(string name)
+        {
+            var path = VRSetup.SamplesFolder + "/Starter Assets/XRI Default Input Actions.inputactions";
+            var reference = AssetDatabase.LoadAllAssetsAtPath(path).OfType<InputActionReference>().FirstOrDefault(r => r.name == name);
+            if (!reference) Debug.LogWarning("Action introuvable : " + name);
+            return reference;
         }
 
         // Le rayon de chaque manette : celui des Starter Assets (courbé, 25 cm, presque transparent) est éteint,
@@ -201,25 +284,60 @@ namespace SAE.EditorTools
             area.interactionLayers = 1 << VRSetup.TeleportLayer;
         }
 
+        // Borne de commande en bois (même style que la cabane) : un socle, un poteau, une platine avec un gros bouton rond
+        // cerclé de laiton, et une plaque en bois avec le nom écrit en grand. Le bouton (ActionCube) s'enfonce avec la main
+        // ou se vise avec le rayon. pos : où poser la borne (on garde x et z, elle est posée au sol).
+        // yaw : null = tournée vers le centre du hub ; sinon l'angle voulu (sur la carte, 0 = face au joueur de l'estrade).
+        static readonly Color Brass = new Color(0.85f, 0.65f, 0.25f);
+        static readonly Color SignText = new Color(1f, 0.93f, 0.75f);
+
         static ActionCube MakeActionCube(Transform parent, string name, Vector3 pos, float size, Color color,
-            string label, ActionCube.Action action, Transform destination)
+            string label, ActionCube.Action action, Transform destination, float? yaw = null)
         {
-            var cube = Visuals.Solid(name, parent, pos, Vector3.one * size, color);
-            cube.tag = Tags.Bouton;
-            var a = cube.AddComponent<ActionCube>();
-            cube.AddComponent<RayPress>();   // on peut aussi l'enfoncer de loin, en le visant
+            var root = new GameObject($"Borne {name}").transform;
+            root.SetParent(parent, false);
+            root.localPosition = new Vector3(pos.x, 0f, pos.z);
+            root.localRotation = Quaternion.Euler(0, yaw ?? AngleOf(pos), 0);   // +Z local = à l'opposé du joueur
+
+            const float Top = 0.95f;                    // hauteur de la platine : le bouton tombe sous la main
+            float plate = Mathf.Max(0.38f, size * 0.95f + 0.1f);
+            Visuals.Solid("Socle", root, new Vector3(0, 0.03f, 0), new Vector3(plate - 0.04f, 0.06f, plate - 0.04f), Wood);
+            Visuals.Solid("Poteau", root, new Vector3(0, Top / 2f, 0), new Vector3(0.14f, Top - 0.06f, 0.14f), Wood);
+            Visuals.Solid("Platine", root, new Vector3(0, Top - 0.03f, 0), new Vector3(plate, 0.06f, plate), Wood);
+            var cylinder = Resources.GetBuiltinResource<Mesh>("Cylinder.fbx");
+            var ring = Visuals.Box("Bague", root, new Vector3(0, Top + 0.01f, 0), new Vector3(size * 0.95f, 0.01f, size * 0.95f), Brass);
+            ring.GetComponent<MeshFilter>().sharedMesh = cylinder;
+
+            var button = Visuals.Box(name, root, new Vector3(0, Top + 0.04f, 0), new Vector3(size * 0.75f, 0.03f, size * 0.75f), color);
+            button.GetComponent<MeshFilter>().sharedMesh = cylinder;
+            var col = button.AddComponent<BoxCollider>();
+            col.size = new Vector3(1.3f, 4f, 1.3f);     // un peu plus grand que le bouton : facile à toucher du bout de la manette
+            button.tag = Tags.Bouton;
+            var a = button.AddComponent<ActionCube>();
+            button.AddComponent<RayPress>();             // on peut aussi l'enfoncer de loin, en le visant
             a.action = action;
             a.destination = destination;
-            var text = Visuals.Label(cube.transform, label, new Vector3(0, 1.3f, 0), 0.12f);   // bien au-dessus : on voit le cube d'en haut
-            text.transform.localScale = Vector3.one / size; // le cube parent est mis à l'échelle : on compense
+
+            // Plaque au-dessus, côté mur, sur deux montants : le nom se lit de loin, sans cacher le bouton
+            var rows = label.Split('\n');
+            float charSize = rows.Length > 1 ? 0.06f : 0.075f;    // deux lignes : un peu plus petit
+            int longest = 0;
+            foreach (var row in rows) longest = Mathf.Max(longest, row.Length);
+            float signW = Mathf.Max(0.46f, longest * charSize * 0.85f + 0.08f);   // la plaque s'adapte au texte
+            float signH = 0.08f + charSize * 1.2f * rows.Length, signY = Top + 0.3f + signH / 2f;
+            for (int sx = -1; sx <= 1; sx += 2)
+                Visuals.Box("Montant", root, new Vector3(sx * 0.15f, (Top + signY) / 2f, plate / 2f - 0.03f), new Vector3(0.03f, signY - Top, 0.03f), Wood);
+            Visuals.Box("Plaque", root, new Vector3(0, signY, plate / 2f - 0.03f), new Vector3(signW, signH, 0.03f), Wood);
+            var text = Visuals.Label(root, label, new Vector3(0, signY, plate / 2f - 0.05f), charSize, SignText);
+            Object.DestroyImmediate(text.GetComponent<Billboard>());
             return a;
         }
 
         // Bouton LANCER : la vague ne part que quand le joueur appuie dessus.
-        static void MakeLaunchCube(Transform parent, Vector3 pos, float size, WaveSpawner spawner)
+        static void MakeLaunchCube(Transform parent, Vector3 pos, float size, WaveSpawner spawner, float? yaw = null)
         {
             var a = MakeActionCube(parent, "Lancer la vague", pos, size, new Color(0.95f, 0.45f, 0.15f),
-                "LANCER", ActionCube.Action.StartWave, null);
+                "LANCER", ActionCube.Action.StartWave, null, yaw);
             a.spawner = spawner;
         }
 
@@ -240,21 +358,22 @@ namespace SAE.EditorTools
         }
 
         // ---------------- HUB ----------------
-        // Tout ce qui compte est disposé EN ROND autour du joueur (point d'apparition au centre, regard vers +Z),
-        // chaque élément tourné vers lui :
-        //   devant (0°)           : le plateau incliné (la carte en direct), reculé sur le cercle,
-        //                           avec LANCER (-32°), JOUER (-20°) et Vider (+20°) de part et d'autre,
-        //                           et le tableau de la vague au-dessus
-        //   côtés (±72°)          : les deux meubles de la bibliothèque, courbés le long du cercle
-        //   derrière (180°)       : le bananier de Maxens (agrandi), la table des bananes devant lui (-172°),
-        //                           le panier sur son socle (-157°) et la caisse (-140°), le panneau d'amélioration (160°)
-        //   derrière (132°)       : le coffre de Nicolas, avec son prix au-dessus et le panneau des chances
-        const float Ring = 5.0f;          // rayon du cercle : tout est posé dessus, le centre reste libre pour circuler
-        const float SlotSize = 0.24f;     // ancienne taille ×1,1
-        const float SlotStepX = 0.36f;    // espace entre deux raretés
-        const float SlotStepY = 0.40f;    // espace entre deux étagères
-        const float FirstShelfY = 0.45f;  // rangée la plus basse (accessible à un petit joueur)
-        const float TreeScale = 1.6f;     // le palmier de Maxens, agrandi
+        // Le hub est une cabane en rondins (voir BuildCabin). Tout est posé EN ROND contre les murs, tourné vers le joueur
+        // qui se tient au centre, sur le tapis (point d'apparition, regard vers +Z). Cercle de 2,8 m : un ou deux pas suffisent.
+        //   devant (0°)        : le plateau incliné (la carte en direct), le tableau de la vague au mur au-dessus,
+        //                        LANCER (-41°), JOUER (-30°), Vider (+30°) sur des bornes en bois, et le panier (+45°)
+        //   gauche (-82°)      : LA bibliothèque, un seul meuble courbe (7 types × 8 raretés)
+        //   derrière (180°)    : la grande porte ouverte : le bananier dehors, la table des bananes juste devant
+        //   arrière-gauche     : le panneau RÉCOLTEUR (-132°, posé au lancement) et la caisse accrochée au mur au-dessus
+        //   arrière-droite     : le panneau d'amélioration du bananier (140°) ; droite : le coffre (100°) et ses chances
+        const float Ring = HubLayout.Ring;   // rayon du cercle (2,8 m) : tout est posé dessus, le centre reste libre pour circuler
+        const float SlotSize = 0.2f;      // une seule bibliothèque compacte (7 types × 8 raretés), tout à portée de bras
+        const float SlotStepX = 0.28f;    // espace entre deux raretés
+        const float SlotStepY = 0.26f;    // espace entre deux étagères : la plus haute est à 2,1 m
+        const float FirstShelfY = 0.55f;  // rangée la plus basse (sans se baisser)
+        const float TreeScale = 1.4f;     // le palmier de Maxens, agrandi, dehors derrière la grande porte
+        const float BasketAngle = HubLayout.BasketAngle;     // le panier, à côté du plateau (HarvesterSetup le déplace aussi dans une scène plus ancienne)
+        const float BasketRadius = HubLayout.BasketRadius;
 
         // Position sur le cercle. angle 0 = devant, positif = à droite.
         static Vector3 Around(float angleDeg, float radius, float height = 0f)
@@ -266,30 +385,157 @@ namespace SAE.EditorTools
         static Transform BuildHub(Transform mapRoot, Transform mapSpawn, WaveSpawner spawner)
         {
             var env = new GameObject("Hub").transform;
-            Teleportable(Visuals.Solid("Sol", env, new Vector3(0, -0.05f, 0), new Vector3(15, 0.1f, 15), Floor));
+            BuildCabin(env);
 
-            // Devant, sur le cercle : le plateau, avec JOUER et Vider de part et d'autre
+            // Devant : le plateau, avec JOUER, LANCER, Vider et le panier de part et d'autre
             BuildBoard(env, mapRoot);
-            MakeActionCube(env, "Jouer", Around(-20f, Ring - 0.5f, 1.0f), 0.35f, new Color(0.2f, 0.85f, 0.3f),
+            MakeActionCube(env, "Jouer", Around(-30f, Ring - 0.5f, 1.0f), 0.35f, new Color(0.2f, 0.85f, 0.3f),
                 "JOUER", ActionCube.Action.Teleport, mapSpawn);
-            MakeActionCube(env, "Vider", Around(20f, Ring - 0.5f, 0.9f), 0.25f, new Color(0.6f, 0.6f, 0.6f),
-                "Vider", ActionCube.Action.ClearBoard, null);
-            // LANCER à côté de JOUER (on peut lancer depuis le hub et regarder la vague sur le plateau),
-            // et le tableau de la vague au-dessus du plateau
-            MakeLaunchCube(env, Around(-32f, Ring - 0.5f, 1.0f), 0.3f, spawner);
-            BuildWaveBoard(env, Around(0f, Ring + 0.1f, 2.1f), Quaternion.identity, spawner);
+            MakeActionCube(env, "Vider", Around(30f, Ring - 0.5f, 0.9f), 0.25f, new Color(0.6f, 0.6f, 0.6f),
+                $"VIDER\n{ActionCube.ClearBoardPrice} bananes", ActionCube.Action.ClearBoard, null);
+            MakeLaunchCube(env, Around(-41f, Ring - 0.5f, 1.0f), 0.3f, spawner);
+            BuildWaveBoard(env, Around(0f, HubLayout.CabinRadius - 0.25f, 2.25f), Quaternion.identity, spawner);   // accroché au mur
 
-            // Sur les côtés : les deux meubles de la bibliothèque, qui suivent le cercle (4 types + 3 types)
-            BuildShelf(env, "Bibliotheque gauche", -72f, 0, 4);
-            BuildShelf(env, "Bibliotheque droite", 72f, 4, 3);
+            // À gauche : la bibliothèque (tous les types dans un seul meuble)
+            BuildShelf(env, "Bibliotheque", -82f, 0, MonkeyData.TypeCount);
 
-            // Derrière : le bananier sur le cercle, la table des bananes devant lui, le panier et la caisse d'un côté,
-            // le panneau d'amélioration de l'autre (le coffre est placé après le joueur, derrière-droite)
-            var bananier = BuildBananas(env, Around(180f, Ring + 0.7f), 180f);
-            BuildMoneyBoard(env, -140f);
-            if (bananier) BuildUpgradePanel(env, bananier, 160f);
+            // Derrière : le bananier dehors, derrière la grande porte ; la table des bananes dedans, juste devant la porte
+            var bananier = BuildBananas(env, Around(180f, Ring + 1.3f), 180f);
+            BuildMoneyBoard(env, HubLayout.HarvesterPanelAngle);
+            if (bananier) BuildUpgradePanel(env, bananier, 140f);
+
+            BuildDecor(env);
+            UseWoodTexture(env);
             return env;
         }
+
+        // La cabane est un vrai modèle 3D, fabriqué dans Blender par un script : Blender/cabane.py (à relancer après
+        // un changement, voir son en-tête) -> Art/Cabane/Cabane.glb, plus les accessoires Tonneau, Caisse et Regime.
+        // Le modèle apporte tout ce qui se voit : rondins, toit de chaume, porte et fenêtres, lustre, lanternes, tapis, prairie.
+        // Ici, on le pose, on l'aligne, et on ajoute ce qu'un modèle n'a pas : les colliders (invisibles),
+        // la zone de téléportation et les vraies lumières (aux repères « Lumiere_* » placés dans le modèle).
+        const string CabinFolder = "Assets/_Project/Art/Cabane/";
+        const int CabinSides = 12;
+        const float CabinDoorHeight = 2.4f;   // même valeur que DOOR_H dans cabane.py : la porte est derrière (180°)
+
+        static void BuildCabin(Transform env)
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(CabinFolder + "Cabane.glb");
+            if (!asset) { Debug.LogWarning("Hub : Cabane.glb introuvable. Lancer Blender/cabane.py (voir l'en-tête du script)."); return; }
+            var cabin = (GameObject)PrefabUtility.InstantiatePrefab(asset);
+            cabin.name = "Cabane";
+            cabin.transform.SetParent(env, false);
+            AlignCabin(cabin.transform);
+
+            // Plancher : dedans et la terrasse derrière la porte (mêmes limites que la plateforme du modèle)
+            var floor = new GameObject("Plancher (collider)");
+            floor.transform.SetParent(env, false);
+            var floorBox = floor.AddComponent<BoxCollider>();
+            floorBox.center = new Vector3(0f, -0.05f, -0.8f);
+            floorBox.size = new Vector3(8f, 0.1f, 9.6f);
+            Teleportable(floor);
+
+            // Un collider par mur : on ne traverse pas, ni en marchant ni en se téléportant (sauf par la porte)
+            float r = HubLayout.CabinRadius, h = HubLayout.CabinHeight;
+            float sideLength = 2f * r * Mathf.Tan(Mathf.PI / CabinSides);
+            for (int i = 0; i < CabinSides; i++)
+            {
+                float angle = i * 360f / CabinSides;
+                float bottom = Mathf.Approximately(angle, 180f) ? CabinDoorHeight : 0f;
+                var wall = new GameObject($"Mur {i} (collider)");
+                wall.transform.SetParent(env, false);
+                wall.transform.SetPositionAndRotation(Around(angle, r), Quaternion.Euler(0, angle, 0));
+                var box = wall.AddComponent<BoxCollider>();
+                box.center = new Vector3(0, (bottom + h) / 2f, 0);
+                box.size = new Vector3(sideLength, h - bottom, 0.25f);
+            }
+
+            // Les lumières, là où le modèle a mis ses repères : un lustre au centre, deux lanternes aux murs
+            foreach (var t in cabin.GetComponentsInChildren<Transform>())
+            {
+                if (t.name == "Lumiere_Lustre") AddLight(t, 7f, 2.4f);
+                else if (t.name.StartsWith("Lumiere_Lanterne")) AddLight(t, 3.5f, 1.3f);
+            }
+
+            // Rien ici ne bouge : Unity regroupe les maillages (moins d'appels de dessin, plus de fps dans le casque)
+            foreach (var t in cabin.GetComponentsInChildren<Transform>())
+                GameObjectUtility.SetStaticEditorFlags(t.gameObject, StaticEditorFlags.BatchingStatic);
+        }
+
+        // Le modèle passe de Blender (Z en haut) à Unity (Y en haut) : selon l'importeur, il peut arriver tourné ou en miroir.
+        // On le remet d'aplomb avec ses deux repères : « Repere_Porte » doit être derrière (180°), « Repere_Droite » à droite (+90°).
+        static void AlignCabin(Transform cabin)
+        {
+            Transform door = null, right = null;
+            foreach (var t in cabin.GetComponentsInChildren<Transform>())
+            {
+                if (t.name == "Repere_Porte") door = t;
+                if (t.name == "Repere_Droite") right = t;
+            }
+            if (!door || !right) { Debug.LogWarning("Hub : repères de la cabane introuvables, cabane non alignée."); return; }
+
+            cabin.Rotate(0f, 180f - AngleOf(door.position), 0f, Space.World);
+            if (AngleOf(right.position) < 0f)
+            {
+                var s = cabin.localScale;
+                cabin.localScale = new Vector3(-s.x, s.y, s.z);   // miroir gauche-droite : la porte (sur l'axe) ne bouge pas
+            }
+        }
+
+        static float AngleOf(Vector3 p) => Mathf.Atan2(p.x, p.z) * Mathf.Rad2Deg;   // 0 = devant, positif = à droite
+
+        static void AddLight(Transform at, float range, float intensity)
+        {
+            var light = new GameObject("Lumière").AddComponent<Light>();
+            light.transform.SetParent(at, false);
+            light.type = LightType.Point;
+            light.range = range;
+            light.intensity = intensity;
+            light.color = new Color(1f, 0.8f, 0.55f);   // chaude, comme une flamme
+            light.shadows = LightShadows.None;           // les ombres des lampes coûtent trop cher sur le casque
+        }
+
+        // Les accessoires du modèle Blender (tonneaux, caisses, régimes de bananes), dans la cabane et sur la terrasse
+        static void BuildDecor(Transform env)
+        {
+            var decor = new GameObject("Décor").transform;
+            decor.SetParent(env, false);
+
+            Prop(decor, "Caisse", Around(-50f, Ring + 0.2f), 10f, 1f);
+            Prop(decor, "Caisse", Around(-50f, Ring + 0.2f, 0.5f), -15f, 0.7f);
+            Prop(decor, "Tonneau", Around(61f, Ring + 0.15f), 0f, 1f);
+            Prop(decor, "Regime", Around(61f, Ring + 0.15f, 0.9f), 30f, 1.6f);
+
+            // Dehors, sur la terrasse, autour du bananier
+            Prop(decor, "Tonneau", Around(205f, Ring + 1.6f), 40f, 1f);
+            Prop(decor, "Regime", Around(205f, Ring + 1.6f, 0.9f), 0f, 1.6f);
+            Prop(decor, "Tonneau", Around(155f, Ring + 1.5f), 0f, 1f);
+            Prop(decor, "Caisse", Around(145f, Ring + 1.9f), 30f, 1f);
+        }
+
+        static void Prop(Transform parent, string model, Vector3 pos, float yaw, float scale)
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(CabinFolder + model + ".glb");
+            if (!asset) { Debug.LogWarning($"Hub : {model}.glb introuvable (Blender/cabane.py)."); return; }
+            var go = (GameObject)PrefabUtility.InstantiatePrefab(asset);
+            go.transform.SetParent(parent, false);
+            go.transform.SetPositionAndRotation(pos, Quaternion.Euler(0, yaw, 0));
+            go.transform.localScale = Vector3.one * scale;
+            if (model == "Regime") return;   // les bananes de déco ne bloquent rien (les vraies tombent du bananier)
+            // Un collider qui l'entoure : les bananes lâchées s'y posent, on ne marche pas au travers
+            var b = Bounds(go);
+            var box = go.AddComponent<BoxCollider>();
+            box.center = go.transform.InverseTransformPoint(b.center);
+            box.size = b.size / scale;
+        }
+
+        // Les meubles en bois uni (pupitres, bibliothèque, socles, cadres) prennent la texture du bois, gardant leur teinte
+        static void UseWoodTexture(Transform env)
+        {
+            foreach (var tint in env.GetComponentsInChildren<ColorTint>(true))
+                if (tint.color == Wood) tint.GetComponent<Renderer>().sharedMaterial = CabinArt.Furniture;
+        }
+
 
         // Plateau incliné de 25° vers le joueur, posé sur une planche qui suit l'inclinaison + un pied.
         static void BuildBoard(Transform env, Transform mapRoot)
@@ -393,7 +639,7 @@ namespace SAE.EditorTools
 
             // Table des bananes : devant le bananier, à l'intérieur du cercle. Les bananes tombent DESSUS,
             // à hauteur de main : on ne se baisse pas pour les ramasser (règle de confort VR).
-            var tablePos = Around(-172f, Ring - 0.5f);
+            var tablePos = Around(180f, Ring - 0.1f);   // juste devant la porte, le bananier dehors à 1,4 m
             var table = new GameObject("Table des bananes").transform;
             table.SetParent(env, false);
             table.SetPositionAndRotation(tablePos, Quaternion.LookRotation(new Vector3(tablePos.x, 0, tablePos.z) - new Vector3(pos.x, 0, pos.z)));
@@ -413,7 +659,7 @@ namespace SAE.EditorTools
             var basket = root.transform.Find("Panier");
             if (basket)
             {
-                var basketPos = Around(-157f, Ring - 0.5f);
+                var basketPos = Around(BasketAngle, BasketRadius);   // avancé vers le centre : de la place autour, loin de la table et de la caisse
                 Visuals.Solid("Socle du panier", env, basketPos + Vector3.up * (HandHeight / 2f), new Vector3(0.5f, HandHeight, 0.5f), Wood);
                 basket.position = basketPos + Vector3.up * HandHeight;
             }
@@ -423,15 +669,15 @@ namespace SAE.EditorTools
         // La caisse : un panneau en bois avec l'argent total en gros chiffres dorés, à côté du panier.
         static void BuildMoneyBoard(Transform env, float angle)
         {
-            var pos = Around(angle, Ring - 0.4f);
+            // Accrochée au mur, en hauteur : elle ne prend pas de place au sol et se voit de partout
+            var pos = Around(angle, HubLayout.CabinRadius - 0.3f);
             var root = new GameObject("Caisse").transform;
             root.SetParent(env, false);
             root.SetPositionAndRotation(pos, Quaternion.Euler(0, angle, 0));     // +Z local = vers l'extérieur
 
-            Visuals.Solid("Poteau", root, new Vector3(0, 0.75f, 0.05f), new Vector3(0.08f, 1.5f, 0.08f), Wood);
             var panel = new GameObject("Panneau").transform;
             panel.SetParent(root, false);
-            panel.localPosition = new Vector3(0, 1.6f, 0);
+            panel.localPosition = new Vector3(0, 2.3f, 0);
             var frame = Visuals.Box("Cadre", panel, Vector3.zero, new Vector3(0.9f, 0.5f, 0.06f), Wood);
             Visuals.Box("Fond", panel, new Vector3(0, 0, -0.035f), new Vector3(0.8f, 0.4f, 0.02f), new Color(0.12f, 0.1f, 0.08f));
             var title = Visuals.Label(panel, "CAISSE", new Vector3(0, 0.12f, -0.06f), 0.07f, new Color(0.9f, 0.85f, 0.7f));
@@ -515,7 +761,11 @@ namespace SAE.EditorTools
             // tourné vers le joueur (au centre), posé au sol
             chest.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(new Vector3(-pos.x, 0, -pos.z)));
             b = Bounds(chest);
-            chest.transform.position += new Vector3(pos.x - b.center.x, -b.min.y, pos.z - b.center.z);
+            // posé sur une petite estrade en bois (comme un trésor qu'on expose)
+            const float Dais = 0.1f;
+            var dais = Visuals.Solid("Estrade du coffre", env, new Vector3(pos.x, Dais / 2f, pos.z), new Vector3(1.0f, Dais, 0.8f), Wood);
+            dais.transform.rotation = Quaternion.Euler(0, AngleOf(pos), 0);
+            chest.transform.position += new Vector3(pos.x - b.center.x, Dais - b.min.y, pos.z - b.center.z);
             float top = Bounds(chest).max.y;
 
 
@@ -527,7 +777,7 @@ namespace SAE.EditorTools
 
             var promptGo = new GameObject("PromptCoffre");
             promptGo.transform.SetParent(env, false);
-            promptGo.transform.position = new Vector3(pos.x, top + 0.35f, pos.z);
+            promptGo.transform.position = new Vector3(pos.x, top + 0.3f, pos.z);
             promptGo.AddComponent<Sae501.Coffres.Billboard>();
             var prompt = promptGo.AddComponent<Sae501.Coffres.ChestPrompt>();
 
@@ -558,13 +808,14 @@ namespace SAE.EditorTools
             chest.transform.SetParent(pivot, true);
             pivot.gameObject.AddComponent<FacePlayer>();
 
-            // Panneau des chances, à côté du coffre (il tourne avec lui, donc reste face au joueur)
+            // Panneau des chances : un tableau encadré de bois, accroché au mur derrière le coffre (comme la caisse)
+            float chestAngle = AngleOf(pos);
             var oddsRoot = new GameObject("Chances du coffre").transform;
-            oddsRoot.SetParent(pivot, false);
-            oddsRoot.localPosition = new Vector3(1.0f, 1.35f, 0f);
-            oddsRoot.localRotation = Quaternion.Euler(0, 180, 0);   // le pivot regarde le joueur : on retourne le texte pour qu'il soit lisible
-            Visuals.Box("Fond", oddsRoot, new Vector3(0, 0, 0.02f), new Vector3(1.15f, 1.5f, 0.02f), new Color(0.1f, 0.09f, 0.08f));
-            var oddsText = Visuals.Label(oddsRoot, "", Vector3.zero, 0.055f);
+            oddsRoot.SetParent(env, false);
+            oddsRoot.SetPositionAndRotation(Around(chestAngle, HubLayout.CabinRadius - 0.3f, 2.18f), Quaternion.Euler(0, chestAngle, 0));   // +Z local = vers le mur
+            Visuals.Box("Cadre", oddsRoot, Vector3.zero, new Vector3(1.25f, 1.55f, 0.06f), Wood);
+            Visuals.Box("Fond", oddsRoot, new Vector3(0, 0, -0.035f), new Vector3(1.15f, 1.45f, 0.02f), new Color(0.12f, 0.1f, 0.08f));
+            var oddsText = Visuals.Label(oddsRoot, "", new Vector3(0, 0, -0.06f), 0.058f, SignText);
             Object.DestroyImmediate(oddsText.GetComponent<Billboard>());
             var oddsPanel = oddsRoot.gameObject.AddComponent<ChestOddsPanel>();
             oddsPanel.chest = controller;
@@ -573,10 +824,10 @@ namespace SAE.EditorTools
             // Prix du coffre, toujours visible au-dessus (doré si on peut payer)
             var tag = new GameObject("Prix du coffre");
             tag.transform.SetParent(env, false);
-            tag.transform.position = new Vector3(pos.x, top + 0.75f, pos.z);
+            tag.transform.position = new Vector3(pos.x, top + 0.55f, pos.z);
             var priceTag = tag.AddComponent<ChestPriceTag>();
             priceTag.chest = controller;
-            priceTag.label = Visuals.Label(tag.transform, "", Vector3.zero, 0.09f);
+            priceTag.label = Visuals.Label(tag.transform, "", Vector3.zero, 0.1f);
         }
 
         static Bounds Bounds(GameObject go)
@@ -623,8 +874,8 @@ namespace SAE.EditorTools
             Teleportable(Visuals.Solid("Sol autour", map.transform, new Vector3(0, -0.6f, 0), new Vector3(edge * 2 + 20, 0.1f, edge * 2 + 20), Floor));
 
             MakeActionCube(map.transform, "Retour hub", new Vector3(3f, 0.9f, -edge - 2f), 0.6f, new Color(0.3f, 0.5f, 1f),
-                "HUB", ActionCube.Action.Teleport, hubSpawn);
-            MakeLaunchCube(map.transform, new Vector3(-3f, 0.9f, -edge - 2f), 0.6f, spawner);
+                "HUB", ActionCube.Action.Teleport, hubSpawn, 0f);
+            MakeLaunchCube(map.transform, new Vector3(-3f, 0.9f, -edge - 2f), 0.6f, spawner, 0f);
             BuildWaveBoard(map.transform, map.transform.position + new Vector3(0, 2.4f, -edge - 0.3f), Quaternion.identity, spawner);
             return map.transform;
         }
