@@ -35,6 +35,8 @@ namespace SAE
         float hp;
         int maxLayers;
         float nextRegen;
+        bool facingSet;
+        const float TurnSpeed = 60f;   // degrés par seconde : un dirigeable prend ~1,5 s pour un virage à angle droit
         float speed;
         float slowFactor = 1f;
         float slowUntil;
@@ -175,7 +177,12 @@ namespace SAE
             if (hasModel ? IsBlimp : Kind == BalloonKind.Dirigeable)
             {
                 if (target != transform.position)
-                    transform.rotation = Quaternion.LookRotation(target - transform.position) * (hasModel ? Quaternion.identity : Quaternion.Euler(90f, 0f, 0f));
+                {
+                    var wanted = Quaternion.LookRotation(target - transform.position) * (hasModel ? Quaternion.identity : Quaternion.Euler(90f, 0f, 0f));
+                    // Au départ il est déjà dans le bon sens ; ensuite il tourne en douceur dans les virages
+                    transform.rotation = facingSet ? Quaternion.RotateTowards(transform.rotation, wanted, TurnSpeed * slowFactor * Time.deltaTime) : wanted;
+                    facingSet = true;
+                }
             }
 
             transform.position = Vector3.MoveTowards(transform.position, target, step);
