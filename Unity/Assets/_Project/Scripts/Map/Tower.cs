@@ -31,7 +31,7 @@ namespace SAE
 
         void Fire(List<Balloon> targets)
         {
-            float damage = MonkeyData.Damage(monkey);
+            int pierce = MonkeyData.Pierce(monkey);
             var hits = targets.Take(MonkeyData.Targets(monkey)).ToList();
 
             if (monkey.type == MonkeyType.Canon)
@@ -46,7 +46,7 @@ namespace SAE
                 Shot(b.transform.position);
                 if (monkey.type == MonkeyType.Glace) b.Slow(0.4f, 1.5f);
                 if (monkey.type == MonkeyType.Colle) b.Slow(0.5f, 3f);
-                b.Hit(damage);
+                b.Pop(pierce);
             }
         }
 

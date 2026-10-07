@@ -3,9 +3,10 @@ using UnityEngine;
 
 namespace SAE
 {
-    // Un ballon suit la piste. Ses points de vie = ses couches (la couleur change à chaque couche perdue).
+    // Un ballon suit la piste. Sa vie = ses couches (la couleur change à chaque couche perdue).
+    // Il n'y a pas de « dégâts » : un tir a une perforation, le nombre de couches qu'il peut percer (voir Pop).
     // Sa sorte (BalloonKind) change sa taille, sa vitesse et sa résistance :
-    //   Rapide = petit et vif ; Blindé = gris, moitié moins de dégâts, insensible au ralentissement ;
+    //   Rapide = petit et vif ; Blindé = gris, chaque couche coûte 2 de perforation, insensible au ralentissement ;
     //   Boss = gros ballon violet foncé et lent ; Dirigeable = le boss final rouge, énorme, insensible au ralentissement.
     // S'il atteint la sortie, il retire autant de vies qu'il lui reste de couches.
     public class Balloon : MonoBehaviour
@@ -26,7 +27,7 @@ namespace SAE
         WaveSpawner spawner;
         List<Vector3> path;
         int nextPoint = 1;
-        float hp;
+        int layers;
         float speed;
         float slowFactor = 1f;
         float slowUntil;
@@ -38,11 +39,11 @@ namespace SAE
         // Distance parcourue : les singes visent le ballon le plus avancé.
         public float Progress { get; private set; }
 
-        public void Init(WaveSpawner owner, List<Vector3> points, int layers, BalloonKind kind)
+        public void Init(WaveSpawner owner, List<Vector3> points, int layerCount, BalloonKind kind)
         {
             spawner = owner;
             path = points;
-            hp = layers;
+            layers = layerCount;
             Kind = kind;
             transform.position = path[0];
             tint = GetComponent<ColorTint>();
@@ -65,16 +66,19 @@ namespace SAE
         void OnDisable() => All.Remove(this);
 
 
-        public void Hit(float damage)
+        // Un tir qui peut percer 'pierce' couches touche ce ballon. Renvoie la perforation dépensée :
+        // 1 par couche, 2 par couche blindée. Un tir trop faible pour une couche blindée s'y arrête (tout est dépensé).
+        public int Pop(int pierce)
         {
-            if (damage <= 0f || hp <= 0f) return;
-            hp -= Armored ? damage * 0.5f : damage;
-            if (hp <= 0f)
-            {
-                Destroy(gameObject);
-                return;
-            }
-            UpdateColor();
+            if (pierce <= 0 || layers <= 0) return 0;
+            int cost = Armored ? 2 : 1;
+            int popped = Mathf.Min(layers, pierce / cost);
+            if (popped == 0) return pierce;
+
+            layers -= popped;
+            if (layers <= 0) Destroy(gameObject);
+            else UpdateColor();
+            return popped * cost;
         }
 
         public void Slow(float factor, float duration)
@@ -101,7 +105,7 @@ namespace SAE
                 nextPoint++;
                 if (nextPoint >= path.Count)
                 {
-                    spawner.BalloonEscaped(Mathf.CeilToInt(hp));
+                    spawner.BalloonEscaped(layers);
                     Destroy(gameObject);
                 }
             }
@@ -116,7 +120,7 @@ namespace SAE
                 case BalloonKind.Boss: tint.Set(BossColor); break;
                 case BalloonKind.Dirigeable: tint.Set(BlimpColor); break;
                 default:
-                    int layer = Mathf.Clamp(Mathf.CeilToInt(hp) - 1, 0, layerColors.Length - 1);
+                    int layer = Mathf.Clamp(layers - 1, 0, layerColors.Length - 1);
                     tint.Set(layerColors[layer]);
                     break;
             }

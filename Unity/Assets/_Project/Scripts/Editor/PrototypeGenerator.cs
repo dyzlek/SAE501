@@ -1059,7 +1059,51 @@ namespace SAE.EditorTools
             ConsoleButton(commands, -ConsoleStep / 2f, "LANCER", LaunchColor, ActionCube.Action.StartWave).spawner = spawner;
             ConsoleButton(commands, ConsoleStep / 2f, "HUB", HubColor, ActionCube.Action.Teleport, hubSpawn);
             BuildWaveBoard(map.transform, new Vector3(0, 2.4f, -edge - 0.3f), Quaternion.identity, spawner);
+            BuildBowUpgrades(map.transform, new Vector3(-2f, 0f, -edge - 0.6f), -30f);
             return map.transform;
+        }
+
+        // Le pupitre « ARC » : les améliorations de l'arc (perforante, transperçante, tir triple, explosive, voir BowUpgrades),
+        // sur l'estrade au bord de l'herbe, à gauche du point d'arrivée et tourné vers lui : on s'améliore là où l'on tire.
+        // Un pupitre bas (on voit la carte par-dessus) et une petite ardoise posée dessus : niveau, effet et prix de chaque bouton.
+        static void BuildBowUpgrades(Transform map, Vector3 pos, float yaw)
+        {
+            var upgrades = new[] { BowUpgrade.Perforation, BowUpgrade.Transpercante, BowUpgrade.TirTriple, BowUpgrade.Explosion };
+            var names = new[] { "PERFORANTE", "TRANSPERÇANTE", "TRIPLE", "EXPLOSIVE" };
+            var top = BuildConsole(map, "Arc", pos, upgrades.Length, yaw);
+            var root = top.parent;
+            float width = upgrades.Length * ConsoleStep + 0.12f;
+
+            // L'ardoise, tenue par deux montants qui portent aussi l'enseigne, derrière les boutons
+            const float BoardY = 1.4f, BoardH = 0.6f, SignY = 1.86f, SignH = 0.2f, BoardZ = 0.3f;
+            for (int side = -1; side <= 1; side += 2)
+                Visuals.Box("Montant", root, new Vector3(side * (width / 2f + 0.025f), (0.85f + SignY + SignH / 2f) / 2f, BoardZ),
+                    new Vector3(0.05f, SignY + SignH / 2f - 0.85f, 0.06f), Wood);
+            var board = BuildChalkboard(root, "Ardoise", new Vector3(0, BoardY, BoardZ), Quaternion.identity, width - 0.12f, BoardH);
+            Visuals.Box("Enseigne", root, new Vector3(0, SignY, BoardZ), new Vector3(width + 0.1f, SignH, 0.05f), DarkWood);
+            Visuals.Text(root, "ARC", new Vector3(0, SignY, BoardZ - 0.03f), 0.13f, TitleGold, title: true);
+
+            for (int i = 0; i < upgrades.Length; i++)
+            {
+                float x = (i - (upgrades.Length - 1) / 2f) * ConsoleStep;
+                var label = Visuals.Text(board, "", new Vector3(x, 0.02f, -0.05f), 0.04f, Chalk);
+                if (i > 0)   // un trait de craie entre deux colonnes
+                    Visuals.Box("Trait", board, new Vector3(x - ConsoleStep / 2f, 0, -0.047f), new Vector3(0.008f, BoardH - 0.1f, 0.004f), new Color(0.6f, 0.62f, 0.58f));
+
+                var button = RoundButton(top, new Vector3(x, 0f, 0.07f));
+                button.name = $"Bouton {upgrades[i]}";
+                var up = button.gameObject.AddComponent<BowUpgradeButton>();
+                button.gameObject.AddComponent<RayPress>();
+                up.upgrade = upgrades[i];
+                up.cap = button.Find("Bouton");
+                up.label = label;
+
+                // Le nom gravé sur une plaque couchée devant le bouton, comme les autres pupitres
+                Visuals.Box("Plaque", top, new Vector3(x, 0.004f, -0.14f), new Vector3(ConsoleStep - 0.04f, 0.008f, 0.1f), DarkWood);
+                Visuals.Text(top, names[i], new Vector3(x, 0.012f, -0.14f), 0.045f, TitleGold, title: true)   // petit : « TRANSPERÇANTE » tient sur sa plaque
+                    .transform.localRotation = Quaternion.Euler(90f, 0, 0);
+            }
+            UseWoodTexture(root);
         }
     }
 }
