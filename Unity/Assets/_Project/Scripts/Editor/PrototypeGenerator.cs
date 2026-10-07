@@ -1299,15 +1299,16 @@ namespace SAE.EditorTools
             priceTag.label = Visuals.Text(plank, "", new Vector3(0, 0, -0.02f), 0.065f, TitleGold, title: true);
         }
 
-        // Le tutoriel (Tutorial) : l'ardoise de Pat Fusty accrochée au mur, à gauche du tableau de la vague, avec Pat assis
-        // dessus (un singe Classique doré), et la flèche dorée qui montre quoi utiliser. Il retrouve les objets par leur nom.
+        // Le tutoriel (Tutorial) : l'ardoise de Pat Fusty accrochée au mur, à gauche du tableau de la vague, avec Pat
+        // (son modèle, Art/Pat_Fusty) debout dessus, et la flèche dorée qui montre quoi utiliser. Il retrouve les objets par leur nom.
+        const string PatModelPath = "Assets/_Project/Art/Pat_Fusty/Pat_Fusty.glb";
+        const float PatHeight = 0.6f;   // en mètres
         static void BuildTutorial(Transform env)
         {
             const float Angle = -25f;
             var slate = BuildChalkboard(env, "Ardoise de Pat Fusty", Around(Angle, HubLayout.CabinRadius - 0.25f, 1.95f),
                 Quaternion.Euler(0, Angle, 0), 1.1f, 0.6f);
-            Visuals.MonkeyPiece(new Monkey(MonkeyType.Classique, Rarity.Jaune), slate, new Vector3(-0.4f, 0.55f, -0.05f), 0.45f, withLabel: false)
-                .name = "Pat Fusty";
+            PlacePat(slate, new Vector3(-0.38f, 0.36f, -0.03f));   // debout sur le haut du cadre, à gauche
 
             var arrow = new GameObject("Flèche du tutoriel").transform;   // un chevron doré qui pointe vers le bas
             arrow.SetParent(env, false);
@@ -1326,6 +1327,27 @@ namespace SAE.EditorTools
             tuto.board = env.Find("Plateau");
             var launch = env.GetComponentsInChildren<ActionCube>().FirstOrDefault(a => a.action == ActionCube.Action.StartWave);
             tuto.launchButton = launch ? launch.transform : null;
+        }
+
+        // Pat Fusty, PatHeight de haut, les pieds en 'feet' (repère de l'ardoise), tourné vers le joueur.
+        // Son modèle regarde vers +Z (vérifié dans Blender) ; l'ardoise regarde vers -Z : on le retourne.
+        // Sans le modèle, un singe Classique doré le remplace.
+        static void PlacePat(Transform slate, Vector3 feet)
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(PatModelPath);
+            if (!asset)
+            {
+                Visuals.MonkeyPiece(new Monkey(MonkeyType.Classique, Rarity.Jaune), slate, feet + Vector3.up * 0.22f, 0.45f, withLabel: false).name = "Pat Fusty";
+                return;
+            }
+            var pat = (GameObject)PrefabUtility.InstantiatePrefab(asset);
+            pat.name = "Pat Fusty";
+            pat.transform.SetParent(slate, false);
+            pat.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+            pat.transform.localScale *= PatHeight / Bounds(pat).size.y;
+            var b = Bounds(pat);
+            var target = slate.TransformPoint(feet);
+            pat.transform.position += new Vector3(target.x - b.center.x, target.y - b.min.y, target.z - b.center.z);
         }
 
         static Bounds Bounds(GameObject go)
