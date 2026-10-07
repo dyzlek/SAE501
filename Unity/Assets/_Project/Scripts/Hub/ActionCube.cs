@@ -6,9 +6,10 @@ namespace SAE
     // changer de niveau (SE TP : vers la carte, HUB : vers le hub, voir Levels), vider le plateau ou lancer la vague.
     // Il s'enfonce un instant quand on appuie. Pendant une vague, LANCER devient gris (elle est partie) ;
     // on peut aller et venir entre le hub et la carte, la vague continue.
+    // REJOUER reste gris jusqu'à la victoire (vague 10) : on ne recommence pas tout par erreur.
     public class ActionCube : MonoBehaviour, IPressable
     {
-        public enum Action { Teleport, ClearBoard, StartWave }
+        public enum Action { Teleport, ClearBoard, StartWave, Restart }
 
         public Action action;
         public Level destination;     // pour Teleport : le niveau (la scène) où aller
@@ -40,8 +41,13 @@ namespace SAE
             }
         }
 
-        // Une vague tourne déjà : on ne la relance pas
-        bool Blocked => action == Action.StartWave && WaveSpawner.Instance && WaveSpawner.Instance.Running;
+        // Une vague tourne déjà : on ne la relance pas. Pas encore gagné : on ne recommence pas.
+        bool Blocked => action switch
+        {
+            Action.StartWave => WaveSpawner.Instance && WaveSpawner.Instance.Running,
+            Action.Restart => !WaveSpawner.Instance || !WaveSpawner.Instance.Won,
+            _ => false,
+        };
 
         public void Press()
         {
@@ -56,6 +62,7 @@ namespace SAE
                         GameState.ClearBoard();
                     break;
                 case Action.StartWave: WaveSpawner.Launch(); break;
+                case Action.Restart: Levels.Restart(); break;
             }
         }
     }

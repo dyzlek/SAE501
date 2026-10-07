@@ -21,39 +21,7 @@ namespace SAE
             go.transform.position = center;
             var wave = go.AddComponent<Shockwave>();
             wave.radius = radius;
-            Sparks(center);
-        }
-
-        // Une gerbe d'étincelles orange : 40 petits points qui partent dans tous les sens, retombent et s'éteignent
-        // (un seul « burst », puis l'objet se détruit tout seul quand elles sont toutes éteintes).
-        static void Sparks(Vector3 center)
-        {
-            var go = new GameObject("Étincelles");
-            go.transform.position = center;
-            var ps = go.AddComponent<ParticleSystem>();
-            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);   // on règle avant de jouer
-            var main = ps.main;
-            main.duration = 0.1f;
-            main.loop = false;
-            main.startLifetime = new ParticleSystem.MinMaxCurve(0.3f, 0.6f);
-            main.startSpeed = new ParticleSystem.MinMaxCurve(3f, 7f);
-            main.startSize = new ParticleSystem.MinMaxCurve(0.03f, 0.06f);
-            main.startColor = new ParticleSystem.MinMaxGradient(new Color(1f, 0.9f, 0.4f), WaveColor);
-            main.gravityModifier = 1f;                          // elles retombent
-            main.stopAction = ParticleSystemStopAction.Destroy;
-            var emission = ps.emission;
-            emission.rateOverTime = 0f;
-            emission.SetBursts(new[] { new ParticleSystem.Burst(0f, 40) });
-            var shape = ps.shape;
-            shape.shapeType = ParticleSystemShapeType.Sphere;
-            shape.radius = 0.1f;
-            var fade = ps.sizeOverLifetime;                     // elles rapetissent en s'éteignant
-            fade.enabled = true;
-            fade.size = new ParticleSystem.MinMaxCurve(1f, AnimationCurve.Linear(0f, 1f, 1f, 0f));
-            var r = go.GetComponent<ParticleSystemRenderer>();
-            r.sharedMaterial = Visuals.LineMaterial;
-            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            ps.Play();
+            Burst.Play(center, new Color(1f, 0.9f, 0.4f), WaveColor, 40, 3f, 7f, 0.06f, 1f, 0.6f);   // une gerbe d'étincelles qui retombent
         }
 
         void Awake()

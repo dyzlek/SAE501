@@ -16,6 +16,7 @@ namespace SAE
     {
         // Les vagues de la scène Labyrinthe (null quand on est au hub)
         public static WaveSpawner Instance { get; private set; }
+        public static event System.Action Victory;   // la vague 10 (le dirigeable rouge) vient d'être gagnée
 
         public float balloonHeight = 1f;
         public int startLives = 20;
@@ -102,7 +103,8 @@ namespace SAE
                 if (Wave == LastWrittenWave)
                 {
                     Won = true;
-                    Status = $"VICTOIRE ! +{reward} bananes · mode infini : LANCER";
+                    Status = $"VICTOIRE ! +{reward} bananes · LANCER : mode infini · REJOUER : nouvelle partie";
+                    Victory?.Invoke();
                 }
                 else Status = $"Vague {Wave} gagnée : +{reward} bananes";
                 Wave++;

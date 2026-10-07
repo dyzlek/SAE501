@@ -53,6 +53,7 @@ namespace SAE.EditorTools
         static readonly Color PlayColor = new Color(0.2f, 0.8f, 0.3f);
         static readonly Color ClearColor = new Color(0.55f, 0.6f, 0.7f);
         static readonly Color HubColor = new Color(0.3f, 0.5f, 1f);
+        static readonly Color RestartColor = new Color(1f, 0.82f, 0.2f);
         static readonly Color PathColor = new Color(0.62f, 0.45f, 0.25f);
         static readonly Color Grass1 = new Color(0.30f, 0.62f, 0.28f);
         static readonly Color Grass2 = new Color(0.26f, 0.55f, 0.24f);
@@ -591,12 +592,19 @@ namespace SAE.EditorTools
             // Devant : le plateau ; à sa gauche un pupitre avec LANCER (la vague) et SE TP (aller sur la carte),
             // à sa droite le pupitre VIDER, puis le panier
             BuildBoard(env);
-            var commands = BuildConsole(env, "Commandes", Around(-41f, Ring - 0.5f), 2);
-            ConsoleButton(commands, -ConsoleStep / 2f, "LANCER", LaunchColor, ActionCube.Action.StartWave);
-            ConsoleButton(commands, ConsoleStep / 2f, "SE TP", PlayColor, ActionCube.Action.Teleport, Level.Carte);   // va sur la carte
+            var commands = BuildConsole(env, "Commandes", Around(-41f, Ring - 0.5f), 3);
+            ConsoleButton(commands, -ConsoleStep, "LANCER", LaunchColor, ActionCube.Action.StartWave);
+            ConsoleButton(commands, 0f, "SE TP", PlayColor, ActionCube.Action.Teleport, Level.Carte);   // va sur la carte
+            ConsoleButton(commands, ConsoleStep, "REJOUER", RestartColor, ActionCube.Action.Restart);   // gris jusqu'à la victoire
             var clear = BuildConsole(env, "Vider", Around(37f, Ring - 0.5f), 1);
             ConsoleButton(clear, 0f, $"VIDER  {ActionCube.ClearBoardPrice}", ClearColor, ActionCube.Action.ClearBoard);
             BuildWaveBoard(env, Around(0f, HubLayout.CabinRadius - 0.25f, 2.25f), Quaternion.identity);   // accroché au mur
+            // La victoire : un petit feu d'artifice sous le toit de la cabane (le grand est sur la carte)
+            var hubParty = new GameObject("Feu d'artifice").AddComponent<VictoryCelebration>();
+            hubParty.transform.SetParent(env, false);
+            hubParty.radius = 1.5f;
+            hubParty.minHeight = 1.8f;
+            hubParty.maxHeight = 2.6f;
 
             // À gauche : la bibliothèque (tous les types dans un seul meuble)
             BuildShelf(env, "Bibliotheque", -82f, 0, MonkeyData.TypeCount);
@@ -1285,9 +1293,11 @@ namespace SAE.EditorTools
             BuildScenery(map.transform, GroundY);
 
             // Le même pupitre qu'au hub, un peu à droite du point d'arrivée : le passage vers la carte reste libre
-            var commands = BuildConsole(map.transform, "Carte", new Vector3(1.5f, 0f, -edge - 2f), 2, 0f);
-            ConsoleButton(commands, -ConsoleStep / 2f, "LANCER", LaunchColor, ActionCube.Action.StartWave);
-            ConsoleButton(commands, ConsoleStep / 2f, "HUB", HubColor, ActionCube.Action.Teleport, Level.Hub);
+            var commands = BuildConsole(map.transform, "Carte", new Vector3(1.5f, 0f, -edge - 2f), 3, 0f);
+            ConsoleButton(commands, -ConsoleStep, "LANCER", LaunchColor, ActionCube.Action.StartWave);
+            ConsoleButton(commands, 0f, "HUB", HubColor, ActionCube.Action.Teleport, Level.Hub);
+            ConsoleButton(commands, ConsoleStep, "REJOUER", RestartColor, ActionCube.Action.Restart);
+            new GameObject("Feu d'artifice").AddComponent<VictoryCelebration>().transform.SetParent(map.transform, false);   // au-dessus du labyrinthe
             BuildWaveBoard(map.transform, new Vector3(0, 2.4f, -edge - 0.3f), Quaternion.identity);
             for (int side = -1; side <= 1; side += 2)   // le tableau tient sur deux poteaux plantés dans le sol (il ne flotte pas)
                 Visuals.Solid("Poteau du tableau", map.transform, new Vector3(side * 0.92f, (2.4f + GroundY) / 2f, -edge - 0.25f), new Vector3(0.1f, 2.4f - GroundY, 0.1f), Wood);

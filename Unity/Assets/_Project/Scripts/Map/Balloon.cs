@@ -186,7 +186,7 @@ namespace SAE
             if (layers <= 0)
             {
                 Sfx.Play(Sfx.Sound.Pop, transform.position, 0.8f, IsBlimp ? 0.6f : 1f);   // un gros ballon éclate plus grave
-                Confetti(transform.position, CurrentColor, IsBlimp ? 60 : 15);
+                Burst.Play(transform.position, CurrentColor, CurrentColor * 0.7f, IsBlimp ? 60 : 15, 2f, 5f, 0.12f, 1.5f, 0.8f);   // des confettis de sa couleur
                 Destroy(gameObject);
             }
             else
@@ -257,34 +257,6 @@ namespace SAE
             BalloonKind.Coeur => HeartColor,
             _ => layerColors[Mathf.Clamp(layers - 1, 0, layerColors.Length - 1)],
         };
-
-        // Une gerbe de petits morceaux de caoutchouc qui volent et retombent (un seul « burst », puis l'objet disparaît)
-        static void Confetti(Vector3 position, Color color, int count)
-        {
-            var go = new GameObject("Confettis");
-            go.transform.position = position;
-            var ps = go.AddComponent<ParticleSystem>();
-            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            var main = ps.main;
-            main.duration = 0.1f;
-            main.loop = false;
-            main.startLifetime = new ParticleSystem.MinMaxCurve(0.4f, 0.8f);
-            main.startSpeed = new ParticleSystem.MinMaxCurve(2f, 5f);
-            main.startSize = new ParticleSystem.MinMaxCurve(0.05f, 0.12f);
-            main.startColor = color;
-            main.gravityModifier = 1.5f;
-            main.stopAction = ParticleSystemStopAction.Destroy;
-            var emission = ps.emission;
-            emission.rateOverTime = 0f;
-            emission.SetBursts(new[] { new ParticleSystem.Burst(0f, (short)count) });
-            var shape = ps.shape;
-            shape.shapeType = ParticleSystemShapeType.Sphere;
-            shape.radius = 0.3f;
-            var r = go.GetComponent<ParticleSystemRenderer>();
-            r.sharedMaterial = Visuals.LineMaterial;
-            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            ps.Play();
-        }
 
         void UpdateColor()
         {

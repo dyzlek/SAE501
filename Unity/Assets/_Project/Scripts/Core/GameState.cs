@@ -38,8 +38,19 @@ namespace SAE
         static readonly bool[] unlocked = new bool[MonkeyData.TypeCount];
 
         // On commence avec un singe Classique gris, pour pouvoir défendre la première vague.
-        static GameState()
+        static GameState() => ResetAll();
+
+        // Une partie neuve : rien de posé ni en main, pas d'argent, aucune vague gagnée, un seul singe et un seul type.
+        // Appelé au lancement (y compris quand Unity garde les statiques d'une partie à l'autre) et par REJOUER.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        public static void ResetAll()
         {
+            Placed.Clear();
+            Held = null;
+            Money = 0;
+            WavesWon = 0;
+            System.Array.Clear(owned, 0, owned.Length);
+            System.Array.Clear(unlocked, 0, unlocked.Length);
             owned[(int)MonkeyType.Classique, (int)Rarity.Gris] = 1;
             unlocked[(int)MonkeyType.Classique] = true;
         }
