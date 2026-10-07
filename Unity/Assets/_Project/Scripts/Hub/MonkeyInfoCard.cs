@@ -11,16 +11,13 @@ namespace SAE
     // Pas d'affichage collé à l'écran (règle de confort VR) : la carte reste posée près du singe.
     // Elle se dessine PAR-DESSUS le décor (shader avec ZTest Always) : sinon une étagère ou un meuble la cachait.
     // Même style que les ardoises du hub : cadre en bois, fond ardoise, titre doré, texte à la craie.
-    // Deux colonnes (critique du 7 oct.) : à gauche QUI il est (rareté, niveau, ce qu'il fait), à droite SES CHIFFRES
-    // (perce, portée, cadence, cibles), et en bas, en vert, ce que donnerait une fusion.
     public class MonkeyInfoCard : MonoBehaviour
     {
         public float textHeight = 0.04f;        // hauteur d'une ligne, en mètres, vue de près
         public float readableDistance = 1.2f;   // au-delà, la carte grandit pour rester lisible
         public float reach = 15f;               // portée de la visée, en mètres
 
-        const float CardWidth = 1.1f, CardHeight = 0.48f;   // en mètres, vue de près
-        const int EffectLineLength = 26;                     // la phrase de l'effet est coupée en lignes de 26 lettres au plus
+        const float CardWidth = 0.95f, CardHeight = 0.4f;   // en mètres, vue de près
         const int OnTopQueue = 4000;                         // après tout le reste (file « Overlay ») : la fiche passe devant
         static readonly Color FrameColor = new Color(0.45f, 0.3f, 0.18f);
         static readonly Color BackColor = new Color(0.1f, 0.13f, 0.12f, 0.95f);
@@ -32,7 +29,7 @@ namespace SAE
         Component aimedSurface;                 // ce qu'on vise : sert à incliner le cercle de portée comme le plateau
 
         Transform card;
-        TextMesh title, left, right, fusion;
+        TextMesh title, text;
         LineRenderer rangeCircle;
         Monkey? shown;
         Vector3 smoothAnchor;
@@ -54,16 +51,12 @@ namespace SAE
             var frame = Visuals.Box("Cadre", card, new Vector3(0, 0, 0.004f), new Vector3(CardWidth + 0.04f, CardHeight + 0.04f, 0.002f), FrameColor);
             var back = Visuals.Box("Fond", card, new Vector3(0, 0, 0.002f), new Vector3(CardWidth, CardHeight, 0.002f), BackColor);
             title = Visuals.Text(card, "", new Vector3(0, CardHeight / 2f - 0.055f, 0), textHeight * 1.6f, TitleColor, title: true);
-            left = Column(Visuals.Text(card, "", new Vector3(-CardWidth / 2f + 0.05f, 0.02f, 0), textHeight, ChalkColor));
-            right = Column(Visuals.Text(card, "", new Vector3(0.1f, 0.02f, 0), textHeight, ChalkColor));
-            fusion = Visuals.Text(card, "", new Vector3(0, -CardHeight / 2f + 0.05f, 0), textHeight * 0.9f, ChalkColor);
-            var line = Visuals.Box("Trait", card, new Vector3(0.06f, 0.02f, 0.001f), new Vector3(0.006f, CardHeight - 0.2f, 0.001f), new Color(0.6f, 0.62f, 0.58f));
-            // Dessinés dans l'ordre (cadre, fond, trait, textes), par-dessus tout le décor
+            text = Visuals.Text(card, "", new Vector3(0, -0.035f, 0), textHeight, ChalkColor);
+            // Dessinés dans l'ordre (cadre, fond, textes), par-dessus tout le décor
             DrawOnTop(frame.GetComponent<Renderer>(), null, OnTopQueue);
             DrawOnTop(back.GetComponent<Renderer>(), null, OnTopQueue + 1);
-            DrawOnTop(line.GetComponent<Renderer>(), null, OnTopQueue + 2);
-            foreach (var tm in new[] { title, left, right, fusion })
-                DrawOnTop(tm.GetComponent<Renderer>(), tm.GetComponent<Renderer>().sharedMaterial, OnTopQueue + 3);
+            DrawOnTop(title.GetComponent<Renderer>(), title.GetComponent<Renderer>().sharedMaterial, OnTopQueue + 2);
+            DrawOnTop(text.GetComponent<Renderer>(), text.GetComponent<Renderer>().sharedMaterial, OnTopQueue + 2);
             card.gameObject.SetActive(false);
 
             rangeCircle = new GameObject("Cercle de portée").AddComponent<LineRenderer>();
@@ -72,14 +65,6 @@ namespace SAE
             rangeCircle.positionCount = 48;
             rangeCircle.startColor = rangeCircle.endColor = new Color(1f, 1f, 1f, 0.8f);
             rangeCircle.gameObject.SetActive(false);
-        }
-
-        // Un texte aligné à gauche (une colonne de la fiche) : il commence à sa position au lieu d'y être centré
-        static TextMesh Column(TextMesh tm)
-        {
-            tm.anchor = TextAnchor.MiddleLeft;
-            tm.alignment = TextAlignment.Left;
-            return tm;
         }
 
         // Donne au rendu un matériau à lui (copie de celui du texte, ou neuf pour le cadre et le fond)
@@ -121,10 +106,9 @@ namespace SAE
             {
                 shown = monkey;
                 title.text = monkey.type.ToString().ToUpper();
-                left.text = Identity(monkey);
-                right.text = Stats(monkey);
-                fusion.text = Fusion(monkey);
-                foreach (var tm in new[] { title, left, right, fusion }) RefreshFont(tm);
+                text.text = Describe(monkey);
+                RefreshFont(title);
+                RefreshFont(text);
                 smoothAnchor = anchor;
             }
 
@@ -151,41 +135,22 @@ namespace SAE
             }
         }
 
-        // Colonne de gauche : la rareté (dans sa couleur), le niveau, et ce que fait le singe
-        static string Identity(Monkey m)
+        // Les caractéristiques, et en vert ce que donnerait la fusion (2 singes identiques → niveau suivant).
+        static string Describe(Monkey m)
         {
             string hex = ColorUtility.ToHtmlStringRGB(MonkeyData.RarityColor(m.level));
-            return $"<color=#{hex}>{MonkeyData.RarityName(m.level)}</color>  ·  niveau {(int)m.level + 1}\n" +
-                   $"<color=#B8C8B8>{Wrap(MonkeyData.Effect(m.type), EffectLineLength)}</color>";
-        }
-
-        // Colonne de droite : ses chiffres, un par ligne
-        static string Stats(Monkey m) =>
-            $"Perce  <color=#FFD45A>{MonkeyData.Pierce(m)}</color> couche(s)\n" +
-            $"Portée  <color=#FFD45A>{Range(m)}</color>\n" +
-            $"Cadence  <color=#FFD45A>{MonkeyData.FireRate(m):0.#}</color> tir/s\n" +
-            $"Cibles  <color=#FFD45A>{Targets(m)}</color>";
-
-        // En bas : ce que donnerait la fusion (2 singes identiques → niveau suivant)
-        static string Fusion(Monkey m)
-        {
-            if (m.level >= Rarity.Blanc) return "<color=#FFFFFF>Niveau maximum</color>";
-            var up = m.Upgraded();
-            return $"<color=#7CFC7C>Fusion → {MonkeyData.RarityName(up.level)} : perce {MonkeyData.Pierce(up)}, {MonkeyData.FireRate(up):0.#} tir/s</color>";
-        }
-
-        // Coupe une phrase en lignes d'au plus 'width' lettres, entre deux mots (un TextMesh ne revient pas à la ligne seul)
-        static string Wrap(string sentence, int width)
-        {
             var sb = new StringBuilder();
-            int lineLength = 0;
-            foreach (var word in sentence.Split(' '))
+            sb.AppendLine($"<color=#{hex}>{MonkeyData.RarityName(m.level)}</color>  ·  niveau {(int)m.level + 1}");
+            sb.AppendLine($"<color=#B8C8B8>{MonkeyData.Effect(m.type)}</color>");
+            sb.AppendLine($"Perce {MonkeyData.Pierce(m)} couche(s)   Portée {Range(m)}");
+            sb.AppendLine($"Cadence {MonkeyData.FireRate(m):0.#} tir/s   Cibles {Targets(m)}");
+            if (m.level < Rarity.Blanc)
             {
-                if (lineLength > 0 && lineLength + 1 + word.Length > width) { sb.Append('\n'); lineLength = 0; }
-                else if (lineLength > 0) { sb.Append(' '); lineLength++; }
-                sb.Append(word);
-                lineLength += word.Length;
+                var up = m.Upgraded();
+                sb.Append($"<color=#7CFC7C>Fusion → {MonkeyData.RarityName(up.level)} : perce {MonkeyData.Pierce(up)}, " +
+                          $"{MonkeyData.FireRate(up):0.#} tir/s</color>");
             }
+            else sb.Append("<color=#FFFFFF>Niveau maximum</color>");
             return sb.ToString();
         }
 

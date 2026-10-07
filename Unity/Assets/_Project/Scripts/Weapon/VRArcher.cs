@@ -17,8 +17,7 @@ namespace SAE
         public AnimateHandOnInput drawHandVisual;   // la main de Quincy qui tire : collée à la corde pendant la tension
         public InputActionProperty drawGrip;      // XRI Right Interaction/Select Value : le grip de la main qui tire
         public InputActionProperty drawTrigger;   // XRI Right Interaction/Activate Value : la gâchette marche aussi
-        public float grabRadius = 0.2f;           // distance main-corde pour attraper la corde, en mètres : il faut venir chercher la corde
-        public float simulatorGrabRadius = 0.4f;  // sans casque, les manettes du simulateur sont loin l'une de l'autre
+        public float grabRadius = 0.4f;           // distance main-corde pour attraper la corde, en mètres (large : pas besoin de viser)
         public float simulatorDrawTime = 1f;      // sans casque : secondes pour tendre l'arc à fond
 
         bool drawing;
@@ -39,8 +38,7 @@ namespace SAE
             if (!bow || !bow.isActiveAndEnabled) return;   // l'arc n'est sorti que sur la carte
             bool pressed = Mathf.Max(Read(drawGrip), Read(drawTrigger)) > 0.5f;
 
-            float radius = simulated ? simulatorGrabRadius : grabRadius;
-            if (!drawing && pressed && bow.CanNock && Vector3.Distance(drawHand.position, bow.NockPoint) < radius)
+            if (!drawing && pressed && Vector3.Distance(drawHand.position, bow.NockPoint) < grabRadius)
             {
                 drawing = true;
                 if (drawHandVisual) handRestPosition = drawHandVisual.transform.localPosition;

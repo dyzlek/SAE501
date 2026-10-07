@@ -26,7 +26,7 @@ namespace SAE
 
         // Sans rechargement du domaine (Enter Play Mode rapide), les statiques survivent d'une partie à l'autre : on repart de zéro
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetState() { Started = false; LaunchOnArrival = false; Current = Level.Hub; }
+        static void ResetState() { Started = false; LaunchOnArrival = false; }
 
         // Appelé par la première scène qui démarre : c'est le niveau où l'on commence
         public static void StartIn(Level level)
@@ -37,16 +37,6 @@ namespace SAE
         }
 
         public static string SceneOf(Level level) => level == Level.Hub ? HubScene : MapScene;
-
-        // REJOUER (après la victoire) : une partie neuve. On remet à zéro ce qui survit aux scènes (l'argent, les singes,
-        // les améliorations de l'arc), puis on recharge le hub seul ; il recharge la carte, comme au lancement.
-        public static void Restart()
-        {
-            GameState.ResetAll();
-            BowUpgrades.ResetLevels();
-            ResetState();
-            SceneManager.LoadScene(HubScene, LoadSceneMode.Single);
-        }
 
         // Aller dans un niveau : sa scène est chargée si elle ne l'est pas encore (elle s'allumera toute seule),
         // sinon on éteint la présence de l'autre et on allume la sienne (le joueur y est déplacé).

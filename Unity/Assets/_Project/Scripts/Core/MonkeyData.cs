@@ -34,10 +34,6 @@ namespace SAE
             Color.magenta /* animé, voir ColorTint */, Color.white,
         };
 
-        // Prix pour débloquer chaque type (en bananes), dans l'ordre de MonkeyType. Le Classique est offert.
-        static readonly int[] unlockPrices = { 0, 40, 120, 200, 60, 80, 150 };
-        public static int UnlockPrice(MonkeyType t) => unlockPrices[(int)t];
-
         public static string ShortName(MonkeyType t) => shortNames[(int)t];
         public static string RarityName(Rarity r) => rarityNames[(int)r];
         public static Color RarityColor(Rarity r) => rarityColors[(int)r];

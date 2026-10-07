@@ -633,12 +633,7 @@ def build_walls(M, coll):
             for k in range(3):   # trois lattes par volet
                 b.box(c + B @ Vector((s * (k - 1) * WIN_W / 6, 0, 0)), (WIN_W / 6 - 0.01, 0.03, WIN_Y1 - WIN_Y0), B, M["peint"], uv_scale=1 / 1.2, bevel=0.004)
             b.box(c + B @ Vector((0, 0.02, 0)), (WIN_W / 2, 0.025, 0.06), B, M["peint"], uv_scale=1 / 1.2, bevel=0.004)
-    shutters = b.finish("Volets_Porte", coll)
-
-    # Battant de porte : pivote sur le montant droit et s'ouvre dehors, contre le mur. C'est un objet À PART
-    # (« Porte_Battant »), avec un repère sur sa charnière (« Repere_Charniere ») : Unity le fait tourner autour
-    # pour l'ouvrir et le fermer (DoorSwing). Il est modélisé ouvert (-100°), comme avant.
-    b = Builder([M["peint"]])
+    # Battant de porte : pivote sur le montant droit et s'ouvre dehors, contre le mur
     B = basis(DOOR)
     hinge = polar(DOOR, R) + B @ Vector((DOOR_W / 2 + 0.06, LOG_R + 0.05, 0))
     Bd = B @ Matrix.Rotation(math.radians(-100), 3, "Z")
@@ -647,9 +642,8 @@ def build_walls(M, coll):
         b.box(hinge + Bd @ Vector((x, 0.03, DOOR_H / 2 - 0.02)), (DOOR_W / 6 - 0.01, 0.045, DOOR_H - 0.06), Bd, M["peint"], uv_scale=1 / 1.2, bevel=0.005)
     for zz in (0.35, DOOR_H - 0.4):
         b.box(hinge + Bd @ Vector((-DOOR_W / 2, -0.01, zz)), (DOOR_W - 0.06, 0.03, 0.12), Bd, M["peint"], uv_scale=1 / 1.2, bevel=0.006)
-    door = b.finish("Porte_Battant", coll)
-    hinge_mark = empty("Repere_Charniere", hinge, coll)
-    return [walls, chinking, frames, shutters, door, hinge_mark]
+    door = b.finish("Volets_Porte", coll)
+    return [walls, chinking, frames, door]
 
 
 def build_roof(M, coll):
