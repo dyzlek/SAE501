@@ -21,9 +21,14 @@ namespace SAE
 
         void Awake()
         {
-            Local = this;
             origin = GetComponent<XROrigin>();       // null en mode PC
             body = GetComponent<CharacterController>();
+        }
+
+        // Chaque scène a son joueur : celui qui s'allume (on arrive dans son niveau) devient le joueur actif
+        void OnEnable()
+        {
+            Local = this;
             // Le texte du coffre (« [Touche] Ouvrir… ») suit le joueur actif
             foreach (var prompt in FindObjectsByType<Sae501.Coffres.ChestPrompt>()) prompt.player = head;
         }

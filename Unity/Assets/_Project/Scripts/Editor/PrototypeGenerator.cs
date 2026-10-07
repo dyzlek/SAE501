@@ -19,9 +19,10 @@ namespace SAE.EditorTools
 {
     // Menu SAE → Générer le prototype : construit les DEUX scènes du jeu (relancer le menu les écrase).
     //   Hub.unity        : la cabane (bananier, coffre, bibliothèque, plateau) ; c'est la scène de départ.
-    //   Labyrinthe.unity : la carte et ses vagues, où l'on défend avec l'arc.
-    // Chaque scène a son joueur (VR et PC). On passe de l'une à l'autre par un vrai changement de scène
-    // (boutons SE TP / HUB, voir Levels) ; ce qui doit rester (argent, singes, vagues gagnées…) est en static.
+    //   Labyrinthe.unity : la carte et ses vagues, où l'on défend avec l'arc (à 1 km du hub).
+    // Le hub charge aussi le labyrinthe (LevelLoader) : les deux tournent ensemble, une vague continue quand on est au hub.
+    // Chaque scène a sa « présence » (son joueur VR et PC, son soleil, ses réglages d'image), allumée seulement
+    // quand on est dans ce niveau (LevelPresence, boutons SE TP / HUB : voir Levels).
     public static class PrototypeGenerator
     {
         const string Folder = "Assets/_Project/Scenes";
@@ -37,7 +38,7 @@ namespace SAE.EditorTools
         static readonly Vector3 HandOffset = new Vector3(0f, -0.01f, -0.06f);   // la paume, un peu derrière l'avant de la manette
         static readonly Vector3 BowInHand = new Vector3(0.07f, 0f, 0.02f);      // la poignée de l'arc, sur le côté intérieur de la main : la flèche passe à côté
         const float HandTilt = 35f;   // les mains tournées pouce vers le haut, comme quand on tient les manettes (pas paume à plat)
-        static readonly Vector3 MapCenter = Vector3.zero;   // la carte a sa propre scène : elle est au centre
+        static readonly Vector3 MapCenter = new Vector3(0f, 0f, 1000f);   // les deux scènes sont chargées ensemble : la carte est loin, hors de vue du hub
 
         static readonly Color Floor = new Color(0.35f, 0.35f, 0.38f);
         static readonly Color Wood = new Color(0.45f, 0.30f, 0.18f);
@@ -72,6 +73,7 @@ namespace SAE.EditorTools
             var mapSpawn = Spawn("Spawn Carte", MapCenter + new Vector3(0, 0, -MapLayout.HalfExtent - 3f), Level.Carte);
             BuildMap();
             if (!BuildPlayers(mapSpawn.position, withBow: true)) return;
+            BuildPresence(Level.Carte, mapSpawn);
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), MapScenePath);
 
             // 2. Le hub
@@ -82,12 +84,36 @@ namespace SAE.EditorTools
             if (!player) return;
             BuildChest(hub, Around(97f, Ring - 0.2f), player.head);   // estrade de 1,4 m (le coffre de Maxens) : un peu plus près de VIDER, loin du comptoir du bananier
             UseWoodTexture(hub);   // encore une fois : l'estrade et le cadre du coffre sont posés après le reste du hub
+            BuildPresence(Level.Hub, hubSpawn);
+            new GameObject("Chargement du labyrinthe").AddComponent<LevelLoader>();
 
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), HubScenePath);
             // Le hub en premier : c'est la scène de départ du jeu
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(HubScenePath, true), new EditorBuildSettingsScene(MapScenePath, true) };
             PlayerModeMenu.Apply();   // VR ou PC, selon le menu SAE → Mode de jeu
             Debug.Log("Prototype généré : " + HubScenePath + " et " + MapScenePath);
+        }
+
+        // La « présence » d'un niveau : ce qui n'est allumé que quand on y est (les joueurs et leur PlayerMode, le soleil,
+        // les réglages d'image), rangé sous un seul objet ÉTEINT ; LevelPresence l'allume si c'est le niveau en cours.
+        static void BuildPresence(Level level, Transform spawn)
+        {
+            var presence = new GameObject("Présence du joueur");
+            var mode = Object.FindFirstObjectByType<PlayerMode>();
+            var parts = new[]
+            {
+                mode ? mode.gameObject : null, mode ? mode.vrPlayer : null, mode ? mode.pcPlayer : null,
+                Object.FindFirstObjectByType<Light>() ? Object.FindFirstObjectByType<Light>().gameObject : null,
+                Object.FindFirstObjectByType<Volume>() ? Object.FindFirstObjectByType<Volume>().gameObject : null,
+            };
+            foreach (var part in parts)
+                if (part) part.transform.SetParent(presence.transform, true);
+            presence.SetActive(false);
+
+            var root = new GameObject(level == Level.Hub ? "Niveau Hub" : "Niveau Carte").AddComponent<LevelPresence>();
+            root.level = level;
+            root.presence = presence;
+            root.spawn = spawn;
         }
 
         // Une scène vide avec sa lumière (le soleil) et la brume légère au loin ; la caméra est celle du joueur

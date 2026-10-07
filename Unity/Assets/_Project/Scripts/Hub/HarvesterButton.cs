@@ -42,7 +42,7 @@ namespace SAE
             cap.localPosition = capRest + Vector3.down * (0.015f * pressed);
 
             int price = isBuyButton ? crew.PriceToBuy : crew.Price(stat);
-            bool usable = isBuyButton || HarvesterCrew.Count > 0;   // on n'améliore pas une équipe vide
+            bool usable = isBuyButton || crew.Count > 0;   // on n'améliore pas une équipe vide
             var color = usable && Economy.CanAfford(price) ? UpgradeButton.Affordable : UpgradeButton.TooExpensive;
             capTint.Set(Color.Lerp(color, UpgradeButton.Refused, refused));
         }
@@ -50,7 +50,7 @@ namespace SAE
         string Text(bool done, int price)
         {
             if (isBuyButton)
-                return UpgradeButton.Board("SINGES", $"{HarvesterCrew.Count} / {crew.monkeys.Length}", "un de plus", price, done);
+                return UpgradeButton.Board("SINGES", $"{crew.Count} / {crew.monkeys.Length}", "un de plus", price, done);
 
             string title = stat switch
             {

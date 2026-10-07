@@ -4,6 +4,11 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
+### Revenir au hub pendant une vague
+> Quand je lance la vague, j'aimerais pouvoir quand même revenir au hub depuis l'autre niveau, etc.
+>
+> Suite (mon choix) : la vague continue pendant que je suis au hub.
+
 ### Branche fusion avec le travail de Maxens et Nicolas
 > Dans une branche `fusion`, ajoute ce que Maxens et Nicolas ont fait de nouveau.
 

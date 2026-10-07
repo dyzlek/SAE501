@@ -42,9 +42,6 @@ namespace SAE
             foreach (var p in MapLayout.PathPoints())
                 path.Add(transform.position + p + Vector3.up * balloonHeight);
             Lives = startLives;
-            // La scène est rechargée à chaque retour sur la carte : on reprend à la vague suivante (gardée dans GameState)
-            Wave = GameState.WavesWon + 1;
-            Won = GameState.WavesWon >= waves.Count;
             if (Levels.LaunchOnArrival)
             {
                 Levels.LaunchOnArrival = false;
@@ -52,12 +49,12 @@ namespace SAE
             }
         }
 
-        // LANCER, depuis le hub ou la carte : sur la carte, la vague part ; au hub, on part sur la carte et elle démarre à l'arrivée
+        // LANCER, depuis le hub ou la carte : la vague part (la carte tourne aussi quand on est au hub).
+        // Si la carte n'est pas encore chargée (tout début de partie), elle partira dès qu'elle le sera.
         public static void Launch()
         {
-            if (Instance) { Instance.StartWave(); return; }
-            Levels.LaunchOnArrival = true;
-            Levels.Load(Level.Carte);
+            if (Instance) Instance.StartWave();
+            else Levels.LaunchOnArrival = true;
         }
 
         // Appelé par le bouton LANCER (hub ou carte). Ne fait rien si une vague est déjà en cours.
