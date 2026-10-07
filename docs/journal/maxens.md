@@ -52,9 +52,12 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
   ![Singe choisi : la barre est partie, il sort du milieu du coffre en grossissant](../captures/maxens-coffre-singe-sort.png)
 
+- **Retiré : l'aura dorée du coffre** (elle ne rendait pas bien). À l'ouverture, il reste le boing et le couvercle qui s'ouvre.
+
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Retrait de l'aura dorée du coffre | Gardé |
 | Claude (Code) | Roulette avec tous les types et très rapide au début, barre qui disparaît, singe qui sort du coffre en tournant et grossissant, textes cachés à l'ouverture, bananes du bananier sur des feuilles ; testé en Play | À tester au casque |
 | Claude (Code) | Régimes de bananes dans le coffre, coffre qui se trémousse quand on peut l'ouvrir ; testé en Play | Trémoussement gardé, régimes jetés (remplacés par les bananes du bananier) |
 | Claude (Code) | Coffre agrandi (1,1 m) et creusé (on voit l'intérieur à l'ouverture), cerclages de fer à l'extérieur ; un seul singe par coffre (seules les chances de rareté montent avec les vagues) | À tester au casque |

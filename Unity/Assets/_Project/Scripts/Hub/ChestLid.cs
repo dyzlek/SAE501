@@ -4,15 +4,14 @@ using UnityEngine;
 namespace SAE
 {
     // L'ouverture du coffre de la cabane (modèle Art/Coffre/Coffre.glb, couvercle séparé sur sa charnière) :
-    // un petit « boing » (le coffre s'écrase puis rebondit), le couvercle s'ouvre, et une aura dorée s'allume.
+    // un petit « boing » (le coffre s'écrase puis rebondit), puis le couvercle s'ouvre.
     // Le coffre reste à sa place (il ne tourne plus vers le joueur). ChestController appelle Open() et Close().
     // Quand le joueur a assez d'argent pour l'ouvrir, le coffre se trémousse de temps en temps pour l'inviter à le faire.
     public class ChestLid : MonoBehaviour
     {
         public Sae501.Coffres.ChestController chest;
         public Transform lid;              // Coffre_Couvercle : son origine est sur la charnière
-        public Transform glowAnchor;       // le centre du coffre, où s'allume l'aura
-        public Vector3 glowSize = new Vector3(0.8f, 0.5f, 0.5f);   // taille de l'aura (largeur, hauteur, profondeur), en mètres
+        public Transform glowAnchor;       // le centre du coffre : c'est de là que sort le singe gagné (ChestReward)
         public float openAngle = -110f;    // rotation du couvercle autour de son axe X, en degrés
         public float boingTime = 0.3f;     // secondes
         public float openTime = 0.45f;
@@ -21,11 +20,8 @@ namespace SAE
         public float wiggleTime = 0.5f;
         public float wiggleAngle = 4f;     // degrés
 
-        static readonly Color Gold = new Color(1f, 0.78f, 0.2f);
-
         Vector3 restScale;
         Quaternion closedRotation;
-        Aura glow;
         Quaternion restRotation;
         float nextWiggle;
         bool isOpen;
@@ -91,15 +87,11 @@ namespace SAE
             }
             transform.localScale = restScale;
 
-            // L'aura dorée s'allume pendant que le couvercle s'ouvre
-            if (!glow) glow = Aura.Add(glowAnchor.gameObject, Gold, glowSize);
-            if (glow) glow.gameObject.SetActive(true);
             yield return TurnLid(openAngle, openTime);
         }
 
         IEnumerator CloseRoutine()
         {
-            if (glow) glow.gameObject.SetActive(false);
             yield return TurnLid(0f, openTime);
             isOpen = false;
         }

@@ -749,7 +749,7 @@ namespace SAE.EditorTools
 
         // Le coffre : le modèle de la cabane (Art/Coffre/Coffre.glb, fait par Blender/coffre.py), avec la roulette
         // et le texte de Nicolas, branché sur notre joueur (ChestClickable) et sur l'argent commun.
-        // Il reste fixe, tourné vers le centre ; à l'ouverture : boing, couvercle et aura dorée (ChestLid).
+        // Il reste fixe, tourné vers le centre ; à l'ouverture : boing et couvercle (ChestLid).
         static void BuildChest(Transform env, Vector3 pos, Transform player)
         {
             const string ChestModelPath = "Assets/_Project/Art/Coffre/Coffre.glb";
@@ -803,8 +803,8 @@ namespace SAE.EditorTools
             var reward = chest.AddComponent<ChestReward>();
             reward.chest = controller;
 
-            // L'ouverture : boing, couvercle (son origine est sur la charnière) et aura dorée au centre du coffre
-            var glowAnchor = new GameObject("Centre (aura)").transform;
+            // L'ouverture : boing, puis le couvercle (son origine est sur la charnière) ; le singe sort du centre du coffre
+            var glowAnchor = new GameObject("Centre").transform;
             glowAnchor.SetParent(chest.transform, false);
             glowAnchor.position = chestBounds.center;
             // Un trésor dedans : les bananes du bananier, posées sur le lit de feuilles du double fond (Blender/coffre.py)
@@ -826,7 +826,6 @@ namespace SAE.EditorTools
             var lid = chest.AddComponent<ChestLid>();
             lid.lid = chest.GetComponentsInChildren<Transform>(true).First(t => t.name == "Coffre_Couvercle");
             lid.glowAnchor = glowAnchor;
-            lid.glowSize = chestBounds.size;
             lid.chest = controller;
 
             // Panneau des chances : un tableau encadré de bois, accroché au mur derrière le coffre (comme la caisse)
