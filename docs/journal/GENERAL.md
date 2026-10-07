@@ -28,6 +28,7 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 | 2026-10-07 | **Les deux scènes restent chargées** : on peut revenir au hub pendant une vague, elle continue (et les bananes tombent pendant qu'on défend). Changer de niveau allume la présence (joueur, soleil, réglages d'image) de la scène d'arrivée et éteint l'autre ; le plateau du hub montre la vague en direct | Demande de Dylan : aller chercher des bananes en pleine vague, comme dans Bloons |
 | 2026-10-07 | Dans le hub, on ne se téléporte plus que **dans un disque de 1,9 m au centre** de la cabane, devant les meubles | Plus de téléportation dans un meuble, contre un mur ou dehors (Dylan) |
 | 2026-10-07 | **Lumière** : pas de faux rayons dessinés ; vraie lumière du soleil et ombres, poussières dans le soleil, réglages de l'image (`Art/Lumiere.asset`), halo (Bloom) coupé sur le casque | Plus réaliste, et rien de coûteux pour le Quest (Dylan) |
+| 2026-10-07 | **Suivi de projet sur GitHub** : une issue par tâche (responsable, label `prio:` = périmètre du GDD), un jalon par semaine (S1/S2/S3), tableau [Project](https://github.com/users/dyzlek/projects/2) À faire / En cours / En relecture / Fait, PR avec `Ferme #N`. Mode d'emploi : [ORGANISATION.md](../ORGANISATION.md) | Outil de suivi demandé (note de gestion de projet) ; tout au même endroit que le code (Dylan) |
 | _à trancher_ | Nom du jeu · assets Bloons ou maison · périmètre définitif | Avant le GDD v1 (ven. 9 oct.) |
 
 ## Jalons
