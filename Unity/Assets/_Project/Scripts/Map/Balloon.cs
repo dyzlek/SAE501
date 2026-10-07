@@ -36,6 +36,9 @@ namespace SAE
         ColorTint[] modelTints;   // les morceaux du modèle 3D qui prennent la couleur de la couche
         bool hasModel;
 
+        public GameObject Model { get; private set; }               // le modèle 3D, recopié en miniature par le plateau
+        public bool TintedModel => modelTints != null;              // le modèle prend la couleur de la couche
+
         public BalloonKind Kind { get; private set; }
         bool Armored => Kind == BalloonKind.Blinde || Kind == BalloonKind.Dirigeable;
         bool IsBlimp => Kind == BalloonKind.Boss || Kind == BalloonKind.Dirigeable;
@@ -76,11 +79,10 @@ namespace SAE
             UpdateColor();
         }
 
-        // Pose le modèle 3D dans la sphère (de diamètre 1 avant l'échelle) et cache la sphère,
-        // qui reste comme collider et comme miniature sur le plateau du hub.
+        // Pose le modèle 3D, ramené à une taille de 1 avant l'échelle, et un collider à sa forme
+        // pour que les flèches et projectiles le touchent.
         void AddModel(GameObject asset)
         {
-            GetComponent<Renderer>().enabled = false;
             var model = Instantiate(asset);
             model.name = "Modele";
             model.transform.SetPositionAndRotation(Vector3.zero, asset.transform.rotation);
@@ -98,6 +100,11 @@ namespace SAE
             model.transform.localRotation = turn * asset.transform.rotation;
             model.transform.localScale = asset.transform.localScale * scale;
             model.transform.localPosition = turn * -bounds.center * scale;
+            Model = model;
+
+            var box = gameObject.AddComponent<BoxCollider>();
+            var fitted = turn * bounds.size * scale;
+            box.size = new Vector3(Mathf.Abs(fitted.x), Mathf.Abs(fitted.y), Mathf.Abs(fitted.z));
 
             // Les ballons normaux et rapides changent de couleur à chaque couche ; les autres gardent leur texture.
             if (Kind == BalloonKind.Normal || Kind == BalloonKind.Rapide)

@@ -13,6 +13,7 @@ namespace SAE
 
         readonly Dictionary<Mirrored, GameObject> proxies = new Dictionary<Mirrored, GameObject>();
         readonly List<Mirrored> toRemove = new List<Mirrored>();
+        readonly Dictionary<Mirrored, ColorTint[]> modelTints = new Dictionary<Mirrored, ColorTint[]>();   // ballons teintés par couche
 
         Vector3 MapToBoard(Vector3 worldOnMap) =>
             transform.TransformPoint(mapRoot.InverseTransformPoint(worldOnMap) * scale);
@@ -38,6 +39,8 @@ namespace SAE
                 proxy.transform.SetPositionAndRotation(MapToBoard(m.transform.position), transform.rotation * m.transform.rotation);
                 proxy.transform.localScale = m.transform.lossyScale * scale;
                 if (m.Tint) proxy.GetComponent<ColorTint>().Set(m.Tint.color, m.Tint.rainbow);
+                if (m.Tint && modelTints.TryGetValue(m, out var tints))
+                    foreach (var t in tints) t.Set(m.Tint.color);
             }
 
             // Supprimer les copies des objets disparus (ballon éclaté, singe repris…)
@@ -48,6 +51,7 @@ namespace SAE
             {
                 Destroy(proxies[m]);
                 proxies.Remove(m);
+                modelTints.Remove(m);
             }
         }
 
@@ -57,8 +61,18 @@ namespace SAE
             // Un singe avec un modèle 3D : sa miniature est le même singe (modèle + aura), à l'échelle 1 du proxy
             // (le proxy prend la taille du cube du singe). Sinon, on copie simplement le mesh (ballons, joueur).
             var view = m.GetComponentInParent<MonkeyView>();
+            var balloon = m.GetComponent<Balloon>();
             if (view && view.model)
                 Visuals.MonkeyPiece(view.monkey, proxy.transform, Vector3.zero, 1f, withLabel: false);
+            else if (balloon && balloon.Model)
+            {
+                // Un ballon avec un modèle 3D : la miniature est une copie du modèle, placée pareil dans le proxy
+                var src = balloon.Model.transform;
+                var copy = Instantiate(balloon.Model, proxy.transform, false);
+                copy.transform.SetLocalPositionAndRotation(src.localPosition, src.localRotation);
+                copy.transform.localScale = src.localScale;
+                if (balloon.TintedModel) modelTints[m] = copy.GetComponentsInChildren<ColorTint>();
+            }
             else
             {
                 proxy.AddComponent<MeshFilter>().sharedMesh = m.GetComponent<MeshFilter>().sharedMesh;
