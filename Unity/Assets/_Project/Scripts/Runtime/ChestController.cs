@@ -14,13 +14,12 @@ namespace Sae501.Coffres
 
         [Header("Règles")]
         // Le coffre suit la progression du joueur : plus on a vaincu de vagues, plus il est cher,
-        // mais meilleur (raretés débloquées, chances, nombre de singes). Payé avec l'argent commun (SAE.Economy).
+        // mais meilleur (raretés débloquées, meilleures chances). Payé avec l'argent commun (SAE.Economy).
         public int basePrice = 25;
         public int pricePerWave = 20;
-        public int wavesPerExtraMonkey = 3;
         public int Progress => SAE.GameState.WavesWon;
         public int Price => basePrice + pricePerWave * Progress;
-        public int MonkeysPerChest => 1 + Progress / Mathf.Max(1, wavesPerExtraMonkey);
+        public const int MonkeysPerChest = 1;   // toujours un seul singe : ce sont ses chances d'être rare qui montent avec les vagues
         // Raretés obtenues au dernier coffre (l'inventaire viendra les récupérer)
         public System.Collections.Generic.List<Rarity> LastResults { get; } = new System.Collections.Generic.List<Rarity>();
         // Type de singe de chaque résultat (index de SAE.MonkeyType), tiré en même temps que la rareté pour que la

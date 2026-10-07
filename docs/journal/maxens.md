@@ -30,14 +30,14 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 - **Corrigé après mon test :**
   - **le coffre était trop petit** : il fait maintenant 1,1 m de large (au lieu de 0,8), sur une estrade plus grande ;
   - **il paraissait fermé et ouvert en même temps** : la caisse était pleine, et le dessus des planches ressemblait à un deuxième couvercle fermé. **La caisse est maintenant creuse** (4 parois en planches, un fond sombre) et les bandes de fer sont de simples cerclages à l'extérieur ;
-  - **3 singes sortaient du coffre** : ce n'était pas un bug du coffre. Le coffre donne plus de singes à mesure que l'on gagne des vagues (1 singe + 1 toutes les 3 vagues gagnées, règle de Nicolas). Pendant mon test, j'avais mis « 8 vagues gagnées » par code pour voir des singes rares, et cette valeur est restée en mémoire dans Unity (elle ne se remet à zéro qu'à la recompilation). Avec une partie normale (0 vague), il n'en sort qu'un.
+  - **3 singes sortaient du coffre** : le code donnait 1 singe de plus toutes les 3 vagues gagnées (et mon test avait mis « 8 vagues gagnées », restées en mémoire dans Unity). **Ce n'était pas la règle voulue** : un coffre donne **toujours un seul singe** ; ce qui monte avec les vagues, ce sont **ses chances d'être rare** (à 0 vague : 64 % gris, 36 % vert ; à 9 vagues : du bleu et du violet apparaissent). Corrigé dans `ChestController` (`MonkeysPerChest = 1`), et le panneau des chances n'affiche plus « Singes : X ».
 
   ![Coffre plus grand, creux, ouvert avec son aura dorée](../captures/maxens-coffre-v2-ouvert.png)
 
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
-| Claude (Code) | Coffre agrandi (1,1 m) et creusé (on voit l'intérieur à l'ouverture), cerclages de fer à l'extérieur ; explication des 3 singes (valeur de test restée en mémoire) | À tester au casque |
+| Claude (Code) | Coffre agrandi (1,1 m) et creusé (on voit l'intérieur à l'ouverture), cerclages de fer à l'extérieur ; un seul singe par coffre (seules les chances de rareté montent avec les vagues) | À tester au casque |
 | Claude (Code) | Nouveau coffre branché dans la scène (fixe), ouverture boing + couvercle + aura dorée (`ChestLid`), roulette avec les vrais singes et leur aura, type du singe tiré avant la roulette ; testé en Play | À tester au casque |
 | Claude (Code) | Nouveau coffre modélisé par script Blender (`coffre.py`) dans le style de la cabane, couvercle séparé sur sa charnière, rendus d'aperçu | À valider |
 

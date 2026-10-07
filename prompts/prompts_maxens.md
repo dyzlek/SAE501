@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mer. 7 oct. 2026
 
+### Un seul singe par coffre
+> Ce n'était pas la règle prévue : un coffre donne un seul singe. Ce qui doit augmenter avec les vagues, ce sont seulement les chances d'obtenir un singe de rareté supérieure dans la roulette.
+
 ### Corrections du coffre
 > Le coffre est trop petit, on le voit à peine. Il donne l'impression d'être fermé et ouvert en même temps. Et trois singes en sortent au lieu d'un.
 

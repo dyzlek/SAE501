@@ -29,7 +29,7 @@ namespace SAE
             sb.AppendLine("<b>CHANCES DU COFFRE</b>");
             sb.AppendLine($"Vagues vaincues : {GameState.WavesWon}");
             string priceColor = Economy.CanAfford(chest.Price) ? "#FFD233" : "#999999";
-            sb.AppendLine($"Prix : <color={priceColor}>{chest.Price}</color>   Singes : {chest.MonkeysPerChest}");
+            sb.AppendLine($"Prix : <color={priceColor}>{chest.Price}</color>");
             sb.AppendLine();
 
             var odds = chest.CurrentOdds();
