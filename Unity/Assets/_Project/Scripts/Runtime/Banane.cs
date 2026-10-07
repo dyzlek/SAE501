@@ -5,7 +5,8 @@ using UnityEngine;
 /// - Elle tombe au pied de l'arbre et attend que le joueur la ramasse.
 /// - Elle brunit petit à petit ; au bout de « dureePourriture » secondes elle est pourrie :
 ///   elle ne vaut plus rien et disparaît après « delaiDisparition » (sauf si on la tient en main).
-/// - Le joueur l'attrape (XR Grab Interactable) et la lâche dans un Panier : c'est le panier qui donne l'argent.
+/// - Le joueur l'attrape (XR Grab Interactable) et la lâche ou la LANCE dans un Panier : c'est le panier qui donne l'argent.
+///   Au lâcher, elle part avec la vitesse de la main (ThrowVelocity) et laisse une traînée (ThrowTrail).
 ///
 /// Branchement XR (dans l'Inspector du XR Grab Interactable de la banane) :
 ///   Select Entered -> Banane.Prise()     Select Exited -> Banane.Lachee()
@@ -36,7 +37,10 @@ public class Banane : MonoBehaviour
     Bananier source;
     float dureePourriture, age, ageDisparition;
     bool posee, deposee, lachee;
+    bool elanADonner;               // lâchée : il faut lui donner l'élan de la main (voir FixedUpdate)
+    Vector3 elan;
     Rigidbody rb;
+    SAE.ThrowVelocity vitesseMain;
     Renderer[] rends;
     MaterialPropertyBlock mpb;
     static readonly int ColorId = Shader.PropertyToID("_Color");
@@ -48,6 +52,8 @@ public class Banane : MonoBehaviour
         rb.isKinematic = true;          // posée au sol, elle ne bouge pas
         rb.useGravity = false;
         if (!GetComponent<SAE.GrabReach>()) gameObject.AddComponent<SAE.GrabReach>();   // attrapable de loin, jusqu'à 6 m (GrabReach.Reach)
+        vitesseMain = gameObject.AddComponent<SAE.ThrowVelocity>();   // pour la lancer
+        gameObject.AddComponent<SAE.ThrowTrail>();
         rends = GetComponentsInChildren<Renderer>();
         mpb = new MaterialPropertyBlock();
         SAE.PlayerRig.IgnoreCollisions(gameObject);   // on ne peut pas monter sur une banane tenue et s'envoler
@@ -103,6 +109,7 @@ public class Banane : MonoBehaviour
     public void Prise()
     {
         EnMain = true; posee = true; lachee = false;
+        vitesseMain.Clear();
         StopAllCoroutines();
     }
 
@@ -110,14 +117,22 @@ public class Banane : MonoBehaviour
     {
         EnMain = false;
         lachee = true;
+        elan = vitesseMain.Velocity;    // la vitesse de la main au moment du lâcher : on peut la lancer dans le panier
+        elanADonner = true;
         rb.isKinematic = false;         // elle retombe (dans le panier ou par terre)
         rb.useGravity = true;
     }
 
-    // le XR Grab Interactable peut remettre le Rigidbody en kinematic juste après le lâcher : on corrige
+    // le XR Grab Interactable peut remettre le Rigidbody en kinematic juste après le lâcher : on corrige,
+    // puis on lui donne l'élan de la main (une seule fois)
     void FixedUpdate()
     {
         if (lachee && !EnMain && rb.isKinematic) { rb.isKinematic = false; rb.useGravity = true; }
+        if (elanADonner && !rb.isKinematic)
+        {
+            rb.linearVelocity = elan;
+            elanADonner = false;
+        }
     }
 
     /// Appelé par le Panier. Renvoie ce que la banane rapporte (0 si pourrie).

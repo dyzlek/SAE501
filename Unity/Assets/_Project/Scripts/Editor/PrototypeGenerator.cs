@@ -927,6 +927,15 @@ namespace SAE.EditorTools
                     Visuals.Box("Pied", stool, Around(i * 120f, 0.17f, (HandHeight - 0.06f) / 2f), new Vector3(0.05f, HandHeight - 0.06f, 0.05f), Wood);
                 basket.position = basketPos + Vector3.up * HandHeight;
                 panier = basket.GetComponentInChildren<Panier>();
+                // On LANCE les bananes dans le panier : plus de parois ni de poignée qui les renvoient (MeshCollider retiré),
+                // et une zone de dépôt plus haute que le bord, pour qu'un lancer un peu court compte quand même.
+                foreach (var wall in basket.GetComponentsInChildren<MeshCollider>()) Object.DestroyImmediate(wall);
+                if (panier)
+                {
+                    var zone = panier.GetComponent<BoxCollider>();
+                    zone.size = new Vector3(2.4f, 4f, 2.4f);   // dans le repère de Zone_Depot (déjà à la taille de l'intérieur)
+                    zone.center = new Vector3(0f, 1f, 0f);
+                }
             }
             return bananier;
         }
