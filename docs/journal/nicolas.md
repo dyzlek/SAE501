@@ -2,6 +2,25 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Mer. 7 oct. 2026
+**Mon analyse critique du jeu** _(transmise par Dylan, qui corrige sur la branche `fix-all` ; mise en forme par l'IA)_
+1. **Bibliothèque :** le texte « Bibliothèque » suit la caméra au lieu de rester fixe.
+2. **Singe récolteur :** par moments, il a un bug de collision avec la table du panier et passe à travers son bord gauche.
+3. **Fiche du singe (touche A) :** la commode (la bibliothèque) cache les informations. Il faudrait un genre de « z-index » pour que la fiche passe devant (photo 1).
+4. **Textures qui se chevauchent :** selon l'angle de vue, une texture passe par-dessus une autre ; par exemple, les bûches du mur débordent un peu sur la fenêtre (photo 2).
+5. **Herbe de la carte :** en mode FPS, hors du hub, la texture de l'herbe est très moche.
+6. **Chute dans le vide :** en mode FPS, si on s'aventure trop loin, on traverse le sol et on tombe sans être remis en place : on est bloqué. Il faudrait revenir au hub, ou à une position proche d'avant la chute.
+7. **Bouton LANCER :** après avoir lancé la vague puis être revenu au hub, le bouton n'a pas changé, ce qui donne envie de recliquer dessus. Le griser une fois la vague lancée éviterait ça.
+8. **Singes tenus en main :** ils sont encore en T-pose ; il faudrait changer leur design.
+9. **Arc :** l'arc et son animation de tir ne rendent pas très bien, en mode PC comme en VR.
+10. **Plateau 3D :** quand on pose un singe, on ne voit pas sa portée, ni un rappel de ses dégâts, de ses tirs par seconde, etc.
+
+_Note : les deux photos ont été prises avant les corrections de Dylan sur `fix-all` (anciennes polices, ancien comptoir), donc le point 1 est peut-être déjà réglé._
+
+![Photo 1 : la fiche du singe (touche A) en partie cachée par la bibliothèque](../captures/nicolas-critique-1.webp)
+
+![Photo 2 : les bûches du mur qui débordent sur la fenêtre, près de la caisse et du comptoir du récolteur](../captures/nicolas-critique-2.webp)
+
 ## Lun. 5 oct. 2026
 - **Fait :** création du projet Unity (6000.3.8f1, URP) dans `Unity/` et du prototype « ouverture de coffres » (money, 7 raretés, probabilités, roulette façon CS, animation du coffre).
 - **Bloque :** projet pas encore ouvert dans Unity : il reste à installer les packages (menu SAE501 > 1) puis créer la scène (menu SAE501 > 2) et tester.

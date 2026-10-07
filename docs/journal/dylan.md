@@ -77,6 +77,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 | Claude (Claude Code) | Corrections sur `fix-all` de 11 points des deux critiques : bug des objets qui volent (`PlayerRig.IgnoreCollisions`), pupitres de commande, comptoirs d'amélioration avec ardoise, boutons qui disparaissent au max, jusqu'à 4 singes récolteurs (`HarvesterCrew` ; `HarvesterSetup` supprimé, tout est construit par le générateur), trajets des singes par le centre, polices Bangers et Oswald, enseignes et pancartes au lieu des textes flottants, étal des bananes, tabouret du panier, lanterne déplacée dans `cabane.py` | À tester (compilé, scène à régénérer) |
 | Claude (Claude Code) | 2e passe après mon test : cylindre corrigé (boutons deux fois trop gros), boutons plus petits, plaques gravées devant les boutons des comptoirs, enseigne posée sur l'ardoise, plaques de la bibliothèque lisibles, meubles plus espacés, JOUER renommé « SE TP » | À tester (compilé, scène à régénérer) |
 | Claude (Claude Code) | 3e passe : « +0 » supprimé (MoneyBoard ignore un montant nul), plaques des boutons lisibles (bois foncé, texte doré plus grand), texte des ardoises agrandi | À tester (compilé, scène à régénérer) |
+| Claude (Claude Code) | Mise en forme de l'analyse critique de Nicolas (qu'il m'a transmise) dans son journal, avec ses 2 photos ; rien de corrigé pour l'instant | Gardé |
 
 ## Mar. 6 oct. 2026
 - **Fait :**

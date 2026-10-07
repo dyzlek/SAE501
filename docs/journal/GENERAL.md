@@ -35,7 +35,7 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 **Mer. 7 oct. — objectifs du jour**
 | Tâche | Qui |
 |---|---|
-| Analyse critique et bugs : chacun relève, Dylan corrige (branche `fix-all`, voir les analyses de [Dylan](dylan.md) et de [Maxens](maxens.md)) | Tout le monde, Dylan |
+| Analyse critique et bugs : chacun relève, Dylan corrige (branche `fix-all`, voir les analyses de [Dylan](dylan.md), [Maxens](maxens.md) et [Nicolas](nicolas.md)) | Tout le monde, Dylan |
 | Coffre : changer l'asset, améliorer l'animation, voir les singes qui en sortent | Maxens |
 | Limiter la zone de téléportation dans le hub | Dylan |
 | Améliorer l'arc | Nicolas |

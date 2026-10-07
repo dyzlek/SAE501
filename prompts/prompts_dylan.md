@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
+### La critique de Nicolas dans son journal
+> Ajoute dans le journal de Nicolas sa critique (texte de la bibliothèque, collision du singe récolteur, fiche du singe cachée par la bibliothèque, textures qui se chevauchent, herbe de la carte, chute dans le vide, bouton LANCER à griser, singes en T-pose, arc, portée et stats des singes sur le plateau), avec ses 2 photos.
+
 ### Corriger une partie des critiques
 > Pour l'instant, corrige seulement ces points : les objets qu'on peut faire voler avec la banane ; les objets qui se superposent (les caisses rentrent dans l'armoire) ; le petit singe récolteur qui rentre dans les objets ; l'affichage des écrans, pas beau même s'il est lisible ; le texte qui flotte dans le vide (il faudrait une pancarte, et le mot « Bibliothèque » tourne vers le joueur) ; les textes trop simples (bibliothèque et récolteur) ; les panneaux et certains objets pas beaux ; les bornes d'amélioration pas belles et les boutons jaunes du récolteur. Pour le meuble du récolteur, enlever seulement le bouton quand il est au maximum, et permettre d'avoir plusieurs singes ; pareil pour le bananier. Refaire le bananier et toute sa zone, les boutons LANCER et JOUER (horribles), et enlever le tonneau.
 >
