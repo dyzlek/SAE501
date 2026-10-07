@@ -10,6 +10,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
 | Claude (Claude Code) | Fusion `test/cabane` + `feat/arc-quincy` (Maxens) dans `feat/cabane-arc`, conflit du `PrototypeGenerator` résolu en gardant les deux | À tester |
+| Claude (Claude Code) | 2e fusion avec les derniers commits de Maxens sur `feat/arc-quincy` (mains de Quincy riggées, arc plus petit, tir dans le simulateur VR), sans conflit | À tester |
 
 ## Mar. 6 oct. 2026
 - **Fait :**

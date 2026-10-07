@@ -6,6 +6,8 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ### Fusionner la cabane et l'arc de Maxens
 > Fusionne ce que j'ai fait dans `test/cabane` avec la dernière branche de Maxens.
+>
+> Suite : c'est bien `feat/arc-quincy` sur GitHub (prends sa dernière version).
 
 ## Mar. 6 oct. 2026
 
