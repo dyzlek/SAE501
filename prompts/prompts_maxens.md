@@ -4,6 +4,29 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mar. 6 oct. 2026
 
+### Mise à jour finale
+> Pousse le travail sur ma branche, et mets bien à jour mes prompts utiles et ce que j'ai fait, avec des captures.
+
+### Tenue de l'arc
+> C'est parfait. Deux améliorations : quand on tient les manettes, les mains sont paume vers le bas, ce qui n'est pas naturel ; il faudrait les incliner un peu, comme sur la capture. Ensuite, la main gauche devrait tenir l'arc sur le côté : aujourd'hui elle est au milieu, et la flèche passe à travers. Enfin, la main droite devrait être accrochée à la corde : il reste un espace entre les deux.
+
+### Les mains doivent se voir se fermer
+> Voici une capture main ouverte et une capture main fermée : on ne voit presque aucune différence.
+
+### Tir VR et mains
+> Les mains ne se ferment pas, et l'arc ne rend pas bien. Surtout : en mode PC le tir fonctionne, mais pas en VR. Quand je clique, la flèche apparaît puis disparaît. Comment as-tu conçu le système de tir en VR ?
+
+### Retour aux mains simples
+> Finalement, je préférais les mains simples : les nouvelles collent moins au style du jeu. Reprends la main de Quincy d'avant, avec une fermeture légère quand on appuie sur les boutons.
+
+### Refaire les mains
+> Les mains se ferment de façon étrange : il faudrait sans doute les refaire. Autre problème : quand on prend un singe, il se retrouve à l'intérieur de la main.
+
+### Corrections de l'arc et mains de Quincy
+> Au casque, l'arc est beaucoup trop gros et je n'arrive pas à tirer : c'est sans doute lié aux commandes. Corrige ces deux points.
+>
+> Je veux aussi que les mains affichées au hub soient celles de Quincy, correctement riggées si ce n'est pas déjà le cas.
+
 ### Le système de l'arc
 > Récupère le `main` à jour et crée une nouvelle branche pour l'arme. Au hub, le joueur n'a que ses mains ; l'arc n'apparaît dans ses mains qu'une fois téléporté sur la carte. Pour l'instant, réalise uniquement le système de tir : tendre l'arc, encocher la flèche, l'animation de la corde et de la flèche, le tir.
 

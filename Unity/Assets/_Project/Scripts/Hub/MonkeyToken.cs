@@ -16,6 +16,7 @@ namespace SAE
     {
         const float AimReach = 30f;          // portée du rayon de pose, en mètres (assez pour viser la carte de loin)
         const float DropReach = 1.5f;        // sinon, on cherche le plateau juste sous le singe
+        const float HoldDistance = 0.12f;    // le singe tenu flotte à 12 cm devant la main
 
         // Le singe tenu en main (un seul à la fois, comme GameState.Held).
         public static MonkeyToken Held { get; private set; }
@@ -45,6 +46,11 @@ namespace SAE
             grab.throwOnDetach = false;
             grab.useDynamicAttach = false;  // il se cale directement dans la main, quel que soit l'endroit visé
             grab.farAttachMode = InteractableFarAttachMode.Near;   // pris de loin, il vient jusqu'à la main (au lieu de rester au bout du rayon)
+            // Tenu juste devant les doigts de Quincy, pas dans la main : un point d'accroche décalé vers l'arrière du singe
+            var attach = new GameObject("Point de prise").transform;
+            attach.SetParent(piece.transform, false);
+            attach.localPosition = new Vector3(0f, 0f, -HoldDistance);
+            grab.attachTransform = attach;
             piece.AddComponent<GrabReach>();  // on peut l'attraper de loin, jusqu'à 6 m (GrabReach.Reach)
 
             var token = piece.AddComponent<MonkeyToken>();

@@ -14,7 +14,8 @@ namespace SAE.EditorTools
         const string ArrowModel = "Assets/_Project/Art/Quincy/FBX/Quincy_Arrow.fbx";
         const string ArrowPrefabPath = "Assets/_Project/Prefabs/Fleche.prefab";
         const string BowPrefabPath = "Assets/_Project/Prefabs/Arc.prefab";
-        const float BowScale = 0.8f;   // l'arc de Quincy fait 1,2 m : réduit à environ 1 m, la taille d'un arc pour le joueur
+        const float BowScale = 0.55f;    // l'arc de Quincy fait 1,2 m : réduit à environ 65 cm, pour qu'il ne cache pas la vue au casque
+        const float ArrowScale = 0.75f;  // la flèche (0,81 m) réduite à environ 60 cm, à la taille de l'arc
 
         [MenuItem("SAE/Préparer l'arc")]
         public static Bow Setup()
@@ -29,6 +30,7 @@ namespace SAE.EditorTools
             var model = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(ArrowModel));
             model.name = "Modele";
             model.transform.SetParent(root.transform, false);
+            model.transform.localScale *= ArrowScale;
             // Dans le modèle, la flèche est déjà le long de +Z, pointe devant (les plumes, plus larges, sont derrière)
             var b = Bounds(model);
             model.transform.localPosition = new Vector3(-b.center.x, -b.center.y, -b.min.z);   // encoche à l'origine

@@ -73,6 +73,18 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 
   ![Quincy tient l'arc séparé (à gauche), l'arc seul avec la corde tirée (à droite)](../captures/maxens-quincy-arc-separe.png)
 
+- **Bilan de l'arme (état final du jour, branche `feat/arc-quincy`)** — le détail de chaque étape suit en dessous :
+  - **au hub, on n'a que les mains de Quincy** (gants simples, dos de la main vers le haut, inclinés pouce relevé) ; elles se ferment avec le grip et la gâchette ; le singe pris est tenu devant la main ;
+  - **sur la carte, l'arc apparaît dans la main gauche**, tenu sur le côté ; on approche la main droite de la corde, on serre, une flèche s'encoche et la main droite reste accrochée à la corde ; on recule la main pour tendre (sans casque, la tension monte en gardant le bouton), on relâche : la flèche part, vole avec la gravité et éclate les ballons ;
+  - **en mode PC** : clic droit maintenu puis relâché ;
+  - testé dans le simulateur VR et en Play ; **reste à tester au vrai casque** (taille de l'arc bras tendu, confort de visée, prise des singes).
+
+  Mes captures dans le simulateur VR : la flèche encochée, mains de Quincy sur l'arc et la corde ; puis les mains au hub, inclinées.
+
+  ![Simulateur VR : flèche encochée, main droite sur la corde](../captures/maxens-vr-fleche-encochee.png)
+
+  ![Simulateur VR : mains de Quincy au hub, inclinées](../captures/maxens-vr-mains-inclinees.png)
+
 - **Fait : le système de l'arc** (branche `feat/arc-quincy`, partie du `main` à jour avec la PR #8, arc séparé de Quincy repris de `feat/prototype-maxens`) :
   - **au hub, seulement les mains** ; l'arc apparaît dans les mains quand on se téléporte sur la carte (bouton JOUER) et se range au retour (`BowHolster`, qui réagit au nouvel événement `PlayerRig.Teleported`) ;
   - **au casque** (`VRArcher`) : l'arc est dans la main gauche ; on approche la main droite de la corde et on serre le grip : une flèche s'encoche ; on recule la main pour tendre, on relâche pour tirer. Vibrations à l'encoche, pendant la tension et au tir ;
@@ -84,6 +96,42 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
   - **À tester au casque :** le geste réel (main droite sur la corde), la taille de l'arc (environ 1 m), et le confort de la visée. Le tir au clic droit en mode PC n'a pas encore été essayé à la main.
 
   ![L'arc tendu, flèche encochée ; la flèche tirée juste avant vole en haut](../captures/maxens-arc-tendu.png)
+
+- **Corrigé après mon test au casque (simulateur) :** l'arc était trop gros et je n'arrivais pas à tirer.
+  - l'arc passe de 1 m à environ **65 cm** (et la flèche de 81 à 60 cm), la corde recule de 40 cm au maximum ;
+  - attraper la corde est beaucoup plus facile : la main droite peut être **jusqu'à 40 cm** de la corde (au lieu de 15), et **la gâchette marche aussi**, en plus du grip ;
+  - **dans le simulateur sans casque** : `]` pour piloter la manette droite, `` ` `` pour choisir l'action rapide « Grip », `Espace` pour serrer / relâcher, `S` pour reculer la main pendant que la corde est tenue.
+- **Fait : les mains de Quincy à la place des manettes**, au hub comme sur la carte :
+  - la main gauche de Quincy est sortie du personnage dans Blender (script `creer_mains.py`, sur une nouvelle copie `Quincy_Mains.blend`) et **riggée** : poignet, paume, doigts, pouce (avant, une main = un seul os, impossible à fermer). Le trou au poignet est bouché ;
+  - la main droite est la même, en miroir. Prefabs `Main_Gauche` / `Main_Droite` (menu **SAE → Préparer les mains**), posés sur les manettes ; les manettes blanches des Starter Assets sont cachées ;
+  - nouveau script `AnimateHandOnInput` (le même principe que dans le support 3 du cours) : le grip ferme les doigts, la gâchette plie le pouce ; la main gauche reste fermée sur l'arc tant qu'il est sorti.
+  - Testé en Play : mains visibles et bien orientées (doigts devant, pouce en haut), main gauche refermée sur la poignée de l'arc, aucune erreur de notre code.
+  - **À voir au casque :** la position de la main sur la manette (réglage `HandOffset` dans le générateur) et la taille des gants (environ 18 cm).
+  - Pas commité : les réglages OpenXR réécrits tout seuls par le package Meta à l'ouverture (réglages VR de l'équipe).
+
+  ![La main gauche de Quincy refermée sur l'arc](../captures/maxens-main-quincy-arc.png)
+
+- **Refait après mon test : les mains se fermaient bizarrement** (le gant de Quincy n'avait que 2 gros blocs, doigts et pouce, qui se cassaient en se pliant, et il était énorme vu de près), et **le singe pris se retrouvait dans la main** :
+  - **nouvelles mains modélisées dans Blender par script** (`creer_mains.py`, fichier `Quincy_Mains.blend`), dans le style de Quincy : gant noir, bouts des doigts bruns, manchette orange, environ 18 cm. **4 doigts à 2 phalanges + un pouce à 2 phalanges**, chaque morceau suivant un seul os : ils plient comme de vraies articulations. Une main gauche et une main droite exportées (`Quincy_Main_Gauche.fbx`, `Quincy_Main_Droite.fbx`), 288 sommets chacune ;
+  - `AnimateHandOnInput` plie maintenant chaque phalange vers la paume : grip = poing fermé, gâchette = pouce plié ;
+  - **le singe pris est tenu à 12 cm devant la main** (point de prise du XR Grab décalé dans `MonkeyToken`), plus dedans ;
+  - l'ancienne main découpée dans le personnage (`Quincy_Main.fbx`) est supprimée.
+  - Testé en Play : mains visibles et bien orientées, poing fermé propre, point de prise présent sur les singes. La prise réelle d'un singe reste à voir au casque.
+
+  ![Nouvelles mains de Quincy : à droite, poing fermé](../captures/maxens-mains-quincy-v2.png)
+
+- **Annulé : les mains détaillées** ne collent pas au style du jeu (trop « réalistes » à côté des modèles simples). **Retour à la main simple découpée dans Quincy** (`Quincy_Main.fbx`), en gardant le singe tenu devant la main. La fermeture qui faisait bizarre est corrigée : les doigts tournaient dans le plan de la paume (sur le côté) ; ils tournent maintenant autour de l'axe des articulations, et **seulement un peu** (30° pour les doigts, 20° pour le pouce), pour que les blocs ne se cassent pas. Les fichiers des mains détaillées sont retirés du projet (le script `creer_mains.py` et `Quincy_Mains.blend` restent dans mon dossier Blender).
+- **Corrigé après mon test dans le simulateur VR :**
+  - **le tir en VR ne marchait pas dans le simulateur** : la flèche apparaissait puis disparaissait. Le tir VR suit le vrai geste (on attrape la corde et on recule la main) ; dans le simulateur, la main ne recule pas quand on tient le bouton, donc la tension restait à 0 et la flèche était rangée au lâcher. **Sans casque, la tension monte maintenant toute seule** tant qu'on garde le bouton (1 s pour tendre à fond), comme le clic droit du mode PC ; avec un vrai casque, c'est toujours le geste de la main ;
+  - **les mains se fermaient trop peu** pour qu'on le voie : 60° pour les doigts et 30° pour le pouce maintenant que l'axe est le bon ;
+  - **les mains se fermaient sans qu'on le voie** (2e retour) : on voyait le poignet de face et les doigts étaient cachés derrière. Les mains sont maintenant **tournées dos de la main vers le haut** (comme sa propre main), **réduites à 60 %**, et les doigts se replient vers la paume ;
+  - **tenue de l'arc** (3e retour, quand tout le reste était bon) :
+    - les mains sont **inclinées de 35°**, pouce relevé, comme quand on tient vraiment les manettes (avant : paume à plat, pas naturel) ;
+    - **la main gauche tient l'arc sur le côté** : la poignée est décalée de 7 cm vers l'intérieur de la main, la flèche passe à côté de la main et plus au travers ;
+    - **la main droite s'accroche à la corde** pendant la tension : le bout de ses doigts est collé à l'encoche et suit la corde quand elle recule, puis la main revient sur la manette après le tir (`VRArcher.HoldString`).
+
+    ![Main droite sur la corde, main gauche sur le côté de l'arc](../captures/maxens-arc-mains.png)
+  - **l'arc cache la vue dans le simulateur** : le simulateur tient les manettes à 30 cm du visage. Au casque, le bras est tendu (60-70 cm), l'arc est donc plus loin et plus petit à l'écran. À vérifier au casque avant de le réduire encore.
 
 **Captures** (bibliothèque avec les singes 3D et leur aura, et singe tenu en main) :
 
@@ -120,6 +168,12 @@ Mon schéma du hub (le joueur au centre, tout à portée du regard) :
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Mains inclinées (pouce relevé), arc tenu sur le côté de la main gauche, main droite collée à la corde pendant la tension ; testé en Play | À tester au casque |
+| Claude (Code) | Mains tournées dos vers le haut, plus petites, doigts repliés vers la paume | Gardé |
+| Claude (Code) | Tir VR utilisable dans le simulateur (tension au temps sans casque, geste de la main avec casque), mains qui se ferment davantage | À tester au casque |
+| Claude (Code) | Retour à la main simple de Quincy, fermeture corrigée (bon axe, pliage léger) ; singe tenu devant la main gardé | À tester au casque |
+| Claude (Code) | Nouvelles mains de Quincy modélisées et riggées par script Blender (2 phalanges par doigt), pliage phalange par phalange, singe tenu devant la main ; testé en Play | Mains jetées (pas dans le style), singe devant la main gardé |
+| Claude (Code) | Corrections après test : arc plus petit, corde plus facile à attraper (40 cm, grip ou gâchette) ; mains de Quincy riggées (poignet, paume, doigts, pouce) à la place des manettes, qui se ferment avec les boutons ; testé en Play | Arc gardé, mains jetées (refaites) |
 | Claude (Code) | Système de l'arc : arc seulement sur la carte, tir au casque (main droite sur la corde) et au PC (clic droit), corde et branches animées, flèche qui vole et éclate les ballons ; prefabs, générateur, testé en Play | À tester au casque |
 | Claude (Code) | Séparation de l'arc de Quincy par un script Blender (sur une copie) : arc à part avec son squelette (poignée, branches, corde à tirer), os de la flèche en points d'accroche, point `BowGrip` dans la main, export FBX, matériau ; testé dans Unity | À tester au casque |
 | Claude (Code) | Analyse du rig de Quincy dans Unity puis dans Blender en lecture seule (squelette, poids, séparation arc / bras / mains) et liste de ce qu'il faut corriger dans Blender pour utiliser l'arc comme arme | Gardé |

@@ -25,6 +25,9 @@ namespace SAE.EditorTools
         const float HandHeight = 0.9f;   // table des bananes et socle du panier : à hauteur de main, pas au sol
         const int IgnoreRaycast = 2;     // couche Unity « Ignore Raycast »
         const float DesktopBowScale = 0.5f;   // en mode PC, l'arc est collé à la caméra : plus petit
+        static readonly Vector3 HandOffset = new Vector3(0f, -0.01f, -0.06f);   // la paume, un peu derrière l'avant de la manette
+        static readonly Vector3 BowInHand = new Vector3(0.07f, 0f, 0.02f);      // la poignée de l'arc, sur le côté intérieur de la main : la flèche passe à côté
+        const float HandTilt = 35f;   // les mains tournées pouce vers le haut, comme quand on tient les manettes (pas paume à plat)
         static readonly Vector3 MapCenter = new Vector3(0f, 0f, 40f);
 
         static readonly Color Floor = new Color(0.35f, 0.35f, 0.38f);
@@ -169,7 +172,8 @@ namespace SAE.EditorTools
             rig.rightHand = FindChild(go.transform, "Right Controller");
             AddFingertip(rig.leftHand);
             AddFingertip(rig.rightHand);
-            GiveBow(go, rig, mapSpawn);
+            GiveHands(rig, out var leftHand, out var rightHand);
+            GiveBow(go, rig, mapSpawn, leftHand, rightHand);
             go.AddComponent<MonkeyInfoCard>();   // fiche du singe visé, dans le décor
 
             // Corps : invisible pour soi, mais c'est lui qu'on voit en miniature sur le plateau (et plus tard un 2e joueur).
@@ -185,16 +189,45 @@ namespace SAE.EditorTools
             return rig;
         }
 
-        // L'arc de Quincy dans la main gauche ; on tire la corde avec la main droite (grip). Rangé au hub (BowHolster).
-        static void GiveBow(GameObject player, PlayerRig rig, Transform mapSpawn)
+        // Les mains de Quincy à la place des modèles de manettes : elles se ferment avec le grip et la gâchette.
+        // Renvoie la main gauche (celle qui tiendra l'arc).
+        static void GiveHands(PlayerRig rig, out AnimateHandOnInput left, out AnimateHandOnInput right)
+        {
+            left = right = null;
+            if (!rig.leftHand || !rig.rightHand) return;
+            if (!HandSetup.Left || !HandSetup.Right) HandSetup.Setup();   // refaits seulement s'ils manquent (menu SAE → Préparer les mains)
+            right = PutHand(HandSetup.Right, rig.rightHand, "Right");
+            left = PutHand(HandSetup.Left, rig.leftHand, "Left");
+        }
+
+        static AnimateHandOnInput PutHand(AnimateHandOnInput prefab, Transform controller, string side)
+        {
+            var visual = controller.Find(side + " Controller Visual");
+            if (visual) visual.gameObject.SetActive(false);   // on cache la manette blanche des Starter Assets
+            var hand = ((GameObject)PrefabUtility.InstantiatePrefab(prefab.gameObject)).GetComponent<AnimateHandOnInput>();
+            hand.transform.SetParent(controller, false);
+            hand.transform.localPosition = HandOffset;
+            // Pouce relevé vers l'intérieur : la main gauche tourne dans un sens, la droite (en miroir) dans l'autre
+            hand.transform.localRotation = Quaternion.Euler(0f, 0f, side == "Left" ? HandTilt : -HandTilt);
+            hand.gripValue = new InputActionProperty(InputReference($"XRI {side} Interaction/Select Value"));
+            hand.triggerValue = new InputActionProperty(InputReference($"XRI {side} Interaction/Activate Value"));
+            return hand;
+        }
+
+        // L'arc de Quincy dans la main gauche ; on tire la corde avec la main droite (grip ou gâchette).
+        // Rangé au hub (BowHolster) ; la main gauche se ferme dessus tant qu'il est sorti.
+        static void GiveBow(GameObject player, PlayerRig rig, Transform mapSpawn, AnimateHandOnInput leftHand, AnimateHandOnInput rightHand)
         {
             if (!rig.leftHand || !rig.rightHand) { Debug.LogWarning("Joueur VR : manette introuvable, pas d'arc."); return; }
             var bow = ((GameObject)PrefabUtility.InstantiatePrefab(BowSetup.Setup().gameObject)).GetComponent<Bow>();
-            bow.HoldIn(rig.leftHand, Vector3.zero);
+            bow.HoldIn(rig.leftHand, BowInHand);
+            if (leftHand) leftHand.heldBow = bow;
             var archer = player.AddComponent<VRArcher>();
             archer.bow = bow;
             archer.drawHand = rig.rightHand;
+            archer.drawHandVisual = rightHand;
             archer.drawGrip = new InputActionProperty(InputReference("XRI Right Interaction/Select Value"));
+            archer.drawTrigger = new InputActionProperty(InputReference("XRI Right Interaction/Activate Value"));
             GiveHolster(player, bow, mapSpawn);
         }
 
