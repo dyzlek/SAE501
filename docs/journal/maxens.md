@@ -15,9 +15,22 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
   ![Nouveau coffre ouvert](../captures/maxens-coffre-ouvert.png)
 
+- **Fait : le nouveau coffre dans le jeu, avec son ouverture et la roulette des singes** :
+  - le coffre de la cabane remplace l'ancien dans la scène ; **il ne tourne plus vers le joueur**, il reste fixe sur son estrade ;
+  - **à l'ouverture** (nouveau script `Hub/ChestLid.cs`) : un petit **« boing »** (le coffre s'écrase puis rebondit), **le couvercle s'ouvre** en tournant sur sa charnière, et **une aura dorée** s'allume (la même aura en flammes que les singes, en or : `Aura.Add` accepte maintenant une couleur). Il se referme quand la roulette disparaît ;
+  - **la roulette montre de vrais singes avec l'aura de leur rareté** à la place des carrés de couleur (fond de case de la couleur de la rareté, assombri) ;
+  - **le singe au centre est bien celui qu'on gagne** : le type du singe est maintenant tiré par le coffre en même temps que la rareté, avant la roulette (avant, il était tiré après, par `ChestReward`) ;
+  - pour le casque : seuls les singes qui passent dans la fenêtre de la roulette sont allumés (environ 7 sur 48).
+  - Testé en Play (en ouvrant le coffre par code) : boing, couvercle, aura dorée, roulette qui s'arrête sur un singe Glace violet, puis ce même singe qui sort du coffre. Aucune erreur.
+
+  ![Ouverture : couvercle ouvert et aura dorée, la roulette commence](../captures/maxens-coffre-ouverture-aura.png)
+
+  ![La roulette s'arrête sur le singe gagné, qui sort du coffre](../captures/maxens-coffre-roulette-singes.png)
+
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Nouveau coffre branché dans la scène (fixe), ouverture boing + couvercle + aura dorée (`ChestLid`), roulette avec les vrais singes et leur aura, type du singe tiré avant la roulette ; testé en Play | À tester au casque |
 | Claude (Code) | Nouveau coffre modélisé par script Blender (`coffre.py`) dans le style de la cabane, couvercle séparé sur sa charnière, rendus d'aperçu | À valider |
 
 ## Mar. 6 oct. 2026

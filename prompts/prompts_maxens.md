@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mer. 7 oct. 2026
 
+### Roulette des singes et ouverture du coffre
+> Restons sur la branche du coffre. Dans la roulette, je veux voir les singes avec leur aura à la place des carrés de couleur. Le coffre ne doit plus bouger dans la scène ; quand on appuie pour l'ouvrir, il fait un petit « boing », s'ouvre et dégage une petite aura dorée. Dis-moi ce que tu en penses.
+
 ### Un coffre dans le style de la cabane
 > Récupère le `main` à jour. Ce matin, je m'occupe du coffre (changer l'asset, améliorer l'animation, voir les singes en sortir) puis des assets des ballons MOAB. On commence par le coffre : l'asset actuel ne correspond pas à la direction artistique du reste (la cabane). Refais-en un propre ; on verra l'animation et le reste ensuite.
 

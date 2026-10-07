@@ -23,6 +23,10 @@ namespace Sae501.Coffres
         public int MonkeysPerChest => 1 + Progress / Mathf.Max(1, wavesPerExtraMonkey);
         // Raretés obtenues au dernier coffre (l'inventaire viendra les récupérer)
         public System.Collections.Generic.List<Rarity> LastResults { get; } = new System.Collections.Generic.List<Rarity>();
+        // Type de singe de chaque résultat (index de SAE.MonkeyType), tiré en même temps que la rareté pour que la
+        // roulette montre le vrai singe gagné. C'est ChestReward qui fournit le tirage (ses chances par vague).
+        public System.Collections.Generic.List<int> LastTypes { get; } = new System.Collections.Generic.List<int>();
+        public System.Func<int> rollType;
         public event System.Action<System.Collections.Generic.List<Rarity>> Opened;
         public ChestOddsSettings oddsSettings = new ChestOddsSettings();
 
@@ -39,6 +43,7 @@ namespace Sae501.Coffres
 
         Animation anim;
         string clipName;
+        SAE.ChestLid lid;   // le coffre de la cabane : boing, couvercle et aura dorée (sinon, l'animation du modèle)
         Coroutine hideRoutine;
 
         public bool IsInRange(Vector3 playerPosition) =>
@@ -48,8 +53,10 @@ namespace Sae501.Coffres
 
         void Awake()
         {
+            lid = GetComponent<SAE.ChestLid>();
             anim = GetComponentInChildren<Animation>();
-            if (anim != null)
+            if (lid) { }
+            else if (anim != null)
             {
                 anim.playAutomatically = false;
                 clipName = PickClip();
@@ -86,13 +93,19 @@ namespace Sae501.Coffres
             var odds = CurrentOdds();            // probabilités AVANT cette ouverture
             // Résultats décidés d'avance (un par singe), la roulette ne fait que montrer le meilleur
             LastResults.Clear();
-            for (int i = 0; i < MonkeysPerChest; i++) LastResults.Add(ChestOdds.Roll(odds));
-            Rarity result = LastResults[0];
-            foreach (var r in LastResults) if (r > result) result = r;
+            LastTypes.Clear();
+            for (int i = 0; i < MonkeysPerChest; i++)
+            {
+                LastResults.Add(ChestOdds.Roll(odds));
+                LastTypes.Add(rollType != null ? rollType() : 0);
+            }
+            int best = 0;
+            for (int i = 1; i < LastResults.Count; i++) if (LastResults[i] > LastResults[best]) best = i;
+            Rarity result = LastResults[best];
 
             PlayChestAnimation();
             yield return new WaitForSeconds(spinDelay);
-            yield return roulette.Spin(result, odds, spinDuration);
+            yield return roulette.Spin(result, odds, spinDuration, LastTypes[best], rollType);
 
             OpenedCount++;
             roulette.ShowMessage(LastResults.Count == 1 ? result.ToString().ToUpper()
@@ -114,6 +127,7 @@ namespace Sae501.Coffres
         // Ouvre le coffre (animation normale) ou le referme (même animation à l'envers).
         void PlayChestAnimation(bool reverse = false)
         {
+            if (lid) { if (reverse) lid.Close(); else lid.Open(); return; }
             if (anim == null || string.IsNullOrEmpty(clipName)) return;
             var state = anim[clipName];
             state.wrapMode = WrapMode.ClampForever; // le coffre reste ouvert pendant la roulette

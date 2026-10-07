@@ -745,11 +745,12 @@ namespace SAE.EditorTools
             }
         }
 
-        // Le coffre de Nicolas (modèle .glb animé + roulette + texte [E]), monté comme dans son menu SAE501 → 2,
-        // branché sur notre joueur (ChestClickable) et sur l'argent commun (EconomyBridge).
+        // Le coffre : le modèle de la cabane (Art/Coffre/Coffre.glb, fait par Blender/coffre.py), avec la roulette
+        // et le texte de Nicolas, branché sur notre joueur (ChestClickable) et sur l'argent commun.
+        // Il reste fixe, tourné vers le centre ; à l'ouverture : boing, couvercle et aura dorée (ChestLid).
         static void BuildChest(Transform env, Vector3 pos, Transform player)
         {
-            const string ChestModelPath = "Assets/_Project/Art/Chest/chest_cartoon_animations.glb";
+            const string ChestModelPath = "Assets/_Project/Art/Coffre/Coffre.glb";
             var model = AssetDatabase.LoadAssetAtPath<GameObject>(ChestModelPath);
             if (!model) { Debug.LogWarning("Hub : modèle du coffre introuvable (glTFast installé ?), coffre non placé."); return; }
 
@@ -800,13 +801,14 @@ namespace SAE.EditorTools
             var reward = chest.AddComponent<ChestReward>();
             reward.chest = controller;
 
-            // Le coffre se tourne toujours vers le joueur. L'origine du modèle n'est pas au centre du coffre :
-            // on le met dans un pivot placé au centre, et c'est le pivot qui tourne.
-            var pivot = new GameObject("Coffre (pivot)").transform;
-            pivot.SetParent(env, false);
-            pivot.SetPositionAndRotation(new Vector3(pos.x, 0, pos.z), chest.transform.rotation);
-            chest.transform.SetParent(pivot, true);
-            pivot.gameObject.AddComponent<FacePlayer>();
+            // L'ouverture : boing, couvercle (son origine est sur la charnière) et aura dorée au centre du coffre
+            var glowAnchor = new GameObject("Centre (aura)").transform;
+            glowAnchor.SetParent(chest.transform, false);
+            glowAnchor.position = chestBounds.center;
+            var lid = chest.AddComponent<ChestLid>();
+            lid.lid = chest.GetComponentsInChildren<Transform>(true).First(t => t.name == "Coffre_Couvercle");
+            lid.glowAnchor = glowAnchor;
+            lid.glowSize = chestBounds.size;
 
             // Panneau des chances : un tableau encadré de bois, accroché au mur derrière le coffre (comme la caisse)
             float chestAngle = AngleOf(pos);

@@ -6,7 +6,8 @@ namespace SAE
 {
     // Ce que donne le coffre : à l'ouverture, chaque singe gagné sort du coffre avec son aura (Visuals.MonkeyPiece) de la couleur
     // de sa rareté, flotte un instant, puis vole jusqu'à sa case de la bibliothèque, où il s'ajoute à l'inventaire.
-    // Le coffre tire la rareté ; le TYPE est tiré ici, selon des chances qui s'ouvrent avec les vagues (MonkeyOdds).
+    // Le coffre tire la rareté et, grâce à rollType, le TYPE selon des chances qui s'ouvrent avec les vagues (MonkeyOdds) :
+    // les deux sont connus avant la roulette, qui montre ainsi le vrai singe gagné.
     public class ChestReward : MonoBehaviour
     {
         public ChestController chest;
@@ -18,7 +19,12 @@ namespace SAE
 
         public float[] CurrentTypeOdds() => MonkeyOdds.Compute(typeOdds, GameState.WavesWon);
 
-        void OnEnable() { if (chest) chest.Opened += OnOpened; }
+        void OnEnable()
+        {
+            if (!chest) return;
+            chest.Opened += OnOpened;
+            chest.rollType = () => (int)MonkeyOdds.Roll(CurrentTypeOdds());   // le coffre tire le type avant la roulette
+        }
         void OnDisable() { if (chest) chest.Opened -= OnOpened; }
 
         void OnOpened(System.Collections.Generic.List<Sae501.Coffres.Rarity> results)
@@ -26,7 +32,8 @@ namespace SAE
             var typeChances = CurrentTypeOdds();
             for (int i = 0; i < results.Count; i++)
             {
-                var type = MonkeyOdds.Roll(typeChances);
+                // le type déjà tiré par le coffre (celui que la roulette a montré), sinon on le tire ici
+                var type = i < chest.LastTypes.Count ? (MonkeyType)chest.LastTypes[i] : MonkeyOdds.Roll(typeChances);
                 var level = (Rarity)(int)results[i];   // mêmes raretés de Gris à Rouge dans les deux listes
                 StartCoroutine(Deliver(new Monkey(type, level), i * 0.4f, i));
             }
