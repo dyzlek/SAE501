@@ -371,6 +371,7 @@ namespace SAE.EditorTools
             rig.rightHand = FindChild(go.transform, "Right Controller");
             AddFingertip(rig.leftHand);
             AddFingertip(rig.rightHand);
+            if (rig.leftHand) rig.leftHand.gameObject.AddComponent<WristHelp>().head = rig.head;   // l'aide des commandes : lever la main gauche
             GiveHands(rig, out var leftHand, out var rightHand);
             GiveBow(go, rig, leftHand, rightHand);
             go.AddComponent<MonkeyInfoCard>();   // fiche du singe visé, dans le décor
@@ -842,10 +843,18 @@ namespace SAE.EditorTools
             {
                 var type = (MonkeyType)(firstType + i);
                 float y = FirstShelfY + i * SlotStepY;
-                Visuals.Box($"Plaque {type}", shelf, Around(Angle(-1), Ring - 0.19f, y - 0.03f), new Vector3(SlotStepX, 0.12f, 0.015f), Parchment)
-                    .transform.rotation = Facing(Angle(-1));
-                Visuals.Text(shelf, type.ToString(), Around(Angle(-1), Ring - 0.2f, y - 0.03f), 0.065f, Engraved)
-                    .transform.rotation = Facing(Angle(-1));
+                // La plaque se lit et s'enfonce : tant que le type n'est pas débloqué, elle affiche son prix en bananes
+                var plaque = Visuals.Box($"Plaque {type}", shelf, Around(Angle(-1), Ring - 0.19f, y - 0.03f), new Vector3(SlotStepX, 0.14f, 0.015f), Parchment);
+                plaque.transform.rotation = Facing(Angle(-1));
+                var plaqueText = Visuals.Text(shelf, type.ToString(), Around(Angle(-1), Ring - 0.2f, y - 0.03f), 0.045f, Engraved);
+                plaqueText.transform.rotation = Facing(Angle(-1));
+                plaque.tag = Tags.Bouton;
+                plaque.AddComponent<BoxCollider>().size = new Vector3(1f, 1f, 4f);   // un peu épais : facile à toucher du bout de la manette
+                var unlock = plaque.AddComponent<TypeUnlockPlaque>();
+                unlock.type = type;
+                unlock.label = plaqueText;
+                unlock.plate = plaque.GetComponent<ColorTint>();
+                plaque.AddComponent<RayPress>();   // ou de loin, en la visant
 
                 for (int l = 0; l < MonkeyData.LevelCount; l++)
                 {
@@ -1160,11 +1169,16 @@ namespace SAE.EditorTools
             var glowAnchor = new GameObject("Centre").transform;
             glowAnchor.SetParent(chest.transform, false);
             glowAnchor.position = chestBounds.center;
-            // Un trésor dedans : les bananes du bananier, posées sur le lit de feuilles du double fond (Blender/coffre.py)
+            // Un trésor dedans : les bananes du bananier, posées sur le lit de feuilles du double fond (Blender/coffre.py).
+            // Deux rangées de quatre, un peu en vrac : le coffre déborde de bananes (critique de Maxens : « plus de bananes »).
             var bananaModel = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Art/Bananier/FBX/Bananes_Collectible.fbx");
             if (bananaModel)
             {
-                var spots = new[] { new Vector3(-0.32f, 0f, 0.05f), new Vector3(-0.1f, 0f, -0.08f), new Vector3(0.12f, 0f, 0.08f), new Vector3(0.33f, 0f, -0.05f) };
+                var spots = new[]
+                {
+                    new Vector3(-0.34f, 0f, 0.12f), new Vector3(-0.12f, 0f, 0.02f), new Vector3(0.1f, 0f, 0.14f), new Vector3(0.33f, 0f, 0.04f),
+                    new Vector3(-0.3f, 0f, -0.12f), new Vector3(-0.08f, 0f, -0.16f), new Vector3(0.14f, 0f, -0.08f), new Vector3(0.36f, 0f, -0.15f),
+                };
                 for (int i = 0; i < spots.Length; i++)
                 {
                     var banana = (GameObject)PrefabUtility.InstantiatePrefab(bananaModel);

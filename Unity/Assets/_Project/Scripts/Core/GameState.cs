@@ -33,8 +33,24 @@ namespace SAE
         // Inventaire : nombre de singes rangés dans la bibliothèque, par type et par rareté.
         static readonly int[,] owned = new int[MonkeyData.TypeCount, MonkeyData.LevelCount];
 
+        // Types de singes débloqués : seul le Classique l'est au départ, les autres s'achètent avec des bananes
+        // sur les plaques de la bibliothèque (TypeUnlockPlaque). Le coffre ne donne que des types débloqués.
+        static readonly bool[] unlocked = new bool[MonkeyData.TypeCount];
+
         // On commence avec un singe Classique gris, pour pouvoir défendre la première vague.
-        static GameState() => owned[(int)MonkeyType.Classique, (int)Rarity.Gris] = 1;
+        static GameState()
+        {
+            owned[(int)MonkeyType.Classique, (int)Rarity.Gris] = 1;
+            unlocked[(int)MonkeyType.Classique] = true;
+        }
+
+        public static bool IsUnlocked(MonkeyType t) => unlocked[(int)t];
+
+        public static void Unlock(MonkeyType t)
+        {
+            unlocked[(int)t] = true;
+            NotifyChanged();
+        }
 
         public static int Count(Monkey m) => owned[(int)m.type, (int)m.level];
 

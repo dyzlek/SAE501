@@ -30,7 +30,7 @@ namespace SAE
         {
             int wave = GameState.WavesWon + 1;
             string number = wave <= WrittenWaves ? $"{wave} / {WrittenWaves}" : $"{wave} (infini)";
-            return $"<color=#FFD45A>VAGUE {number}</color>\n<size=30>Prête : appuie sur LANCER</size>";
+            return $"<color=#FFD45A>VAGUE {number}</color>\n<size=30>Prête : appuie sur LANCER</size>\n<size=24><color=#B8C8B8>Les commandes ? Lève ta main gauche devant tes yeux</color></size>";
         }
     }
 }

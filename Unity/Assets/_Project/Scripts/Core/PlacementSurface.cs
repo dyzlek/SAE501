@@ -19,6 +19,7 @@ namespace SAE
         GameObject ghost;
         Monkey? ghostMonkey;
         GameObject halo;
+        LineRenderer rangeRing;
 
         Vector2 ToMap(Vector3 worldPoint)
         {
@@ -86,6 +87,16 @@ namespace SAE
                 ghost.GetComponent<MonkeyView>().Tint(fuse ? Fusion : action == PlacementAction.Place ? Ok : No);
             }
 
+            // La portée du singe qu'on va poser (ou obtenir) : on voit ce qu'il couvrira avant de le lâcher
+            float range = showGhost ? MonkeyData.Range(wanted.Value) : 0f;
+            bool showRange = showGhost && range < 30f;   // pas de cercle géant pour le Sniper (toute la carte)
+            if (showRange && !rangeRing) rangeRing = CreateRangeRing();
+            if (rangeRing)
+            {
+                rangeRing.gameObject.SetActive(showRange);
+                if (showRange) DrawRangeRing(ToLocal(fuse ? target.pos : pos, 0.03f), range * scale);
+            }
+
             // Halo doré sous le singe avec lequel on peut fusionner
             bool showHalo = action == PlacementAction.Fuse;
             if (showHalo && !halo) halo = CreateHalo();
@@ -99,6 +110,32 @@ namespace SAE
                     halo.transform.localPosition = ToLocal(target.pos, 0.02f);
                     halo.transform.localScale = new Vector3(d, 0.01f * scale + 0.002f, d);
                 }
+            }
+        }
+
+        // Le cercle de portée : une ligne fermée posée à plat sur la surface (il suit l'inclinaison du plateau)
+        const int RingPoints = 48;
+
+        LineRenderer CreateRangeRing()
+        {
+            var line = new GameObject("Portée").AddComponent<LineRenderer>();
+            line.transform.SetParent(transform, false);
+            line.sharedMaterial = Visuals.LineMaterial;
+            line.useWorldSpace = false;
+            line.loop = true;
+            line.positionCount = RingPoints;
+            line.startColor = line.endColor = new Color(1f, 1f, 1f, 0.7f);
+            line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            return line;
+        }
+
+        void DrawRangeRing(Vector3 localCenter, float localRadius)
+        {
+            rangeRing.widthMultiplier = Mathf.Max(0.004f, localRadius * 0.015f) * transform.lossyScale.x;
+            for (int i = 0; i < RingPoints; i++)
+            {
+                float a = i * Mathf.PI * 2f / RingPoints;
+                rangeRing.SetPosition(i, localCenter + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * localRadius);
             }
         }
 
