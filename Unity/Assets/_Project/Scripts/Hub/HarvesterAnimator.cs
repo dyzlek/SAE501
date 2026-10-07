@@ -5,9 +5,10 @@ namespace SAE
     // Les animations du singe récolteur, faites en code : le modèle du singe classique a un squelette mais aucune animation.
     // Chaque image, on remet les os dans leur pose de départ, puis on oriente les bras et les jambes vers une direction :
     //  - marche : les jambes se balancent d'avant en arrière, les bras à l'opposé, le corps rebondit, la queue ondule ;
-    //  - porter : les deux bras levés au-dessus de la tête, la banane entre les mains ;
+    //  - porter : les deux bras tendus devant lui, la banane serrée contre son ventre (comme on porte un trésor) ;
     //  - lancer : les bras partent en arrière puis vers l'avant ;
-    //  - fête (après un dunk) : bras levés ; bouderie (après un raté) : il secoue la tête.
+    //  - fête (après un dunk) : bras levés ; bouderie (après un raté) : il secoue la tête ;
+    //  - pris dans la main du joueur : il gigote, bras levés et jambes qui pédalent vite.
     // On vise une direction (« ce bras pointe vers le haut ») plutôt qu'un angle autour d'un axe :
     // ça marche quelle que soit l'orientation des os dans le fichier FBX.
     [RequireComponent(typeof(HarvesterMonkey))]
@@ -69,9 +70,10 @@ namespace SAE
             moved.y = 0f;
             lastPos = transform.position;
             phase += moved.magnitude * stepsPerMeter * Mathf.PI;
+            if (monkey.Held) phase += Time.deltaTime * 25f;   // il pédale dans le vide
 
-            walkBlend = Mathf.MoveTowards(walkBlend, monkey.Walking ? 1f : 0f, Time.deltaTime * 5f);
-            carryBlend = Mathf.MoveTowards(carryBlend, monkey.Carried || monkey.Cheering ? 1f : 0f, Time.deltaTime * 6f);
+            walkBlend = Mathf.MoveTowards(walkBlend, monkey.Walking || monkey.Held ? 1f : 0f, Time.deltaTime * 5f);
+            carryBlend = Mathf.MoveTowards(carryBlend, monkey.Carried || monkey.Cheering || monkey.Held ? 1f : 0f, Time.deltaTime * 6f);
 
             for (int i = 0; i < bones.Length; i++) if (bones[i]) bones[i].localRotation = rest[i];
 
@@ -92,12 +94,12 @@ namespace SAE
             if (head && monkey.Sulking) head.rotation = Quaternion.AngleAxis(Mathf.Sin(Time.time * 18f) * 25f, up) * head.rotation;
             if (tail) tail.rotation = Quaternion.AngleAxis(Mathf.Sin(Time.time * 3f) * 20f, up) * tail.rotation;
 
-            // La banane portée suit les mains
+            // La banane portée suit les mains, devant lui
             if (monkey.Carried)
             {
                 var hands = leftHand && rightHand ? (leftHand.position + rightHand.position) / 2f
-                                                  : transform.position + up * monkey.height * 1.1f;
-                monkey.Carried.transform.position = hands + up * 0.04f;
+                                                  : transform.position + up * monkey.height * 0.6f + forward * monkey.height * 0.3f;
+                monkey.Carried.transform.position = hands + forward * 0.03f;
             }
         }
 
@@ -108,8 +110,9 @@ namespace SAE
             float side = Mathf.Sign(Vector3.Dot(arm.position - transform.position, right));
 
             var hanging = Quaternion.AngleAxis(swing * armSwing, right) * (-up + right * side * 0.35f).normalized;
-            var raised = (up + right * side * 0.2f + forward * 0.15f).normalized;
-            var dir = Vector3.Slerp(hanging, raised, carryBlend);
+            var raised = (up + right * side * 0.2f + forward * 0.15f).normalized;      // la fête (ou pris en main) : bras levés
+            var carrying = (forward - up * 0.25f - right * side * 0.15f).normalized;   // porter : bras devant, un peu rentrés
+            var dir = Vector3.Slerp(hanging, monkey.Cheering || monkey.Held ? raised : carrying, carryBlend);
 
             // Lancer : les bras partent en arrière (1re moitié) puis passent devant (2e moitié)
             float t = monkey.ThrowPhase;
@@ -117,7 +120,7 @@ namespace SAE
             {
                 var back = (up - forward * 0.7f).normalized;
                 var front = (forward + up * 0.3f).normalized;
-                dir = t < 0.5f ? Vector3.Slerp(raised, back, t * 2f) : Vector3.Slerp(back, front, (t - 0.5f) * 2f);
+                dir = t < 0.5f ? Vector3.Slerp(carrying, back, t * 2f) : Vector3.Slerp(back, front, (t - 0.5f) * 2f);
             }
             Aim(arm, foreArm, dir);
         }

@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
+### Singes récolteurs à lancer, fléchettes, coffre, caisse sur la carte
+> Reformule « Lancer les singes pour les poser » (#27) : on peut prendre les singes récolteurs (avec une petite animation) et les jeter un peu partout pour rigoler, et fais-le. Fais aussi : le récolteur porte les bananes devant lui (#76), la cible de fléchettes jouable (#74), plus de bananes visibles dans le coffre (#56) et voir combien de bananes on a, aussi sur la carte (#64).
+
 ### Arc, bananes lancées, vague, portée
 > C'est tout bon : ajoute la capture dans mon journal. Puis fais : « Flèche explosive : effet d'étincelles », « Vraie physique des bananes : on les lance dans des paniers (sans poignée) », « Tracé de la flèche : autre couleur que blanc (voir la trajectoire qu'elle aura) », « Ne pas annoncer le contenu de la vague », et afficher la portée quand on s'apprête à poser un singe sur le plateau. Mets-moi comme responsable.
 

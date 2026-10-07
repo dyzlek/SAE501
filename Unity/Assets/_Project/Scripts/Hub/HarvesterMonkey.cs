@@ -7,7 +7,7 @@ namespace SAE
 {
     // Un singe récolteur (un singe classique) : on l'achète au comptoir « RÉCOLTEUR » (voir HarvesterCrew, qui garde
     // le nombre de singes et leurs améliorations, communes à toute l'équipe).
-    // Il marche jusqu'à une banane (sur la table, ou n'importe où si le joueur l'a lâchée ailleurs), saute pour l'attraper, la porte au-dessus de sa tête,
+    // Il marche jusqu'à une banane (sur la table, ou n'importe où si le joueur l'a lâchée ailleurs), saute pour l'attraper, la porte devant lui,
     // marche jusqu'au panier et la jette dedans. Puis il souffle un peu et recommence.
     // Pour rire, le lancer n'est pas toujours le même : parfois il DUNK (saute au-dessus du panier, l'y écrase et fête ça),
     // parfois il RATE (la banane tombe à côté, il boude, la ramasse et recommence).
@@ -38,13 +38,46 @@ namespace SAE
         public float ThrowPhase { get; private set; }   // 0 = rien, monte à 1 pendant le geste du lancer
         public float height = 0.55f;                    // taille du singe, en mètres
         public bool Cheering { get; private set; }      // bras levés : il fête son dunk
-        public bool Sulking { get; private set; }       // il secoue la tête : il a raté
+        public bool Sulking { get; private set; }       // il secoue la tête : il a raté (ou il est sonné après un lancer)
+        public bool Held { get; private set; }          // le joueur l'a pris dans sa main (voir HarvesterGrab) : il gigote
+
+        Banane claimed;                                 // la banane qu'il est parti chercher (les autres singes la laissent)
 
         // Appelé par l'équipe quand on achète ce singe : il apparaît et se met au travail
         public void StartWork()
         {
             gameObject.SetActive(true);
             StartCoroutine(Work());
+        }
+
+        // Le joueur le prend dans sa main : il arrête tout, lâche sa banane et libère celle qu'il visait
+        public void PickedUp()
+        {
+            StopAllCoroutines();
+            Held = true;
+            Walking = Cheering = Sulking = false;
+            ThrowPhase = 0f;
+            if (claimed) crew.Unclaim(claimed);
+            claimed = null;
+            if (Carried)
+            {
+                foreach (var c in Carried.GetComponentsInChildren<Collider>()) c.enabled = true;
+                Carried.Lachee();   // elle retombe, le joueur ou un autre singe pourra la reprendre
+                Carried = null;
+            }
+        }
+
+        // Il a atterri après un lancer : il est sonné un instant (il secoue la tête), puis il retourne au travail
+        public void PutDown()
+        {
+            Held = false;
+            StartCoroutine(BackToWork());
+        }
+
+        IEnumerator BackToWork()
+        {
+            yield return Sulk();
+            yield return Work();
         }
 
         // La boucle de travail : chercher, aller, attraper, porter, lancer, souffler.
@@ -61,8 +94,10 @@ namespace SAE
                 }
 
                 crew.Claim(banana);   // les autres singes la laissent : c'est la sienne
+                claimed = banana;
                 yield return Fetch(banana);
                 crew.Unclaim(banana);
+                claimed = null;
                 yield return new WaitForSeconds(crew.Pause);
             }
         }
