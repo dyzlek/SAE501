@@ -4,8 +4,6 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
-### Tout ce que l'IA peut faire dans la liste
-> Fais tout ce que tu peux faire dans la liste des tâches (urgences, lisibilité, idées proposées comme lancer les bananes, etc.), maintenant.
 ### Point de fin de journée
 > Mets à jour le README et le journal général, et liste ce qu'il faut faire en urgence demain.
 

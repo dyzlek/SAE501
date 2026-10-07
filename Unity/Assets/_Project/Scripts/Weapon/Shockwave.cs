@@ -3,8 +3,7 @@ using UnityEngine;
 namespace SAE
 {
     // L'onde d'une flèche explosive : un anneau orange, à plat, qui grandit jusqu'au rayon de l'explosion
-    // et s'efface en un quart de seconde, et une gerbe d'étincelles qui retombent. Le joueur voit tout de suite
-    // jusqu'où l'explosion a porté.
+    // et s'efface en un quart de seconde. Le joueur voit tout de suite jusqu'où l'explosion a porté.
     public class Shockwave : MonoBehaviour
     {
         const int Points = 32;
@@ -21,7 +20,6 @@ namespace SAE
             go.transform.position = center;
             var wave = go.AddComponent<Shockwave>();
             wave.radius = radius;
-            Burst.Play(center, new Color(1f, 0.9f, 0.4f), WaveColor, 40, 3f, 7f, 0.06f, 1f, 0.6f);   // une gerbe d'étincelles qui retombent
         }
 
         void Awake()

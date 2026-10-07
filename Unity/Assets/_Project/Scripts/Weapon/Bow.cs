@@ -23,9 +23,8 @@ namespace SAE
         public float maxSpeed = 30f;     // vitesse de la flèche à pleine tension, en m/s
         public float limbBend = 12f;     // angle des branches à pleine tension, en degrés
         public Transform aim;            // mode PC : la caméra, la flèche part vers le centre de l'écran ; vide en VR (sens de l'arc)
-        public float reloadTime = 0.6f;  // secondes entre deux tirs : on ne peut plus « spammer » l'arc, comme un vrai arc qu'on recharge
 
-        const float MinDraw = 0.25f;         // en dessous, la flèche tombe au lieu de partir : il faut vraiment tendre l'arc
+        const float MinDraw = 0.1f;          // en dessous, on ne tire pas (et pas de trajectoire)
         const int PreviewPoints = 50;        // points de la courbe de visée
         const float PreviewStep = 0.03f;     // secondes de vol entre deux points : 1,5 s de vol en tout
 
@@ -37,7 +36,6 @@ namespace SAE
         Vector3 limbAxisLocal;            // axe des branches (de bas en haut), dans le repère de l'arc
         Quaternion topRest, bottomRest;
         Arrow nocked;
-        float nextNock;                   // l'heure (Time.time) à partir de laquelle on peut encocher la flèche suivante
         LineRenderer preview;
         readonly Vector3[] previewPoints = new Vector3[PreviewPoints];
 
@@ -77,11 +75,9 @@ namespace SAE
             transform.localPosition = localOffset - hand.InverseTransformPoint(grip.position);
         }
 
-        public bool CanNock => !nocked && Time.time >= nextNock;
-
         public void Nock()
         {
-            if (!CanNock || !arrowPrefab) return;
+            if (nocked || !arrowPrefab) return;
             nocked = Instantiate(arrowPrefab, NockPoint, Quaternion.LookRotation(ShootDirection), transform);
             nocked.Hold();
         }
@@ -118,8 +114,6 @@ namespace SAE
                     var velocity = direction.normalized * ShotSpeed;
                     nocked.transform.SetParent(null, true);
                     nocked.Launch(velocity);
-                    nextNock = Time.time + reloadTime;   // on recharge : pas de nouvelle flèche avant reloadTime
-                    Sfx.Play(Sfx.Sound.Twang, NockPoint, 0.8f);
                     if (BowUpgrades.TripleShot)
                     {
                         ExtraArrow(-BowUpgrades.TripleSpread, velocity, nocked.transform.localScale);
@@ -169,7 +163,7 @@ namespace SAE
             preview.SetPositions(previewPoints);
         }
 
-        // Ligne fine et dorée (le blanc se perdait dans le ciel), qui s'efface vers le bout : elle aide à viser sans cacher la cible.
+        // Ligne fine et blanche, qui s'efface vers le bout : elle aide à viser sans cacher la cible.
         LineRenderer AddPreview()
         {
             var go = new GameObject("Trajectoire");
@@ -178,8 +172,8 @@ namespace SAE
             line.sharedMaterial = Visuals.LineMaterial;
             line.useWorldSpace = true;
             line.widthMultiplier = 0.012f;
-            line.startColor = new Color(1f, 0.75f, 0.2f, 0.8f);
-            line.endColor = new Color(1f, 0.45f, 0.1f, 0f);
+            line.startColor = new Color(1f, 1f, 1f, 0.6f);
+            line.endColor = new Color(1f, 1f, 1f, 0f);
             line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             line.enabled = false;
             return line;

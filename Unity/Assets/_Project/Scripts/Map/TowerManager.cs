@@ -36,7 +36,7 @@ namespace SAE
             {
                 if (towers.ContainsKey(p)) continue;
                 var pos = new Vector3(p.pos.x, TowerSize / 2f, p.pos.y);
-                var go = Visuals.MonkeyPiece(p.monkey, transform, pos, TowerSize, withLabel: false);   // pas de texte au-dessus : la couleur dit la rareté, la fiche dit le reste
+                var go = Visuals.MonkeyPiece(p.monkey, transform, pos, TowerSize);
                 go.tag = Tags.Singe;
                 go.AddComponent<BoxCollider>().size = Vector3.one * TowerSize; // pour le prendre sur la carte
                 go.AddComponent<Tower>().Init(p.monkey);

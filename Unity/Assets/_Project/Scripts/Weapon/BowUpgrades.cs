@@ -35,7 +35,7 @@ namespace SAE
 
         // Sans rechargement du domaine (Enter Play Mode rapide), les statiques survivent d'une partie à l'autre : on repart de zéro.
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        public static void ResetLevels() => System.Array.Clear(levels, 0, levels.Length);   // aussi appelé par REJOUER
+        static void ResetLevels() => System.Array.Clear(levels, 0, levels.Length);
 
         public static int Level(BowUpgrade u) => levels[(int)u];
         public static int MaxLevel(BowUpgrade u) => Prices(u).Length;

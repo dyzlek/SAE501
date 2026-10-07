@@ -8,7 +8,7 @@ namespace SAE
     [RequireComponent(typeof(PlayerRig))]
     public class FallGuard : MonoBehaviour
     {
-        public const float FallHeight = -5f;   // en mètres : plus bas que tous les sols du jeu (sert aussi aux singes lancés)
+        public float fallHeight = -5f;      // en mètres : plus bas que tous les sols du jeu
 
         PlayerRig rig;
 
@@ -16,7 +16,7 @@ namespace SAE
 
         void Update()
         {
-            if (transform.position.y > FallHeight) return;
+            if (transform.position.y > fallHeight) return;
 
             // Le point d'arrivée le plus proche, vu de dessus (on ne compte pas la hauteur de la chute)
             Transform best = null;
