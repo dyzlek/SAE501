@@ -6,6 +6,8 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ### Organiser le projet sur GitHub
 > Aide-moi à mettre en place le planning et l'organisation du projet sur GitHub, car nous serons notés sur l'organisation. Ne touche à rien dans le dossier du projet (une autre IA est en train de modifier Unity) : travaille seulement sur GitHub et dans une autre branche.
+>
+> Suite : n'envoie aucune notification par mail. Fais en sorte que chaque IA qui travaille sur le projet mette à jour le suivi GitHub automatiquement.
 
 ### Bilan du jour et plan de demain
 > Ajoute ce qu'il faudrait faire demain et mets à jour ce qu'on a fait dans le GENERAL.md : chercher des assets de boutons ou les faire ; prendre les singes et les jeter ; faire un indicateur avec un effet de traînée ; ajouter la physique sur les bananes (faire des paniers, et donc enlever la poignée).
