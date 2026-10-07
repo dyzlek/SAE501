@@ -54,9 +54,30 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
 - **Retiré : l'aura dorée du coffre** (elle ne rendait pas bien). À l'ouverture, il reste le boing et le couvercle qui s'ouvre.
 
+- **Fait : les modèles 3D des ballons et des boss dans le jeu** (branche `feat/coffre-maxens`, à jour avec le `main` de la PR #11). Mes modèles étaient déjà dans `Art/` (`Ballons`, `MOAB`, `BFB`) mais **aucun script ne les utilisait** : les ballons étaient des sphères et le dirigeable une capsule.
+  - chaque sorte a son modèle : **normal et rapide** = `Ballon_Normal` (teinté à la couleur de sa couche), **blindé** = `Ballon_Blindage`, **boss** = `MOAB` (bleu), **dirigeable rouge** = `BFB` ; branchés comme les singes, par un asset `Resources/BalloonVisuals.asset` et le menu `SAE → Brancher les modèles des ballons` ;
+  - **plus de sphère** : le ballon est son modèle, avec un collider invisible ajusté à sa taille (les flèches en ont besoin pour le toucher). La miniature du plateau du hub montre aussi le vrai modèle ;
+  - **le MOAB était blanc** : les FBX pointaient vers des textures d'un autre ordinateur (`/home/claude/…`), Unity les importait sans texture. Le code pose maintenant la bonne texture lui-même, sur le ballon et sur sa miniature ;
+  - **les hélices tournent** (nouveau script `Spinner`) : une pour le MOAB, deux pour le BFB, autour du grand axe du dirigeable ;
+  - **les dirigeables tournent en douceur** dans les virages (60° par seconde) au lieu de pivoter d'un coup ;
+  - **nouveau ballon cœur** (règle du GDD : il se régénère) : modèle `Ballon_Coeur` en rose, il regagne **1 couche toutes les 2 s**, sans dépasser ses couches de départ. Affiché sur le tableau des vagues (« 1 cœurs ») ;
+  - **la vague 1 montre un exemple de chaque** : 1 normal, 1 cœur, 1 blindé, puis les 8 normaux, le MOAB et un **BFB d'aperçu à 20 couches** (au lieu de 150). Modifiée aussi dans `Jeu.unity`, qui garde sa propre copie des vagues ;
+  - **le joueur traverse les ballons et les boss** sur la carte (les flèches les touchent toujours).
+  - Testé en Play via Unity MCP : les 5 sortes apparaissent avec leur texture, hélices branchées (1 sur le MOAB, 2 sur le BFB), aucune erreur.
+
+  Avant : le MOAB arrivait tout blanc, et son hélice ne tournait pas.
+
+  ![Avant : MOAB blanc, sans texture](../captures/maxens-moab-blanc-avant.png)
+
+  Après : normal, cœur, blindé, MOAB et BFB avec leurs textures.
+
+  ![Les 5 ballons : normal, cœur, blindé, MOAB, BFB](../captures/maxens-ballons-tous.png)
+
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Modèles 3D des ballons, du MOAB et du BFB à la place des sphères (collider ajusté, miniature du plateau), textures posées par le code, hélices qui tournent, virages en douceur ; testé en Play via Unity MCP | Gardé |
+| Claude (Code) | Ballon cœur qui se régénère, vague 1 avec un exemple de chaque ballon et un BFB d'aperçu, joueur qui traverse les ballons | À tester au casque |
 | Claude (Code) | Retrait de l'aura dorée du coffre | Gardé |
 | Claude (Code) | Roulette avec tous les types et très rapide au début, barre qui disparaît, singe qui sort du coffre en tournant et grossissant, textes cachés à l'ouverture, bananes du bananier sur des feuilles ; testé en Play | À tester au casque |
 | Claude (Code) | Régimes de bananes dans le coffre, coffre qui se trémousse quand on peut l'ouvrir ; testé en Play | Trémoussement gardé, régimes jetés (remplacés par les bananes du bananier) |

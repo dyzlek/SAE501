@@ -23,7 +23,7 @@ namespace SAE
         static readonly Color ArmorColor = new Color(0.55f, 0.57f, 0.6f);
         static readonly Color BossColor = new Color(0.35f, 0.1f, 0.45f);
         static readonly Color BlimpColor = new Color(0.8f, 0.1f, 0.1f);
-        static readonly Color HeartColor = new Color(1f, 0.5f, 0.7f);
+        static readonly Color HeartColor = new Color(1f, 0.3f, 0.55f);
 
         const float RegenDelay = 2f;   // le ballon cœur regagne une couche toutes les 2 s
 
@@ -127,8 +127,8 @@ namespace SAE
             var fitted = turn * bounds.size * scale;
             box.size = new Vector3(Mathf.Abs(fitted.x), Mathf.Abs(fitted.y), Mathf.Abs(fitted.z));
 
-            // Les ballons normaux et rapides changent de couleur à chaque couche ; les autres gardent leur texture.
-            if (Kind == BalloonKind.Normal || Kind == BalloonKind.Rapide)
+            // Les ballons normaux et rapides changent de couleur à chaque couche, le cœur est rose ; les autres gardent leur texture.
+            if (Kind == BalloonKind.Normal || Kind == BalloonKind.Rapide || Kind == BalloonKind.Coeur)
             {
                 modelTints = new ColorTint[renderers.Length];
                 for (int i = 0; i < renderers.Length; i++) modelTints[i] = renderers[i].gameObject.AddComponent<ColorTint>();
@@ -205,7 +205,10 @@ namespace SAE
                 case BalloonKind.Blinde: tint.Set(ArmorColor); break;
                 case BalloonKind.Boss: tint.Set(BossColor); break;
                 case BalloonKind.Dirigeable: tint.Set(BlimpColor); break;
-                case BalloonKind.Coeur: tint.Set(HeartColor); break;
+                case BalloonKind.Coeur:
+                    tint.Set(HeartColor);
+                    if (modelTints != null) foreach (var t in modelTints) t.Set(HeartColor);
+                    break;
                 default:
                     int layer = Mathf.Clamp(Mathf.CeilToInt(hp) - 1, 0, layerColors.Length - 1);
                     tint.Set(layerColors[layer]);

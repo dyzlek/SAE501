@@ -4,6 +4,17 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mer. 7 oct. 2026
 
+### Traverser les ballons
+> Sur la carte, le joueur se cogne aux ballons et aux boss : il doit pouvoir les traverser, sans que les flèches cessent de les toucher.
+
+### Corrections des boss et ballons d'exemple
+> Deux problèmes sur les boss : le MOAB apparaît tout blanc (capture jointe) et son hélice ne tourne pas ; vérifie aussi le dirigeable rouge. Dans les virages, ils pivotent d'un coup : rends la rotation plus fluide.
+>
+> Pour pouvoir tout vérifier, mets dans la première vague un exemple de chaque ballon : un normal, un cœur, un blindé, puis le MOAB et le dirigeable rouge.
+
+### Les modèles des ballons et des boss
+> Intègre dans le jeu mes modèles des ballons et des boss (MOAB, BFB), qui sont dans `Semestre-5/SAE/SAE-dispositif-interectif/Asset`. Le ballon doit être directement le modèle 3D : pas de sphère gardée en dessous, même invisible.
+
 ### Roulette, sortie du singe et contenu du coffre
 > Plusieurs corrections :
 > - la roulette ne montre qu'un type de singe (le Classique, à plusieurs niveaux) : il faut voir tous les types (Canon, Tireur…) ;
