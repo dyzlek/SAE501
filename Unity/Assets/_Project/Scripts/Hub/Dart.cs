@@ -9,7 +9,7 @@ namespace SAE
     // Quelques secondes après, elle revient toute seule sur son présentoir : on ne ramasse rien par terre (confort VR).
     // La pointe est vers +Z.
     [RequireComponent(typeof(Rigidbody))]
-    public class Dart : MonoBehaviour
+    public class Dart : MonoBehaviour, IThrowable
     {
         const float ReturnDelay = 3f;     // en secondes, après s'être plantée ou posée
         const float LostDelay = 6f;       // en secondes : partie trop loin, elle revient quand même
@@ -77,15 +77,25 @@ namespace SAE
 
         void OnGrab(SelectEnterEventArgs args)
         {
-            handSpeed.Clear();
-            flying = false;
-            returnAt = -1f;
+            Grab();
             PlayerRig.Buzz(args.interactorObject.transform, 0.2f);
         }
 
-        void OnRelease(SelectExitEventArgs args)
+        void OnRelease(SelectExitEventArgs args) => Throw(handSpeed.Velocity);
+
+        // Prise dans la main (VR) ou au clic (mode PC)
+        public void Grab()
         {
-            throwVelocity = handSpeed.Velocity;
+            handSpeed.Clear();
+            flying = false;
+            returnAt = -1f;
+            body.isKinematic = true;
+        }
+
+        // Lancée avec cette vitesse (la physique prend le relais au prochain pas, voir FixedUpdate)
+        public void Throw(Vector3 velocity)
+        {
+            throwVelocity = velocity;
             flying = true;
             returnAt = Time.time + LostDelay;
         }
@@ -118,7 +128,7 @@ namespace SAE
 
         void Update()
         {
-            if (returnAt > 0f && Time.time > returnAt && !grab.isSelected) ReturnHome();
+            if (returnAt > 0f && Time.time > returnAt && !(grab && grab.isSelected)) ReturnHome();
         }
 
         void ReturnHome()

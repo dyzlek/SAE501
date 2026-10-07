@@ -5,6 +5,8 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 ## Mer. 7 oct. 2026
 
 ### Singes récolteurs à lancer, fléchettes, coffre, caisse sur la carte
+> Suite : je ne peux pas prendre les singes ni jouer aux fléchettes ; il faut aussi que ça marche en mode PC (sans VR).
+>
 > Reformule « Lancer les singes pour les poser » (#27) : on peut prendre les singes récolteurs (avec une petite animation) et les jeter un peu partout pour rigoler, et fais-le. Fais aussi : le récolteur porte les bananes devant lui (#76), la cible de fléchettes jouable (#74), plus de bananes visibles dans le coffre (#56) et voir combien de bananes on a, aussi sur la carte (#64).
 
 ### Arc, bananes lancées, vague, portée

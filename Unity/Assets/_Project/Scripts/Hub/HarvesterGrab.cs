@@ -8,7 +8,7 @@ namespace SAE
     // Il vole en tournoyant, atterrit, se remet debout, est sonné un instant, puis retourne ramasser des bananes.
     // S'il tombe hors de la cabane (ou dans le vide), il revient à sa place. Il ne se fait jamais mal, promis.
     [RequireComponent(typeof(HarvesterMonkey))]
-    public class HarvesterGrab : MonoBehaviour
+    public class HarvesterGrab : MonoBehaviour, IThrowable
     {
         const float SettleSpeed = 0.3f;     // en m/s : plus lent que ça, il a fini de rouler
         const float MinFlight = 0.3f;       // en secondes : il ne « se pose » pas dès le lâcher
@@ -56,15 +56,25 @@ namespace SAE
 
         void OnGrab(SelectEnterEventArgs args)
         {
-            flying = false;
-            handSpeed.Clear();
-            monkey.PickedUp();
+            Grab();
             PlayerRig.Buzz(args.interactorObject.transform, 0.4f);
         }
 
-        void OnRelease(SelectExitEventArgs args)
+        void OnRelease(SelectExitEventArgs args) => Throw(handSpeed.Velocity);
+
+        // Pris dans la main (VR) ou au clic (mode PC) : il arrête de travailler et gigote
+        public void Grab()
         {
-            throwVelocity = handSpeed.Velocity;
+            flying = false;
+            handSpeed.Clear();
+            body.isKinematic = true;
+            monkey.PickedUp();
+        }
+
+        // Lâché avec cette vitesse : il vole (la physique prend le relais au prochain pas, voir FixedUpdate)
+        public void Throw(Vector3 velocity)
+        {
+            throwVelocity = velocity;
             flying = true;
             launchedAt = Time.time;
         }
