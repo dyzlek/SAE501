@@ -4,13 +4,24 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
 ## Mer. 7 oct. 2026
 - **Fait :** fusion de ma cabane (`test/cabane`) avec l'arc de Maxens (`feat/arc-quincy`) dans une nouvelle branche `feat/cabane-arc`. Un seul conflit, dans le générateur de scène : on garde la place du coffre de la cabane (estrade, texture bois) et le passage du point d'apparition sur la carte au joueur PC (pour l'étui de l'arc).
-- **Bloque :** il faut régénérer la scène Jeu dans Unity (menu SAE) et tester l'arc dans la cabane. Mes réglages Unity non commités (XR Rig, build Quest, URP, scène) sont mis de côté dans un `git stash`.
+  - ajout des derniers commits de Maxens (mains de Quincy, arc plus petit, tir dans le simulateur) ; Pull Request [#9](https://github.com/dyzlek/SAE501/pull/9) fusionnée dans `main` ;
+  - scène régénérée et testée en mode PC : la cabane, le hub et l'arc de Quincy fonctionnent ensemble.
+- **Bloque :** sur la carte, l'arc en mode PC est grand et cache le bas de l'écran ; la carte reste en cubes gris (pas encore dans la DA de la cabane).
 - **Demain :** _
+
+**Captures après la fusion (mode PC)**
+
+![Hub : plateau, boutons LANCER/JOUER, Vider, panier, tonneau et coffre sur son estrade](../captures/cabane-hub-plateau.webp)
+
+![Hub : panneau des chances, coffre, panneau du bananier, bananier par la porte, panneau du récolteur](../captures/cabane-hub-bananier.webp)
+
+![Carte : l'arc de Quincy en bas à droite, la carte encore en cubes](../captures/cabane-arc-carte.webp)
 
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
 | Claude (Claude Code) | Fusion `test/cabane` + `feat/arc-quincy` (Maxens) dans `feat/cabane-arc`, conflit du `PrototypeGenerator` résolu en gardant les deux | À tester |
-| Claude (Claude Code) | 2e fusion avec les derniers commits de Maxens sur `feat/arc-quincy` (mains de Quincy riggées, arc plus petit, tir dans le simulateur VR), sans conflit | À tester |
+| Claude (Claude Code) | 2e fusion avec les derniers commits de Maxens sur `feat/arc-quincy` (mains de Quincy riggées, arc plus petit, tir dans le simulateur VR), sans conflit ; PR #9 ouverte (le merge par Claude a été bloqué faute de relecture, fusionnée ensuite sur GitHub) | Gardé (testé par moi en mode PC) |
+| Claude (Claude Code) | Mise à jour de mon journal et du journal général avec mes 3 captures | Gardé |
 
 ## Mar. 6 oct. 2026
 - **Fait :**

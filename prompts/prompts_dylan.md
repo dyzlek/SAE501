@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
+### Journaux à jour avec mes captures
+> Mets à jour mon journal et le GENERAL.md (avec mes 3 captures du hub et de la carte).
+
 ### Fusionner la cabane et l'arc de Maxens
 > Fusionne ce que j'ai fait dans `test/cabane` avec la dernière branche de Maxens.
 >
