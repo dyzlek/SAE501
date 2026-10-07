@@ -20,6 +20,7 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 | 2026-10-06 | **Vagues** : lancées par un bouton LANCER ; vague perdue = on la rejoue (pas de retour à zéro) ; 10 vagues écrites à l'avance avec boss, ballons rapides et blindés, **victoire après le dirigeable rouge (vague 10)** puis mode infini. Coffre : arc-en-ciel et blanc par fusion seulement, raretés par paliers de vagues | Le joueur décide quand il est prêt ; pas de frustration de tout recommencer ; une vraie fin pour la démo, et de quoi continuer pour débloquer les raretés hautes (Dylan) |
 | 2026-10-06 | **Passage à la VR** : plus de contrôles clavier/souris, on teste sans casque avec le **simulateur XR** de l'XR Interaction Toolkit. Déplacement par **téléportation** (deux sticks) + **rotation par crans**, pas de déplacement continu ; boutons et coffre **enfoncés avec la main** ; bananes sur une **table à hauteur de main** | Règles de confort ; gestes VR vrais dès maintenant (Dylan) |
 | 2026-10-06 | **Deux modes de jeu** (menu SAE → Mode de jeu) : **VR** (casque, Quest Link) ou **PC** (clavier-souris) pour tester vite ; le build casque est toujours en VR | Tester sans casque sans passer par le simulateur XR (Dylan) |
+| 2026-10-07 | **Le hub est une cabane modélisée dans Blender** (script `cabane.py`, source unique) ; Unity n'ajoute que colliders, téléportation et lumières. Même DA autour (prairie, montagnes, palmiers) | Un hub beau et cohérent, semi-réaliste comme Bloons TD 6 (Dylan) |
 | 2026-10-05 | Git : `main` stable + une branche par tâche + PR relue | Éviter de casser le build commun |
 | _à trancher_ | Nom du jeu · assets Bloons ou maison · périmètre définitif | Avant le GDD v1 (ven. 9 oct.) |
 
@@ -29,6 +30,11 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 - [ ] Ven. 13 nov. — rendu + oral
 
 ## Semaine 1 · 5-9 oct. — PROUVER
+**Mer. 7 oct. — cabane + arc dans `main`**
+- La cabane de Dylan (`test/cabane`) et l'arc de Quincy de Maxens (`feat/arc-quincy`) sont fusionnés et dans `main` (PR [#9](https://github.com/dyzlek/SAE501/pull/9)). Un seul conflit, dans le générateur de scène, résolu en gardant les deux.
+- Testé en mode PC : hub dans la cabane (plateau, LANCER/JOUER, Vider, panier, coffre sur estrade, panneaux du bananier et du récolteur), arc sur la carte.
+- À faire : régénérer la scène après `git pull` (menu SAE) ; arc trop grand en mode PC ; carte à passer dans la DA de la cabane ; tester au casque.
+
 **Mar. 6 oct. — plan du jour**
 
 **Objectif :** un prototype **jouable normalement, au casque**, avec les mécaniques de base reliées entre elles :
