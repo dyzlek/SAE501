@@ -10,6 +10,8 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 > Suite (mes choix) : deux vraies scènes ; dans le hub, se téléporter seulement au centre.
 >
 > Suite : regarde pourquoi je vois seulement une prairie et des montagnes au loin (capture).
+>
+> Suite : je veux vraiment deux scènes, au sens où on le demande de base (un vrai changement de scène).
 
 ### Bilan du jour et plan de demain
 > Ajoute ce qu'il faudrait faire demain et mets à jour ce qu'on a fait dans le GENERAL.md : chercher des assets de boutons ou les faire ; prendre les singes et les jeter ; faire un indicateur avec un effet de traînée ; ajouter la physique sur les bananes (faire des paniers, et donc enlever la poignée).

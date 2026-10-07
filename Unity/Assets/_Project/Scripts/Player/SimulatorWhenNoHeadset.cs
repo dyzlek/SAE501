@@ -22,7 +22,10 @@ namespace SAE
             if (manager && manager.activeLoader) return;   // un casque tourne : pas de simulateur
 
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(SimulatorPrefab);
-            if (prefab) Object.Instantiate(prefab).name = "XR Interaction Simulator";
+            if (!prefab) return;
+            var simulator = Object.Instantiate(prefab);
+            simulator.name = "XR Interaction Simulator";
+            Object.DontDestroyOnLoad(simulator);   // il reste quand on change de scène (hub <-> labyrinthe)
         }
     }
 }

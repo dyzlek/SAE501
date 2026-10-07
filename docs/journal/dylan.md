@@ -66,7 +66,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
   - JOUER devient « SE TP ».
 - **3e passe** : plus de « +0 » qui flotte quand une amélioration est gratuite ; plaques des boutons en bois foncé avec le texte doré, plus grand (le texte foncé sur le laiton ne se lisait pas) ; texte des ardoises un peu plus grand.
 - **Mes objectifs du jour** (branche `feat/deux-scenes`, partie de `fix-all`) :
-  - **deux vraies scènes** : `Hub.unity` et `Labyrinthe.unity` ; le hub charge le labyrinthe en plus de lui au lancement, le labyrinthe est loin (1 km : on ne voit plus la cabane ni ses montagnes depuis la carte) et posé sur une prairie ; les boutons SE TP / HUB, LANCER, le tableau de la vague, l'arc et le retour après une chute retrouvent l'autre scène au lancement ;
+  - **deux vraies scènes** : `Hub.unity` et `Labyrinthe.unity`, avec un **vrai changement de scène** (SE TP / HUB) ; chaque scène a son joueur (l'arc seulement sur la carte) ; argent, inventaire, singes posés, vagues gagnées, niveaux du bananier et récolteurs sont gardés ; LANCER au hub emmène sur la carte et lance la vague ; HUB est grisé pendant une vague ; le plateau du hub montre les singes posés (plus les ballons en direct) ;
   - **zone de téléportation du hub** : seulement un disque de 1,9 m au centre de la cabane.
 - **Critique de Nicolas (1re partie)** :
   - **fiche du singe** (touche A) refaite comme les ardoises du hub (cadre en bois, titre doré, texte à la craie) et dessinée par-dessus le décor : un meuble ne la cache plus ;
@@ -91,6 +91,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 | Claude (Claude Code) | `main` fusionné dans `fix-all` (sans conflit), branche poussée, Pull Request [#11](https://github.com/dyzlek/SAE501/pull/11) vers `main` ouverte (à relire et fusionner sur GitHub ; pas encore testée dans Unity) | Gardé |
 | Claude (Claude Code) | Deux scènes (`Hub` + `Labyrinthe`, chargement additif par `LevelLoader`, points d'arrivée `LevelSpawn`, `WaveSpawner.Instance` au lieu des liens entre scènes, carte à 500 m sur une prairie, `Jeu.unity` supprimée à la génération) et zone de téléportation du hub limitée à un disque de 1,9 m | À tester (compilé, scènes à générer) |
 | Claude (Claude Code) | Depuis la carte, on voyait les montagnes du hub dans la brume : carte éloignée à 1 km (au-delà de la distance d'affichage) | À tester |
+| Claude (Claude Code) | Vrai changement de scène à la place du chargement additif : `Levels` (`SceneManager.LoadScene`), un joueur par scène, état gardé en static (`HarvesterCrew`, `UpgradeButton`), `WaveSpawner` reprend au bon numéro et lance à l'arrivée, plateau du hub refait à partir de `GameState`, `LevelLoader`, `BowHolster`, `Mirrored` et `KeepWorldScale` supprimés | À tester (compilé, scènes à générer) |
 | Claude (Claude Code) | Mise en forme de l'analyse critique de Nicolas (qu'il m'a transmise) dans son journal, avec ses 2 photos ; rien de corrigé pour l'instant | Gardé |
 
 ## Mar. 6 oct. 2026

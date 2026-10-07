@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 
 namespace SAE
 {
-    // Raccourci au casque : le bouton B de la manette droite lance la vague, où qu'on soit (hub ou carte).
+    // Raccourci au casque : le bouton B de la manette droite lance la vague, où qu'on soit (au hub, on part sur la carte).
     // Le pupitre LANCER reste le geste « normal » ; le raccourci évite d'aller jusqu'au pupitre pour tester.
     public class WaveShortcut : MonoBehaviour
     {
@@ -24,9 +24,8 @@ namespace SAE
 
         void OnLaunch(InputAction.CallbackContext ctx)
         {
-            var spawner = WaveSpawner.Instance;
-            if (!spawner || spawner.Running) return;
-            spawner.StartWave();
+            if (WaveSpawner.Instance && WaveSpawner.Instance.Running) return;
+            WaveSpawner.Launch();
             if (PlayerRig.Local) PlayerRig.Buzz(PlayerRig.Local.rightHand, 0.6f);   // « c'est parti »
         }
     }

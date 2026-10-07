@@ -8,6 +8,8 @@ namespace SAE
     // L'équipe des singes récolteurs, qu'on achète au comptoir « RÉCOLTEUR » : combien on en a, et leurs améliorations
     // (communes à toute l'équipe). Les singes sont déjà dans la scène, cachés : en acheter un le fait apparaître.
     // L'équipe note aussi la banane que chaque singe est parti chercher, pour que deux singes ne courent pas après la même.
+    // Le nombre de singes et les niveaux sont static : ils restent quand on part sur la carte et qu'on revient
+    // (la scène du hub est alors rechargée).
     public class HarvesterCrew : MonoBehaviour
     {
         public const bool Free = true;          // à passer à false quand on voudra faire payer
@@ -16,10 +18,10 @@ namespace SAE
 
         public HarvesterMonkey[] monkeys;       // tous les singes possibles, cachés au départ : leur nombre est le maximum
 
-        public int Count { get; private set; }  // singes achetés
+        public static int Count { get; private set; }  // singes achetés
         public bool Full => Count >= monkeys.Length;
 
-        readonly int[] levels = { 1, 1, 1 };
+        static readonly int[] levels = { 1, 1, 1 };
         readonly HashSet<Banane> claimed = new HashSet<Banane>();
 
         public int Level(HarvesterStat s) => levels[(int)s];
@@ -31,6 +33,12 @@ namespace SAE
         public float Speed => 0.25f + 0.2f * (Level(HarvesterStat.Vitesse) - 1);       // m/s : 0,25 (il flâne) → 1,05
         public float Pause => 3f - 0.6f * (Level(HarvesterStat.Cadence) - 1);           // s entre deux trajets : 3 → 0,6
         public float Share => 0.6f + 0.1f * (Level(HarvesterStat.Rendement) - 1);       // part payée : 60 % → 100 %
+
+        // Au retour au hub : les singes déjà achetés se remettent au travail
+        void Start()
+        {
+            for (int i = 0; i < Count && i < monkeys.Length; i++) monkeys[i].StartWork();
+        }
 
         public bool Buy()
         {

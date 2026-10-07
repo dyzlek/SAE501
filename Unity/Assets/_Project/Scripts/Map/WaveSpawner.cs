@@ -14,8 +14,7 @@ namespace SAE
     // Rien n'est affiché à l'écran (nausée en VR) : les tableaux WaveBoard du décor lisent Wave, Lives et Status.
     public class WaveSpawner : MonoBehaviour
     {
-        // La seule réserve de vagues du jeu, dans la scène Labyrinthe. Le hub (LANCER, tableau, raccourci B) passe
-        // par ici, car il est dans une autre scène et ne peut pas garder de lien direct vers elle.
+        // Les vagues de la scène Labyrinthe (null quand on est au hub)
         public static WaveSpawner Instance { get; private set; }
 
         public float balloonHeight = 1f;
@@ -43,6 +42,22 @@ namespace SAE
             foreach (var p in MapLayout.PathPoints())
                 path.Add(transform.position + p + Vector3.up * balloonHeight);
             Lives = startLives;
+            // La scène est rechargée à chaque retour sur la carte : on reprend à la vague suivante (gardée dans GameState)
+            Wave = GameState.WavesWon + 1;
+            Won = GameState.WavesWon >= waves.Count;
+            if (Levels.LaunchOnArrival)
+            {
+                Levels.LaunchOnArrival = false;
+                StartWave();
+            }
+        }
+
+        // LANCER, depuis le hub ou la carte : sur la carte, la vague part ; au hub, on part sur la carte et elle démarre à l'arrivée
+        public static void Launch()
+        {
+            if (Instance) { Instance.StartWave(); return; }
+            Levels.LaunchOnArrival = true;
+            Levels.Load(Level.Carte);
         }
 
         // Appelé par le bouton LANCER (hub ou carte). Ne fait rien si une vague est déjà en cours.
@@ -102,7 +117,6 @@ namespace SAE
             go.name = kind.ToString();
             go.tag = Tags.Ballon;
             go.AddComponent<ColorTint>();
-            go.AddComponent<Mirrored>();
             go.AddComponent<Balloon>().Init(this, path, layers, kind);
         }
 

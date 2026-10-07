@@ -11,8 +11,9 @@ namespace SAE
 
         void Update()
         {
-            var spawner = WaveSpawner.Instance;   // dans la scène Labyrinthe (le tableau du hub ne peut pas garder de lien direct)
-            if (!spawner || !text) return;
+            if (!text) return;
+            var spawner = WaveSpawner.Instance;
+            if (!spawner) { text.text = AtHub(); return; }   // au hub : la carte n'est pas chargée
             var sb = new StringBuilder();
             string number = spawner.Wave <= spawner.LastWrittenWave ? $"{spawner.Wave} / {spawner.LastWrittenWave}" : $"{spawner.Wave} (infini)";
             sb.AppendLine($"<color=#FFD45A>VAGUE {number}</color>");
@@ -21,6 +22,17 @@ namespace SAE
             sb.AppendLine($"<size=30>{spawner.Status}</size>");
             sb.Append($"<size=30>{Composition(spawner.Current)}</size>");
             text.text = sb.ToString();
+        }
+
+        // Au hub : la prochaine vague (le numéro est gardé dans GameState), et comment la lancer
+        static readonly int WrittenWaves = WaveBook.Default().Count;
+
+        static string AtHub()
+        {
+            int wave = GameState.WavesWon + 1;
+            string number = wave <= WrittenWaves ? $"{wave} / {WrittenWaves}" : $"{wave} (infini)";
+            var next = wave <= WrittenWaves ? WaveBook.Default()[wave - 1] : WaveBook.Endless(wave);
+            return $"<color=#FFD45A>VAGUE {number}</color>\n<size=30>Prête : appuie sur LANCER</size>\n<size=30>{Composition(next)}</size>";
         }
 
         // Ce que contient la vague, par sorte de ballon : « 18 ballons · 5 rapides · 1 boss ».

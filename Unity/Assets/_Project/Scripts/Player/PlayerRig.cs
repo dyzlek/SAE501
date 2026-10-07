@@ -5,7 +5,7 @@ using UnityEngine.XR.Interaction.Toolkit.Inputs.Haptics;
 namespace SAE
 {
     // Le joueur, en VR ou en mode PC (voir PlayerMode) : ce script donne aux autres la tête et les deux mains,
-    // et téléporte le joueur (boutons JOUER / HUB).
+    // et le remet sur un point (FallGuard, après une chute). Changer de niveau, c'est changer de scène (Levels).
     //   - VR : l'XR Origin des Starter Assets (téléportation et rotation par crans déjà réglées dedans) ;
     //   - PC : DesktopPlayer, la caméra fait office de tête et de mains.
     public class PlayerRig : MonoBehaviour
@@ -15,9 +15,6 @@ namespace SAE
         public Transform rightHand;
 
         public static PlayerRig Local { get; private set; }
-
-        // Prévient quand le joueur arrive sur un point (hub ou carte) : l'arc s'affiche ou se range (BowHolster).
-        public static event System.Action<Transform> Teleported;
 
         XROrigin origin;
         CharacterController body;
@@ -43,7 +40,6 @@ namespace SAE
             }
             else transform.SetPositionAndRotation(spot.position, Quaternion.Euler(0f, spot.eulerAngles.y, 0f));
             if (body) body.enabled = true;
-            Teleported?.Invoke(spot);
         }
 
         // Le joueur ne se cogne pas à cet objet (banane, singe à saisir) : sinon, en le tenant sous ses pieds,

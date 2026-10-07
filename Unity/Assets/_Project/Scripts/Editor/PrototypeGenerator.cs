@@ -16,16 +16,15 @@ using UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets;
 namespace SAE.EditorTools
 {
     // Menu SAE → Générer le prototype : construit les DEUX scènes du jeu (relancer le menu les écrase).
-    //   Hub.unity        : la cabane, les joueurs, le plateau ; c'est la scène qu'on lance.
-    //   Labyrinthe.unity : la carte et ses vagues, loin du hub (on ne voit pas l'un depuis l'autre).
-    // Au lancement, le hub charge le labyrinthe en plus de lui (LevelLoader) : les deux tournent ensemble,
-    // et le plateau du hub montre la carte en direct. Les liens d'une scène à l'autre (boutons de téléportation,
-    // LANCER, tableau de la vague) sont retrouvés au lancement (LevelSpawn, WaveSpawner.Instance).
+    //   Hub.unity        : la cabane (bananier, coffre, bibliothèque, plateau) ; c'est la scène de départ.
+    //   Labyrinthe.unity : la carte et ses vagues, où l'on défend avec l'arc.
+    // Chaque scène a son joueur (VR et PC). On passe de l'une à l'autre par un vrai changement de scène
+    // (boutons SE TP / HUB, voir Levels) ; ce qui doit rester (argent, singes, vagues gagnées…) est en static.
     public static class PrototypeGenerator
     {
         const string Folder = "Assets/_Project/Scenes";
         const string HubScenePath = Folder + "/Hub.unity";
-        const string MapScenePath = Folder + "/Labyrinthe.unity";   // même nom que LevelLoader.mapScene
+        const string MapScenePath = Folder + "/Labyrinthe.unity";   // même nom que Levels.MapScene
         const string OldScenePath = Folder + "/Jeu.unity";          // l'ancienne scène unique, supprimée à la génération
         const float BoardTile = 0.2f;    // plateau de 1,6 m : l'élément principal du hub
         const float HandHeight = 0.9f;   // table des bananes et socle du panier : à hauteur de main, pas au sol
@@ -36,7 +35,7 @@ namespace SAE.EditorTools
         static readonly Vector3 HandOffset = new Vector3(0f, -0.01f, -0.06f);   // la paume, un peu derrière l'avant de la manette
         static readonly Vector3 BowInHand = new Vector3(0.07f, 0f, 0.02f);      // la poignée de l'arc, sur le côté intérieur de la main : la flèche passe à côté
         const float HandTilt = 35f;   // les mains tournées pouce vers le haut, comme quand on tient les manettes (pas paume à plat)
-        static readonly Vector3 MapCenter = new Vector3(0f, 0f, 1000f);   // les montagnes du hub (jusqu'à 110 m de lui) restent au-delà de la distance d'affichage (400 m)
+        static readonly Vector3 MapCenter = Vector3.zero;   // la carte a sa propre scène : elle est au centre
 
         static readonly Color Floor = new Color(0.35f, 0.35f, 0.38f);
         static readonly Color Wood = new Color(0.45f, 0.30f, 0.18f);
@@ -64,43 +63,57 @@ namespace SAE.EditorTools
             VRSetup.Configure();
             CabinArt.Build();   // la texture de bois des meubles du hub (la cabane elle-même vient de Blender)
 
-            // 1. Le labyrinthe, dans sa propre scène (ni caméra ni lumière : ce sont celles du hub)
-            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            // 1. Le labyrinthe
+            NewLevelScene();
             // L'ancienne scène unique (hub et carte ensemble) est remplacée par Hub + Labyrinthe : on la supprime
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(OldScenePath)) AssetDatabase.DeleteAsset(OldScenePath);
-            Spawn("Spawn Carte", MapCenter + new Vector3(0, 0, -MapLayout.HalfExtent - 3f), Level.Carte);
+            var mapSpawn = Spawn("Spawn Carte", MapCenter + new Vector3(0, 0, -MapLayout.HalfExtent - 3f), Level.Carte);
             BuildMap();
+            if (!BuildPlayers(mapSpawn.position, withBow: true)) return;
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), MapScenePath);
 
             // 2. Le hub
+            NewLevelScene();
+            var hubSpawn = Spawn("Spawn Hub", Vector3.zero, Level.Hub);
+            var hub = BuildHub();   // avant le joueur : l'installeur des bananes ajoute son TestSouris à Camera.main s'il en trouve une
+            var player = BuildPlayers(hubSpawn.position, withBow: false);
+            if (!player) return;
+            BuildChest(hub, Around(97f, Ring - 0.2f), player.head);   // estrade de 1,4 m (le coffre de Maxens) : un peu plus près de VIDER, loin du comptoir du bananier
+            UseWoodTexture(hub);   // encore une fois : l'estrade et le cadre du coffre sont posés après le reste du hub
+
+            EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), HubScenePath);
+            // Le hub en premier : c'est la scène de départ du jeu
+            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(HubScenePath, true), new EditorBuildSettingsScene(MapScenePath, true) };
+            PlayerModeMenu.Apply();   // VR ou PC, selon le menu SAE → Mode de jeu
+            Debug.Log("Prototype généré : " + HubScenePath + " et " + MapScenePath);
+        }
+
+        // Une scène vide avec sa lumière (le soleil) et la brume légère au loin ; la caméra est celle du joueur
+        static void NewLevelScene()
+        {
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
-            // Une brume légère au loin : les montagnes s'estompent dans le ciel, on sent la profondeur
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.Linear;
             RenderSettings.fogStartDistance = 60f;
             RenderSettings.fogEndDistance = 230f;
             RenderSettings.fogColor = new Color(0.72f, 0.82f, 0.93f);
             var defaultCam = GameObject.FindWithTag("MainCamera");
-            if (defaultCam) Object.DestroyImmediate(defaultCam); // la caméra est celle du joueur
+            if (defaultCam) Object.DestroyImmediate(defaultCam);
+        }
 
-            var hubSpawn = Spawn("Spawn Hub", Vector3.zero, Level.Hub);
-            var hub = BuildHub();   // avant le joueur : l'installeur des bananes ajoute son TestSouris à Camera.main s'il en trouve une
-            var player = Player(hubSpawn.position);
-            if (!player) return;
-            BuildChest(hub, Around(97f, Ring - 0.2f), player.head);   // estrade de 1,4 m (le coffre de Maxens) : un peu plus près de VIDER, loin du comptoir du bananier
-            UseWoodTexture(hub);   // encore une fois : l'estrade et le cadre du coffre sont posés après le reste du hub
-            var pcPlayer = DesktopPlayerObject(hubSpawn.position);
-            player.gameObject.AddComponent<FallGuard>();          // tombé dans le vide : retour au point d'arrivée le plus proche
+        // Les deux joueurs de la scène (VR et PC, PlayerMode active le bon), au point d'arrivée.
+        // withBow : l'arc de Quincy, seulement sur la carte (au hub, les mains servent à prendre et appuyer).
+        // Renvoie le joueur VR (null si les Starter Assets manquent).
+        static PlayerRig BuildPlayers(Vector3 position, bool withBow)
+        {
+            var player = Player(position, withBow);
+            if (!player) return null;
+            var pcPlayer = DesktopPlayerObject(position, withBow);
+            player.gameObject.AddComponent<FallGuard>();          // tombé dans le vide : retour au point d'arrivée
             player.gameObject.AddComponent<WaveShortcut>();       // B (manette droite) : lancer la vague
             pcPlayer.AddComponent<FallGuard>();
             BuildPlayerMode(player.gameObject, pcPlayer);
-            new GameObject("Chargement du labyrinthe").AddComponent<LevelLoader>();
-
-            EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), HubScenePath);
-            // Le hub en premier : c'est lui qu'on lance, il charge le labyrinthe
-            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(HubScenePath, true), new EditorBuildSettingsScene(MapScenePath, true) };
-            PlayerModeMenu.Apply();   // VR ou PC, selon le menu SAE → Mode de jeu
-            Debug.Log("Prototype généré : " + HubScenePath + " et " + MapScenePath);
+            return player;
         }
 
         // Distance d'affichage de la caméra : assez loin pour les montagnes (la brume finit à 230 m), mais pas plus.
@@ -108,7 +121,7 @@ namespace SAE.EditorTools
         // « clignotent » l'une sur l'autre selon l'angle (les bûches sur les fenêtres, par exemple).
         const float NearClip = 0.03f, FarClip = 400f;
 
-        // Un point d'arrivée (hub ou carte), retrouvé par son niveau depuis l'autre scène
+        // Le point d'arrivée de la scène (le joueur y est posé, FallGuard l'y remet après une chute)
         static Transform Spawn(string name, Vector3 pos, Level level)
         {
             var go = new GameObject(name);
@@ -131,7 +144,7 @@ namespace SAE.EditorTools
         }
 
         // Le joueur PC (clavier/souris), pour tester vite sans casque : DesktopPlayer, et la caméra sert de tête et de mains.
-        static GameObject DesktopPlayerObject(Vector3 position)
+        static GameObject DesktopPlayerObject(Vector3 position, bool withBow)
         {
             var player = new GameObject("Joueur PC");
             player.tag = Tags.Joueur;
@@ -141,17 +154,6 @@ namespace SAE.EditorTools
             cc.height = 1.8f;
             cc.radius = 0.3f;
             cc.center = new Vector3(0, 0.9f, 0);
-
-            // Corps : copié en miniature sur le plateau (« Toi »)
-            var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            body.name = "Corps";
-            Object.DestroyImmediate(body.GetComponent<Collider>());
-            body.transform.SetParent(player.transform, false);
-            body.transform.localPosition = new Vector3(0, 0.9f, 0);
-            body.transform.localScale = new Vector3(0.6f, 0.9f, 0.6f);
-            body.GetComponent<Renderer>().enabled = false;
-            body.AddComponent<ColorTint>().Set(new Color(1f, 0.55f, 0.1f));
-            body.AddComponent<Mirrored>().label = "Toi";
 
             var cam = new GameObject("Camera");
             cam.tag = "MainCamera";
@@ -166,20 +168,22 @@ namespace SAE.EditorTools
             var rig = player.AddComponent<PlayerRig>();
             rig.head = rig.leftHand = rig.rightHand = cam.transform;
 
-            // L'arc, en bas à droite de la vue, plus petit qu'en VR pour ne pas cacher l'écran (clic droit : tirer)
-            var bow = ((GameObject)PrefabUtility.InstantiatePrefab(BowSetup.Setup().gameObject)).GetComponent<Bow>();
-            bow.transform.localScale *= DesktopBowScale;
-            bow.maxDraw *= DesktopBowScale;
-            bow.HoldIn(cam.transform, new Vector3(0.3f, -0.3f, 0.7f));
-            var archer = player.AddComponent<DesktopArcher>();
-            archer.bow = bow;
-            archer.aim = cam.transform;
-            GiveHolster(player, bow);
+            // L'arc (sur la carte), en bas à droite de la vue, plus petit qu'en VR pour ne pas cacher l'écran (clic droit : tirer)
+            if (withBow)
+            {
+                var bow = ((GameObject)PrefabUtility.InstantiatePrefab(BowSetup.Setup().gameObject)).GetComponent<Bow>();
+                bow.transform.localScale *= DesktopBowScale;
+                bow.maxDraw *= DesktopBowScale;
+                bow.HoldIn(cam.transform, new Vector3(0.3f, -0.3f, 0.7f));
+                var archer = player.AddComponent<DesktopArcher>();
+                archer.bow = bow;
+                archer.aim = cam.transform;
+            }
             player.AddComponent<MonkeyInfoCard>();
             return player;
         }
 
-        static PlayerRig Player(Vector3 position)
+        static PlayerRig Player(Vector3 position, bool withBow)
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(VRSetup.RigPrefab);
             if (!prefab) { Debug.LogError("Joueur VR : Starter Assets de l'XR Interaction Toolkit introuvables : " + VRSetup.RigPrefab); return null; }
@@ -214,19 +218,8 @@ namespace SAE.EditorTools
             AddFingertip(rig.leftHand);
             AddFingertip(rig.rightHand);
             GiveHands(rig, out var leftHand, out var rightHand);
-            GiveBow(go, rig, leftHand, rightHand);
+            if (withBow) GiveBow(go, rig, leftHand, rightHand);
             go.AddComponent<MonkeyInfoCard>();   // fiche du singe visé, dans le décor
-
-            // Corps : invisible pour soi, mais c'est lui qu'on voit en miniature sur le plateau (et plus tard un 2e joueur).
-            var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            body.name = "Corps";
-            Object.DestroyImmediate(body.GetComponent<Collider>());
-            body.transform.SetParent(go.transform, false);
-            body.transform.localPosition = new Vector3(0, 0.9f, 0);
-            body.transform.localScale = new Vector3(0.6f, 0.9f, 0.6f);
-            body.GetComponent<Renderer>().enabled = false;
-            body.AddComponent<ColorTint>().Set(new Color(1f, 0.55f, 0.1f));
-            body.AddComponent<Mirrored>().label = "Toi";
             return rig;
         }
 
@@ -256,7 +249,7 @@ namespace SAE.EditorTools
         }
 
         // L'arc de Quincy dans la main gauche ; on tire la corde avec la main droite (grip ou gâchette).
-        // Rangé au hub (BowHolster) ; la main gauche se ferme dessus tant qu'il est sorti.
+        // Seulement sur la carte ; la main gauche se ferme dessus.
         static void GiveBow(GameObject player, PlayerRig rig, AnimateHandOnInput leftHand, AnimateHandOnInput rightHand)
         {
             if (!rig.leftHand || !rig.rightHand) { Debug.LogWarning("Joueur VR : manette introuvable, pas d'arc."); return; }
@@ -269,10 +262,7 @@ namespace SAE.EditorTools
             archer.drawHandVisual = rightHand;
             archer.drawGrip = new InputActionProperty(InputReference("XRI Right Interaction/Select Value"));
             archer.drawTrigger = new InputActionProperty(InputReference("XRI Right Interaction/Activate Value"));
-            GiveHolster(player, bow);
         }
-
-        static void GiveHolster(GameObject player, Bow bow) => player.AddComponent<BowHolster>().bow = bow;
 
         // Une action des contrôles XRI des Starter Assets (même chose que « Use Reference » dans l'Inspector).
         static InputActionReference InputReference(string name)
@@ -1067,7 +1057,7 @@ namespace SAE.EditorTools
             float edge = MapLayout.HalfExtent;
             Teleportable(Visuals.Solid("Estrade", map.transform, new Vector3(0, -0.25f, -edge - 2.5f), new Vector3(8, 0.5f, 5), Floor));
             Teleportable(Visuals.Solid("Sol autour", map.transform, new Vector3(0, -0.6f, 0), new Vector3(edge * 2 + 20, 0.1f, edge * 2 + 20), Floor));
-            // Une grande prairie sous la carte : le labyrinthe n'est plus une île grise dans le ciel (on ne s'y téléporte pas)
+            // Une grande prairie sous la carte : le labyrinthe n'est pas une île grise dans le ciel (on ne s'y téléporte pas)
             Visuals.Solid("Prairie", map.transform, new Vector3(0, -0.7f, 0), new Vector3(300f, 0.1f, 300f), Grass2);
 
             // Le même pupitre qu'au hub, un peu à droite du point d'arrivée : le passage vers la carte reste libre

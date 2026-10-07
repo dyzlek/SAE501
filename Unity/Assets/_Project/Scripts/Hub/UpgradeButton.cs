@@ -7,6 +7,7 @@ namespace SAE
     // Gros bouton rond du comptoir d'amélioration du bananier (Maxens) : on l'enfonce avec la main, on paie, la stat monte d'un niveau.
     // Le bouton est vert si on peut payer, gris sinon, flash rouge si refusé. Il s'enfonce quand on appuie.
     // Au niveau max, le bouton disparaît et l'ardoise affiche MAX.
+    // Les niveaux sont gardés dans un tableau static : ils restent quand on part sur la carte et qu'on revient.
     public class UpgradeButton : MonoBehaviour, IPressable
     {
         public Bananier bananier;
@@ -18,6 +19,8 @@ namespace SAE
         public static readonly Color Affordable = new Color(0.25f, 0.8f, 0.3f);
         public static readonly Color TooExpensive = new Color(0.4f, 0.4f, 0.42f);
         public static readonly Color Refused = new Color(0.95f, 0.25f, 0.25f);
+
+        static readonly int[] savedLevels = { 1, 1, 1 };   // par BananaStat
 
         Vector3 capRest;
         float pressed;      // 1 = enfoncé, revient à 0
@@ -66,10 +69,12 @@ namespace SAE
                 case BananaStat.Pourriture: bananier.AmeliorerPourriture(); break;
                 default: bananier.AmeliorerValeur(); break;
             }
+            savedLevels[(int)stat] = S.niveau;
         }
 
         void Start()
         {
+            S.niveau = savedLevels[(int)stat];   // retour au hub : on reprend le niveau acheté avant
             capRest = cap.localPosition;
             capTint = cap.GetComponent<ColorTint>();
         }
