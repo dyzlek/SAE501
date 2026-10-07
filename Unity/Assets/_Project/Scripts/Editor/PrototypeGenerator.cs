@@ -596,8 +596,9 @@ namespace SAE.EditorTools
             ConsoleButton(commands, -ConsoleStep, "LANCER", LaunchColor, ActionCube.Action.StartWave);
             ConsoleButton(commands, 0f, "SE TP", PlayColor, ActionCube.Action.Teleport, Level.Carte);   // va sur la carte
             ConsoleButton(commands, ConsoleStep, "REJOUER", RestartColor, ActionCube.Action.Restart);   // gris jusqu'à la victoire
-            var clear = BuildConsole(env, "Vider", Around(37f, Ring - 0.5f), 1);
-            ConsoleButton(clear, 0f, $"VIDER  {ActionCube.ClearBoardPrice}", ClearColor, ActionCube.Action.ClearBoard);
+            var clear = BuildConsole(env, "Vider", Around(37f, Ring - 0.5f), 2);
+            ConsoleButton(clear, -ConsoleStep / 2f, $"VIDER  {ActionCube.ClearBoardPrice}", ClearColor, ActionCube.Action.ClearBoard);
+            ConsoleButton(clear, ConsoleStep / 2f, "ASSIS", HubColor, ActionCube.Action.Seated);   // jouer assis : le joueur est remonté
             BuildWaveBoard(env, Around(0f, HubLayout.CabinRadius - 0.25f, 2.25f), Quaternion.identity);   // accroché au mur
             // La victoire : un petit feu d'artifice sous le toit de la cabane (le grand est sur la carte)
             var hubParty = new GameObject("Feu d'artifice").AddComponent<VictoryCelebration>();
@@ -690,6 +691,35 @@ namespace SAE.EditorTools
             }
 
             MakeStatic(cabin);
+
+            // La cible de fléchettes du modèle devient jouable (petit bonus caché)
+            var dartboard = cabin.GetComponentsInChildren<Transform>().FirstOrDefault(t => t.name == "Cible");
+            if (dartboard) BuildDarts(env, dartboard.gameObject);
+        }
+
+        // La cible jouable : un collider plat devant la cible du modèle (DartBoard), une petite ardoise des points en dessous,
+        // et un présentoir avec trois fléchettes à lancer (Dart), qui y reviennent toutes seules.
+        static void BuildDarts(Transform env, GameObject model)
+        {
+            var b = Bounds(model);
+            var outward = new Vector3(b.center.x, 0f, b.center.z).normalized;   // de la pièce vers le mur
+            float depth = Mathf.Abs(outward.x) * b.extents.x + Mathf.Abs(outward.z) * b.extents.z;
+            var face = b.center + outward * (depth - 0.05f);                     // le devant de la cible (5 cm devant le mur)
+
+            var board = new GameObject("Cible (jeu)").transform;
+            board.SetParent(env, false);
+            board.SetPositionAndRotation(face, Quaternion.LookRotation(outward));   // +Z vers le mur, comme les ardoises
+            var col = board.gameObject.AddComponent<BoxCollider>();
+            col.size = new Vector3(0.5f, 0.5f, 0.04f);
+            col.center = new Vector3(0f, 0f, 0.02f);                              // sa face avant est sur celle de la cible
+            var game = board.gameObject.AddComponent<DartBoard>();
+
+            var slate = BuildChalkboard(board, "Ardoise des fléchettes", new Vector3(0f, -0.45f, 0.01f), Quaternion.identity, 0.5f, 0.22f);
+            game.label = Visuals.Text(slate, "", new Vector3(0, 0, -0.05f), 0.04f, Chalk);
+
+            Visuals.Solid("Présentoir à fléchettes", board, new Vector3(0f, -0.68f, -0.05f), new Vector3(0.45f, 0.03f, 0.12f), DarkWood);
+            for (int i = 0; i < 3; i++)
+                Dart.Create(env, board.TransformPoint(new Vector3((i - 1) * 0.12f, -0.65f, -0.05f)), Quaternion.LookRotation(board.right));
         }
 
         // Rien ici ne bouge : Unity regroupe les maillages (moins d'appels de dessin, plus de fps dans le casque)

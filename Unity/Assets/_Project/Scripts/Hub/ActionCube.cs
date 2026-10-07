@@ -7,9 +7,10 @@ namespace SAE
     // Il s'enfonce un instant quand on appuie. Pendant une vague, LANCER devient gris (elle est partie) ;
     // on peut aller et venir entre le hub et la carte, la vague continue.
     // REJOUER reste gris jusqu'à la victoire (vague 10) : on ne recommence pas tout par erreur.
+    // ASSIS : pour jouer assis (le joueur est remonté à hauteur d'yeux debout), on rappuie pour revenir debout.
     public class ActionCube : MonoBehaviour, IPressable
     {
-        public enum Action { Teleport, ClearBoard, StartWave, Restart }
+        public enum Action { Teleport, ClearBoard, StartWave, Restart, Seated }
 
         public Action action;
         public Level destination;     // pour Teleport : le niveau (la scène) où aller
@@ -63,6 +64,7 @@ namespace SAE
                     break;
                 case Action.StartWave: WaveSpawner.Launch(); break;
                 case Action.Restart: Levels.Restart(); break;
+                case Action.Seated: if (PlayerRig.Local) PlayerRig.Local.ToggleSeated(); break;   // assis ↔ debout
             }
         }
     }

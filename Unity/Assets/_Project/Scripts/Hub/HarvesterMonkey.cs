@@ -7,7 +7,7 @@ namespace SAE
 {
     // Un singe récolteur (un singe classique) : on l'achète au comptoir « RÉCOLTEUR » (voir HarvesterCrew, qui garde
     // le nombre de singes et leurs améliorations, communes à toute l'équipe).
-    // Il marche jusqu'à une banane (sur la table, ou n'importe où si le joueur l'a lâchée ailleurs), saute pour l'attraper, la porte au-dessus de sa tête,
+    // Il marche jusqu'à une banane (sur la table, ou n'importe où si le joueur l'a lâchée ailleurs), saute pour l'attraper, la porte devant lui,
     // marche jusqu'au panier et la jette dedans. Puis il souffle un peu et recommence.
     // Pour rire, le lancer n'est pas toujours le même : parfois il DUNK (saute au-dessus du panier, l'y écrase et fête ça),
     // parfois il RATE (la banane tombe à côté, il boude, la ramasse et recommence).

@@ -50,6 +50,21 @@ namespace SAE
             if (spawn) TeleportTo(spawn);
         }
 
+        // Joueur assis (bouton ASSIS du hub) : le casque suit la vraie hauteur des yeux, assis on serait trop bas pour
+        // atteindre les étagères et voir le plateau. On remonte donc tout le joueur de SeatedLift, comme s'il était debout.
+        public const float SeatedLift = 0.5f;   // en mètres : la différence entre les yeux debout (~1,6 m) et assis (~1,1 m)
+        public static bool Seated { get; private set; }
+
+        public void ToggleSeated()
+        {
+            Seated = !Seated;
+            if (origin && origin.CameraFloorOffsetObject)
+            {
+                var offset = origin.CameraFloorOffsetObject.transform;
+                offset.localPosition = new Vector3(offset.localPosition.x, Seated ? SeatedLift : 0f, offset.localPosition.z);
+            }
+        }
+
         // Pose le joueur sur 'spot', tourné dans sa direction. La hauteur du casque (vraie taille du joueur) est gardée.
         // Le CharacterController est coupé le temps du déplacement, sinon il remet le joueur à son ancienne place.
         public void TeleportTo(Transform spot)
