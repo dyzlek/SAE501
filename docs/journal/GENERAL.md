@@ -38,17 +38,24 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 - [ ] Ven. 13 nov. — rendu + oral
 
 ## Semaine 1 · 5-9 oct. — PROUVER
-**Jeu. 8 oct. — à faire** _(plus les critiques de fin de journée de [Dylan](dylan.md) et [Maxens](maxens.md) : 32 points, devenus les issues #50 à #81 sur le tableau)_
-| Tâche | Qui |
-|---|---|
-| Tester `fix-all` (régénérer la scène, mode PC puis casque : LANCER et bouton B, coffre, comptoirs, fiche du singe), puis Pull Request vers `main` | Dylan, relu par un autre |
-| Chercher des assets de boutons, ou les faire | Maxens |
-| Prendre les singes et les **jeter** (pour les poser) | _à répartir_ (idée de Maxens) |
-| Un indicateur de trajectoire (effet de traînée) quand on lance | _à répartir_ (idée de Maxens) |
-| De la vraie physique sur les bananes : on les lance dans des paniers (et on enlève la poignée des paniers) | _à répartir_ (idée de Dylan) |
-| Restes des critiques et des objectifs du 7 (voir le bilan ci-dessous) | Tout le monde |
+**Jeu. 8 oct. — urgent** _(objectif : vendredi 9, GDD v1 + prototype jouable au casque)_
+| Ordre | Tâche | Issue | Qui |
+|---|---|---|---|
+| 1 | Build casque : mode développeur + débogage USB autorisé sur le Quest (bloqué le 7), puis premier build | #13 | Dylan |
+| 2 | Tester `main` au casque : un seul joueur, téléportation hub/carte, LANCER | #14, #15 | Dylan, + un autre |
+| 3 | GDD v1 (2 pages) : nom du jeu, geste + boucle, pourquoi la VR, périmètre DOIT/DEVRAIT/POURRAIT/NE FERA PAS | #12 | Tout le monde |
+| 4 | Bugs bloquants au casque : spawn, téléportation sur le plateau et hors carte, saut, spam de l'arc | #65, #67, #81, #55, #60 | Dylan (spawn, téléportation), Nicolas (arc) |
+| 5 | Réserver les casques sur Moodle | #25 | _à répartir_ |
+| 6 | Lisibilité : argent et prix, bananes visibles sur la carte, visuel « fusion possible », explication des touches, texte du coffre | #63, #64, #57, #54, #72 | _à répartir_ |
+| — | Assets : boutons, ballons MOAB | #21, #20 | Maxens |
 
-_À vérifier contre le périmètre : lancer les singes et la traînée sont de nouveaux gestes (bons pour la VR, test de l'écran) ; à écrire dans le GDD avant de commencer._
+- **Ménage avant de committer** : des fichiers Unity traînent hors du projet (`Sol.glb`, `Systeme_Bananes.glb`, `Main Camera.glb`, `Directional Light.glb` à la racine de `Assets/`, dossier `_Recovery/`, fichiers de test de performance). À ranger dans `Assets/_Project/Art/` ou à supprimer, pas à pousser tels quels.
+- **Après vendredi** : lancer les singes, traînée, physique des bananes (#27, #28, #29) restent en POURRAIT ; à écrire dans le GDD avant de commencer.
+
+**Mer. 7 oct. — fin de journée**
+- `main` à jour : cabane + arc, corrections `fix-all`, deux scènes Hub / Labyrinthe, un seul joueur VR, téléportation sur toute la carte (PR #47).
+- Critiques de Dylan et Maxens transformées en issues #50 à #81 sur le tableau.
+- Bloque : le Quest n'est pas reconnu par `adb` (débogage USB pas autorisé), donc pas encore de build casque.
 
 **Mer. 7 oct. — objectifs du jour**
 | Tâche | Qui |
