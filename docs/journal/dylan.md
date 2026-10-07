@@ -3,6 +3,12 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Mer. 7 oct. 2026
+**Décor refait dans Blender (#61, #66)** _(rendus de prévisualisation Blender, pas encore Unity)_
+
+![Montagnes en trois rangs, collines et champignons](../captures/decor-montagnes-champignons.webp)
+
+![Guirlande de ballons et étagère sur les murs du hub](../captures/decor-murs-guirlande.webp)
+
 **Test de `fix/textes-fusion` (#57, #59, #72) : tout bon.** Fusion dorée sur le plateau : le singe qu'on obtiendra flotte au-dessus du singe posé, avec le halo doré.
 
 ![Fusion dorée sur le plateau](../captures/fusion-doree-plateau.webp)
@@ -116,6 +122,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Claude Code) | Branche `art/decor-lumiere` (partie de `feat/singes-bananes`) : dans `Blender/cabane.py`, champignons rouges à points blancs (touffes et quelques géants) et montagnes refaites en trois rangs (collines au pied, sommets avec arêtes et neige variable, chaîne lointaine bleutée) (#61) ; murs du hub : guirlande de ballons colorés en festons et deux étagères hautes avec pots et livres (#66) ; `Cabane.glb` et `Paysage.glb` réexportés (110 000 et 63 000 triangles, à surveiller pour les fps) ; lumière : ambiante un peu plus basse, lustre et lanternes plus forts, soleil 1,45, contraste 18 (#77). Rendus Blender vérifiés ; dans Unity, à juger à l'œil | À tester |
 | Claude (Claude Code) | Branche `feat/singes-bananes` (partie de `fix/urgences-casque`, compilé, à tester) : types de singes **débloqués avec des bananes** sur les plaques de la bibliothèque (`TypeUnlockPlaque`, prix dans `MonkeyData`), plus par vague (#52) ; traînée dorée derrière ce qu'on lance : bananes, singes récolteurs, fléchettes (`ThrowTrail`, #28) ; bananes qui pourrissent : elles se ratatinent, dégagent une odeur verdâtre, tremblotent puis se dégonflent (#75) | À tester |
 | Claude (Claude Code) | Branche `fix/urgences-casque` (partie de `feat/recolteurs-flechettes`, compilé, à tester) : saut des Starter Assets coupé (#55) ; arc avec temps de recharge 0,6 s, tension minimale et corde à attraper à 20 cm (#60) ; joueur VR remis au point d'arrivée une fois le casque suivi (#65) ; bloc invisible sous le plateau contre la téléportation (#67) ; téléportation limitée à 6 m autour du labyrinthe (#81) | À tester |
 | Claude (Claude Code) | Fusion `test/cabane` + `feat/arc-quincy` (Maxens) dans `feat/cabane-arc`, conflit du `PrototypeGenerator` résolu en gardant les deux | À tester |

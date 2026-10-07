@@ -148,13 +148,15 @@ namespace SAE.EditorTools
                 sun.name = "Soleil";
                 sun.transform.rotation = SunRotation;
                 sun.color = SunColor;
-                sun.intensity = 1.3f;
+                sun.intensity = 1.45f;   // un peu plus fort (7 oct.) : des taches de soleil plus nettes sur le plancher
                 sun.shadows = LightShadows.Soft;
                 sun.shadowStrength = 0.85f;   // les ombres restent un peu éclairées par le ciel
             }
             RenderSettings.ambientMode = AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = new Color(0.55f, 0.65f, 0.8f);
-            RenderSettings.ambientEquatorColor = new Color(0.5f, 0.48f, 0.42f);
+            // Lumière ambiante un peu plus basse qu'avant (7 oct.) : la cabane était éclairée partout pareil, toute plate ;
+            // ce sont maintenant le lustre, les lanternes et le soleil qui font les zones claires et sombres.
+            RenderSettings.ambientSkyColor = new Color(0.5f, 0.6f, 0.78f);
+            RenderSettings.ambientEquatorColor = new Color(0.44f, 0.42f, 0.37f);
             RenderSettings.ambientGroundColor = new Color(0.3f, 0.24f, 0.17f);
 
             var volume = new GameObject("Réglages de l'image").AddComponent<Volume>();
@@ -676,8 +678,8 @@ namespace SAE.EditorTools
             // Les lumières, là où le modèle a mis ses repères : un lustre au centre, deux lanternes aux murs
             foreach (var t in cabin.GetComponentsInChildren<Transform>())
             {
-                if (t.name == "Lumiere_Lustre") AddLight(t, 7f, 2.4f);
-                else if (t.name.StartsWith("Lumiere_Lanterne")) AddLight(t, 3.5f, 1.3f);
+                if (t.name == "Lumiere_Lustre") AddLight(t, 8f, 3.2f);                       // plus forts (7 oct.) : une vraie lumière chaude de lampe
+                else if (t.name.StartsWith("Lumiere_Lanterne")) AddLight(t, 4.5f, 2f);
             }
 
             MakeStatic(cabin);
