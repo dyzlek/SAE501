@@ -34,9 +34,17 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
   ![Coffre plus grand, creux, ouvert avec son aura dorée](../captures/maxens-coffre-v2-ouvert.png)
 
+- **Fait : un trésor dans le coffre et un coffre qui appelle le joueur** :
+  - **3 régimes de bananes** au fond de la caisse (le modèle `Regime` de la cabane), qu'on découvre quand le couvercle s'ouvre ;
+  - **quand on a assez d'argent pour l'ouvrir**, le coffre **se trémousse** toutes les 2,5 s (il se balance de gauche à droite, de moins en moins, jusqu'à 4°), pour inviter le joueur à l'ouvrir. Il s'arrête quand il est ouvert ou si on n'a plus assez d'argent (`ChestLid`).
+  - Testé en Play : le coffre penche bien pendant l'appel (3,5° mesurés), et les bananes sont visibles une fois ouvert.
+
+  ![Coffre ouvert : les régimes de bananes au fond](../captures/maxens-coffre-bananes.png)
+
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Régimes de bananes dans le coffre, coffre qui se trémousse quand on peut l'ouvrir ; testé en Play | À tester au casque |
 | Claude (Code) | Coffre agrandi (1,1 m) et creusé (on voit l'intérieur à l'ouverture), cerclages de fer à l'extérieur ; un seul singe par coffre (seules les chances de rareté montent avec les vagues) | À tester au casque |
 | Claude (Code) | Nouveau coffre branché dans la scène (fixe), ouverture boing + couvercle + aura dorée (`ChestLid`), roulette avec les vrais singes et leur aura, type du singe tiré avant la roulette ; testé en Play | À tester au casque |
 | Claude (Code) | Nouveau coffre modélisé par script Blender (`coffre.py`) dans le style de la cabane, couvercle séparé sur sa charnière, rendus d'aperçu | À valider |

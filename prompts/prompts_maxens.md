@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mer. 7 oct. 2026
 
+### Garnir le coffre et inciter à l'ouvrir
+> Mets quelque chose dans le coffre, par exemple des bananes. Et quand le joueur a assez d'argent, le coffre devrait bouger un peu pour l'inciter à l'ouvrir.
+
 ### Un seul singe par coffre
 > Ce n'était pas la règle prévue : un coffre donne un seul singe. Ce qui doit augmenter avec les vagues, ce sont seulement les chances d'obtenir un singe de rareté supérieure dans la roulette.
 

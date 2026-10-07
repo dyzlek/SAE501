@@ -805,10 +805,18 @@ namespace SAE.EditorTools
             var glowAnchor = new GameObject("Centre (aura)").transform;
             glowAnchor.SetParent(chest.transform, false);
             glowAnchor.position = chestBounds.center;
+            // Un trésor dedans : des régimes de bananes au fond de la caisse (on les voit quand le couvercle s'ouvre)
+            for (int i = -1; i <= 1; i++)
+            {
+                var spot = chestBounds.center + chest.transform.right * (i * 0.27f) + chest.transform.forward * (i == 0 ? 0.05f : -0.06f);
+                spot.y = chestBounds.min.y + 0.07f;
+                Prop(chest.transform, "Regime", spot, chest.transform.eulerAngles.y + 40f * i + 15f, 1.4f);
+            }
             var lid = chest.AddComponent<ChestLid>();
             lid.lid = chest.GetComponentsInChildren<Transform>(true).First(t => t.name == "Coffre_Couvercle");
             lid.glowAnchor = glowAnchor;
             lid.glowSize = chestBounds.size;
+            lid.chest = controller;
 
             // Panneau des chances : un tableau encadré de bois, accroché au mur derrière le coffre (comme la caisse)
             float chestAngle = AngleOf(pos);
