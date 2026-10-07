@@ -7,6 +7,7 @@ namespace SAE
     // Ce qui rapporte : les bananes déposées dans le panier, et chaque vague finie (pas les ballons éclatés).
     // Ce qui coûte : ouvrir un coffre, améliorer le bananier.
     // Pas d'affichage à l'écran (en VR ça donne le vertige) : la caisse du hub et les « +5 » flottants s'abonnent à MoneyChanged.
+    // Le son de chaque achat (carillon) et de chaque refus (buzz grave) part d'ici, là où l'achat a lieu.
     public static class Economy
     {
         // (variation, endroit où ça s'est passé — null = pas d'endroit précis, ex. fin de vague)
@@ -25,9 +26,14 @@ namespace SAE
 
         public static bool TrySpend(int amount, Vector3? where = null)
         {
-            if (amount < 0 || GameState.Money < amount) return false;
+            if (amount < 0 || GameState.Money < amount)
+            {
+                if (where.HasValue) Sfx.Play(Sfx.Sound.Error, where.Value);
+                return false;
+            }
             GameState.Money -= amount;
             MoneyChanged?.Invoke(-amount, where);
+            if (where.HasValue) Sfx.Play(Sfx.Sound.Chime, where.Value, 0.7f);
             return true;
         }
     }

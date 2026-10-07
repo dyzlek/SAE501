@@ -68,6 +68,7 @@ namespace SAE
         {
             target?.Press();
             PlayerRig.Buzz(hand, 0.6f);
+            Sfx.Play(Sfx.Sound.Click, transform.position);
         }
     }
 }

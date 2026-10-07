@@ -94,6 +94,7 @@ namespace SAE
             flying = false;
             body.isKinematic = true;
             trail.emitting = false;
+            Sfx.Play(Sfx.Sound.Thunk, transform.position, 0.6f);
             Destroy(gameObject, stuckTime);
         }
 

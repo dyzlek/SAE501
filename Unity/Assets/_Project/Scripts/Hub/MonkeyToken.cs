@@ -127,6 +127,7 @@ namespace SAE
             landBy = Time.time + FlightTime;
             body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;   // rapide : sans ça, il traverserait le plateau
             if (ray) ray.enabled = false;
+            Sfx.Play(Sfx.Sound.Whoosh, transform.position);
         }
 
         // Fin du vol : posé sur 'surface' en 'point' si c'est possible, sinon rangé dans la bibliothèque

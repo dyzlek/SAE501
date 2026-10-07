@@ -119,6 +119,7 @@ namespace SAE
                     nocked.transform.SetParent(null, true);
                     nocked.Launch(velocity);
                     nextNock = Time.time + reloadTime;   // on recharge : pas de nouvelle flèche avant reloadTime
+                    Sfx.Play(Sfx.Sound.Twang, NockPoint, 0.8f);
                     if (BowUpgrades.TripleShot)
                     {
                         ExtraArrow(-BowUpgrades.TripleSpread, velocity, nocked.transform.localScale);

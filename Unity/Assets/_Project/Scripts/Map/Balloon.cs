@@ -12,6 +12,10 @@ namespace SAE
     //   Blindé = Ballon_Blindage, Boss = MOAB (hélice qui tourne), Dirigeable = BFB (2 hélices), Coeur = Ballon_Coeur.
     // Le ballon cœur regagne une couche toutes les 2 s (règle du GDD : il se régénère).
     // S'il atteint la sortie, il retire autant de vies qu'il lui reste de couches.
+    // Ce qu'on voit de sa vie (critique du 7 oct. : on ne savait pas où en était un gros ballon) :
+    //   - chaque couche percée : un « pop » et le ballon se gonfle un instant ;
+    //   - les gros (BarFrom couches ou plus : boss, dirigeable) ont une barre de vie au-dessus d'eux, verte puis rouge ;
+    //   - éclaté : un pop plus fort et une gerbe de confettis de sa couleur.
     public class Balloon : MonoBehaviour
     {
         public static readonly List<Balloon> All = new List<Balloon>();
@@ -27,6 +31,8 @@ namespace SAE
         static readonly Color HeartColor = new Color(1f, 0.3f, 0.55f);
 
         const float RegenDelay = 2f;   // le ballon cœur regagne une couche toutes les 2 s
+        const int BarFrom = 5;         // à partir de 5 couches, une barre de vie
+        const float BarWidth = 1.2f, BarHeight = 0.12f;   // en mètres
 
         public float baseSpeed = 2.5f;
 
@@ -44,6 +50,10 @@ namespace SAE
         ColorTint tint;
         ColorTint[] modelTints;   // les morceaux du modèle 3D qui prennent la couleur de la couche
         bool hasModel;
+        Transform bar, barFill;   // la barre de vie des gros ballons (hors du ballon : elle ne tourne pas avec lui)
+        ColorTint barTint;
+        Vector3 baseScale;
+        float punch;              // 1 = vient d'être touché (il gonfle), revient à 0
 
         public GameObject Model { get; private set; }               // le modèle 3D, recopié en miniature par le plateau
         public bool TintedModel => modelTints != null;              // le modèle prend la couleur de la couche
@@ -87,8 +97,31 @@ namespace SAE
             else
                 transform.localScale = kind == BalloonKind.Dirigeable ? new Vector3(size, size * 1.6f, size) : Vector3.one * size;
             speed = baseSpeed * speedFactor;
+            baseScale = transform.localScale;
+            if (maxLayers >= BarFrom) CreateBar();
             UpdateColor();
         }
+
+        // La barre de vie : un fond sombre et une jauge colorée, au-dessus du ballon, tournée vers le joueur
+        void CreateBar()
+        {
+            bar = new GameObject("Barre de vie").transform;
+            bar.gameObject.AddComponent<Billboard>();
+            Visuals.Box("Fond", bar, new Vector3(0, 0, 0.01f), new Vector3(BarWidth + 0.06f, BarHeight + 0.06f, 0.01f), new Color(0.1f, 0.1f, 0.1f));
+            barFill = Visuals.Box("Jauge", bar, Vector3.zero, new Vector3(BarWidth, BarHeight, 0.02f), Color.green).transform;
+            barTint = barFill.GetComponent<ColorTint>();
+        }
+
+        void UpdateBar()
+        {
+            if (!bar) return;
+            float k = Mathf.Clamp01((float)layers / maxLayers);
+            barFill.localScale = new Vector3(BarWidth * k, BarHeight, 0.02f);
+            barFill.localPosition = new Vector3(-BarWidth * (1f - k) / 2f, 0f, 0f);   // la jauge se vide vers la gauche
+            barTint.Set(Color.Lerp(new Color(0.9f, 0.15f, 0.1f), new Color(0.2f, 0.85f, 0.25f), k));
+        }
+
+        void OnDestroy() { if (bar) Destroy(bar.gameObject); }
 
         // Pose le modèle 3D, ramené à une taille de 1 avant l'échelle, et un collider à sa forme
         // pour que les flèches et projectiles le touchent.
@@ -150,8 +183,18 @@ namespace SAE
             if (popped == 0) return pierce;
 
             layers -= popped;
-            if (layers <= 0) Destroy(gameObject);
-            else UpdateColor();
+            if (layers <= 0)
+            {
+                Sfx.Play(Sfx.Sound.Pop, transform.position, 0.8f, IsBlimp ? 0.6f : 1f);   // un gros ballon éclate plus grave
+                Confetti(transform.position, CurrentColor, IsBlimp ? 60 : 15);
+                Destroy(gameObject);
+            }
+            else
+            {
+                Sfx.Play(Sfx.Sound.Pop, transform.position, 0.35f, 1.3f);
+                punch = 1f;
+                UpdateColor();
+            }
             return popped * cost;
         }
 
@@ -170,6 +213,10 @@ namespace SAE
                 nextRegen = Time.time + RegenDelay;
                 if (layers < maxLayers) { layers++; UpdateColor(); }
             }
+
+            punch = Mathf.MoveTowards(punch, 0f, Time.deltaTime * 6f);
+            transform.localScale = baseScale * (1f + 0.15f * punch);
+            if (bar) bar.position = transform.position + Vector3.up * (baseScale.y * 0.7f + 0.4f);
 
             if (Time.time > slowUntil) slowFactor = 1f;
             float step = speed * slowFactor * Time.deltaTime;
@@ -201,8 +248,47 @@ namespace SAE
             }
         }
 
+        // La couleur du ballon en ce moment (pour ses confettis)
+        Color CurrentColor => Kind switch
+        {
+            BalloonKind.Blinde => ArmorColor,
+            BalloonKind.Boss => BossColor,
+            BalloonKind.Dirigeable => BlimpColor,
+            BalloonKind.Coeur => HeartColor,
+            _ => layerColors[Mathf.Clamp(layers - 1, 0, layerColors.Length - 1)],
+        };
+
+        // Une gerbe de petits morceaux de caoutchouc qui volent et retombent (un seul « burst », puis l'objet disparaît)
+        static void Confetti(Vector3 position, Color color, int count)
+        {
+            var go = new GameObject("Confettis");
+            go.transform.position = position;
+            var ps = go.AddComponent<ParticleSystem>();
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            var main = ps.main;
+            main.duration = 0.1f;
+            main.loop = false;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(0.4f, 0.8f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(2f, 5f);
+            main.startSize = new ParticleSystem.MinMaxCurve(0.05f, 0.12f);
+            main.startColor = color;
+            main.gravityModifier = 1.5f;
+            main.stopAction = ParticleSystemStopAction.Destroy;
+            var emission = ps.emission;
+            emission.rateOverTime = 0f;
+            emission.SetBursts(new[] { new ParticleSystem.Burst(0f, (short)count) });
+            var shape = ps.shape;
+            shape.shapeType = ParticleSystemShapeType.Sphere;
+            shape.radius = 0.3f;
+            var r = go.GetComponent<ParticleSystemRenderer>();
+            r.sharedMaterial = Visuals.LineMaterial;
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            ps.Play();
+        }
+
         void UpdateColor()
         {
+            UpdateBar();
             if (!tint) return;
             switch (Kind)
             {

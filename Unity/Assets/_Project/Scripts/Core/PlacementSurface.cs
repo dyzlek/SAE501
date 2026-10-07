@@ -37,6 +37,7 @@ namespace SAE
             var action = Placement.Evaluate(pos, out _);
             if (action != PlacementAction.Place && action != PlacementAction.Fuse) return false;
             Placement.Apply(pos);
+            Sfx.Play(action == PlacementAction.Fuse ? Sfx.Sound.Chime : Sfx.Sound.Thunk, point);   // fusion : un carillon qui monte
             return true;
         }
 

@@ -30,6 +30,7 @@ namespace SAE
 
         void OnOpened(System.Collections.Generic.List<Sae501.Coffres.Rarity> results)
         {
+            Sfx.Play(Sfx.Sound.Fanfare, chest.transform.position);
             var typeChances = CurrentTypeOdds();
             for (int i = 0; i < results.Count; i++)
             {

@@ -118,6 +118,7 @@ public class Banane : MonoBehaviour
         EnMain = false;
         lachee = true;
         elan = vitesseMain.Velocity;    // la vitesse de la main au moment du lâcher : on peut la lancer dans le panier
+        if (elan.sqrMagnitude > 2f) SAE.Sfx.Play(SAE.Sfx.Sound.Whoosh, transform.position, 0.7f);
         elanADonner = true;
         rb.isKinematic = false;         // elle retombe (dans le panier ou par terre)
         rb.useGravity = true;
