@@ -22,7 +22,7 @@ namespace SAE
         void Update()
         {
             pressed = Mathf.MoveTowards(pressed, 0f, Time.deltaTime * 5f);
-            transform.localPosition = rest + Vector3.down * (0.02f * pressed);
+            transform.localPosition = rest + Vector3.down * (0.012f * pressed);
         }
 
         public void Press()

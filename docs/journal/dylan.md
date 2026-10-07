@@ -57,6 +57,13 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 - **Zone du bananier** : la table jaune sur un seul pied devient un étal en bois (4 pieds, rebords, étagère basse avec une caisse) avec une feuille de bananier : les bananes ressortent sur le vert. Le panier est sur un tabouret rond au lieu d'un cube.
 - **LANCER / JOUER** : un pupitre au dessus incliné, gros boutons ronds cerclés de laiton, nom gravé sur une plaque devant chaque bouton (même pupitre sur la carte avec LANCER / HUB, et VIDER à droite du plateau).
 - **Tonneau** : retiré de la cabane.
+- **Après mon test (2e passe)** :
+  - boutons deux fois trop gros qui dépassaient et cachaient leurs plaques : le cylindre utilisé sortait deux fois trop large ; boutons plus petits et bien posés ;
+  - on ne comprenait pas à quoi servaient certains boutons : chaque bouton de comptoir a maintenant une plaque gravée devant lui (PRODUCTION, FRAÎCHEUR, VALEUR, +1 SINGE, VITESSE, CADENCE, RENDEMENT) ;
+  - l'enseigne au-dessus des améliorations flottait : elle est posée sur l'ardoise et tenue par les deux montants ;
+  - noms de la bibliothèque peu lisibles : plaques claires au bord des étagères, texte foncé plus grand ;
+  - meubles trop collés : écarts agrandis (pupitres, panier, comptoirs, étal un peu moins large), vérifiés par calcul ;
+  - JOUER devient « SE TP ».
 - _Pas encore traité :_ le modèle du bananier lui-même (c'est l'asset de Maxens), le texte « [Touche] Ouvrir le coffre » et la roulette (le coffre est la tâche de Maxens aujourd'hui).
 
 | Outil | Pour quoi | Gardé / jeté |
@@ -67,6 +74,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 | Claude (Claude Code) | Mise en forme de ma troisième analyse critique (depuis mon fichier Word, avec ses 9 captures) et des objectifs du jour dans le journal général, branche `fix-all` ; rien de corrigé pour l'instant | Gardé |
 | Claude (Claude Code) | Mise en forme de l'analyse critique de Maxens (qu'il m'a transmise) dans son journal, pour la corriger sur `fix-all` | Gardé |
 | Claude (Claude Code) | Corrections sur `fix-all` de 11 points des deux critiques : bug des objets qui volent (`PlayerRig.IgnoreCollisions`), pupitres de commande, comptoirs d'amélioration avec ardoise, boutons qui disparaissent au max, jusqu'à 4 singes récolteurs (`HarvesterCrew` ; `HarvesterSetup` supprimé, tout est construit par le générateur), trajets des singes par le centre, polices Bangers et Oswald, enseignes et pancartes au lieu des textes flottants, étal des bananes, tabouret du panier, lanterne déplacée dans `cabane.py` | À tester (compilé, scène à régénérer) |
+| Claude (Claude Code) | 2e passe après mon test : cylindre corrigé (boutons deux fois trop gros), boutons plus petits, plaques gravées devant les boutons des comptoirs, enseigne posée sur l'ardoise, plaques de la bibliothèque lisibles, meubles plus espacés, JOUER renommé « SE TP » | À tester (compilé, scène à régénérer) |
 
 ## Mar. 6 oct. 2026
 - **Fait :**

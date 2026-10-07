@@ -37,6 +37,7 @@ namespace SAE.EditorTools
         static readonly Color Chalk = new Color(0.95f, 0.94f, 0.88f);      // texte « à la craie »
         static readonly Color TitleGold = new Color(1f, 0.83f, 0.35f);     // titres des enseignes
         static readonly Color Engraved = new Color(0.22f, 0.13f, 0.06f);   // texte gravé sur les plaques en laiton
+        static readonly Color Parchment = new Color(0.93f, 0.86f, 0.68f);  // plaques claires de la bibliothèque : texte foncé, bien lisible
         static readonly Color Leaf = new Color(0.27f, 0.50f, 0.18f);       // la feuille de bananier posée sur l'étal
         static readonly Color LaunchColor = new Color(0.95f, 0.45f, 0.15f);
         static readonly Color PlayColor = new Color(0.2f, 0.8f, 0.3f);
@@ -300,7 +301,7 @@ namespace SAE.EditorTools
         // yaw : null = tourné vers le centre du hub ; sinon l'angle voulu (sur la carte, 0 = face au joueur de l'estrade).
         // Renvoie le dessus incliné, sur lequel on pose les boutons (x = 0 au milieu).
         static readonly Color Brass = new Color(0.85f, 0.65f, 0.25f);
-        const float ConsoleStep = 0.42f;     // espace entre deux boutons
+        const float ConsoleStep = 0.36f;     // espace entre deux boutons
         const float ConsoleDepth = 0.45f;
 
         static Transform BuildConsole(Transform parent, string name, Vector3 pos, int buttons, float? yaw = null)
@@ -329,11 +330,10 @@ namespace SAE.EditorTools
         // ou se vise avec le rayon), et une plaque en laiton gravée à son nom, couchée sur le pupitre devant lui.
         static ActionCube ConsoleButton(Transform top, float x, string label, Color color, ActionCube.Action action, Transform destination = null)
         {
-            var cylinder = Resources.GetBuiltinResource<Mesh>("Cylinder.fbx");
-            var ring = Visuals.Box("Bague", top, new Vector3(x, 0.006f, 0.05f), new Vector3(0.24f, 0.012f, 0.24f), Brass);
-            ring.GetComponent<MeshFilter>().sharedMesh = cylinder;
-            var button = Visuals.Box(label, top, new Vector3(x, 0.025f, 0.05f), new Vector3(0.19f, 0.025f, 0.19f), color);
-            button.GetComponent<MeshFilter>().sharedMesh = cylinder;
+            var ring = Visuals.Box("Bague", top, new Vector3(x, 0.005f, 0.07f), new Vector3(0.2f, 0.01f, 0.2f), Brass);
+            ring.GetComponent<MeshFilter>().sharedMesh = Cylinder;
+            var button = Visuals.Box(label, top, new Vector3(x, 0.02f, 0.07f), new Vector3(0.15f, 0.02f, 0.15f), color);
+            button.GetComponent<MeshFilter>().sharedMesh = Cylinder;
             var col = button.AddComponent<BoxCollider>();
             col.size = new Vector3(1.3f, 4f, 1.3f);     // un peu plus grand que le bouton : facile à toucher du bout de la manette
             button.tag = Tags.Bouton;
@@ -342,10 +342,25 @@ namespace SAE.EditorTools
             a.action = action;
             a.destination = destination;
 
-            Visuals.Box("Plaque", top, new Vector3(x, 0.004f, -0.16f), new Vector3(0.36f, 0.008f, 0.1f), Brass);
-            var text = Visuals.Text(top, label, new Vector3(x, 0.01f, -0.16f), 0.065f, Engraved, title: true);
+            Visuals.Box("Plaque", top, new Vector3(x, 0.004f, -0.14f), new Vector3(ConsoleStep - 0.04f, 0.008f, 0.1f), Brass);
+            var text = Visuals.Text(top, label, new Vector3(x, 0.01f, -0.14f), 0.065f, Engraved, title: true);
             text.transform.localRotation = Quaternion.Euler(90f, 0, 0);   // couché sur la plaque, le haut des lettres vers le mur
             return a;
+        }
+
+        // Le maillage du cylindre, pris sur un cylindre primitif de Unity (1 m de diamètre à l'échelle 1) :
+        // celui de Resources « Cylinder.fbx » sortait deux fois trop large (boutons énormes, plaques cachées dessous).
+        static Mesh cylinder;
+        static Mesh Cylinder
+        {
+            get
+            {
+                if (cylinder) return cylinder;
+                var tmp = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                cylinder = tmp.GetComponent<MeshFilter>().sharedMesh;
+                Object.DestroyImmediate(tmp);
+                return cylinder;
+            }
         }
 
         // Une ardoise encadrée de bois, avec son rebord à craie : le support de tous les tableaux (vague, caisse, chances,
@@ -377,11 +392,11 @@ namespace SAE.EditorTools
         // Le hub est une cabane en rondins (voir BuildCabin). Tout est posé EN ROND contre les murs, tourné vers le joueur
         // qui se tient au centre, sur le tapis (point d'apparition, regard vers +Z). Cercle de 2,8 m : un ou deux pas suffisent.
         //   devant (0°)        : le plateau incliné (la carte en direct), le tableau de la vague au mur au-dessus,
-        //                        le pupitre LANCER / JOUER (-40°), le pupitre VIDER (+34°), et le panier sur son tabouret (+48°)
+        //                        le pupitre LANCER / SE TP (-41°), le pupitre VIDER (+37°), et le panier sur son tabouret (+54°)
         //   gauche (-82°)      : LA bibliothèque, un seul meuble courbe (7 types × 8 raretés)
         //   derrière (180°)    : la grande porte ouverte : le bananier dehors, l'étal des bananes juste devant
-        //   arrière-gauche     : le comptoir RÉCOLTEUR (-134°) et la caisse accrochée au mur au-dessus
-        //   arrière-droite     : le comptoir du bananier (140°) ; droite : le coffre (100°) et ses chances
+        //   arrière-gauche     : le comptoir RÉCOLTEUR (-136°) et la caisse accrochée au mur au-dessus
+        //   arrière-droite     : le comptoir du bananier (137°) ; droite : le coffre (100°) et ses chances
         const float Ring = HubLayout.Ring;   // rayon du cercle (2,8 m) : tout est posé dessus, le centre reste libre pour circuler
         const float SlotSize = 0.2f;      // une seule bibliothèque compacte (7 types × 8 raretés), tout à portée de bras
         const float SlotStepX = 0.28f;    // espace entre deux raretés
@@ -403,13 +418,13 @@ namespace SAE.EditorTools
             var env = new GameObject("Hub").transform;
             BuildCabin(env);
 
-            // Devant : le plateau ; à sa gauche un pupitre avec LANCER (la vague) et JOUER (aller sur la carte),
+            // Devant : le plateau ; à sa gauche un pupitre avec LANCER (la vague) et SE TP (aller sur la carte),
             // à sa droite le pupitre VIDER, puis le panier
             BuildBoard(env, mapRoot);
-            var commands = BuildConsole(env, "Commandes", Around(-40f, Ring - 0.5f), 2);
+            var commands = BuildConsole(env, "Commandes", Around(-41f, Ring - 0.5f), 2);
             ConsoleButton(commands, -ConsoleStep / 2f, "LANCER", LaunchColor, ActionCube.Action.StartWave).spawner = spawner;
-            ConsoleButton(commands, ConsoleStep / 2f, "JOUER", PlayColor, ActionCube.Action.Teleport, mapSpawn);
-            var clear = BuildConsole(env, "Vider", Around(34f, Ring - 0.5f), 1);
+            ConsoleButton(commands, ConsoleStep / 2f, "SE TP", PlayColor, ActionCube.Action.Teleport, mapSpawn);   // va sur la carte
+            var clear = BuildConsole(env, "Vider", Around(37f, Ring - 0.5f), 1);
             ConsoleButton(clear, 0f, $"VIDER  {ActionCube.ClearBoardPrice}", ClearColor, ActionCube.Action.ClearBoard);
             BuildWaveBoard(env, Around(0f, HubLayout.CabinRadius - 0.25f, 2.25f), Quaternion.identity, spawner);   // accroché au mur
 
@@ -419,7 +434,7 @@ namespace SAE.EditorTools
             // Derrière : le bananier dehors, derrière la grande porte ; l'étal des bananes dedans, juste devant la porte
             var bananier = BuildBananas(env, Around(180f, Ring + 1.3f), 180f, out var panier);
             BuildMoneyBoard(env, HubLayout.HarvesterPanelAngle);
-            if (bananier) BuildUpgradePanel(env, bananier, 140f);
+            if (bananier) BuildUpgradePanel(env, bananier, 137f);
             if (bananier && panier) BuildHarvesters(env, bananier, panier);
 
             BuildDecor(env);
@@ -607,8 +622,9 @@ namespace SAE.EditorTools
                     board.transform.rotation = Facing(a);
                 }
             }
-            // Le nom du meuble sur une enseigne posée dessus, et celui de chaque type sur une plaque au fond de la
-            // première colonne : rien ne flotte, et rien ne se tourne vers le joueur (c'était bizarre de se faire « regarder »)
+            // Le nom du meuble sur une enseigne posée dessus, et celui de chaque type sur une plaque claire accrochée
+            // au bord de son étagère, dans la première colonne : rien ne flotte, rien ne se tourne vers le joueur,
+            // et la plaque n'est plus cachée au fond du casier.
             Visuals.Box("Enseigne", shelf, Around(centerAngle, Ring + 0.2f, height + 0.12f), new Vector3(1.4f, 0.26f, 0.05f), DarkWood)
                 .transform.rotation = Facing(centerAngle);
             Visuals.Text(shelf, "BIBLIOTHÈQUE", Around(centerAngle, Ring + 0.17f, height + 0.12f), 0.16f, TitleGold, title: true)
@@ -618,9 +634,9 @@ namespace SAE.EditorTools
             {
                 var type = (MonkeyType)(firstType + i);
                 float y = FirstShelfY + i * SlotStepY;
-                Visuals.Box($"Plaque {type}", shelf, Around(Angle(-1), Ring + 0.21f, y), new Vector3(SlotStepX - 0.02f, 0.1f, 0.02f), DarkWood)
+                Visuals.Box($"Plaque {type}", shelf, Around(Angle(-1), Ring - 0.19f, y - 0.03f), new Vector3(SlotStepX, 0.12f, 0.015f), Parchment)
                     .transform.rotation = Facing(Angle(-1));
-                Visuals.Text(shelf, type.ToString(), Around(Angle(-1), Ring + 0.195f, y), 0.055f, Chalk)
+                Visuals.Text(shelf, type.ToString(), Around(Angle(-1), Ring - 0.2f, y - 0.03f), 0.065f, Engraved)
                     .transform.rotation = Facing(Angle(-1));
 
                 for (int l = 0; l < MonkeyData.LevelCount; l++)
@@ -669,16 +685,17 @@ namespace SAE.EditorTools
             var table = new GameObject("Etal des bananes").transform;
             table.SetParent(env, false);
             table.SetPositionAndRotation(tablePos, Quaternion.LookRotation(new Vector3(tablePos.x, 0, tablePos.z) - new Vector3(pos.x, 0, pos.z)));
-            Visuals.Solid("Plateau", table, new Vector3(0, HandHeight - 0.025f, 0), new Vector3(1.6f, 0.05f, 1.0f), Wood);
-            Visuals.Box("Feuille", table, new Vector3(0, HandHeight + 0.003f, 0), new Vector3(1.4f, 0.006f, 0.8f), Leaf);
-            Visuals.Solid("Rebord avant", table, new Vector3(0, HandHeight + 0.03f, -0.49f), new Vector3(1.6f, 0.06f, 0.03f), DarkWood);
-            Visuals.Solid("Rebord arriere", table, new Vector3(0, HandHeight + 0.03f, 0.49f), new Vector3(1.6f, 0.06f, 0.03f), DarkWood);
-            Visuals.Solid("Rebord gauche", table, new Vector3(-0.79f, HandHeight + 0.03f, 0), new Vector3(0.03f, 0.06f, 1.0f), DarkWood);
-            Visuals.Solid("Rebord droit", table, new Vector3(0.79f, HandHeight + 0.03f, 0), new Vector3(0.03f, 0.06f, 1.0f), DarkWood);
+            const float StallW = 1.4f, StallD = 1.0f;   // un peu moins large qu'avant : de la place pour le comptoir du récolteur
+            Visuals.Solid("Plateau", table, new Vector3(0, HandHeight - 0.025f, 0), new Vector3(StallW, 0.05f, StallD), Wood);
+            Visuals.Box("Feuille", table, new Vector3(0, HandHeight + 0.003f, 0), new Vector3(StallW - 0.2f, 0.006f, StallD - 0.2f), Leaf);
+            Visuals.Solid("Rebord avant", table, new Vector3(0, HandHeight + 0.03f, -StallD / 2f + 0.015f), new Vector3(StallW, 0.06f, 0.03f), DarkWood);
+            Visuals.Solid("Rebord arriere", table, new Vector3(0, HandHeight + 0.03f, StallD / 2f - 0.015f), new Vector3(StallW, 0.06f, 0.03f), DarkWood);
+            Visuals.Solid("Rebord gauche", table, new Vector3(-StallW / 2f + 0.015f, HandHeight + 0.03f, 0), new Vector3(0.03f, 0.06f, StallD), DarkWood);
+            Visuals.Solid("Rebord droit", table, new Vector3(StallW / 2f - 0.015f, HandHeight + 0.03f, 0), new Vector3(0.03f, 0.06f, StallD), DarkWood);
             for (int sx = -1; sx <= 1; sx += 2)
                 for (int sz = -1; sz <= 1; sz += 2)
-                    Visuals.Box("Pied", table, new Vector3(sx * 0.72f, (HandHeight - 0.05f) / 2f, sz * 0.42f), new Vector3(0.07f, HandHeight - 0.05f, 0.07f), Wood);
-            Visuals.Box("Etagere basse", table, new Vector3(0, 0.22f, 0), new Vector3(1.44f, 0.03f, 0.84f), DarkWood);
+                    Visuals.Box("Pied", table, new Vector3(sx * (StallW / 2f - 0.08f), (HandHeight - 0.05f) / 2f, sz * (StallD / 2f - 0.08f)), new Vector3(0.07f, HandHeight - 0.05f, 0.07f), Wood);
+            Visuals.Box("Etagere basse", table, new Vector3(0, 0.22f, 0), new Vector3(StallW - 0.16f, 0.03f, StallD - 0.16f), DarkWood);
             Prop(table, "Caisse", table.TransformPoint(new Vector3(-0.35f, 0.235f, 0f)), table.eulerAngles.y + 10f, 0.6f);
             bananier.versCible = table;
             bananier.hauteurAuSol = HandHeight + 0.1f;   // la banane se pose sur la table, pas par terre
@@ -694,11 +711,10 @@ namespace SAE.EditorTools
                 var stool = new GameObject("Tabouret du panier").transform;
                 stool.SetParent(env, false);
                 stool.localPosition = basketPos;
-                var cylinder = Resources.GetBuiltinResource<Mesh>("Cylinder.fbx");
                 Visuals.Solid("Assise", stool, new Vector3(0, HandHeight - 0.03f, 0), new Vector3(0.48f, 0.03f, 0.48f), DarkWood)
-                    .GetComponent<MeshFilter>().sharedMesh = cylinder;
+                    .GetComponent<MeshFilter>().sharedMesh = Cylinder;
                 Visuals.Box("Etagere basse", stool, new Vector3(0, 0.3f, 0), new Vector3(0.4f, 0.015f, 0.4f), Wood)
-                    .GetComponent<MeshFilter>().sharedMesh = cylinder;
+                    .GetComponent<MeshFilter>().sharedMesh = Cylinder;
                 for (int i = 0; i < 3; i++)
                     Visuals.Box("Pied", stool, Around(i * 120f, 0.17f, (HandHeight - 0.06f) / 2f), new Vector3(0.05f, HandHeight - 0.06f, 0.05f), Wood);
                 basket.position = basketPos + Vector3.up * HandHeight;
@@ -727,41 +743,49 @@ namespace SAE.EditorTools
             board.frame = panel.Find("Cadre").GetComponent<ColorTint>();
         }
 
-        // Comptoir d'amélioration (bananier, récolteur) : un meuble bas en bois avec un gros bouton rond par amélioration,
-        // et derrière lui une ardoise encadrée, une colonne par bouton (titre, niveau, effet, prix), sous une enseigne.
-        // Rien ne flotte : tout est écrit sur l'ardoise ou sur l'enseigne. +Z local = vers le mur.
-        // Renvoie les boutons (leur dessus qui s'enfonce s'appelle « Bouton ») et le texte de chaque colonne.
-        const float CounterStep = 0.42f;
+        // Comptoir d'amélioration (bananier, récolteur) : un meuble bas en bois avec un bouton rond par amélioration
+        // et, gravé sur une plaque devant chaque bouton, ce qu'il fait. Derrière, une ardoise encadrée (une colonne par
+        // bouton : titre, niveau, effet, prix) tenue par deux montants qui portent aussi l'enseigne : rien ne flotte.
+        // +Z local = vers le mur. Renvoie les boutons (leur dessus qui s'enfonce s'appelle « Bouton ») et le texte de chaque colonne.
+        const float CounterStep = 0.36f;
 
-        static Transform BuildCounter(Transform env, string name, string title, float angle, int columns,
+        static Transform BuildCounter(Transform env, string name, string title, float angle, string[] names,
             out Transform[] buttons, out TextMesh[] labels)
         {
             var root = new GameObject(name).transform;
             root.SetParent(env, false);
             root.SetPositionAndRotation(Around(angle, Ring - 0.45f), Quaternion.Euler(0, angle, 0));
+            int columns = names.Length;
             float width = columns * CounterStep + 0.16f;
 
             Visuals.Box("Plinthe", root, new Vector3(0, 0.035f, 0.06f), new Vector3(width + 0.04f, 0.07f, 0.4f), DarkWood);
             Visuals.Solid("Meuble", root, new Vector3(0, 0.45f, 0.06f), new Vector3(width, 0.8f, 0.36f), Wood);
             Visuals.Box("Dessus", root, new Vector3(0, 0.875f, 0.04f), new Vector3(width + 0.08f, 0.05f, 0.44f), DarkWood);
 
-            // L'ardoise sur deux montants, derrière le comptoir, et l'enseigne avec le titre au-dessus
+            // Deux montants posés sur le comptoir, de chaque côté de l'ardoise, jusqu'en haut de l'enseigne
+            const float SignY = 1.85f, SignH = 0.24f;
+            float postTop = SignY + SignH / 2f;
             for (int side = -1; side <= 1; side += 2)
-                Visuals.Box("Montant", root, new Vector3(side * (width / 2f - 0.04f), 1.4f, 0.24f), new Vector3(0.06f, 1.0f, 0.06f), Wood);
+                Visuals.Box("Montant", root, new Vector3(side * (width / 2f + 0.025f), (0.9f + postTop) / 2f, 0.2f), new Vector3(0.05f, postTop - 0.9f, 0.06f), Wood);
             var board = BuildChalkboard(root, "Ardoise", new Vector3(0, 1.36f, 0.2f), Quaternion.identity, width - 0.12f, 0.62f);
-            Visuals.Box("Enseigne", root, new Vector3(0, 1.92f, 0.22f), new Vector3(title.Length * 0.1f + 0.3f, 0.22f, 0.05f), DarkWood);
-            Visuals.Text(root, title, new Vector3(0, 1.92f, 0.19f), 0.15f, TitleGold, title: true);
+            Visuals.Box("Enseigne", root, new Vector3(0, SignY, 0.2f), new Vector3(width + 0.1f, SignH, 0.05f), DarkWood);   // posée sur le cadre de l'ardoise
+            Visuals.Text(root, title, new Vector3(0, SignY, 0.17f), 0.15f, TitleGold, title: true);
 
             buttons = new Transform[columns];
             labels = new TextMesh[columns];
             for (int i = 0; i < columns; i++)
             {
                 float x = (i - (columns - 1) / 2f) * CounterStep;
-                labels[i] = Visuals.Text(board, "", new Vector3(x, 0.02f, -0.05f), 0.055f, Chalk);
+                labels[i] = Visuals.Text(board, "", new Vector3(x, 0.02f, -0.05f), 0.05f, Chalk);
                 if (i > 0)   // un trait de craie entre deux colonnes
                     Visuals.Box("Trait", board, new Vector3(x - CounterStep / 2f, 0, -0.047f), new Vector3(0.008f, 0.5f, 0.004f), new Color(0.6f, 0.62f, 0.58f));
                 Visuals.Box("Porte", root, new Vector3(x, 0.42f, -0.125f), new Vector3(CounterStep - 0.08f, 0.5f, 0.02f), DarkWood);
-                buttons[i] = RoundButton(root, new Vector3(x, 0.9f, -0.04f));
+                buttons[i] = RoundButton(root, new Vector3(x, 0.9f, 0.04f));
+
+                // Ce que fait le bouton, gravé sur une plaque en laiton couchée devant lui
+                Visuals.Box("Plaque", root, new Vector3(x, 0.903f, -0.11f), new Vector3(CounterStep - 0.04f, 0.006f, 0.08f), Brass);
+                Visuals.Text(root, names[i], new Vector3(x, 0.908f, -0.11f), 0.045f, Engraved, title: true)
+                    .transform.localRotation = Quaternion.Euler(90f, 0, 0);
             }
             return root;
         }
@@ -775,14 +799,13 @@ namespace SAE.EditorTools
             button.localPosition = localPos;
             button.gameObject.tag = Tags.Bouton;
             var col = button.gameObject.AddComponent<BoxCollider>();   // avant RayPress : l'interactable récupère le collider
-            col.size = new Vector3(0.24f, 0.14f, 0.24f);
-            col.center = new Vector3(0, 0.05f, 0);
+            col.size = new Vector3(0.2f, 0.12f, 0.2f);
+            col.center = new Vector3(0, 0.04f, 0);
 
-            var cylinder = Resources.GetBuiltinResource<Mesh>("Cylinder.fbx");
-            Visuals.Box("Bague", button, new Vector3(0, 0.01f, 0), new Vector3(0.22f, 0.012f, 0.22f), Brass)
-                .GetComponent<MeshFilter>().sharedMesh = cylinder;
-            Visuals.Box("Bouton", button, new Vector3(0, 0.035f, 0), new Vector3(0.16f, 0.03f, 0.16f), UpgradeButton.TooExpensive)
-                .GetComponent<MeshFilter>().sharedMesh = cylinder;
+            Visuals.Box("Bague", button, new Vector3(0, 0.005f, 0), new Vector3(0.17f, 0.01f, 0.17f), Brass)
+                .GetComponent<MeshFilter>().sharedMesh = Cylinder;
+            Visuals.Box("Bouton", button, new Vector3(0, 0.02f, 0), new Vector3(0.12f, 0.02f, 0.12f), UpgradeButton.TooExpensive)
+                .GetComponent<MeshFilter>().sharedMesh = Cylinder;
             return button;
         }
 
@@ -790,7 +813,7 @@ namespace SAE.EditorTools
         static void BuildUpgradePanel(Transform env, Bananier bananier, float angle)
         {
             var stats = new[] { BananaStat.Frequence, BananaStat.Pourriture, BananaStat.Valeur };
-            BuildCounter(env, "Comptoir bananier", "BANANIER", angle, stats.Length, out var buttons, out var labels);
+            BuildCounter(env, "Comptoir bananier", "BANANIER", angle, new[] { "PRODUCTION", "FRAÎCHEUR", "VALEUR" }, out var buttons, out var labels);
             for (int i = 0; i < stats.Length; i++)
             {
                 buttons[i].name = $"Bouton {stats[i]}";
@@ -812,7 +835,8 @@ namespace SAE.EditorTools
 
         static void BuildHarvesters(Transform env, Bananier bananier, Panier panier)
         {
-            var counter = BuildCounter(env, "Comptoir récolteur", "RÉCOLTEUR", HubLayout.HarvesterPanelAngle, 4, out var buttons, out var labels);
+            var counter = BuildCounter(env, "Comptoir récolteur", "RÉCOLTEUR", HubLayout.HarvesterPanelAngle,
+                new[] { "+1 SINGE", "VITESSE", "CADENCE", "RENDEMENT" }, out var buttons, out var labels);
             var crew = counter.gameObject.AddComponent<HarvesterCrew>();
             crew.monkeys = new HarvesterMonkey[HarvesterCount];
             for (int i = 0; i < HarvesterCount; i++)

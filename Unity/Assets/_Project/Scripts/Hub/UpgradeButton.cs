@@ -83,7 +83,7 @@ namespace SAE
 
             pressed = Mathf.MoveTowards(pressed, 0f, Time.deltaTime * 5f);
             refused = Mathf.MoveTowards(refused, 0f, Time.deltaTime * 2f);
-            cap.localPosition = capRest + Vector3.down * (0.03f * pressed);
+            cap.localPosition = capRest + Vector3.down * (0.015f * pressed);
 
             var color = Economy.CanAfford(S.PrixAmelioration) ? Affordable : TooExpensive;
             capTint.Set(Color.Lerp(color, Refused, refused));

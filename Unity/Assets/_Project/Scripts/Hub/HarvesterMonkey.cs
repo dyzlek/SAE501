@@ -101,7 +101,7 @@ namespace SAE
         Vector3 PickSpot(Vector3 bananaPos)
         {
             var local = table.InverseTransformPoint(bananaPos);
-            bool onTable = Mathf.Abs(local.x) < 0.85f && Mathf.Abs(local.z) < 0.55f;
+            bool onTable = Mathf.Abs(local.x) < 0.75f && Mathf.Abs(local.z) < 0.55f;   // l'étal fait 1,4 × 1 m
             if (!onTable)
             {
                 var toMonkey = transform.position - bananaPos;
@@ -117,7 +117,7 @@ namespace SAE
         Vector3 TableSpot(Vector3 local)
         {
             float side = Mathf.Sign(table.InverseTransformPoint(home).z);
-            var spot = table.TransformPoint(new Vector3(Mathf.Clamp(local.x, -0.7f, 0.7f), 0f, side * 0.7f));
+            var spot = table.TransformPoint(new Vector3(Mathf.Clamp(local.x, -0.6f, 0.6f), 0f, side * 0.7f));
             spot.y = home.y;
             return spot;
         }
