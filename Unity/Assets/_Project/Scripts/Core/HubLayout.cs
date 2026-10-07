@@ -10,11 +10,11 @@ namespace SAE
         public const float CabinHeight = 3.0f;       // hauteur des murs (le toit conique monte à 4,8 m)
         public const float CarpetRadius = 1.5f;      // le tapis rond au centre, là où se tient le joueur
 
-        public const float BasketAngle = 45f;        // le panier, à côté du plateau, après Vider
+        public const float BasketAngle = 54f;        // le panier, à côté du plateau, après le pupitre Vider
         public const float BasketRadius = Ring - 0.3f;
 
-        public const float HarvesterPanelAngle = -132f;   // le panneau RÉCOLTEUR (la caisse est accrochée au mur au-dessus)
-        public const float HarvesterHomeAngle = -160f;    // où le singe récolteur attend, devant la table des bananes
+        public const float HarvesterPanelAngle = -136f;   // le comptoir RÉCOLTEUR (la caisse est accrochée au mur au-dessus)
+        public const float HarvesterHomeAngle = -160f;    // où le 1er singe récolteur attend, devant l'étal des bananes (les autres à côté)
         public const float HarvesterHomeRadius = Ring - 1.1f;
     }
 }

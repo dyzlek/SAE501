@@ -546,12 +546,16 @@ def build_walls(M, coll):
         if ang == DOOR:
             cuts.append((-DOOR_W / 2, DOOR_W / 2, -1, DOOR_H))
         elif ang in WINDOWS:
-            cuts.append((-WIN_W / 2, WIN_W / 2, WIN_Y0, WIN_Y1))
+            # 4 cm de plus de chaque côté : le bout des rondins se cache dans les montants de la fenêtre
+            # (au ras du montant, les deux faces se superposaient et « clignotaient » selon l'angle de vue)
+            cuts.append((-WIN_W / 2 - 0.04, WIN_W / 2 + 0.04, WIN_Y0, WIN_Y1))
         y = LOG_R + (i % 2) * step / 2
         while y < H - LOG_R * 0.3:
             pieces = [(-side_len / 2 - over, side_len / 2 + over)]
             for (cx0, cx1, cy0, cy1) in cuts:
-                if y + LOG_R * 0.6 > cy0 and y - LOG_R * 0.6 < cy1:
+                # Tout rondin qui touche l'ouverture est coupé (avant : seulement s'il y entrait de plus d'un demi-rayon,
+                # et les autres débordaient de quelques centimètres sur la fenêtre)
+                if y + LOG_R > cy0 and y - LOG_R < cy1:
                     new = []
                     for (a, c) in pieces:
                         if a < cx0:
@@ -608,6 +612,7 @@ def build_walls(M, coll):
                 b.box(center + B @ Vector((s * (WIN_W / 2 + 0.04), 0, wy)), (0.08, 0.3, WIN_Y1 - WIN_Y0 + 0.16), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.008)
             b.box(center + B @ Vector((0, 0, WIN_Y1 + 0.05)), (WIN_W + 0.24, 0.3, 0.1), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.01)
             b.box(center + B @ Vector((0, -0.03, WIN_Y0 - 0.04)), (WIN_W + 0.3, 0.42, 0.07), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.01)   # appui
+            b.box(center + B @ Vector((0, 0, WIN_Y0 - 0.17)), (WIN_W + 0.08, 0.26, 0.3), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.008)    # allège : bouche le jour sous l'appui
             b.box(center + B @ Vector((0, 0, wy)), (0.035, 0.05, WIN_Y1 - WIN_Y0), B, M["poutre"], uv_scale=1 / 1.5)                     # croisillon
             b.box(center + B @ Vector((0, 0, wy)), (WIN_W, 0.05, 0.035), B, M["poutre"], uv_scale=1 / 1.5)
     frames = b.finish("Encadrements", coll)
@@ -709,9 +714,10 @@ def build_chandelier(M, coll):
 
 
 def build_lanterns(M, coll):
-    """Deux lanternes en fer accrochées aux murs, une bougie allumée derrière les vitres."""
+    """Deux lanternes en fer accrochées aux murs, une bougie allumée derrière les vitres.
+    À -28° (au-dessus du pupitre LANCER / JOUER) : à -60°, elle tombait dans la bibliothèque."""
     b = Builder([M["fer"], M["vitre_lanterne"]])
-    for i, ang in enumerate((120, -60)):
+    for i, ang in enumerate((120, -28)):
         B = basis(ang)
         wall = polar(ang, R - LOG_R - 0.02)
         c = wall + B @ Vector((0, -0.24, 2.35))

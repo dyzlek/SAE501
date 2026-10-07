@@ -26,10 +26,10 @@ namespace SAE
             shownMoney = Economy.Money;
 
             var sb = new StringBuilder();
-            sb.AppendLine("<b>CHANCES DU COFFRE</b>");
+            sb.AppendLine("<color=#FFD45A>CHANCES DU COFFRE</color>");
             sb.AppendLine($"Vagues vaincues : {GameState.WavesWon}");
             string priceColor = Economy.CanAfford(chest.Price) ? "#FFD233" : "#999999";
-            sb.AppendLine($"Prix : <color={priceColor}>{chest.Price}</color>   Singes : {chest.MonkeysPerChest}");
+            sb.AppendLine($"Prix : <color={priceColor}>{chest.Price}</color>");
             sb.AppendLine();
 
             var odds = chest.CurrentOdds();
@@ -50,7 +50,7 @@ namespace SAE
             if (reward)
             {
                 sb.AppendLine();
-                sb.AppendLine("<b>SINGES</b>");
+                sb.AppendLine("<color=#FFD45A>SINGES</color>");
                 var typeOdds = reward.CurrentTypeOdds();
                 for (int i = 0; i < MonkeyData.TypeCount; i++)
                 {

@@ -35,26 +35,33 @@ namespace SAE
             return go;
         }
 
-        // Police et matériau de tous les textes 3D. Le matériau utilise notre shader « SAE/Texte 3D »
-        // (Art/Resources) : celui de Unity ne s'affiche pas correctement dans le casque (un seul œil, à travers les murs).
-        static Font font;
-        static Material textMaterial;
+        // Les deux polices des textes 3D (Art/Resources/Fonts, licence libre OFL) : Oswald pour lire (panneaux, prix),
+        // Bangers pour les titres (style dessin animé, comme Bloons). Sans elles, on retombe sur la police de Unity.
+        // Le matériau utilise notre shader « SAE/Texte 3D » (Art/Resources) : celui de Unity ne s'affiche pas
+        // correctement dans le casque (un seul œil, à travers les murs). Un matériau par police (chacune a sa texture).
+        static Font bodyFont, titleFont;
+        static readonly System.Collections.Generic.Dictionary<Font, Material> textMaterials = new System.Collections.Generic.Dictionary<Font, Material>();
 
-        static Font Font => font ? font : font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        static Font BodyFont => bodyFont ? bodyFont : bodyFont = LoadFont("Fonts/Oswald-Bold");
+        static Font TitleFont => titleFont ? titleFont : titleFont = LoadFont("Fonts/Bangers");
 
-        static Material TextMaterial
+        static Font LoadFont(string path)
         {
-            get
+            var f = Resources.Load<Font>(path);
+            return f ? f : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        }
+
+        static Material TextMaterial(Font f)
+        {
+            if (!textMaterials.TryGetValue(f, out var m) || !m)
             {
-                if (!textMaterial)
-                {
-                    textMaterial = new Material(Shader.Find("SAE/Texte 3D")) { name = "Texte 3D" };
-                    // Quand Unity agrandit la texture de la police (nouvelles lettres), on la redonne au matériau
-                    Font.textureRebuilt += f => { if (textMaterial && f == font) textMaterial.mainTexture = f.material.mainTexture; };
-                }
-                textMaterial.mainTexture = Font.material.mainTexture;
-                return textMaterial;
+                m = new Material(Shader.Find("SAE/Texte 3D")) { name = "Texte 3D " + f.name };
+                textMaterials[f] = m;
+                // Quand Unity agrandit la texture de la police (nouvelles lettres), on la redonne au matériau
+                Font.textureRebuilt += rebuilt => { if (m && rebuilt == f) m.mainTexture = f.material.mainTexture; };
             }
+            m.mainTexture = f.material.mainTexture;
+            return m;
         }
 
         // Matériau des lignes (rayons, cercles, tirs) : le même shader, sans texture, la couleur vient de la ligne.
@@ -66,24 +73,35 @@ namespace SAE
         static void FixSceneTexts()
         {
             foreach (var tm in Object.FindObjectsByType<TextMesh>())
-                if (tm.font == Font) tm.GetComponent<MeshRenderer>().sharedMaterial = TextMaterial;
+                if (tm.font == BodyFont || tm.font == TitleFont) tm.GetComponent<MeshRenderer>().sharedMaterial = TextMaterial(tm.font);
         }
 
-        public static TextMesh Label(Transform parent, string text, Vector3 localPos, float height, Color? color = null)
+        // Un texte 3D qui se tourne vers le joueur (Billboard). title = police des titres.
+        public static TextMesh Label(Transform parent, string text, Vector3 localPos, float height, Color? color = null, bool title = false)
         {
             var go = new GameObject("Label");
             go.transform.SetParent(parent, false);
             go.transform.localPosition = localPos;
             var tm = go.AddComponent<TextMesh>();
-            tm.font = Font;
-            go.GetComponent<MeshRenderer>().sharedMaterial = TextMaterial;
+            tm.font = title ? TitleFont : BodyFont;
+            go.GetComponent<MeshRenderer>().sharedMaterial = TextMaterial(tm.font);
             tm.text = text;
             tm.fontSize = 48;
             tm.characterSize = height / 4.8f; // ~ hauteur d'une ligne en mètres
+            tm.lineSpacing = 0.9f;
             tm.anchor = TextAnchor.MiddleCenter;
             tm.alignment = TextAlignment.Center;
             tm.color = color ?? Color.white;
             go.AddComponent<Billboard>();
+            return tm;
+        }
+
+        // Un texte fixe, écrit sur un panneau : il ne se tourne pas vers le joueur, il suit le panneau.
+        // Lisible du côté -Z local du parent (le côté du joueur pour nos meubles, tournés « +Z vers le mur »).
+        public static TextMesh Text(Transform parent, string text, Vector3 localPos, float height, Color color, bool title = false)
+        {
+            var tm = Label(parent, text, localPos, height, color, title);
+            Kill(tm.GetComponent<Billboard>());
             return tm;
         }
 

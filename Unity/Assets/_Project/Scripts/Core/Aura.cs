@@ -17,7 +17,10 @@ namespace SAE
 
         // Pose une aura sur target. bodySize = taille du singe en mètres (largeur, hauteur, profondeur).
         // Le singe est centré sur target, donc ses pieds sont à -hauteur/2.
-        public static Aura Add(GameObject target, Rarity level, Vector3 bodySize)
+        public static Aura Add(GameObject target, Rarity level, Vector3 bodySize) => Add(target, ColorOf(level), bodySize);
+
+        // Même aura, d'une couleur choisie (ex. l'aura dorée du coffre qui s'ouvre).
+        public static Aura Add(GameObject target, ParticleSystem.MinMaxGradient color, Vector3 bodySize)
         {
             var prefab = MonkeyVisuals.Instance ? MonkeyVisuals.Instance.auraPrefab : null;
             if (!prefab) return null;
@@ -25,7 +28,7 @@ namespace SAE
             var aura = Instantiate(prefab, target.transform);
             aura.name = "Aura";
             aura.Fit(bodySize);
-            aura.SetColor(level);
+            aura.SetColor(color);
             aura.Restart();
             return aura;
         }
@@ -44,9 +47,8 @@ namespace SAE
             shape.radius = Mathf.Max(MinRadius, halfWidth / height);
         }
 
-        void SetColor(Rarity level)
+        void SetColor(ParticleSystem.MinMaxGradient color)
         {
-            var color = ColorOf(level);
             var flamesMain = flames.main;
             flamesMain.startColor = color;
             var glowMain = glow.main;

@@ -4,11 +4,16 @@
 // couleur du TextMesh × forme des lettres (alpha de la texture de police), caché par ce qui est devant.
 // Il utilise la bibliothèque d'URP (Core.hlsl) : c'est elle qui donne la bonne caméra à chaque œil.
 // Il est dans un dossier Resources pour être toujours inclus dans le build (Shader.Find au lancement).
+// Options (réglées par code) : _ZTest = Always pour dessiner par-dessus le décor (la fiche du singe),
+// _VertexColor = 0 pour un objet sans couleur de sommets (le fond de la fiche), teinté par _Color.
 Shader "SAE/Texte 3D"
 {
     Properties
     {
         _MainTex ("Texture de la police", 2D) = "white" {}
+        _Color ("Teinte", Color) = (1, 1, 1, 1)
+        _VertexColor ("Utiliser la couleur des sommets", Float) = 1
+        [Enum(UnityEngine.Rendering.CompareFunction)] _ZTest ("Test de profondeur", Float) = 4
     }
     SubShader
     {
@@ -21,6 +26,7 @@ Shader "SAE/Texte 3D"
         }
         Blend SrcAlpha OneMinusSrcAlpha
         ZWrite Off
+        ZTest [_ZTest]
         Cull Off
 
         Pass
@@ -38,6 +44,8 @@ Shader "SAE/Texte 3D"
             SAMPLER(sampler_MainTex);
             CBUFFER_START(UnityPerMaterial)
                 float4 _MainTex_ST;
+                half4 _Color;
+                half _VertexColor;
             CBUFFER_END
 
             struct Attributes
@@ -69,7 +77,7 @@ Shader "SAE/Texte 3D"
 
             half4 frag (Varyings input) : SV_Target
             {
-                half4 c = input.color;
+                half4 c = lerp(half4(1, 1, 1, 1), input.color, _VertexColor) * _Color;
                 c.a *= SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv).a;
                 return c;
             }

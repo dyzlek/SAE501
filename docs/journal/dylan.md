@@ -6,8 +6,9 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 - **Fait :** fusion de ma cabane (`test/cabane`) avec l'arc de Maxens (`feat/arc-quincy`) dans une nouvelle branche `feat/cabane-arc`. Un seul conflit, dans le générateur de scène : on garde la place du coffre de la cabane (estrade, texture bois) et le passage du point d'apparition sur la carte au joueur PC (pour l'étui de l'arc).
   - ajout des derniers commits de Maxens (mains de Quincy, arc plus petit, tir dans le simulateur) ; Pull Request [#9](https://github.com/dyzlek/SAE501/pull/9) fusionnée dans `main` ;
   - scène régénérée et testée en mode PC : la cabane, le hub et l'arc de Quincy fonctionnent ensemble.
+  - branche `fix-all` : corrections d'une partie des deux critiques (la mienne et celle de Maxens), voir le détail ci-dessous.
 - **Bloque :** sur la carte, l'arc en mode PC est grand et cache le bas de l'écran ; la carte reste en cubes gris (pas encore dans la DA de la cabane).
-- **Demain :** _
+- **Demain :** tester `fix-all` (PC puis casque) et faire la Pull Request vers `main` ; voir le plan du 8 oct. dans le [journal général](GENERAL.md).
 
 **Captures après la fusion (mode PC)**
 
@@ -17,11 +18,75 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
 ![Carte : l'arc de Quincy en bas à droite, la carte encore en cubes](../captures/cabane-arc-carte.webp)
 
+_L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : je la corrige aussi sur `fix-all`._
+
+**Ma troisième analyse critique** _(bugs et défauts à corriger sur la branche `fix-all`)_
+1. **On peut faire voler des objets avec la banane** (« prop fly ») : en tenant une banane, on pousse les objets du décor et on peut les envoyer en l'air.
+2. **L'affichage sur les écrans n'est pas beau**, même s'il reste lisible.
+
+   ![Affichage d'un écran du hub](../captures/critique3-1.png)
+   ![Affichage d'un autre écran du hub](../captures/critique3-2.png)
+3. **Des objets se superposent.**
+
+   ![Objets du hub qui se chevauchent](../captures/critique3-3.png)
+   ![Autres objets qui se chevauchent](../captures/critique3-4.png)
+4. **Le texte qui flotte dans le vide est moche**, par exemple sur la bibliothèque : il faudrait le mettre sur une pancarte ou un support.
+
+   ![Texte flottant au-dessus de la bibliothèque](../captures/critique3-5.png)
+5. **Les panneaux et certains objets ne sont pas beaux.**
+
+   ![Panneaux et objets du hub](../captures/critique3-6.png)
+6. **Les bornes d'amélioration ne sont vraiment pas belles.**
+
+   ![Bornes et boutons d'amélioration](../captures/critique3-7.png)
+7. **Le petit singe (récolteur) rentre dans les objets.**
+
+   ![Le singe récolteur qui traverse un objet](../captures/critique3-8.png)
+8. **Le terrain n'est pas beau.**
+
+   ![Le terrain autour de la cabane](../captures/critique3-9.png)
+
+**Corrigé sur `fix-all`** _(code écrit par l'IA, compilé, pas encore testé dans Unity : il faut régénérer la scène)_
+- **Objets qui volent avec la banane** : le joueur ne se cogne plus aux bananes ni au singe qu'il tient ; avant, il pouvait monter dessus et s'envoler.
+- **Objets superposés** : LANCER et JOUER sont réunis sur un seul pupitre ; les caisses et le tonneau sortent de la cabane (caisses sur la terrasse et sous l'étal) ; la lanterne qui tombait dans la bibliothèque est déplacée au-dessus du pupitre (modèle Blender réexporté).
+- **Singe récolteur qui traversait les meubles** : sur un long trajet, il passe par le milieu de la pièce ; il s'arrête devant le tabouret du panier au lieu de rentrer dedans.
+- **Textes et écrans** : deux vraies polices (Bangers pour les titres, Oswald pour lire, licence libre) ; tous les tableaux deviennent des ardoises encadrées, titres dorés, texte à la craie.
+- **Texte dans le vide** : « BIBLIOTHÈQUE » sur une enseigne posée sur le meuble (il ne se tourne plus vers le joueur), les noms des types sur des plaques, le prix du coffre sur une petite pancarte devant l'estrade.
+- **Bornes d'amélioration** : de vrais comptoirs en bois (portes, plateau foncé), une ardoise avec une colonne par bouton, une enseigne avec le titre ; boutons ronds cerclés de laiton, verts ou gris (plus de jaune).
+- **Récolteur** : on peut acheter **jusqu'à 4 singes** (le bouton d'achat reste) ; les améliorations valent pour toute l'équipe ; deux singes ne courent jamais après la même banane. Les boutons au niveau max **disparaissent** (récolteur et bananier) et l'ardoise affiche MAX.
+- **Zone du bananier** : la table jaune sur un seul pied devient un étal en bois (4 pieds, rebords, étagère basse avec une caisse) avec une feuille de bananier : les bananes ressortent sur le vert. Le panier est sur un tabouret rond au lieu d'un cube.
+- **LANCER / JOUER** : un pupitre au dessus incliné, gros boutons ronds cerclés de laiton, nom gravé sur une plaque devant chaque bouton (même pupitre sur la carte avec LANCER / HUB, et VIDER à droite du plateau).
+- **Tonneau** : retiré de la cabane.
+- **Après mon test (2e passe)** :
+  - boutons deux fois trop gros qui dépassaient et cachaient leurs plaques : le cylindre utilisé sortait deux fois trop large ; boutons plus petits et bien posés ;
+  - on ne comprenait pas à quoi servaient certains boutons : chaque bouton de comptoir a maintenant une plaque gravée devant lui (PRODUCTION, FRAÎCHEUR, VALEUR, +1 SINGE, VITESSE, CADENCE, RENDEMENT) ;
+  - l'enseigne au-dessus des améliorations flottait : elle est posée sur l'ardoise et tenue par les deux montants ;
+  - noms de la bibliothèque peu lisibles : plaques claires au bord des étagères, texte foncé plus grand ;
+  - meubles trop collés : écarts agrandis (pupitres, panier, comptoirs, étal un peu moins large), vérifiés par calcul ;
+  - JOUER devient « SE TP ».
+- **3e passe** : plus de « +0 » qui flotte quand une amélioration est gratuite ; plaques des boutons en bois foncé avec le texte doré, plus grand (le texte foncé sur le laiton ne se lisait pas) ; texte des ardoises un peu plus grand.
+- **Critique de Nicolas (1re partie)** :
+  - **fiche du singe** (touche A) refaite comme les ardoises du hub (cadre en bois, titre doré, texte à la craie) et dessinée par-dessus le décor : un meuble ne la cache plus ;
+  - **bûches qui débordaient sur les fenêtres** : dans `cabane.py`, les rondins qui touchent une fenêtre sont coupés et leurs bouts se cachent dans les montants, un panneau bouche le vide sous l'appui ; caméras réglées (affichage de 3 cm à 400 m) pour que les surfaces proches clignotent moins ;
+  - **chute dans le vide** : le joueur qui tombe sous le sol revient au point d'arrivée le plus proche (hub ou carte).
+- _Pas encore traité :_ le modèle du bananier lui-même (c'est l'asset de Maxens), le texte « [Touche] Ouvrir le coffre » et la roulette (le coffre est la tâche de Maxens aujourd'hui).
+
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
 | Claude (Claude Code) | Fusion `test/cabane` + `feat/arc-quincy` (Maxens) dans `feat/cabane-arc`, conflit du `PrototypeGenerator` résolu en gardant les deux | À tester |
 | Claude (Claude Code) | 2e fusion avec les derniers commits de Maxens sur `feat/arc-quincy` (mains de Quincy riggées, arc plus petit, tir dans le simulateur VR), sans conflit ; PR #9 ouverte (le merge par Claude a été bloqué faute de relecture, fusionnée ensuite sur GitHub) | Gardé (testé par moi en mode PC) |
 | Claude (Claude Code) | Mise à jour de mon journal et du journal général avec mes 3 captures | Gardé |
+| Claude (Claude Code) | Mise en forme de ma troisième analyse critique (depuis mon fichier Word, avec ses 9 captures) et des objectifs du jour dans le journal général, branche `fix-all` ; rien de corrigé pour l'instant | Gardé |
+| Claude (Claude Code) | Mise en forme de l'analyse critique de Maxens (qu'il m'a transmise) dans son journal, pour la corriger sur `fix-all` | Gardé |
+| Claude (Claude Code) | Corrections sur `fix-all` de 11 points des deux critiques : bug des objets qui volent (`PlayerRig.IgnoreCollisions`), pupitres de commande, comptoirs d'amélioration avec ardoise, boutons qui disparaissent au max, jusqu'à 4 singes récolteurs (`HarvesterCrew` ; `HarvesterSetup` supprimé, tout est construit par le générateur), trajets des singes par le centre, polices Bangers et Oswald, enseignes et pancartes au lieu des textes flottants, étal des bananes, tabouret du panier, lanterne déplacée dans `cabane.py` | À tester (compilé, scène à régénérer) |
+| Claude (Claude Code) | 2e passe après mon test : cylindre corrigé (boutons deux fois trop gros), boutons plus petits, plaques gravées devant les boutons des comptoirs, enseigne posée sur l'ardoise, plaques de la bibliothèque lisibles, meubles plus espacés, JOUER renommé « SE TP » | À tester (compilé, scène à régénérer) |
+| Claude (Claude Code) | 3e passe : « +0 » supprimé (MoneyBoard ignore un montant nul), plaques des boutons lisibles (bois foncé, texte doré plus grand), texte des ardoises agrandi | À tester (compilé, scène à régénérer) |
+| Claude (Claude Code) | Critique de Nicolas, 1re partie : fiche du singe restylée et dessinée par-dessus le décor (shader « SAE/Texte 3D » avec ZTest réglable), rondins coupés autour des fenêtres dans `cabane.py` (cabane réexportée), caméras 3 cm à 400 m, `FallGuard` (retour au point d'arrivée le plus proche après une chute) | À tester (compilé, scène à régénérer) |
+| Claude (Claude Code) | Fusion de `feat/coffre-maxens` (nouveau coffre de Maxens) dans `fix-all` : conflits résolus en gardant les deux (générateur : son coffre fixe + mes comptoirs ; pancarte du prix : « COFFRE » pendant l'ouverture ; journal de Maxens : ses deux entrées) ; coffre décalé à 97° (son estrade fait 1,4 m) | À tester |
+| Claude (Claude Code) | LANCER qui ne faisait rien au casque (build) : cause non trouvée sans casque (le lien vers les vagues est bien dans la scène). Ajouts : LANCER devient gris pendant une vague (on voit si elle est partie), il retrouve les vagues tout seul si le lien manque, et le bouton B de la manette droite lance la vague de partout | À tester au casque |
+| Claude (Claude Code) | Journal général : bilan du 7 oct. et plan du 8 oct. (tâches données par l'équipe) | Gardé |
+| Claude (Claude Code) | `main` fusionné dans `fix-all` (sans conflit), branche poussée, Pull Request [#11](https://github.com/dyzlek/SAE501/pull/11) vers `main` ouverte (à relire et fusionner sur GitHub ; pas encore testée dans Unity) | Gardé |
+| Claude (Claude Code) | Mise en forme de l'analyse critique de Nicolas (qu'il m'a transmise) dans son journal, avec ses 2 photos ; rien de corrigé pour l'instant | Gardé |
 
 ## Mar. 6 oct. 2026
 - **Fait :**

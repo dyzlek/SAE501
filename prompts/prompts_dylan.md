@@ -4,6 +4,30 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
+### Bilan du jour et plan de demain
+> Ajoute ce qu'il faudrait faire demain et mets à jour ce qu'on a fait dans le GENERAL.md : chercher des assets de boutons ou les faire ; prendre les singes et les jeter ; faire un indicateur avec un effet de traînée ; ajouter la physique sur les bananes (faire des paniers, et donc enlever la poignée).
+
+### Fusionner le coffre de Maxens et lancer les vagues en VR
+> Fusionne `feat/coffre` (le coffre de Maxens) avec ce que j'ai fait, et corrige le fait que je ne peux pas faire apparaître les ballons simplement en VR. Attends avant de mettre ça sur `main`.
+
+### Fiches des singes, textures qui se chevauchent, chute dans le vide
+> Améliore les fiches des singes (il faut aussi régler le fait qu'elles soient cachées par les meubles), corrige les textures qui se chevauchent selon l'angle (par exemple les bûches du mur sur la fenêtre), et le fait que quand on tombe dans le vide hors de la carte, rien ne nous remet en place.
+
+### La critique de Nicolas dans son journal
+> Ajoute dans le journal de Nicolas sa critique (texte de la bibliothèque, collision du singe récolteur, fiche du singe cachée par la bibliothèque, textures qui se chevauchent, herbe de la carte, chute dans le vide, bouton LANCER à griser, singes en T-pose, arc, portée et stats des singes sur le plateau), avec ses 2 photos.
+
+### Corriger une partie des critiques
+> Pour l'instant, corrige seulement ces points : les objets qu'on peut faire voler avec la banane ; les objets qui se superposent (les caisses rentrent dans l'armoire) ; le petit singe récolteur qui rentre dans les objets ; l'affichage des écrans, pas beau même s'il est lisible ; le texte qui flotte dans le vide (il faudrait une pancarte, et le mot « Bibliothèque » tourne vers le joueur) ; les textes trop simples (bibliothèque et récolteur) ; les panneaux et certains objets pas beaux ; les bornes d'amélioration pas belles et les boutons jaunes du récolteur. Pour le meuble du récolteur, enlever seulement le bouton quand il est au maximum, et permettre d'avoir plusieurs singes ; pareil pour le bananier. Refaire le bananier et toute sa zone, les boutons LANCER et JOUER (horribles), et enlever le tonneau.
+>
+> Suite (après mon test) : certains meubles sont trop collés ; les boutons sont trop gros, pas beaux, et ils dépassent ; on voit mal les textes de la bibliothèque ; la pancarte au-dessus des améliorations flotte ; on ne comprend pas à quoi servent certains boutons ; remplace JOUER par « SE TP ».
+>
+> Suite : il manque juste à enlever le « +0 » qui s'affiche et à améliorer la lisibilité du texte.
+
+### Ma critique et les objectifs du jour, dans une branche fix-all
+> Dans une branche `fix-all`, mets d'abord ma critique (mon fichier Word « analyse critique ») et les objectifs qu'on s'est fixés aujourd'hui : analyse critique et bugs (tout le monde, Dylan corrige) ; coffre : changer l'asset, améliorer l'animation, voir les singes (Maxens) ; limiter la zone de téléportation dans le hub (Dylan) ; améliorer l'arc (Nicolas) ; séparer vraiment les deux niveaux, le hub et le labyrinthe (Dylan) ; améliorer le labyrinthe (Dylan) ; mettre les assets des ballons MOAB (Maxens).
+>
+> Suite : ajoute aussi la critique de Maxens (bibliothèque, récolteur, bananier, boutons LANCER/JOUER, caisses, tonneau, carte et montagnes).
+
 ### Journaux à jour avec mes captures
 > Mets à jour mon journal et le GENERAL.md (avec mes 3 captures du hub et de la carte).
 
