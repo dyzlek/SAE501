@@ -57,7 +57,8 @@ namespace SAE
         public static List<WaveData> Default() => new List<WaveData>
         {
             new WaveData(N(1, 1), C(1, 2), B(1, 2),                                    // 1 : découverte, un de chaque
-                         N(8, 1, 0.9f), Boss(1, 5)),
+                         N(8, 1, 0.9f), Boss(1, 5),
+                         new BalloonGroup(BalloonKind.Dirigeable, 1, 20, 1f, 4f)),   // aperçu du dirigeable rouge
             new WaveData(N(10, 1), N(6, 2), Boss(1, 6)),                              // 2
             new WaveData(N(12, 2), R(5, 1), Boss(1, 8)),                              // 3 : premiers rapides
             new WaveData(N(10, 2), R(8, 2), N(6, 3), Boss(1, 10)),                    // 4
