@@ -6,7 +6,7 @@ namespace SAE
 {
     // Une flèche (prefab Prefabs/Fleche.prefab : l'origine est l'encoche, la pointe vers +Z).
     // Encochée, elle suit la corde sans physique. Tirée, elle vole avec la gravité et s'oriente dans le sens
-    // de sa vitesse (elle pique du nez en fin de course), avec une traînée blanche qui montre sa vitesse.
+    // de sa vitesse (elle pique du nez en fin de course), avec une traînée dorée qui montre sa vitesse.
     // Deux améliorations décident de ce qu'elle fait aux ballons :
     //   perforation (BowUpgrades.Pierce)        : les couches percées sur chaque ballon touché (ses « dégâts ») ;
     //   transperçante (BowUpgrades.PassThrough) : le nombre de ballons qu'elle traverse (tir collatéral).
@@ -97,7 +97,7 @@ namespace SAE
             Destroy(gameObject, stuckTime);
         }
 
-        // Effet de vitesse : une traînée blanche, courte (0,12 s), qui s'affine et s'efface derrière la flèche.
+        // Effet de vitesse : une traînée dorée (pas blanche : elle se perdait dans le ciel), courte (0,12 s), qui s'affine et s'efface.
         TrailRenderer AddTrail()
         {
             var t = gameObject.AddComponent<TrailRenderer>();
@@ -105,8 +105,8 @@ namespace SAE
             t.time = 0.12f;
             t.widthMultiplier = 0.035f;
             t.widthCurve = AnimationCurve.Linear(0f, 1f, 1f, 0f);
-            t.startColor = new Color(1f, 1f, 1f, 0.7f);
-            t.endColor = new Color(1f, 1f, 1f, 0f);
+            t.startColor = new Color(1f, 0.8f, 0.3f, 0.8f);
+            t.endColor = new Color(1f, 0.5f, 0.1f, 0f);
             t.minVertexDistance = 0.1f;
             t.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             t.emitting = false;

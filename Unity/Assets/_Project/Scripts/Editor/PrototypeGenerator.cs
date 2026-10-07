@@ -81,7 +81,7 @@ namespace SAE.EditorTools
             var hub = BuildHub();   // avant le joueur : l'installeur des bananes ajoute son TestSouris à Camera.main s'il en trouve une
             var player = BuildPlayers(hubSpawn.position);
             if (!player) return;
-            BuildChest(hub, Around(97f, Ring - 0.2f), player.head);   // estrade de 1,4 m (le coffre de Maxens) : un peu plus près de VIDER, loin du comptoir du bananier
+            BuildChest(hub, Around(97f, Ring - 0.2f));   // estrade de 1,4 m (le coffre de Maxens) : un peu plus près de VIDER, loin du comptoir du bananier
             UseWoodTexture(hub);   // encore une fois : l'estrade et le cadre du coffre sont posés après le reste du hub
             BuildPresence(Level.Hub, hubSpawn);
             new GameObject("Chargement du labyrinthe").AddComponent<LevelLoader>();
@@ -358,6 +358,10 @@ namespace SAE.EditorTools
                 so.FindProperty("m_SmoothTurnEnabled").boolValue = false;
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
+
+            // Pas de saut : on se déplace en se téléportant (le saut des Starter Assets secoue la vue, règle de confort)
+            var jump = FindChild(go.transform, "Jump");
+            if (jump) jump.gameObject.SetActive(false);
 
             ShowRays(go);
 
@@ -645,6 +649,15 @@ namespace SAE.EditorTools
             disc.convex = true;
             Teleportable(zone);
 
+            // Sous le plateau : un bloc invisible du sol jusqu'à la planche. Le rayon de téléportation s'y arrête
+            // (ce n'est pas une zone de téléportation) : on ne se pose plus sous le plateau, la tête dedans.
+            var underBoard = new GameObject("Sous le plateau (bloque la téléportation)");
+            underBoard.transform.SetParent(env, false);
+            var block = underBoard.AddComponent<BoxCollider>();
+            float boardSide = MapLayout.Size * BoardTile + 0.1f;
+            block.center = Around(0f, Ring - 0.9f, 0.45f);
+            block.size = new Vector3(boardSide, 0.9f, boardSide * Mathf.Cos(25f * Mathf.Deg2Rad));
+
             // Un collider par mur : on ne traverse pas, ni en marchant ni en se téléportant (sauf par la porte)
             float r = HubLayout.CabinRadius, h = HubLayout.CabinHeight;
             float sideLength = 2f * r * Mathf.Tan(Mathf.PI / CabinSides);
@@ -929,13 +942,21 @@ namespace SAE.EditorTools
 
             // Une ardoise fixe (pas de billboard) : c'est le panneau entier qui fait face au joueur, au-dessus du comptoir
             var panel = BuildChalkboard(root, "Panneau", new Vector3(0, 2.4f, 0), Quaternion.identity, 0.8f, 0.4f);
-            Visuals.Text(panel, "CAISSE", new Vector3(0, 0.12f, -0.05f), 0.09f, Chalk, title: true);
-            var amount = Visuals.Text(panel, "0", new Vector3(0, -0.05f, -0.05f), 0.22f, TitleGold, title: true);
+            FillMoneyBoard(panel, root.gameObject);
+        }
 
-            var board = root.gameObject.AddComponent<MoneyBoard>();
+        // Le texte d'une caisse (hub ou carte) : « MES BANANES », puis le nombre en gros chiffres dorés.
+        // L'argent du jeu, ce sont les bananes : on l'écrit partout pareil (caisse, prix, comptoirs).
+        // host : l'objet qui porte le script (au hub, le pied du mur : les « +50 » de fin de vague apparaissent à hauteur d'yeux).
+        static MoneyBoard FillMoneyBoard(Transform panel, GameObject host)
+        {
+            Visuals.Text(panel, "MES BANANES", new Vector3(0, 0.12f, -0.05f), 0.08f, Chalk, title: true);
+            var amount = Visuals.Text(panel, "0", new Vector3(0, -0.05f, -0.05f), 0.22f, TitleGold, title: true);
+            var board = host.AddComponent<MoneyBoard>();
             board.amount = amount;
             board.panel = panel;
             board.frame = panel.Find("Cadre").GetComponent<ColorTint>();
+            return board;
         }
 
         // Comptoir d'amélioration (bananier, récolteur) : un meuble bas en bois avec un bouton rond par amélioration
@@ -1083,7 +1104,7 @@ namespace SAE.EditorTools
         // Le coffre : le modèle de la cabane (Art/Coffre/Coffre.glb, fait par Blender/coffre.py), avec la roulette
         // et le texte de Nicolas, branché sur notre joueur (ChestClickable) et sur l'argent commun.
         // Il reste fixe, tourné vers le centre ; à l'ouverture : boing et couvercle (ChestLid).
-        static void BuildChest(Transform env, Vector3 pos, Transform player)
+        static void BuildChest(Transform env, Vector3 pos)
         {
             const string ChestModelPath = "Assets/_Project/Art/Coffre/Coffre.glb";
             var model = AssetDatabase.LoadAssetAtPath<GameObject>(ChestModelPath);
@@ -1111,19 +1132,9 @@ namespace SAE.EditorTools
             rouletteGo.AddComponent<Sae501.Coffres.Billboard>();
             var roulette = rouletteGo.AddComponent<Sae501.Coffres.RouletteView>();
 
-            var promptGo = new GameObject("PromptCoffre");
-            promptGo.transform.SetParent(env, false);
-            promptGo.transform.position = new Vector3(pos.x, top + 0.3f, pos.z);
-            promptGo.AddComponent<Sae501.Coffres.Billboard>();
-            var prompt = promptGo.AddComponent<Sae501.Coffres.ChestPrompt>();
-
+            // Pas de texte au-dessus du coffre (ChestPrompt) : le prix est sur la pancarte devant, qui dit aussi ce qui manque
             var controller = chest.AddComponent<Sae501.Coffres.ChestController>();
-
             controller.roulette = roulette;
-            controller.prompt = prompt;
-            prompt.chest = controller;
-            prompt.player = player;
-            prompt.keyLabel = "Touche";   // « [Touche]  Ouvrir le coffre » : on l'ouvre avec la main
             chest.AddComponent<ChestClickable>().chest = controller;
             // Le modèle .glb n'a pas de collider : on en met un autour, pour le toucher ou le viser avec le rayon
             var chestBounds = Bounds(chest);
@@ -1181,10 +1192,10 @@ namespace SAE.EditorTools
             plank.SetParent(sign, false);
             plank.localPosition = new Vector3(0, 0.3f, 0);
             plank.localRotation = Quaternion.Euler(20f, 0, 0);   // penchée vers l'arrière : elle se lit en baissant les yeux
-            Visuals.Box("Planche", plank, Vector3.zero, new Vector3(0.56f, 0.16f, 0.03f), DarkWood);
+            Visuals.Box("Planche", plank, Vector3.zero, new Vector3(0.56f, 0.2f, 0.03f), DarkWood);   // deux lignes : COFFRE, puis le prix en bananes
             var priceTag = sign.gameObject.AddComponent<ChestPriceTag>();
             priceTag.chest = controller;
-            priceTag.label = Visuals.Text(plank, "", new Vector3(0, 0, -0.02f), 0.09f, TitleGold, title: true);
+            priceTag.label = Visuals.Text(plank, "", new Vector3(0, 0, -0.02f), 0.065f, TitleGold, title: true);
         }
 
         static Bounds Bounds(GameObject go)
@@ -1238,11 +1249,16 @@ namespace SAE.EditorTools
             float edge = MapLayout.HalfExtent;
             const float GroundY = -0.55f;   // le dessus de l'herbe, autour du plateau de jeu
             Teleportable(Visuals.Solid("Estrade", map.transform, new Vector3(0, -0.25f, -edge - 2.5f), new Vector3(8, 0.5f, 5), Wood));
-            // Le sol de toute la prairie (invisible : on voit l'herbe du paysage) : on peut s'y téléporter partout,
-            // autour du labyrinthe comme plus loin, et sur les cases du labyrinthe elles-mêmes (voir BuildGrid)
+            // Le sol de toute la prairie (invisible : on voit l'herbe du paysage), pour ne pas tomber.
+            // On ne peut s'y téléporter que PRÈS du labyrinthe (TeleportMargin autour), et sur les cases elles-mêmes
+            // (voir BuildGrid) : plus loin, le rayon devient rouge, on ne part plus se perdre dans les montagnes.
             var meadow = Visuals.Solid("Prairie (collider)", map.transform, new Vector3(0, GroundY - 0.05f, 0), new Vector3(180f, 0.1f, 180f), Floor);
             meadow.GetComponent<Renderer>().enabled = false;
-            Teleportable(meadow);
+            const float TeleportMargin = 6f;
+            float zoneSide = 2f * (edge + TeleportMargin);
+            var zone = Visuals.Solid("Zone de téléportation", map.transform, new Vector3(0, GroundY - 0.04f, 0), new Vector3(zoneSide, 0.1f, zoneSide), Floor);
+            zone.GetComponent<Renderer>().enabled = false;   // 1 cm au-dessus de la prairie : c'est elle que le rayon touche
+            Teleportable(zone);
             BuildScenery(map.transform, GroundY);
 
             // Le même pupitre qu'au hub, un peu à droite du point d'arrivée : le passage vers la carte reste libre
@@ -1253,6 +1269,13 @@ namespace SAE.EditorTools
             for (int side = -1; side <= 1; side += 2)   // le tableau tient sur deux poteaux plantés dans le sol (il ne flotte pas)
                 Visuals.Solid("Poteau du tableau", map.transform, new Vector3(side * 0.92f, (2.4f + GroundY) / 2f, -edge - 0.25f), new Vector3(0.1f, 2.4f - GroundY, 0.1f), Wood);
             BuildBowUpgrades(map.transform, new Vector3(-2f, 0f, -edge - 0.6f), -30f);   // le pupitre ARC de Nicolas
+
+            // La caisse de la carte : on voit ses bananes sans retourner au hub. À droite du pupitre, sur deux poteaux.
+            var cashPos = new Vector3(3.3f, 1.5f, -edge - 1.6f);
+            var cash = BuildChalkboard(map.transform, "Caisse de la carte", cashPos, Quaternion.Euler(0, 20f, 0), 0.8f, 0.4f);
+            FillMoneyBoard(cash, cash.gameObject).spawnPopups = false;   // les « +5 » flottants viennent déjà de la caisse du hub
+            for (int side = -1; side <= 1; side += 2)   // plantés dans l'estrade (son dessus est à 0)
+                Visuals.Solid("Poteau de la caisse", cash, new Vector3(side * 0.47f, -cashPos.y / 2f, 0.05f), new Vector3(0.06f, cashPos.y, 0.06f), Wood);
             UseWoodTexture(map.transform);   // l'estrade, les pupitres et les poteaux, en bois comme au hub
             return map.transform;
         }

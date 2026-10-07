@@ -99,9 +99,9 @@ namespace SAE
                 if (Wave == LastWrittenWave)
                 {
                     Won = true;
-                    Status = $"VICTOIRE ! +{reward} · mode infini : LANCER";
+                    Status = $"VICTOIRE ! +{reward} bananes · mode infini : LANCER";
                 }
-                else Status = $"Vague {Wave} gagnée : +{reward}";
+                else Status = $"Vague {Wave} gagnée : +{reward} bananes";
                 Wave++;
                 Lives = startLives;   // la vague suivante repart avec toutes les vies (affiché pendant la préparation)
             }

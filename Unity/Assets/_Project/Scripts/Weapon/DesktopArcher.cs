@@ -20,7 +20,7 @@ namespace SAE
             var mouse = Mouse.current;
             if (!bow || !bow.isActiveAndEnabled || mouse == null) return;   // l'arc n'est sorti que sur la carte
 
-            if (mouse.rightButton.wasPressedThisFrame)
+            if (mouse.rightButton.wasPressedThisFrame && bow.CanNock)
             {
                 drawing = true;
                 bow.Nock();

@@ -27,6 +27,7 @@ namespace Sae501.Coffres
         public System.Collections.Generic.List<int> LastTypes { get; } = new System.Collections.Generic.List<int>();
         public System.Func<int> rollType;
         public event System.Action<System.Collections.Generic.List<Rarity>> Opened;
+        public event System.Action<int> Refused;   // pas assez d'argent : combien il manque (la pancarte du prix l'affiche)
         public ChestOddsSettings oddsSettings = new ChestOddsSettings();
 
         [Header("Timing (secondes)")]
@@ -74,7 +75,8 @@ namespace Sae501.Coffres
 
             if (!SAE.Economy.TrySpend(Price, transform.position))
             {
-                prompt.ShowError($"Pas assez d'argent ({SAE.Economy.Money}/{Price})");
+                Refused?.Invoke(Price - SAE.Economy.Money);
+                if (prompt) prompt.ShowError($"Pas assez d'argent ({SAE.Economy.Money}/{Price})");   // plus de texte au-dessus du coffre du hub
                 return;
             }
             StartCoroutine(OpenRoutine());
