@@ -33,13 +33,15 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 **Mer. 7 oct. — objectifs du jour**
 | Tâche | Qui |
 |---|---|
-| Analyse critique et bugs : chacun relève, Dylan corrige (branche `fix-all`, voir [l'analyse de Dylan](dylan.md)) | Tout le monde, Dylan |
+| Analyse critique et bugs : chacun relève, Dylan corrige (branche `fix-all`, voir les analyses de [Dylan](dylan.md) et de [Maxens](maxens.md)) | Tout le monde, Dylan |
 | Coffre : changer l'asset, améliorer l'animation, voir les singes qui en sortent | Maxens |
 | Limiter la zone de téléportation dans le hub | Dylan |
 | Améliorer l'arc | Nicolas |
 | Séparer vraiment les deux niveaux : le hub et le labyrinthe | Dylan |
 | Améliorer le labyrinthe | Dylan |
 | Mettre les assets des ballons MOAB | Maxens |
+
+_À trancher : l'idée de Maxens d'un mini-jeu (roulette) quand tout est amélioré au maximum est une **nouvelle fonctionnalité**, hors du périmètre actuel (à mettre en POURRAIT dans le GDD)._
 
 **Mer. 7 oct. — cabane + arc dans `main`**
 - La cabane de Dylan (`test/cabane`) et l'arc de Quincy de Maxens (`feat/arc-quincy`) sont fusionnés et dans `main` (PR [#9](https://github.com/dyzlek/SAE501/pull/9)). Un seul conflit, dans le générateur de scène, résolu en gardant les deux.

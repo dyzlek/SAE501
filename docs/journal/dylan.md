@@ -17,6 +17,8 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
 ![Carte : l'arc de Quincy en bas à droite, la carte encore en cubes](../captures/cabane-arc-carte.webp)
 
+_L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : je la corrige aussi sur `fix-all`._
+
 **Ma troisième analyse critique** _(bugs et défauts à corriger sur la branche `fix-all`)_
 1. **On peut faire voler des objets avec la banane** (« prop fly ») : en tenant une banane, on pousse les objets du décor et on peut les envoyer en l'air.
 2. **L'affichage sur les écrans n'est pas beau**, même s'il reste lisible.
@@ -49,6 +51,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude (Claude Code) | 2e fusion avec les derniers commits de Maxens sur `feat/arc-quincy` (mains de Quincy riggées, arc plus petit, tir dans le simulateur VR), sans conflit ; PR #9 ouverte (le merge par Claude a été bloqué faute de relecture, fusionnée ensuite sur GitHub) | Gardé (testé par moi en mode PC) |
 | Claude (Claude Code) | Mise à jour de mon journal et du journal général avec mes 3 captures | Gardé |
 | Claude (Claude Code) | Mise en forme de ma troisième analyse critique (depuis mon fichier Word, avec ses 9 captures) et des objectifs du jour dans le journal général, branche `fix-all` ; rien de corrigé pour l'instant | Gardé |
+| Claude (Claude Code) | Mise en forme de l'analyse critique de Maxens (qu'il m'a transmise) dans son journal, pour la corriger sur `fix-all` | Gardé |
 
 ## Mar. 6 oct. 2026
 - **Fait :**

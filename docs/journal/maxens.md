@@ -2,6 +2,14 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Mer. 7 oct. 2026
+**Mon analyse critique du hub et de la carte** _(transmise à Dylan, qui corrige sur la branche `fix-all` ; mise en forme par l'IA)_
+1. **Bibliothèque :** le mot « Bibliothèque » nous regarde (il tourne vers le joueur) ; les textes sont trop simples, un peu moches. Les singes sont en T-pose : à changer peut-être.
+2. **Récolteur :** même remarque sur les textes ; je n'aime pas les boutons jaunes. Le meuble devrait disparaître quand tout est au maximum (la colonne disparaît). Idée : quand tout est à fond, un mini-jeu en plus apparaît à la place, par exemple une roulette.
+3. **Bananier :** à refaire, et toute sa zone aussi ; essayer de faire autrement, je ne sais pas encore comment.
+4. **Boutons LANCER et JOUER :** horribles. Les caisses à côté rentrent dans l'armoire. Je ne suis pas fan du tonneau. Améliorations du bananier : pareil que le récolteur, les faire disparaître une fois au maximum et mettre autre chose à la place.
+5. **Carte :** rien n'est beau, tout est à refaire, montagnes comprises.
+
 ## Mar. 6 oct. 2026
 - **Fait :** nouvelle branche `feat/prototype-maxens`, créée depuis le `main` à jour (PR #7 incluse), pour faire mes tests : placer le bananier dans la scène, essayer des réglages, etc.
 - **Fait :** tous mes modèles 3D ajoutés au projet Unity sur cette branche, dans `Unity/Assets/_Project/Art/<Nom>/` (`FBX/` + `Textures/`) : Ballons (normal, blindé, cœur), BFB, MOAB, Boomerang, Canon, Colle, Glace, Pat Fusty (FBX + `Pat_Fusty.glb`), Quincy (niv. 3, 7, 10, 20 + flèche), Singe de base (+ fléchette), Sniper, Tireur (+ punaise).

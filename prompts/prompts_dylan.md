@@ -6,6 +6,8 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ### Ma critique et les objectifs du jour, dans une branche fix-all
 > Dans une branche `fix-all`, mets d'abord ma critique (mon fichier Word « analyse critique ») et les objectifs qu'on s'est fixés aujourd'hui : analyse critique et bugs (tout le monde, Dylan corrige) ; coffre : changer l'asset, améliorer l'animation, voir les singes (Maxens) ; limiter la zone de téléportation dans le hub (Dylan) ; améliorer l'arc (Nicolas) ; séparer vraiment les deux niveaux, le hub et le labyrinthe (Dylan) ; améliorer le labyrinthe (Dylan) ; mettre les assets des ballons MOAB (Maxens).
+>
+> Suite : ajoute aussi la critique de Maxens (bibliothèque, récolteur, bananier, boutons LANCER/JOUER, caisses, tonneau, carte et montagnes).
 
 ### Journaux à jour avec mes captures
 > Mets à jour mon journal et le GENERAL.md (avec mes 3 captures du hub et de la carte).
