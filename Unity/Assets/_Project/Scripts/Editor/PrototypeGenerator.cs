@@ -1204,6 +1204,14 @@ namespace SAE.EditorTools
         static void BuildGrid(Transform parent, float tile, float thickness, bool walkable)
         {
             float k = tile / MapLayout.Tile;
+            // Sur la carte, les cases sont rangées sous un même objet, sur lequel on peut se téléporter
+            // (la zone de téléportation prend les colliders de tous ses enfants)
+            var cells = parent;
+            if (walkable)
+            {
+                cells = new GameObject("Cases").transform;
+                cells.SetParent(parent, false);
+            }
             for (int r = 0; r < MapLayout.Size; r++)
                 for (int c = 0; c < MapLayout.Size; c++)
                 {
@@ -1215,10 +1223,11 @@ namespace SAE.EditorTools
 
                     var size = new Vector3(tile, thickness, tile);
                     var pos = MapLayout.CellLocal(r, c) * k + new Vector3(0, -thickness / 2f, 0);
-                    var cell = walkable ? Visuals.Solid($"Case {r},{c}", parent, pos, size, color)
-                                        : Visuals.Box($"Case {r},{c}", parent, pos, size, color);
+                    var cell = walkable ? Visuals.Solid($"Case {r},{c}", cells, pos, size, color)
+                                        : Visuals.Box($"Case {r},{c}", cells, pos, size, color);
                     cell.tag = ch == '.' ? Tags.Terrain : Tags.Piste;
                 }
+            if (walkable) Teleportable(cells.gameObject);
         }
 
         // ---------------- CARTE ----------------
@@ -1234,13 +1243,11 @@ namespace SAE.EditorTools
             float edge = MapLayout.HalfExtent;
             const float GroundY = -0.55f;   // le dessus de l'herbe, autour du plateau de jeu
             Teleportable(Visuals.Solid("Estrade", map.transform, new Vector3(0, -0.25f, -edge - 2.5f), new Vector3(8, 0.5f, 5), Wood));
-            // Le sol autour du labyrinthe : on voit l'herbe du paysage, ces deux blocs ne servent qu'à marcher (invisibles).
-            // Le premier est la zone de téléportation, le second empêche de tomber si on marche plus loin (mode PC).
-            var around = Visuals.Solid("Sol autour (collider)", map.transform, new Vector3(0, GroundY - 0.05f, 0), new Vector3(edge * 2 + 20, 0.1f, edge * 2 + 20), Floor);
-            around.GetComponent<Renderer>().enabled = false;
-            Teleportable(around);
-            var meadow = Visuals.Solid("Prairie (collider)", map.transform, new Vector3(0, GroundY - 0.06f, 0), new Vector3(180f, 0.1f, 180f), Floor);
+            // Le sol de toute la prairie (invisible : on voit l'herbe du paysage) : on peut s'y téléporter partout,
+            // autour du labyrinthe comme plus loin, et sur les cases du labyrinthe elles-mêmes (voir BuildGrid)
+            var meadow = Visuals.Solid("Prairie (collider)", map.transform, new Vector3(0, GroundY - 0.05f, 0), new Vector3(180f, 0.1f, 180f), Floor);
             meadow.GetComponent<Renderer>().enabled = false;
+            Teleportable(meadow);
             BuildScenery(map.transform, GroundY);
 
             // Le même pupitre qu'au hub, un peu à droite du point d'arrivée : le passage vers la carte reste libre

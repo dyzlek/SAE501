@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
+### Téléportation sur la carte
+> Il y a des bugs de téléportation, surtout sur la carte (là où il y a l'arc) : je ne peux pas me téléporter n'importe où, ce qui n'est pas cool. Corrige-les.
+
 ### Mes captures et tout sur main
 > Mets mes captures dans mon journal et pousse tout sur `main`.
 
