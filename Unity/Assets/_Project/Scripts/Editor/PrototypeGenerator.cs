@@ -36,7 +36,7 @@ namespace SAE.EditorTools
         static readonly Color Slate = new Color(0.13f, 0.17f, 0.15f);      // les ardoises des tableaux
         static readonly Color Chalk = new Color(0.95f, 0.94f, 0.88f);      // texte « à la craie »
         static readonly Color TitleGold = new Color(1f, 0.83f, 0.35f);     // titres des enseignes
-        static readonly Color Engraved = new Color(0.22f, 0.13f, 0.06f);   // texte gravé sur les plaques en laiton
+        static readonly Color Engraved = new Color(0.22f, 0.13f, 0.06f);   // texte foncé sur les plaques claires de la bibliothèque
         static readonly Color Parchment = new Color(0.93f, 0.86f, 0.68f);  // plaques claires de la bibliothèque : texte foncé, bien lisible
         static readonly Color Leaf = new Color(0.27f, 0.50f, 0.18f);       // la feuille de bananier posée sur l'étal
         static readonly Color LaunchColor = new Color(0.95f, 0.45f, 0.15f);
@@ -342,8 +342,8 @@ namespace SAE.EditorTools
             a.action = action;
             a.destination = destination;
 
-            Visuals.Box("Plaque", top, new Vector3(x, 0.004f, -0.14f), new Vector3(ConsoleStep - 0.04f, 0.008f, 0.1f), Brass);
-            var text = Visuals.Text(top, label, new Vector3(x, 0.01f, -0.14f), 0.065f, Engraved, title: true);
+            Visuals.Box("Plaque", top, new Vector3(x, 0.004f, -0.14f), new Vector3(ConsoleStep - 0.04f, 0.008f, 0.1f), DarkWood);   // plaque foncée, texte doré : bien lisible (le texte foncé sur le laiton ne se lisait pas)
+            var text = Visuals.Text(top, label, new Vector3(x, 0.012f, -0.14f), 0.075f, TitleGold, title: true);
             text.transform.localRotation = Quaternion.Euler(90f, 0, 0);   // couché sur la plaque, le haut des lettres vers le mur
             return a;
         }
@@ -776,15 +776,15 @@ namespace SAE.EditorTools
             for (int i = 0; i < columns; i++)
             {
                 float x = (i - (columns - 1) / 2f) * CounterStep;
-                labels[i] = Visuals.Text(board, "", new Vector3(x, 0.02f, -0.05f), 0.05f, Chalk);
+                labels[i] = Visuals.Text(board, "", new Vector3(x, 0.02f, -0.05f), 0.056f, Chalk);
                 if (i > 0)   // un trait de craie entre deux colonnes
                     Visuals.Box("Trait", board, new Vector3(x - CounterStep / 2f, 0, -0.047f), new Vector3(0.008f, 0.5f, 0.004f), new Color(0.6f, 0.62f, 0.58f));
                 Visuals.Box("Porte", root, new Vector3(x, 0.42f, -0.125f), new Vector3(CounterStep - 0.08f, 0.5f, 0.02f), DarkWood);
                 buttons[i] = RoundButton(root, new Vector3(x, 0.9f, 0.04f));
 
                 // Ce que fait le bouton, gravé sur une plaque en laiton couchée devant lui
-                Visuals.Box("Plaque", root, new Vector3(x, 0.903f, -0.11f), new Vector3(CounterStep - 0.04f, 0.006f, 0.08f), Brass);
-                Visuals.Text(root, names[i], new Vector3(x, 0.908f, -0.11f), 0.045f, Engraved, title: true)
+                Visuals.Box("Plaque", root, new Vector3(x, 0.903f, -0.11f), new Vector3(CounterStep - 0.04f, 0.006f, 0.09f), DarkWood);   // plaque foncée, texte doré : bien lisible
+                Visuals.Text(root, names[i], new Vector3(x, 0.91f, -0.11f), 0.06f, TitleGold, title: true)
                     .transform.localRotation = Quaternion.Euler(90f, 0, 0);
             }
             return root;

@@ -30,6 +30,7 @@ namespace SAE
 
         void OnMoneyChanged(int delta, Vector3? where)
         {
+            if (delta == 0) return;   // achat gratuit : pas de « +0 » qui flotte, la caisse ne bouge pas
             punch = 1f;
             flash = delta >= 0 ? new Color(0.3f, 0.9f, 0.3f) : new Color(0.95f, 0.25f, 0.25f);
             MoneyPopup.Spawn((where ?? transform.position + Vector3.up * 0.3f) + Vector3.up * 0.4f, delta);

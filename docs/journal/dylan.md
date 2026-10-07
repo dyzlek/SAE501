@@ -64,6 +64,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
   - noms de la bibliothèque peu lisibles : plaques claires au bord des étagères, texte foncé plus grand ;
   - meubles trop collés : écarts agrandis (pupitres, panier, comptoirs, étal un peu moins large), vérifiés par calcul ;
   - JOUER devient « SE TP ».
+- **3e passe** : plus de « +0 » qui flotte quand une amélioration est gratuite ; plaques des boutons en bois foncé avec le texte doré, plus grand (le texte foncé sur le laiton ne se lisait pas) ; texte des ardoises un peu plus grand.
 - _Pas encore traité :_ le modèle du bananier lui-même (c'est l'asset de Maxens), le texte « [Touche] Ouvrir le coffre » et la roulette (le coffre est la tâche de Maxens aujourd'hui).
 
 | Outil | Pour quoi | Gardé / jeté |
@@ -75,6 +76,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 | Claude (Claude Code) | Mise en forme de l'analyse critique de Maxens (qu'il m'a transmise) dans son journal, pour la corriger sur `fix-all` | Gardé |
 | Claude (Claude Code) | Corrections sur `fix-all` de 11 points des deux critiques : bug des objets qui volent (`PlayerRig.IgnoreCollisions`), pupitres de commande, comptoirs d'amélioration avec ardoise, boutons qui disparaissent au max, jusqu'à 4 singes récolteurs (`HarvesterCrew` ; `HarvesterSetup` supprimé, tout est construit par le générateur), trajets des singes par le centre, polices Bangers et Oswald, enseignes et pancartes au lieu des textes flottants, étal des bananes, tabouret du panier, lanterne déplacée dans `cabane.py` | À tester (compilé, scène à régénérer) |
 | Claude (Claude Code) | 2e passe après mon test : cylindre corrigé (boutons deux fois trop gros), boutons plus petits, plaques gravées devant les boutons des comptoirs, enseigne posée sur l'ardoise, plaques de la bibliothèque lisibles, meubles plus espacés, JOUER renommé « SE TP » | À tester (compilé, scène à régénérer) |
+| Claude (Claude Code) | 3e passe : « +0 » supprimé (MoneyBoard ignore un montant nul), plaques des boutons lisibles (bois foncé, texte doré plus grand), texte des ardoises agrandi | À tester (compilé, scène à régénérer) |
 
 ## Mar. 6 oct. 2026
 - **Fait :**
