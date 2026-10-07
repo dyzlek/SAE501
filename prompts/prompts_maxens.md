@@ -2,6 +2,11 @@
 
 _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (orthographe, clarté, structure : contexte, objectif, contraintes). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/maxens.md)._
 
+## Mer. 7 oct. 2026
+
+### Un coffre dans le style de la cabane
+> Récupère le `main` à jour. Ce matin, je m'occupe du coffre (changer l'asset, améliorer l'animation, voir les singes en sortir) puis des assets des ballons MOAB. On commence par le coffre : l'asset actuel ne correspond pas à la direction artistique du reste (la cabane). Refais-en un propre ; on verra l'animation et le reste ensuite.
+
 ## Mar. 6 oct. 2026
 
 ### Mise à jour finale

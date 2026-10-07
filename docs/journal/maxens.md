@@ -2,6 +2,24 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Mer. 7 oct. 2026
+- **À faire ce matin :** (1) le coffre : changer l'asset, améliorer l'animation, voir les singes en sortir ; (2) mettre les assets des ballons MOAB.
+- **Fait : un nouveau coffre dans le style de la cabane** (branche `feat/coffre-maxens`, partie du `main` à jour avec la PR #9). L'ancien coffre téléchargé (`chest_cartoon_animations.glb`) ne collait pas à la direction artistique de la cabane.
+  - modélisé par un script Blender, `Blender/coffre.py`, qui **reprend les textures et l'outil de `cabane.py`** (même bois à veines, même fer) : planches teintées une par une, montants de coin en bois sombre, deux bandes de fer avec rivets dorés, serrure dorée devant, poignées sur les côtés, couvercle bombé en lattes ;
+  - **deux objets** : `Coffre_Caisse` et `Coffre_Couvercle`, dont l'origine est sur la charnière (arrière, en haut) : pour l'ouvrir, il suffit de le tourner autour de X (en négatif). Ça prépare l'animation ;
+  - environ 1 100 triangles (léger pour le casque), exporté en `Art/Coffre/Coffre.glb` ;
+  - **pas encore branché dans la scène** : le jeu utilise toujours l'ancien coffre et son animation ; on remplacera les deux en même temps (étape suivante : l'animation).
+  - À reprendre : l'intérieur de la caisse est plein (on voit le dessus des planches quand il est ouvert) ; à creuser au moment de l'animation, pour voir les singes sortir.
+
+  ![Nouveau coffre fermé](../captures/maxens-coffre-ferme.png)
+
+  ![Nouveau coffre ouvert](../captures/maxens-coffre-ouvert.png)
+
+### IA
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Code) | Nouveau coffre modélisé par script Blender (`coffre.py`) dans le style de la cabane, couvercle séparé sur sa charnière, rendus d'aperçu | À valider |
+
 ## Mar. 6 oct. 2026
 - **Fait :** nouvelle branche `feat/prototype-maxens`, créée depuis le `main` à jour (PR #7 incluse), pour faire mes tests : placer le bananier dans la scène, essayer des réglages, etc.
 - **Fait :** tous mes modèles 3D ajoutés au projet Unity sur cette branche, dans `Unity/Assets/_Project/Art/<Nom>/` (`FBX/` + `Textures/`) : Ballons (normal, blindé, cœur), BFB, MOAB, Boomerang, Canon, Colle, Glace, Pat Fusty (FBX + `Pat_Fusty.glb`), Quincy (niv. 3, 7, 10, 20 + flèche), Singe de base (+ fléchette), Sniper, Tireur (+ punaise).
