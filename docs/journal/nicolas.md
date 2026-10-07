@@ -23,6 +23,27 @@ _Note : les deux photos ont été prises avant les corrections de Dylan sur `fix
 
 ![Photo 2 : les bûches du mur qui débordent sur la fenêtre, près de la caisse et du comptoir du récolteur](../captures/nicolas-critique-2.webp)
 
+**Refonte de l'arc et améliorations** _(branche `feat/arc-upgrade`, fusionnée par Dylan dans la branche `fusion`)_
+- **Fait :** la flèche est détruite dès qu'elle n'a plus rien à percer (sans amélioration : une couche, puis elle disparaît). Le système de « dégâts » est retiré du jeu : tout passe par la **perforation** (couches percées), singes compris. Le ballon blindé coûte 2 de perforation par couche. Quatre améliorations, cumulables, gratuites pour le bêta-test (les vrais prix sont prêts) : **perforante** (couches percées par ballon, c'est-à-dire les « dégâts », 5 paliers), **transperçante** (nombre de ballons traversés, tir collatéral, 5 paliers), **tir triple**, **explosive** (5 paliers). Le pupitre « ARC » est sur l'estrade de la carte, au bord de l'herbe. En plus : la courbe de visée pendant la tension, et une traînée de vitesse derrière la flèche.
+- **Captures (mode PC) :**
+
+![Le tableau des améliorations de l'arc (gratuites pour le bêta-test)](../captures/nicolas-arc-tableau.webp)
+
+![La prévisualisation du tir : la courbe de visée pendant la tension](../captures/nicolas-arc-visee.webp)
+
+![Le tir triple : trois flèches à la fois](../captures/nicolas-arc-tir-triple.webp)
+
+![Le tir explosif : l'onde (anneau orange) touche les ballons autour](../captures/nicolas-arc-tir-explosif.webp)
+
+- **À tester :** au casque et en mode PC ; l'équilibrage (le blindé et le dirigeable sont intouchables à l'arc sans perforation, les singes percent moins qu'avant aux raretés impaires).
+
+### IA
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude Code | Avis sur ma refonte de l'arc (points à trancher : dégâts des singes, blindé, cumul, périmètre) et proposition de paliers et de prix | Gardé |
+| Claude Code | Code de la refonte : `BowUpgrades`, `BowUpgradeButton`, `Shockwave` (nouveaux), `Arrow`, `Bow`, `DesktopArcher`, `Balloon` (`Hit` → `Pop`), `Tower`, `MonkeyData` (`Damage` → `Pierce`), `MonkeyInfoCard`, pupitre « ARC » dans `PrototypeGenerator` ; scène régénérée | À valider (test) |
+| Claude Code | Correction de ma demande : perforante = couches par ballon, nouvelle amélioration « transperçante » = nombre de ballons traversés ; pupitre à 4 boutons | À valider (test) |
+
 ## Lun. 5 oct. 2026
 - **Fait :** création du projet Unity (6000.3.8f1, URP) dans `Unity/` et du prototype « ouverture de coffres » (money, 7 raretés, probabilités, roulette façon CS, animation du coffre).
 - **Bloque :** projet pas encore ouvert dans Unity : il reste à installer les packages (menu SAE501 > 1) puis créer la scène (menu SAE501 > 2) et tester.

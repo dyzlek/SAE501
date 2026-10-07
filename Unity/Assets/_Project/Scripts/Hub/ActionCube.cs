@@ -3,15 +3,15 @@ using UnityEngine;
 namespace SAE
 {
     // Bouton rond d'un pupitre de commande (voir PrototypeGenerator.BuildConsole) qu'on enfonce avec la main :
-    // se téléporter (SE TP / HUB), vider le plateau ou lancer la vague. Il s'enfonce un instant quand on appuie.
-    // LANCER devient gris tant que la vague tourne : on voit qu'elle est partie, et on n'a pas envie de recliquer.
+    // changer de niveau (SE TP : vers la carte, HUB : vers le hub, voir Levels), vider le plateau ou lancer la vague.
+    // Il s'enfonce un instant quand on appuie. Pendant une vague, LANCER devient gris (elle est partie) ;
+    // on peut aller et venir entre le hub et la carte, la vague continue.
     public class ActionCube : MonoBehaviour, IPressable
     {
         public enum Action { Teleport, ClearBoard, StartWave }
 
         public Action action;
-        public Transform destination;
-        public WaveSpawner spawner;   // pour StartWave
+        public Level destination;     // pour Teleport : le niveau (la scène) où aller
 
         static readonly Color Busy = new Color(0.4f, 0.4f, 0.42f);   // LANCER pendant une vague
 
@@ -27,33 +27,35 @@ namespace SAE
             rest = transform.localPosition;
             tint = GetComponent<ColorTint>();
             if (tint) idleColor = tint.color;
-            // Filet de sécurité : sans lien vers les vagues, LANCER ne ferait rien du tout
-            if (action == Action.StartWave && !spawner) spawner = FindAnyObjectByType<WaveSpawner>();
         }
 
         void Update()
         {
             pressed = Mathf.MoveTowards(pressed, 0f, Time.deltaTime * 5f);
             transform.localPosition = rest + Vector3.down * (0.012f * pressed);
-            if (action == Action.StartWave && tint && spawner)
+            if (tint)
             {
-                var color = spawner.Running ? Busy : idleColor;
+                var color = Blocked ? Busy : idleColor;
                 if (tint.color != color) tint.Set(color);
             }
         }
 
+        // Une vague tourne déjà : on ne la relance pas
+        bool Blocked => action == Action.StartWave && WaveSpawner.Instance && WaveSpawner.Instance.Running;
+
         public void Press()
         {
             pressed = 1f;
+            if (Blocked) return;
             switch (action)
             {
-                case Action.Teleport: PlayerRig.Local.TeleportTo(destination); break;
+                case Action.Teleport: Levels.Go(destination); break;
                 case Action.ClearBoard:
                     // Plateau déjà vide : rien à payer. Pas assez de bananes : rien ne se passe.
                     if (GameState.Placed.Count > 0 && Economy.TrySpend(ClearBoardPrice, transform.position))
                         GameState.ClearBoard();
                     break;
-                case Action.StartWave: if (spawner) spawner.StartWave(); break;
+                case Action.StartWave: WaveSpawner.Launch(); break;
             }
         }
     }

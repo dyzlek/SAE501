@@ -14,6 +14,9 @@ namespace SAE
     // Rien n'est affiché à l'écran (nausée en VR) : les tableaux WaveBoard du décor lisent Wave, Lives et Status.
     public class WaveSpawner : MonoBehaviour
     {
+        // Les vagues de la scène Labyrinthe (null quand on est au hub)
+        public static WaveSpawner Instance { get; private set; }
+
         public float balloonHeight = 1f;
         public int startLives = 20;
         public List<WaveData> waves = WaveBook.Default();
@@ -30,12 +33,28 @@ namespace SAE
         public WaveData Current => Wave <= waves.Count ? waves[Wave - 1] : WaveBook.Endless(Wave);
         public int BossCount => Current.BossCount;
 
+        void Awake() => Instance = this;
+        void OnDestroy() { if (Instance == this) Instance = null; }
+
         void Start()
         {
             path = new List<Vector3>();
             foreach (var p in MapLayout.PathPoints())
                 path.Add(transform.position + p + Vector3.up * balloonHeight);
             Lives = startLives;
+            if (Levels.LaunchOnArrival)
+            {
+                Levels.LaunchOnArrival = false;
+                StartWave();
+            }
+        }
+
+        // LANCER, depuis le hub ou la carte : la vague part (la carte tourne aussi quand on est au hub).
+        // Si la carte n'est pas encore chargée (tout début de partie), elle partira dès qu'elle le sera.
+        public static void Launch()
+        {
+            if (Instance) Instance.StartWave();
+            else Levels.LaunchOnArrival = true;
         }
 
         // Appelé par le bouton LANCER (hub ou carte). Ne fait rien si une vague est déjà en cours.
@@ -91,12 +110,15 @@ namespace SAE
 
         void Spawn(BalloonKind kind, int layers)
         {
-            var go = GameObject.CreatePrimitive(kind == BalloonKind.Dirigeable ? PrimitiveType.Capsule : PrimitiveType.Sphere);
+            // Avec un modèle 3D, le ballon est un objet vide : Balloon.Init y pose le modèle et son collider.
+            // Sans modèle, on garde l'ancienne sphère (capsule pour le dirigeable).
+            var go = BalloonVisuals.Model(kind) ? new GameObject()
+                : GameObject.CreatePrimitive(kind == BalloonKind.Dirigeable ? PrimitiveType.Capsule : PrimitiveType.Sphere);
             go.name = kind.ToString();
             go.tag = Tags.Ballon;
             go.AddComponent<ColorTint>();
-            go.AddComponent<Mirrored>();
             go.AddComponent<Balloon>().Init(this, path, layers, kind);
+            PlayerRig.IgnoreCollisions(go);   // le joueur traverse les ballons et les boss ; les flèches les touchent toujours
         }
 
         public void BalloonEscaped(int layers) => Lives = Mathf.Max(0, Lives - layers);

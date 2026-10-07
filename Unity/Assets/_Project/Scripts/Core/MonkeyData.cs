@@ -73,13 +73,15 @@ namespace SAE
             _ => 1f,
         } / (1f + (int)m.level * 0.2f);
 
-        public static float Damage(Monkey m) => m.type switch
+        // Perforation : nombre de couches percées sur chaque ballon touché (il n'y a plus de « dégâts »).
+        // +1 couche toutes les 2 raretés (Gris 1, Bleu 2, Jaune 3, Arc-en-ciel 4) ; le sniper perce 3 fois plus.
+        public static int Pierce(Monkey m) => m.type switch
         {
-            MonkeyType.Sniper => 3f,
-            MonkeyType.Glace => 0f,
-            MonkeyType.Colle => 0f,
-            _ => 1f,
-        } * (1f + (int)m.level * 0.5f);
+            MonkeyType.Sniper => 3,
+            MonkeyType.Glace => 0,
+            MonkeyType.Colle => 0,
+            _ => 1,
+        } * (1 + (int)m.level / 2);
 
         // Nombre de ballons touchés par tir.
         public static int Targets(Monkey m) => m.type switch

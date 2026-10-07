@@ -3,75 +3,105 @@ using UnityEngine;
 
 namespace SAE
 {
-    // Le plateau du hub = la carte en miniature, en direct.
-    // Il affiche une copie réduite de tout ce qui porte Mirrored (ballons, singes, joueurs).
+    // Le plateau du hub = la carte en miniature, en direct :
+    //   - les singes posés (GameState.Placed), chacun à sa place ;
+    //   - les ballons de la vague en cours : la carte (scène Labyrinthe) tourne en arrière-plan, on recopie leur position
+    //     (miniature du modèle 3D, comme l'avait fait Maxens, teinte de la couche comprise).
     // La pose des singes est gérée par PlacementSurface, sur le même objet.
     public class Board : MonoBehaviour
     {
-        public Transform mapRoot;          // le centre de la vraie carte
         public float scale = 0.05f;        // taille du plateau / taille de la carte
 
-        readonly Dictionary<Mirrored, GameObject> proxies = new Dictionary<Mirrored, GameObject>();
-        readonly List<Mirrored> toRemove = new List<Mirrored>();
+        readonly Dictionary<PlacedMonkey, GameObject> pieces = new Dictionary<PlacedMonkey, GameObject>();
+        readonly Dictionary<Balloon, GameObject> balloons = new Dictionary<Balloon, GameObject>();
+        readonly List<Balloon> gone = new List<Balloon>();
 
-        Vector3 MapToBoard(Vector3 worldOnMap) =>
-            transform.TransformPoint(mapRoot.InverseTransformPoint(worldOnMap) * scale);
-
-        void LateUpdate()
+        void OnEnable()
         {
-            if (!mapRoot) return;
+            GameState.Changed += Sync;
+            Sync();
+        }
 
-            foreach (var m in Mirrored.All)
+        void OnDisable() => GameState.Changed -= Sync;
+
+        // Les singes : même travail que TowerManager sur la carte, en petit
+        void Sync()
+        {
+            var removed = new List<PlacedMonkey>();
+            foreach (var pair in pieces)
+                if (!GameState.Placed.Contains(pair.Key)) removed.Add(pair.Key);
+            foreach (var p in removed)
             {
-                if (!proxies.TryGetValue(m, out var proxy))
-                {
-                    proxy = CreateProxy(m);
-                    proxies.Add(m, proxy);
-                }
-
-                // On ne montre que ce qui est sur la carte (pas le joueur quand il est au hub)
-                var local = mapRoot.InverseTransformPoint(m.transform.position);
-                bool onMap = Mathf.Abs(local.x) <= MapLayout.HalfExtent + 1f && Mathf.Abs(local.z) <= MapLayout.HalfExtent + 1f;
-                proxy.SetActive(onMap);
-                if (!onMap) continue;
-
-                proxy.transform.SetPositionAndRotation(MapToBoard(m.transform.position), transform.rotation * m.transform.rotation);
-                proxy.transform.localScale = m.transform.lossyScale * scale;
-                if (m.Tint) proxy.GetComponent<ColorTint>().Set(m.Tint.color, m.Tint.rainbow);
+                Destroy(pieces[p]);
+                pieces.Remove(p);
             }
 
-            // Supprimer les copies des objets disparus (ballon éclaté, singe repris…)
-            toRemove.Clear();
-            foreach (var pair in proxies)
-                if (!pair.Key) toRemove.Add(pair.Key);
-            foreach (var m in toRemove)
+            float size = TowerManager.TowerSize * scale;
+            foreach (var p in GameState.Placed)
             {
-                Destroy(proxies[m]);
-                proxies.Remove(m);
+                if (pieces.ContainsKey(p)) continue;
+                var pos = new Vector3(p.pos.x, TowerManager.TowerSize / 2f, p.pos.y) * scale;
+                pieces.Add(p, Visuals.MonkeyPiece(p.monkey, transform, pos, size, withLabel: false));
             }
         }
 
-        GameObject CreateProxy(Mirrored m)
+        // Les ballons bougent sans arrêt : on les suit à chaque image
+        void LateUpdate()
         {
-            var proxy = new GameObject($"Miniature {m.name}");
-            // Un singe avec un modèle 3D : sa miniature est le même singe (modèle + aura), à l'échelle 1 du proxy
-            // (le proxy prend la taille du cube du singe). Sinon, on copie simplement le mesh (ballons, joueur).
-            var view = m.GetComponentInParent<MonkeyView>();
-            if (view && view.model)
-                Visuals.MonkeyPiece(view.monkey, proxy.transform, Vector3.zero, 1f, withLabel: false);
+            var spawner = WaveSpawner.Instance;
+            if (!spawner) return;   // la carte n'est pas encore chargée
+            var map = spawner.transform;
+
+            foreach (var balloon in Balloon.All)
+            {
+                if (!balloons.TryGetValue(balloon, out var mini))
+                {
+                    mini = Miniature(balloon);
+                    balloons.Add(balloon, mini);
+                }
+                // Même place sur le plateau que sur la carte, en petit (et la même orientation, pour les dirigeables)
+                mini.transform.position = transform.TransformPoint(map.InverseTransformPoint(balloon.transform.position) * scale);
+                mini.transform.rotation = transform.rotation * (Quaternion.Inverse(map.rotation) * balloon.transform.rotation);
+                mini.transform.localScale = balloon.transform.lossyScale * scale;
+                var color = balloon.GetComponent<ColorTint>().color;   // la couleur de sa couche
+                foreach (var tint in mini.GetComponentsInChildren<ColorTint>()) tint.Set(color);
+            }
+
+            // Ballons éclatés ou sortis : on retire leur miniature
+            gone.Clear();
+            foreach (var pair in balloons)
+                if (!pair.Key) gone.Add(pair.Key);
+            foreach (var balloon in gone)
+            {
+                Destroy(balloons[balloon]);
+                balloons.Remove(balloon);
+            }
+        }
+
+        // La miniature d'un ballon : une copie de son modèle 3D (ou de sa sphère s'il n'en a pas)
+        GameObject Miniature(Balloon balloon)
+        {
+            var mini = new GameObject($"Miniature {balloon.name}");
+            mini.transform.SetParent(transform, false);
+            if (balloon.Model)
+            {
+                var src = balloon.Model.transform;
+                var copy = Instantiate(balloon.Model, mini.transform, false);
+                copy.transform.SetLocalPositionAndRotation(src.localPosition, src.localRotation);
+                copy.transform.localScale = src.localScale;
+                BalloonVisuals.ApplyTexture(copy, balloon.Kind);   // la copie ne garde pas la texture posée par le code
+                foreach (var spinner in copy.GetComponentsInChildren<Spinner>()) Destroy(spinner);   // pas d'hélice qui tourne en petit
+                if (!balloon.TintedModel)                          // seuls les ballons « teintés » changent de couleur
+                    foreach (var tint in copy.GetComponentsInChildren<ColorTint>()) Destroy(tint);
+            }
             else
             {
-                proxy.AddComponent<MeshFilter>().sharedMesh = m.GetComponent<MeshFilter>().sharedMesh;
-                proxy.AddComponent<MeshRenderer>().sharedMaterial = m.GetComponent<MeshRenderer>().sharedMaterial;
+                mini.AddComponent<MeshFilter>().sharedMesh = balloon.GetComponent<MeshFilter>().sharedMesh;
+                mini.AddComponent<MeshRenderer>().sharedMaterial = balloon.GetComponent<MeshRenderer>().sharedMaterial;
+                mini.AddComponent<ColorTint>();
             }
-            proxy.AddComponent<ColorTint>();
-            if (!view && !string.IsNullOrEmpty(m.label))   // pas de texte sur les singes posés : le modèle suffit
-            {
-                // Label posé au-dessus, à taille fixe (on compense l'échelle du proxy chaque frame)
-                var label = Visuals.Label(proxy.transform, m.label, Vector3.up * 0.9f, 0.04f, Color.black);
-                label.gameObject.AddComponent<KeepWorldScale>();
-            }
-            return proxy;
+            foreach (var c in mini.GetComponentsInChildren<Collider>()) Destroy(c);   // une miniature ne se touche pas
+            return mini;
         }
     }
 }

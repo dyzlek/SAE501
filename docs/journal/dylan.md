@@ -65,6 +65,25 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
   - meubles trop collés : écarts agrandis (pupitres, panier, comptoirs, étal un peu moins large), vérifiés par calcul ;
   - JOUER devient « SE TP ».
 - **3e passe** : plus de « +0 » qui flotte quand une amélioration est gratuite ; plaques des boutons en bois foncé avec le texte doré, plus grand (le texte foncé sur le laiton ne se lisait pas) ; texte des ardoises un peu plus grand.
+- **Mes objectifs du jour** (branche `feat/deux-scenes`, partie de `fix-all`) :
+  - **deux vraies scènes** : `Hub.unity` et `Labyrinthe.unity`, avec un **vrai changement de scène** (SE TP / HUB) ; chaque scène a son joueur (l'arc seulement sur la carte) ; argent, inventaire, singes posés, vagues gagnées, niveaux du bananier et récolteurs sont gardés ; LANCER au hub emmène sur la carte et lance la vague ; HUB est grisé pendant une vague ; le plateau du hub montre les singes posés (plus les ballons en direct) ;
+  - **zone de téléportation du hub** : seulement un disque de 1,9 m au centre de la cabane.
+- **Décor des deux scènes** (sans toucher au labyrinthe) :
+  - **plus de végétation** autour de la cabane : massifs d'herbe haute, massifs de fleurs, plus de buissons, de rochers et de palmiers (modèle Blender) ;
+  - **le même paysage autour du labyrinthe** : prairie, végétation, palmiers et montagnes à la place du sol gris ; estrade, pupitre et poteaux du tableau en bois ;
+  - **lumière** : après plusieurs essais de rayons dessinés (trop artificiels, ils traversaient les meubles), on garde la vraie lumière : soleil chaud aux ombres douces (taches de soleil sur le plancher derrière les fenêtres), lumière ambiante en trois tons, poussières dorées qui flottent dans le soleil aux fenêtres et à la porte, et réglages de l'image (tons naturels, couleurs un peu plus vives, léger halo, coupé sur le casque pour tenir 72 i/s).
+
+**Captures dans Unity (mode PC), après la fusion :**
+
+![Le labyrinthe dans sa scène : prairie, palmiers, montagnes, la vague en cours](../captures/deux-scenes-labyrinthe.webp)
+
+![Le hub : comptoirs du bananier et du récolteur, étal des bananes, bibliothèque](../captures/deux-scenes-hub-comptoirs.webp)
+
+![Le hub pendant une vague : les ballons avancent en direct sur le plateau](../captures/deux-scenes-hub-plateau.webp)
+
+![Rendu Blender : la cabane et sa végétation](../captures/cabane-vegetation-dehors.png)
+
+![Rendu Blender : les massifs d'herbe et de fleurs](../captures/cabane-vegetation-horizon.png)
 - **Critique de Nicolas (1re partie)** :
   - **fiche du singe** (touche A) refaite comme les ardoises du hub (cadre en bois, titre doré, texte à la craie) et dessinée par-dessus le décor : un meuble ne la cache plus ;
   - **bûches qui débordaient sur les fenêtres** : dans `cabane.py`, les rondins qui touchent une fenêtre sont coupés et leurs bouts se cachent dans les montants, un panneau bouche le vide sous l'appui ; caméras réglées (affichage de 3 cm à 400 m) pour que les surfaces proches clignotent moins ;
@@ -86,6 +105,17 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 | Claude (Claude Code) | LANCER qui ne faisait rien au casque (build) : cause non trouvée sans casque (le lien vers les vagues est bien dans la scène). Ajouts : LANCER devient gris pendant une vague (on voit si elle est partie), il retrouve les vagues tout seul si le lien manque, et le bouton B de la manette droite lance la vague de partout | À tester au casque |
 | Claude (Claude Code) | Journal général : bilan du 7 oct. et plan du 8 oct. (tâches données par l'équipe) | Gardé |
 | Claude (Claude Code) | `main` fusionné dans `fix-all` (sans conflit), branche poussée, Pull Request [#11](https://github.com/dyzlek/SAE501/pull/11) vers `main` ouverte (à relire et fusionner sur GitHub ; pas encore testée dans Unity) | Gardé |
+| Claude (Claude Code) | Deux scènes (`Hub` + `Labyrinthe`, chargement additif par `LevelLoader`, points d'arrivée `LevelSpawn`, `WaveSpawner.Instance` au lieu des liens entre scènes, carte à 500 m sur une prairie, `Jeu.unity` supprimée à la génération) et zone de téléportation du hub limitée à un disque de 1,9 m | À tester (compilé, scènes à générer) |
+| Claude (Claude Code) | Depuis la carte, on voyait les montagnes du hub dans la brume : carte éloignée à 1 km (au-delà de la distance d'affichage) | À tester |
+| Claude (Claude Code) | Vrai changement de scène à la place du chargement additif : `Levels` (`SceneManager.LoadScene`), un joueur par scène, état gardé en static (`HarvesterCrew`, `UpgradeButton`), `WaveSpawner` reprend au bon numéro et lance à l'arrivée, plateau du hub refait à partir de `GameState`, `LevelLoader`, `BowHolster`, `Mirrored` et `KeepWorldScale` supprimés | À tester (compilé, scènes à générer) |
+| Claude (Claude Code) | Décor : `cabane.py` (massifs d'herbe et de fleurs, plus de buissons, rochers et palmiers ; nouveau `Paysage.glb` pour la carte, zone de jeu libre), rayons de soleil en maillages transparents (porte et fenêtres du hub, grands rayons sur la carte), soleil identique dans les deux scènes, estrade et pupitres de la carte en bois | À tester (compilé, rendus Blender vérifiés, scènes à générer) |
+| Claude (Claude Code) | Rayons trop forts et « artificiels » dans la cabane : beaucoup plus légers et sans bord net (transparents sur les arêtes, lueur au milieu) ; rayons du ciel qui partent de 150 m (on ne voit plus leur sommet en forme de boîte) | À tester |
+| Claude (Claude Code) | Rayons qui traversaient les comptoirs et bouts visibles dans le ciel : lueurs courtes aux fenêtres (0,8 m, s'éteignent avant les ardoises), plus de rayon à la porte ; rayons du ciel effacés aux deux bouts | À tester |
+| Claude (Claude Code) | Rayons dessinés abandonnés (jeté : toujours artificiels). À la place : soleil réglé (ombres douces, couleur chaude), ambiance en trois tons, poussières dorées en particules dans le soleil, volume de réglages de l'image (`Art/Lumiere.asset` : tons, couleurs, balance des blancs, halo coupé sur le casque par `MobileLighting`), ombres du Quest sur 25 m (plus nettes) | À tester |
+| Claude (Claude Code) | Branche `fusion` (depuis `feat/deux-scenes` + `main`) : ajout des ballons de Maxens (`feat/coffre-maxens` : modèles, MOAB, BFB, cœur) et des améliorations de l'arc de Nicolas (`feat/arc-upgrade`). Conflits : plateau du hub gardé en version deux scènes (la miniature des ballons de Maxens ne sert plus, la carte n'étant plus chargée au hub), `Balloon` réunit la régénération du cœur (Maxens) et la perforation par couches (Nicolas), le pupitre ARC est posé sur l'estrade de la nouvelle scène Labyrinthe | À tester (compilé) |
+| Claude (Claude Code) | Pouvoir revenir au hub pendant une vague (la vague continue) : les deux scènes restent chargées (le hub charge le labyrinthe en arrière-plan), chaque scène a sa « présence » (joueur, soleil, réglages d'image) allumée seulement quand on y est (`Levels.Go`, `LevelPresence`) ; HUB n'est plus grisé pendant une vague ; le plateau du hub montre de nouveau les ballons en direct (miniatures de Maxens réutilisées) ; récolteurs et bananier redeviennent normaux (plus besoin de static) | À tester (compilé) |
+| Claude (Claude Code) | Journal de Nicolas : ses 4 captures de l'arc (tableau des améliorations, visée, tir triple, tir explosif) ; fusion de `docs/organisation-github` dans `fusion` (conflits de journaux : les deux côtés gardés) | Gardé |
+| Claude (Claude Code) | Mes captures dans mon journal ; scènes générées (`Hub.unity`, `Labyrinthe.unity`, `Lumiere.asset`, `Poussiere.mat`, suppression de `Jeu.unity`) commitées ; branche `fusion` poussée et Pull Request vers `main` | Gardé (testé par moi en mode PC) |
 | Claude (Claude Code) | Mise en forme de l'analyse critique de Nicolas (qu'il m'a transmise) dans son journal, avec ses 2 photos ; rien de corrigé pour l'instant | Gardé |
 | Claude (Claude Code) | Suivi de projet sur GitHub (branche `docs/organisation-github`, sans toucher au projet Unity) : 17 labels (priorité = périmètre du GDD, type, zone), 3 jalons S1/S2/S3 avec leurs dates, 33 issues tirées du journal général et du GDD (#12 à #44) avec responsables, tableau [Project](https://github.com/users/dyzlek/projects/2) (À faire / En cours / En relecture / Fait, dates, taille) avec les PR déjà fusionnées, modèles d'issue et de PR, `docs/ORGANISATION.md` | Gardé |
 | Claude (Claude Code) | Règle n°3 dans `CLAUDE.md` : chaque IA tient le suivi GitHub à jour toute seule (issue, carte En cours / En relecture / Fait, `Ferme #N`), sans assigner ni mentionner personne (pas de mails, à ma demande) | Gardé |

@@ -11,7 +11,7 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 |---|---|---|
 | 2026-10-05 | Idée retenue : tower defense VR univers Bloons (Quincy à l'arc + singes posés à la main) | Gestes VR forts (arc, saisir/poser, ramasser) |
 | 2026-10-05 | Le plateau du hub = la carte en miniature, **en direct** (ballons, singes, joueurs). Placement libre des singes, sauf sur la piste et hors carte | Même vision au hub et sur la carte ; prépare un 2e joueur visible |
-| 2026-10-05 | Hub et carte dans **une seule scène** (deux zones, téléportation) | Pour que la carte tourne pendant qu'on est au hub |
+| 2026-10-05 | ~~Hub et carte dans **une seule scène** (deux zones, téléportation)~~ → remplacé le 7 oct. | Pour que la carte tourne pendant qu'on est au hub |
 | 2026-10-05 | Prototype d'abord au clavier/souris (pas de casque dispo), VR ensuite | Valider les mécaniques sans attendre le matériel |
 | 2026-10-05 | Un seul projet Unity en **6000.6** ; intégration des 3 prototypes (hub, coffres, bananier) sur `feat/integration` avant `main` | 3 projets séparés et 2 versions d'Unity ne pouvaient pas cohabiter dans `Unity/` |
 | 2026-10-06 | **Pas d'interface collée à l'écran** : l'argent, les prix et les infos se lisent dans le décor du hub | En VR, un affichage collé au visage donne le vertige (règles de confort) |
@@ -24,6 +24,10 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 | 2026-10-05 | Git : `main` stable + une branche par tâche + PR relue | Éviter de casser le build commun |
 | 2026-10-07 | **Récolteur** : jusqu'à 4 singes (on en rachète tant que l'équipe n'est pas complète), améliorations communes à l'équipe ; un bouton d'amélioration **disparaît au niveau max** (récolteur et bananier) | Critiques de Dylan et Maxens : un meuble plein de boutons inutiles en fin de partie, et un seul singe, c'est vite limité |
 | 2026-10-07 | **Pas de texte qui flotte** : tout est écrit sur un support du décor (ardoise, enseigne, plaque, pancarte), avec deux polices (Bangers pour les titres, Oswald pour lire) | Critiques : texte « dans le vide » moche, textes trop simples |
+| 2026-10-07 | **Deux vraies scènes, avec un vrai changement de scène** : `Hub.unity` (cabane, scène de départ) et `Labyrinthe.unity` (carte, vagues, arc). SE TP charge le labyrinthe, HUB recharge le hub (`SceneManager.LoadScene`) ; chaque scène a son joueur. Ce qui doit rester (argent, inventaire, singes posés, vagues gagnées, améliorations du bananier et des récolteurs) est gardé en static. Conséquences : le plateau du hub montre les singes posés mais plus les ballons en direct ; on ne quitte pas la carte pendant une vague (HUB grisé) ; LANCER au hub emmène sur la carte et lance la vague. `Jeu.unity` est supprimée | Séparer vraiment les deux niveaux, comme dans le cours (Dylan) |
+| 2026-10-07 | **Les deux scènes restent chargées** : on peut revenir au hub pendant une vague, elle continue (et les bananes tombent pendant qu'on défend). Changer de niveau allume la présence (joueur, soleil, réglages d'image) de la scène d'arrivée et éteint l'autre ; le plateau du hub montre la vague en direct | Demande de Dylan : aller chercher des bananes en pleine vague, comme dans Bloons |
+| 2026-10-07 | Dans le hub, on ne se téléporte plus que **dans un disque de 1,9 m au centre** de la cabane, devant les meubles | Plus de téléportation dans un meuble, contre un mur ou dehors (Dylan) |
+| 2026-10-07 | **Lumière** : pas de faux rayons dessinés ; vraie lumière du soleil et ombres, poussières dans le soleil, réglages de l'image (`Art/Lumiere.asset`), halo (Bloom) coupé sur le casque | Plus réaliste, et rien de coûteux pour le Quest (Dylan) |
 | 2026-10-07 | **Suivi de projet sur GitHub** : une issue par tâche (responsable, label `prio:` = périmètre du GDD), un jalon par semaine (S1/S2/S3), tableau [Project](https://github.com/users/dyzlek/projects/2) À faire / En cours / En relecture / Fait, PR avec `Ferme #N`. Mode d'emploi : [ORGANISATION.md](../ORGANISATION.md) | Outil de suivi demandé (note de gestion de projet) ; tout au même endroit que le code (Dylan) |
 | _à trancher_ | Nom du jeu · assets Bloons ou maison · périmètre définitif | Avant le GDD v1 (ven. 9 oct.) |
 
@@ -50,9 +54,9 @@ _À vérifier contre le périmètre : lancer les singes et la traînée sont de 
 |---|---|
 | Analyse critique et bugs : chacun relève, Dylan corrige (branche `fix-all`, voir les analyses de [Dylan](dylan.md), [Maxens](maxens.md) et [Nicolas](nicolas.md)) | Tout le monde, Dylan |
 | Coffre : changer l'asset, améliorer l'animation, voir les singes qui en sortent | Maxens |
-| Limiter la zone de téléportation dans le hub | Dylan |
+| Limiter la zone de téléportation dans le hub | Dylan · _fait (branche `feat/deux-scenes`, à tester)_ |
 | Améliorer l'arc | Nicolas |
-| Séparer vraiment les deux niveaux : le hub et le labyrinthe | Dylan |
+| Séparer vraiment les deux niveaux : le hub et le labyrinthe | Dylan · _fait (branche `feat/deux-scenes`, à tester)_ |
 | Améliorer le labyrinthe | Dylan |
 | Mettre les assets des ballons MOAB | Maxens |
 

@@ -4,6 +4,40 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
+### Mes captures et tout sur main
+> Mets mes captures dans mon journal et pousse tout sur `main`.
+
+### Captures de l'arc dans le journal de Nicolas
+> Mets à jour le journal de Nicolas avec ses captures : le tableau des améliorations de l'arc (pour le bêta-test), la prévisualisation du tir, le tir triple et le tir explosif. Ajoute aussi `docs/organisation-github`.
+
+### Revenir au hub pendant une vague
+> Quand je lance la vague, j'aimerais pouvoir quand même revenir au hub depuis l'autre niveau, etc.
+>
+> Suite (mon choix) : la vague continue pendant que je suis au hub.
+
+### Branche fusion avec le travail de Maxens et Nicolas
+> Dans une branche `fusion`, ajoute ce que Maxens et Nicolas ont fait de nouveau.
+
+### Rendre les deux scènes belles
+> Rends les deux scènes belles, sans toucher encore au labyrinthe.
+>
+> Suite (précision) : j'aimerais des rayons de soleil, et un peu plus de végétation autour du hub et du labyrinthe.
+>
+> Suite : ce n'est pas mal, mais dans la maison c'est trop artificiel et abusé.
+>
+> Suite : ça traverse encore, et ce n'est pas encore centré.
+>
+> Suite : toujours pas centré, et la lumière aux fenêtres n'est pas réaliste, donc améliore. Essaie de rendre le jeu vraiment beau avec la lumière, je te laisse faire.
+
+### Zone de téléportation du hub et deux vraies scènes
+> Fais maintenant « limiter la zone de téléportation dans le hub » et « séparer vraiment les deux niveaux : le hub et le labyrinthe ».
+>
+> Suite (mes choix) : deux vraies scènes ; dans le hub, se téléporter seulement au centre.
+>
+> Suite : regarde pourquoi je vois seulement une prairie et des montagnes au loin (capture).
+>
+> Suite : je veux vraiment deux scènes, au sens où on le demande de base (un vrai changement de scène).
+
 ### Organiser le projet sur GitHub
 > Aide-moi à mettre en place le planning et l'organisation du projet sur GitHub, car nous serons notés sur l'organisation. Ne touche à rien dans le dossier du projet (une autre IA est en train de modifier Unity) : travaille seulement sur GitHub et dans une autre branche.
 >

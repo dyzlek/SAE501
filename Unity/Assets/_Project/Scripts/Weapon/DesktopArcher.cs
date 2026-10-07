@@ -13,6 +13,8 @@ namespace SAE
 
         bool drawing;
 
+        void Start() => bow.aim = aim;   // la courbe de visée de l'arc part elle aussi vers le centre de l'écran
+
         void Update()
         {
             var mouse = Mouse.current;

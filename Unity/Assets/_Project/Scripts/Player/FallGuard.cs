@@ -8,7 +8,6 @@ namespace SAE
     [RequireComponent(typeof(PlayerRig))]
     public class FallGuard : MonoBehaviour
     {
-        public Transform[] spawns;          // les points où le remettre (Spawn Hub, Spawn Carte)
         public float fallHeight = -5f;      // en mètres : plus bas que tous les sols du jeu
 
         PlayerRig rig;
@@ -22,12 +21,11 @@ namespace SAE
             // Le point d'arrivée le plus proche, vu de dessus (on ne compte pas la hauteur de la chute)
             Transform best = null;
             float bestDistance = float.MaxValue;
-            foreach (var spawn in spawns)
+            foreach (var spawn in LevelSpawn.All)   // Spawn Hub et Spawn Carte, chacun dans sa scène
             {
-                if (!spawn) continue;
-                var flat = spawn.position - transform.position;
+                var flat = spawn.transform.position - transform.position;
                 flat.y = 0f;
-                if (flat.sqrMagnitude < bestDistance) { bestDistance = flat.sqrMagnitude; best = spawn; }
+                if (flat.sqrMagnitude < bestDistance) { bestDistance = flat.sqrMagnitude; best = spawn.transform; }
             }
             if (best) rig.TeleportTo(best);
         }

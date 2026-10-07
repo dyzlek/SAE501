@@ -142,12 +142,12 @@ namespace SAE
             var sb = new StringBuilder();
             sb.AppendLine($"<color=#{hex}>{MonkeyData.RarityName(m.level)}</color>  ·  niveau {(int)m.level + 1}");
             sb.AppendLine($"<color=#B8C8B8>{MonkeyData.Effect(m.type)}</color>");
-            sb.AppendLine($"Dégâts {MonkeyData.Damage(m):0.#}   Portée {Range(m)}");
+            sb.AppendLine($"Perce {MonkeyData.Pierce(m)} couche(s)   Portée {Range(m)}");
             sb.AppendLine($"Cadence {MonkeyData.FireRate(m):0.#} tir/s   Cibles {Targets(m)}");
             if (m.level < Rarity.Blanc)
             {
                 var up = m.Upgraded();
-                sb.Append($"<color=#7CFC7C>Fusion → {MonkeyData.RarityName(up.level)} : dégâts {MonkeyData.Damage(up):0.#}, " +
+                sb.Append($"<color=#7CFC7C>Fusion → {MonkeyData.RarityName(up.level)} : perce {MonkeyData.Pierce(up)}, " +
                           $"{MonkeyData.FireRate(up):0.#} tir/s</color>");
             }
             else sb.Append("<color=#FFFFFF>Niveau maximum</color>");
