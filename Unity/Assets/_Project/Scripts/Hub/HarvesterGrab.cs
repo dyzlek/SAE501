@@ -41,6 +41,7 @@ namespace SAE
             grab.farAttachMode = UnityEngine.XR.Interaction.Toolkit.Attachment.InteractableFarAttachMode.Near;   // pris de loin, il vient dans la main
             gameObject.AddComponent<GrabReach>();
             handSpeed = gameObject.AddComponent<ThrowVelocity>();
+            gameObject.AddComponent<ThrowTrail>();   // la traînée dorée quand il vole
             PlayerRig.IgnoreCollisions(gameObject);   // on ne marche pas sur lui en le tenant
         }
 

@@ -21,7 +21,7 @@ namespace SAE
         void Update()
         {
             if (!chest || !text) return;
-            if (shownWaves == GameState.WavesWon && shownMoney == Economy.Money) return;   // rien n'a changé
+            if (shownWaves == GameState.WavesWon && shownMoney == Economy.Money) return;   // rien n'a changé (débloquer coûte des bananes : l'argent change)
             shownWaves = GameState.WavesWon;
             shownMoney = Economy.Money;
 
@@ -50,14 +50,14 @@ namespace SAE
             if (reward)
             {
                 sb.AppendLine();
-                sb.AppendLine("<color=#FFD45A>SINGES</color>");
+                sb.AppendLine("<color=#FFD45A>SINGES</color>  <color=#AAAAAA>(à débloquer à la bibliothèque)</color>");
                 var typeOdds = reward.CurrentTypeOdds();
                 for (int i = 0; i < MonkeyData.TypeCount; i++)
                 {
                     var t = (MonkeyType)i;
-                    sb.Append(MonkeyOdds.IsUnlocked(reward.typeOdds, t, GameState.WavesWon)
+                    sb.Append(GameState.IsUnlocked(t)
                         ? $"{t} {Percent(typeOdds[i])}"
-                        : $"<color=#777777>{t} : vague {reward.typeOdds.unlockAtWave[i]}</color>");
+                        : $"<color=#777777>{t} : {MonkeyData.UnlockPrice(t)} bananes</color>");
                     if (i % 2 == 1) sb.AppendLine();
                     else sb.Append("    ");
                 }

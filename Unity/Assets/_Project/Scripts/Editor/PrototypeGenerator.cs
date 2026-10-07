@@ -871,10 +871,18 @@ namespace SAE.EditorTools
             {
                 var type = (MonkeyType)(firstType + i);
                 float y = FirstShelfY + i * SlotStepY;
-                Visuals.Box($"Plaque {type}", shelf, Around(Angle(-1), Ring - 0.19f, y - 0.03f), new Vector3(SlotStepX, 0.12f, 0.015f), Parchment)
-                    .transform.rotation = Facing(Angle(-1));
-                Visuals.Text(shelf, type.ToString(), Around(Angle(-1), Ring - 0.2f, y - 0.03f), 0.065f, Engraved)
-                    .transform.rotation = Facing(Angle(-1));
+                // La plaque se lit et s'enfonce : tant que le type n'est pas débloqué, elle affiche son prix en bananes
+                var plaque = Visuals.Box($"Plaque {type}", shelf, Around(Angle(-1), Ring - 0.19f, y - 0.03f), new Vector3(SlotStepX, 0.14f, 0.015f), Parchment);
+                plaque.transform.rotation = Facing(Angle(-1));
+                var plaqueText = Visuals.Text(shelf, type.ToString(), Around(Angle(-1), Ring - 0.2f, y - 0.03f), 0.045f, Engraved);
+                plaqueText.transform.rotation = Facing(Angle(-1));
+                plaque.tag = Tags.Bouton;
+                plaque.AddComponent<BoxCollider>().size = new Vector3(1f, 1f, 4f);   // un peu épais : facile à toucher du bout de la manette
+                var unlock = plaque.AddComponent<TypeUnlockPlaque>();
+                unlock.type = type;
+                unlock.label = plaqueText;
+                unlock.plate = plaque.GetComponent<ColorTint>();
+                plaque.AddComponent<RayPress>();   // ou de loin, en la visant
 
                 for (int l = 0; l < MonkeyData.LevelCount; l++)
                 {

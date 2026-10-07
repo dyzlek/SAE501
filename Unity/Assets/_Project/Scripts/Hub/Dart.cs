@@ -60,6 +60,7 @@ namespace SAE
             body = GetComponent<Rigidbody>();
             grab = GetComponent<XRGrabInteractable>();
             handSpeed = gameObject.AddComponent<ThrowVelocity>();
+            gameObject.AddComponent<ThrowTrail>();
             PlayerRig.IgnoreCollisions(gameObject);
         }
 
