@@ -5,14 +5,16 @@ namespace SAE
     // Surface où l'on pose les singes : le plateau du hub (scale = taille réduite) ou la carte (scale = 1).
     // Son repère local = le repère de la carte multiplié par 'scale'.
     // On y lâche le singe tenu en main (MonkeyToken). Pendant qu'on le tient au-dessus :
-    // singe fantôme vert (on peut poser) ou rouge (on ne peut pas),
-    // et halo blanc autour du singe déjà posé quand on peut fusionner.
+    // singe fantôme vert (on peut poser) ou rouge (on ne peut pas) ;
+    // si on peut fusionner, le fantôme DORÉ montre le singe qu'on va obtenir (rareté suivante), au-dessus du singe posé,
+    // avec un halo doré qui pulse dessous (avant : un fantôme rouge, on croyait que c'était interdit).
     public class PlacementSurface : MonoBehaviour, IMonkeyInfo
     {
         public float scale = 1f;
 
         static readonly Color Ok = new Color(0.3f, 1f, 0.3f);
         static readonly Color No = new Color(1f, 0.2f, 0.2f);
+        static readonly Color Fusion = new Color(1f, 0.82f, 0.25f);
 
         GameObject ghost;
         Monkey? ghostMonkey;
@@ -61,9 +63,12 @@ namespace SAE
                 action = Placement.Evaluate(pos, out target);
             }
 
-            // Fantôme du singe tenu, là où l'on vise
-            bool showGhost = action == PlacementAction.Place || action == PlacementAction.Blocked || action == PlacementAction.Fuse;
-            if (!showGhost || !GameState.Held.Equals(ghostMonkey))
+            // Fantôme : le singe tenu là où l'on vise, ou (fusion) le singe qu'on va obtenir, au-dessus de celui posé.
+            // Sans nom au-dessus : le texte cachait l'endroit où l'on pose.
+            bool fuse = action == PlacementAction.Fuse;
+            bool showGhost = action == PlacementAction.Place || action == PlacementAction.Blocked || fuse;
+            Monkey? wanted = !showGhost ? (Monkey?)null : fuse ? target.monkey.Upgraded() : GameState.Held;
+            if (!showGhost || !wanted.Equals(ghostMonkey))
             {
                 if (ghost) Destroy(ghost);
                 ghost = null;
@@ -72,15 +77,16 @@ namespace SAE
             {
                 if (!ghost)
                 {
-                    ghostMonkey = GameState.Held;
-                    ghost = Visuals.MonkeyPiece(GameState.Held.Value, transform, Vector3.zero, TowerManager.TowerSize * scale);
+                    ghostMonkey = wanted;
+                    ghost = Visuals.MonkeyPiece(wanted.Value, transform, Vector3.zero, TowerManager.TowerSize * scale, withLabel: false);
                     ghost.name = "Apercu";
                 }
-                ghost.transform.localPosition = ToLocal(pos, TowerManager.TowerSize * 0.5f);
-                ghost.GetComponent<MonkeyView>().Tint(action == PlacementAction.Place ? Ok : No);
+                float lift = fuse ? 1.5f + 0.15f * Mathf.Sin(Time.time * 6f) : 0.5f;   // le singe obtenu flotte et danse au-dessus
+                ghost.transform.localPosition = ToLocal(fuse ? target.pos : pos, TowerManager.TowerSize * lift);
+                ghost.GetComponent<MonkeyView>().Tint(fuse ? Fusion : action == PlacementAction.Place ? Ok : No);
             }
 
-            // Halo blanc sous le singe avec lequel on peut fusionner
+            // Halo doré sous le singe avec lequel on peut fusionner
             bool showHalo = action == PlacementAction.Fuse;
             if (showHalo && !halo) halo = CreateHalo();
             if (halo)
@@ -102,7 +108,7 @@ namespace SAE
             go.name = "Halo fusion";
             Visuals.Kill(go.GetComponent<Collider>());
             go.transform.SetParent(transform, false);
-            go.AddComponent<ColorTint>().Set(Color.white);
+            go.AddComponent<ColorTint>().Set(Fusion);
             return go;
         }
     }
