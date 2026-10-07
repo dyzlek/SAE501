@@ -6,14 +6,16 @@ namespace SAE
 {
     // Pour s'amuser : on peut prendre un singe récolteur dans sa main (il gigote) et le lancer un peu partout.
     // Il vole en tournoyant, atterrit, se remet debout, est sonné un instant, puis retourne ramasser des bananes.
-    // S'il tombe hors de la cabane (ou dans le vide), il revient à sa place. Il ne se fait jamais mal, promis.
+    // Il se pose au sol, au point le plus proche de là où il est tombé où il peut marcher : le disque libre au centre
+    // de la cabane (le même où l'on se téléporte en VR). Tombé sur un meuble, dehors ou dans le vide : il est ramené au bord
+    // de ce disque, du côté où il est tombé. Il ne se fait jamais mal, promis.
     [RequireComponent(typeof(HarvesterMonkey))]
     public class HarvesterGrab : MonoBehaviour, IThrowable
     {
         const float SettleSpeed = 0.3f;     // en m/s : plus lent que ça, il a fini de rouler
         const float MinFlight = 0.3f;       // en secondes : il ne « se pose » pas dès le lâcher
         const float MaxFlight = 5f;         // en secondes : au-delà, on le remet à sa place
-        const float InsideRadius = 2.6f;    // en mètres : au-delà, il est sorti de la cabane (ou coincé dans un meuble)
+        const float WalkRadius = HubLayout.Ring - 0.9f;   // 1,9 m : le disque libre au centre (zone de téléportation du hub)
 
         HarvesterMonkey monkey;
         Rigidbody body;
@@ -95,17 +97,18 @@ namespace SAE
             float age = Time.time - launchedAt;
             bool lost = age > MaxFlight || transform.position.y < FallGuard.FallHeight;
             bool settled = age > MinFlight && !body.isKinematic && body.linearVelocity.sqrMagnitude < SettleSpeed * SettleSpeed;
-            if (lost || settled) Land(lost);
+            if (lost || settled) Land();
         }
 
         // Il se remet debout, au sol, dans la cabane ; puis HarvesterMonkey le renvoie au travail
-        void Land(bool lost)
+        void Land()
         {
             flying = false;
             body.isKinematic = true;
             body.useGravity = false;
             var flat = new Vector3(transform.position.x, 0f, transform.position.z);
-            Vector3 spot = lost || flat.magnitude > InsideRadius ? monkey.home : new Vector3(flat.x, monkey.home.y, flat.z);
+            flat = Vector3.ClampMagnitude(flat, WalkRadius);   // le point du disque libre le plus proche, au sol
+            var spot = new Vector3(flat.x, monkey.home.y, flat.z);
             var look = Vector3.ProjectOnPlane(transform.forward, Vector3.up);
             transform.SetPositionAndRotation(spot, Quaternion.LookRotation(look.sqrMagnitude > 0.01f ? look : Vector3.forward));
             monkey.PutDown();

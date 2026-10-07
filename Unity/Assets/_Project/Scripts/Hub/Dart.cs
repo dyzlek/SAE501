@@ -38,7 +38,7 @@ namespace SAE
 
             var col = go.AddComponent<CapsuleCollider>();   // avant le XR Grab : il récupère les colliders à sa création
             col.direction = 2;                               // le long de Z
-            col.radius = 0.02f;
+            col.radius = 0.05f;   // plus large que la fléchette : facile à viser et à attraper
             col.height = Length;
             var rb = go.AddComponent<Rigidbody>();
             rb.isKinematic = true;
