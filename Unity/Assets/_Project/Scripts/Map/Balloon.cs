@@ -8,7 +8,8 @@ namespace SAE
     //   Rapide = petit et vif ; Blindé = gris, moitié moins de dégâts, insensible au ralentissement ;
     //   Boss = gros ballon violet foncé et lent ; Dirigeable = le boss final rouge, énorme, insensible au ralentissement.
     // Avec les modèles 3D (BalloonVisuals) : Normal et Rapide = Ballon_Normal teinté par couche,
-    //   Blindé = Ballon_Blindage, Boss = MOAB, Dirigeable = BFB.
+    //   Blindé = Ballon_Blindage, Boss = MOAB (hélice qui tourne), Dirigeable = BFB (2 hélices), Coeur = Ballon_Coeur.
+    // Le ballon cœur regagne une couche toutes les 2 s (règle du GDD : il se régénère).
     // S'il atteint la sortie, il retire autant de vies qu'il lui reste de couches.
     public class Balloon : MonoBehaviour
     {
@@ -22,6 +23,9 @@ namespace SAE
         static readonly Color ArmorColor = new Color(0.55f, 0.57f, 0.6f);
         static readonly Color BossColor = new Color(0.35f, 0.1f, 0.45f);
         static readonly Color BlimpColor = new Color(0.8f, 0.1f, 0.1f);
+        static readonly Color HeartColor = new Color(1f, 0.5f, 0.7f);
+
+        const float RegenDelay = 2f;   // le ballon cœur regagne une couche toutes les 2 s
 
         public float baseSpeed = 2.5f;
 
@@ -29,6 +33,8 @@ namespace SAE
         List<Vector3> path;
         int nextPoint = 1;
         float hp;
+        int maxLayers;
+        float nextRegen;
         float speed;
         float slowFactor = 1f;
         float slowUntil;
@@ -51,6 +57,8 @@ namespace SAE
             spawner = owner;
             path = points;
             hp = layers;
+            maxLayers = layers;
+            nextRegen = Time.time + RegenDelay;
             Kind = kind;
             transform.position = path[0];
             tint = GetComponent<ColorTint>();
@@ -101,6 +109,17 @@ namespace SAE
             model.transform.localScale = asset.transform.localScale * scale;
             model.transform.localPosition = turn * -bounds.center * scale;
             Model = model;
+            BalloonVisuals.ApplyTexture(model, Kind);
+
+            // Les hélices tournent autour du grand axe du dirigeable (le +Z du ballon)
+            var localAxis = model.transform.InverseTransformDirection(transform.forward);
+            foreach (var r in renderers)
+                if (r.name.Contains("Helice"))
+                {
+                    var spinner = r.gameObject.AddComponent<Spinner>();
+                    spinner.axisRef = model.transform;
+                    spinner.localAxis = localAxis;
+                }
 
             var box = gameObject.AddComponent<BoxCollider>();
             var fitted = turn * bounds.size * scale;
@@ -139,6 +158,13 @@ namespace SAE
 
         void Update()
         {
+            // Le ballon cœur se régénère, jusqu'à son nombre de couches de départ
+            if (Kind == BalloonKind.Coeur && Time.time >= nextRegen)
+            {
+                nextRegen = Time.time + RegenDelay;
+                if (hp < maxLayers) { hp = Mathf.Min(maxLayers, Mathf.Floor(hp) + 1f); UpdateColor(); }
+            }
+
             if (Time.time > slowUntil) slowFactor = 1f;
             float step = speed * slowFactor * Time.deltaTime;
             Progress += step;
@@ -172,6 +198,7 @@ namespace SAE
                 case BalloonKind.Blinde: tint.Set(ArmorColor); break;
                 case BalloonKind.Boss: tint.Set(BossColor); break;
                 case BalloonKind.Dirigeable: tint.Set(BlimpColor); break;
+                case BalloonKind.Coeur: tint.Set(HeartColor); break;
                 default:
                     int layer = Mathf.Clamp(Mathf.CeilToInt(hp) - 1, 0, layerColors.Length - 1);
                     tint.Set(layerColors[layer]);

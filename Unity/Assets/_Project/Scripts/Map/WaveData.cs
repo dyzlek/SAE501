@@ -6,7 +6,8 @@ namespace SAE
     // Les sortes de ballons.
     // Normal : perd une couche par point de dégât. Rapide : petit et vif. Blindé : gris, prend moitié moins
     // de dégâts et ne peut pas être ralenti. Boss : gros, lent, très solide. Dirigeable : le boss final rouge.
-    public enum BalloonKind { Normal, Rapide, Blinde, Boss, Dirigeable }
+    // Coeur : regagne une couche toutes les quelques secondes (ajouté à la fin pour garder les numéros des autres).
+    public enum BalloonKind { Normal, Rapide, Blinde, Boss, Dirigeable, Coeur }
 
     // Un groupe de ballons identiques envoyés les uns après les autres.
     [Serializable]
@@ -50,11 +51,13 @@ namespace SAE
         static BalloonGroup N(int count, int layers, float interval = 0.7f) => new BalloonGroup(BalloonKind.Normal, count, layers, interval);
         static BalloonGroup R(int count, int layers) => new BalloonGroup(BalloonKind.Rapide, count, layers, 0.5f);
         static BalloonGroup B(int count, int layers) => new BalloonGroup(BalloonKind.Blinde, count, layers, 1f);
+        static BalloonGroup C(int count, int layers) => new BalloonGroup(BalloonKind.Coeur, count, layers, 1f);
         static BalloonGroup Boss(int count, int layers) => new BalloonGroup(BalloonKind.Boss, count, layers, 2.5f, 2f);
 
         public static List<WaveData> Default() => new List<WaveData>
         {
-            new WaveData(N(8, 1, 0.9f), Boss(1, 5)),                                   // 1 : découverte
+            new WaveData(N(1, 1), C(1, 2), B(1, 2),                                    // 1 : découverte, un de chaque
+                         N(8, 1, 0.9f), Boss(1, 5)),
             new WaveData(N(10, 1), N(6, 2), Boss(1, 6)),                              // 2
             new WaveData(N(12, 2), R(5, 1), Boss(1, 8)),                              // 3 : premiers rapides
             new WaveData(N(10, 2), R(8, 2), N(6, 3), Boss(1, 10)),                    // 4

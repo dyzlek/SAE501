@@ -10,7 +10,7 @@ namespace SAE.EditorTools
     {
         const string AssetPath = "Assets/_Project/Resources/BalloonVisuals.asset";
 
-        // Un FBX par sorte, dans l'ordre de BalloonKind (Normal, Rapide, Blindé, Boss, Dirigeable).
+        // Un FBX par sorte, dans l'ordre de BalloonKind (Normal, Rapide, Blindé, Boss, Dirigeable, Coeur).
         // Le boss est le MOAB (bleu), le dirigeable rouge de la vague 10 est le BFB.
         static readonly string[] ModelPaths =
         {
@@ -19,6 +19,17 @@ namespace SAE.EditorTools
             "Assets/_Project/Art/Ballons/FBX/Ballon_Blindage.fbx",
             "Assets/_Project/Art/MOAB/FBX/MOAB.fbx",
             "Assets/_Project/Art/BFB/FBX/BFB.fbx",
+            "Assets/_Project/Art/Ballons/FBX/Ballon_Coeur.fbx",
+        };
+
+        static readonly string[] TexturePaths =
+        {
+            "Assets/_Project/Art/Ballons/Textures/Ballon_Texture.png",
+            "Assets/_Project/Art/Ballons/Textures/Ballon_Texture.png",
+            "Assets/_Project/Art/Ballons/Textures/Ballon_Blindage_Texture.png",
+            "Assets/_Project/Art/MOAB/Textures/MOAB_Texture.png",
+            "Assets/_Project/Art/BFB/Textures/BFB_Texture.png",
+            "Assets/_Project/Art/Ballons/Textures/Ballon_Coeur_Texture.png",
         };
 
         [MenuItem("SAE/Brancher les modèles des ballons")]
@@ -33,8 +44,10 @@ namespace SAE.EditorTools
             }
 
             visuals.models = new GameObject[ModelPaths.Length];
+            visuals.textures = new Texture2D[TexturePaths.Length];
             for (int i = 0; i < ModelPaths.Length; i++)
             {
+                visuals.textures[i] = AssetDatabase.LoadAssetAtPath<Texture2D>(TexturePaths[i]);
                 visuals.models[i] = AssetDatabase.LoadAssetAtPath<GameObject>(ModelPaths[i]);
                 if (!visuals.models[i]) Debug.LogWarning($"Ballons : modèle introuvable pour {(BalloonKind)i} ({ModelPaths[i]}), il restera en sphère.");
             }

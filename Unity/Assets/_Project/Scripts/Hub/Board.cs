@@ -71,6 +71,7 @@ namespace SAE
                 var copy = Instantiate(balloon.Model, proxy.transform, false);
                 copy.transform.SetLocalPositionAndRotation(src.localPosition, src.localRotation);
                 copy.transform.localScale = src.localScale;
+                BalloonVisuals.ApplyTexture(copy, balloon.Kind);   // la copie ne garde pas la texture posée par le code
                 if (balloon.TintedModel) modelTints[m] = copy.GetComponentsInChildren<ColorTint>();
             }
             else
