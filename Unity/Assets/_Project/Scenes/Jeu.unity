@@ -48723,6 +48723,21 @@ MonoBehaviour:
   waves:
   - groups:
     - kind: 0
+      count: 1
+      layers: 1
+      interval: 0.7
+      pause: 1
+    - kind: 5
+      count: 1
+      layers: 2
+      interval: 1
+      pause: 1
+    - kind: 2
+      count: 1
+      layers: 2
+      interval: 1
+      pause: 1
+    - kind: 0
       count: 8
       layers: 1
       interval: 0.9
@@ -48732,6 +48747,11 @@ MonoBehaviour:
       layers: 5
       interval: 2.5
       pause: 2
+    - kind: 4
+      count: 1
+      layers: 20
+      interval: 1
+      pause: 4
   - groups:
     - kind: 0
       count: 10

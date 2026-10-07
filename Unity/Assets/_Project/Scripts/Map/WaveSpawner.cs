@@ -113,11 +113,15 @@ namespace SAE
 
         void Spawn(BalloonKind kind, int layers)
         {
-            var go = GameObject.CreatePrimitive(kind == BalloonKind.Dirigeable ? PrimitiveType.Capsule : PrimitiveType.Sphere);
+            // Avec un modèle 3D, le ballon est un objet vide : Balloon.Init y pose le modèle et son collider.
+            // Sans modèle, on garde l'ancienne sphère (capsule pour le dirigeable).
+            var go = BalloonVisuals.Model(kind) ? new GameObject()
+                : GameObject.CreatePrimitive(kind == BalloonKind.Dirigeable ? PrimitiveType.Capsule : PrimitiveType.Sphere);
             go.name = kind.ToString();
             go.tag = Tags.Ballon;
             go.AddComponent<ColorTint>();
             go.AddComponent<Balloon>().Init(this, path, layers, kind);
+            PlayerRig.IgnoreCollisions(go);   // le joueur traverse les ballons et les boss ; les flèches les touchent toujours
         }
 
         public void BalloonEscaped(int layers) => Lives = Mathf.Max(0, Lives - layers);

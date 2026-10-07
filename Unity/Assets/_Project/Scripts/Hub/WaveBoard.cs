@@ -43,6 +43,7 @@ namespace SAE
             var parts = new System.Collections.Generic.List<string>();
             if (counts[(int)BalloonKind.Normal] > 0) parts.Add($"{counts[(int)BalloonKind.Normal]} ballons");
             if (counts[(int)BalloonKind.Rapide] > 0) parts.Add($"{counts[(int)BalloonKind.Rapide]} rapides");
+            if (counts[(int)BalloonKind.Coeur] > 0) parts.Add($"<color=#FF7FB0>{counts[(int)BalloonKind.Coeur]} cœurs</color>");
             if (counts[(int)BalloonKind.Blinde] > 0) parts.Add($"<color=#B0B4BA>{counts[(int)BalloonKind.Blinde]} blindés</color>");
             if (counts[(int)BalloonKind.Boss] > 0) parts.Add($"<color=#C080E0>{counts[(int)BalloonKind.Boss]} boss</color>");
             if (counts[(int)BalloonKind.Dirigeable] > 0) parts.Add("<color=#FF4040>DIRIGEABLE</color>");

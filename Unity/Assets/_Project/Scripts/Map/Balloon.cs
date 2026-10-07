@@ -7,6 +7,9 @@ namespace SAE
     // Sa sorte (BalloonKind) change sa taille, sa vitesse et sa résistance :
     //   Rapide = petit et vif ; Blindé = gris, moitié moins de dégâts, insensible au ralentissement ;
     //   Boss = gros ballon violet foncé et lent ; Dirigeable = le boss final rouge, énorme, insensible au ralentissement.
+    // Avec les modèles 3D (BalloonVisuals) : Normal et Rapide = Ballon_Normal teinté par couche,
+    //   Blindé = Ballon_Blindage, Boss = MOAB (hélice qui tourne), Dirigeable = BFB (2 hélices), Coeur = Ballon_Coeur.
+    // Le ballon cœur regagne une couche toutes les 2 s (règle du GDD : il se régénère).
     // S'il atteint la sortie, il retire autant de vies qu'il lui reste de couches.
     public class Balloon : MonoBehaviour
     {
@@ -20,6 +23,9 @@ namespace SAE
         static readonly Color ArmorColor = new Color(0.55f, 0.57f, 0.6f);
         static readonly Color BossColor = new Color(0.35f, 0.1f, 0.45f);
         static readonly Color BlimpColor = new Color(0.8f, 0.1f, 0.1f);
+        static readonly Color HeartColor = new Color(1f, 0.3f, 0.55f);
+
+        const float RegenDelay = 2f;   // le ballon cœur regagne une couche toutes les 2 s
 
         public float baseSpeed = 2.5f;
 
@@ -27,13 +33,23 @@ namespace SAE
         List<Vector3> path;
         int nextPoint = 1;
         float hp;
+        int maxLayers;
+        float nextRegen;
+        bool facingSet;
+        const float TurnSpeed = 60f;   // degrés par seconde : un dirigeable prend ~1,5 s pour un virage à angle droit
         float speed;
         float slowFactor = 1f;
         float slowUntil;
         ColorTint tint;
+        ColorTint[] modelTints;   // les morceaux du modèle 3D qui prennent la couleur de la couche
+        bool hasModel;
+
+        public GameObject Model { get; private set; }               // le modèle 3D, recopié en miniature par le plateau
+        public bool TintedModel => modelTints != null;              // le modèle prend la couleur de la couche
 
         public BalloonKind Kind { get; private set; }
         bool Armored => Kind == BalloonKind.Blinde || Kind == BalloonKind.Dirigeable;
+        bool IsBlimp => Kind == BalloonKind.Boss || Kind == BalloonKind.Dirigeable;
 
         // Distance parcourue : les singes visent le ballon le plus avancé.
         public float Progress { get; private set; }
@@ -43,6 +59,8 @@ namespace SAE
             spawner = owner;
             path = points;
             hp = layers;
+            maxLayers = layers;
+            nextRegen = Time.time + RegenDelay;
             Kind = kind;
             transform.position = path[0];
             tint = GetComponent<ColorTint>();
@@ -56,9 +74,65 @@ namespace SAE
                 BalloonKind.Dirigeable => (2.2f, 0.35f),
                 _ => (0.9f, 1f),
             };
-            transform.localScale = kind == BalloonKind.Dirigeable ? new Vector3(size, size * 1.6f, size) : Vector3.one * size;
+            var modelAsset = BalloonVisuals.Model(kind);
+            hasModel = modelAsset;
+            if (hasModel)
+            {
+                // Les dirigeables (MOAB, BFB) sont longs : leur taille est leur longueur, on les grandit un peu.
+                if (IsBlimp) size *= 1.5f;
+                transform.localScale = Vector3.one * size;
+                AddModel(modelAsset);
+            }
+            else
+                transform.localScale = kind == BalloonKind.Dirigeable ? new Vector3(size, size * 1.6f, size) : Vector3.one * size;
             speed = baseSpeed * speedFactor;
             UpdateColor();
+        }
+
+        // Pose le modèle 3D, ramené à une taille de 1 avant l'échelle, et un collider à sa forme
+        // pour que les flèches et projectiles le touchent.
+        void AddModel(GameObject asset)
+        {
+            var model = Instantiate(asset);
+            model.name = "Modele";
+            model.transform.SetPositionAndRotation(Vector3.zero, asset.transform.rotation);
+
+            var renderers = model.GetComponentsInChildren<Renderer>();
+            var bounds = renderers[0].bounds;
+            foreach (var r in renderers) bounds.Encapsulate(r.bounds);
+
+            // Un dirigeable avance dans le sens de son grand axe : on le tourne pour qu'il soit le long de +Z.
+            var turn = Quaternion.identity;
+            if (IsBlimp && bounds.size.x > bounds.size.z) turn = Quaternion.Euler(0f, 90f, 0f);
+            float scale = 1f / Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
+
+            model.transform.SetParent(transform, false);
+            model.transform.localRotation = turn * asset.transform.rotation;
+            model.transform.localScale = asset.transform.localScale * scale;
+            model.transform.localPosition = turn * -bounds.center * scale;
+            Model = model;
+            BalloonVisuals.ApplyTexture(model, Kind);
+
+            // Les hélices tournent autour du grand axe du dirigeable (le +Z du ballon)
+            var localAxis = model.transform.InverseTransformDirection(transform.forward);
+            foreach (var r in renderers)
+                if (r.name.Contains("Helice"))
+                {
+                    var spinner = r.gameObject.AddComponent<Spinner>();
+                    spinner.axisRef = model.transform;
+                    spinner.localAxis = localAxis;
+                }
+
+            var box = gameObject.AddComponent<BoxCollider>();
+            var fitted = turn * bounds.size * scale;
+            box.size = new Vector3(Mathf.Abs(fitted.x), Mathf.Abs(fitted.y), Mathf.Abs(fitted.z));
+
+            // Les ballons normaux et rapides changent de couleur à chaque couche, le cœur est rose ; les autres gardent leur texture.
+            if (Kind == BalloonKind.Normal || Kind == BalloonKind.Rapide || Kind == BalloonKind.Coeur)
+            {
+                modelTints = new ColorTint[renderers.Length];
+                for (int i = 0; i < renderers.Length; i++) modelTints[i] = renderers[i].gameObject.AddComponent<ColorTint>();
+            }
         }
 
         void OnEnable() => All.Add(this);
@@ -86,14 +160,30 @@ namespace SAE
 
         void Update()
         {
+            // Le ballon cœur se régénère, jusqu'à son nombre de couches de départ
+            if (Kind == BalloonKind.Coeur && Time.time >= nextRegen)
+            {
+                nextRegen = Time.time + RegenDelay;
+                if (hp < maxLayers) { hp = Mathf.Min(maxLayers, Mathf.Floor(hp) + 1f); UpdateColor(); }
+            }
+
             if (Time.time > slowUntil) slowFactor = 1f;
             float step = speed * slowFactor * Time.deltaTime;
             Progress += step;
 
             var target = path[nextPoint];
             // Le dirigeable est couché dans le sens de la marche
-            if (Kind == BalloonKind.Dirigeable && target != transform.position)
-                transform.rotation = Quaternion.LookRotation(target - transform.position) * Quaternion.Euler(90f, 0f, 0f);
+            // (avec un modèle, le MOAB et le BFB regardent simplement vers où ils vont)
+            if (hasModel ? IsBlimp : Kind == BalloonKind.Dirigeable)
+            {
+                if (target != transform.position)
+                {
+                    var wanted = Quaternion.LookRotation(target - transform.position) * (hasModel ? Quaternion.identity : Quaternion.Euler(90f, 0f, 0f));
+                    // Au départ il est déjà dans le bon sens ; ensuite il tourne en douceur dans les virages
+                    transform.rotation = facingSet ? Quaternion.RotateTowards(transform.rotation, wanted, TurnSpeed * slowFactor * Time.deltaTime) : wanted;
+                    facingSet = true;
+                }
+            }
 
             transform.position = Vector3.MoveTowards(transform.position, target, step);
             if ((transform.position - target).sqrMagnitude < 0.0001f)
@@ -115,9 +205,14 @@ namespace SAE
                 case BalloonKind.Blinde: tint.Set(ArmorColor); break;
                 case BalloonKind.Boss: tint.Set(BossColor); break;
                 case BalloonKind.Dirigeable: tint.Set(BlimpColor); break;
+                case BalloonKind.Coeur:
+                    tint.Set(HeartColor);
+                    if (modelTints != null) foreach (var t in modelTints) t.Set(HeartColor);
+                    break;
                 default:
                     int layer = Mathf.Clamp(Mathf.CeilToInt(hp) - 1, 0, layerColors.Length - 1);
                     tint.Set(layerColors[layer]);
+                    if (modelTints != null) foreach (var t in modelTints) t.Set(layerColors[layer]);
                     break;
             }
         }
