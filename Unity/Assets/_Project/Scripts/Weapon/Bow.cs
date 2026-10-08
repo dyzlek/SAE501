@@ -163,7 +163,8 @@ namespace SAE
             preview.SetPositions(previewPoints);
         }
 
-        // Ligne fine et blanche, qui s'efface vers le bout : elle aide à viser sans cacher la cible.
+        // Ligne fine et dorée (le blanc se perdait dans le ciel), qui s'efface vers le bout : on voit la trajectoire
+        // qu'aura la flèche, sans cacher la cible.
         LineRenderer AddPreview()
         {
             var go = new GameObject("Trajectoire");
@@ -171,9 +172,9 @@ namespace SAE
             var line = go.AddComponent<LineRenderer>();
             line.sharedMaterial = Visuals.LineMaterial;
             line.useWorldSpace = true;
-            line.widthMultiplier = 0.012f;
-            line.startColor = new Color(1f, 1f, 1f, 0.6f);
-            line.endColor = new Color(1f, 1f, 1f, 0f);
+            line.widthMultiplier = 0.015f;
+            line.startColor = new Color(1f, 0.75f, 0.2f, 0.9f);
+            line.endColor = new Color(1f, 0.45f, 0.1f, 0.1f);
             line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             line.enabled = false;
             return line;
