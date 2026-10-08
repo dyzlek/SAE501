@@ -1324,7 +1324,9 @@ namespace SAE.EditorTools
             }
 
             // Un peu de décor dans les coins de l'abri
-            Prop(env, "Tonneau", new Vector3(2.75f, 0f, 4.15f), 20f, 1f);
+            Prop(env, "Tonneau", new Vector3(2.55f, 0f, 4.05f), 20f, 1f);
+            var barrel = env.Find("Tonneau");
+            if (barrel) barrel.localScale = new Vector3(1.5f, 1f, 1.5f);   // plus large : à côté de l'armoire, il paraissait maigre
             Prop(env, "Caisse", new Vector3(-2.75f, 0f, 4.1f), 12f, 1f);
             Prop(env, "Caisse", new Vector3(-2.7f, 0.5f, 4.15f), 35f, 0.8f);
             UseWoodTexture(env);

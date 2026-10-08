@@ -72,6 +72,10 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
   ![Le voile noir à mi-course, qui descend du haut avec son bord fondu](../captures/maxens-voile-noir.png)
 
+- **Corrigé :** le tonneau sous l'abri, à droite de l'armoire, était trop maigre : il est **50 % plus large** (même hauteur).
+
+  ![Le tonneau élargi](../captures/maxens-tonneau-elargi.png)
+
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|

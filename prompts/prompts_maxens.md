@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Jeu. 8 oct. 2026
 
+### Le tonneau
+> Élargis le tonneau à droite de l'armoire : il est trop étroit.
+
 ### Démarrage du voile
 > Parfait. Fais juste démarrer le voile un peu plus tôt, quand la porte commence à s'ouvrir, comme sur la capture.
 
