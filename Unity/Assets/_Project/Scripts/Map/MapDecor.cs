@@ -17,8 +17,8 @@ namespace SAE
         static readonly Color FlowerHeart = new Color(1f, 0.75f, 0.1f);
         static readonly Color Tuft = new Color(0.36f, 0.62f, 0.2f);
         static readonly Color Rock = new Color(0.58f, 0.57f, 0.53f);
-        static readonly Color Bush = new Color(0.2f, 0.48f, 0.18f);
-        static readonly Color BushLight = new Color(0.3f, 0.6f, 0.22f);
+        static readonly Color Bush = new Color(0.22f, 0.55f, 0.16f);      // comme les buissons du paysage
+        static readonly Color BushLight = new Color(0.3f, 0.64f, 0.2f);
         static readonly Color MushroomCap = new Color(0.85f, 0.18f, 0.15f);
         static readonly Color MushroomStem = new Color(0.95f, 0.92f, 0.82f);
 
@@ -135,9 +135,9 @@ namespace SAE
                 for (int k = 0; k < 5; k++)
                 {
                     var dir = Quaternion.Euler(0f, turn + k * 72f, 0f);
-                    batch.Add(MeshBatch.Gem, (center + dir * Vector3.forward * 0.045f) * scale, dir, new Vector3(0.05f, 0.02f, 0.08f) * scale, petal);
+                    batch.Add(MeshBatch.Ball, (center + dir * Vector3.forward * 0.045f) * scale, dir, new Vector3(0.05f, 0.02f, 0.08f) * scale, petal);
                 }
-                batch.Add(MeshBatch.Gem, (center + Vector3.up * 0.01f) * scale, Quaternion.identity, new Vector3(0.05f, 0.03f, 0.05f) * scale, FlowerHeart);
+                batch.Add(MeshBatch.Ball, (center + Vector3.up * 0.01f) * scale, Quaternion.identity, new Vector3(0.05f, 0.03f, 0.05f) * scale, FlowerHeart);
             }
         }
 
@@ -162,7 +162,7 @@ namespace SAE
                 float size = k == 0 ? Range(random, 0.35f, 0.6f) : Range(random, 0.12f, 0.25f);
                 var pos = at + (k == 0 ? Vector3.zero : new Vector3(Range(random, -0.45f, 0.45f), 0f, Range(random, -0.45f, 0.45f)));
                 var rot = Quaternion.Euler(Range(random, -10f, 10f), Range(random, 0f, 360f), Range(random, -10f, 10f));
-                batch.Add(MeshBatch.Gem, (pos + Vector3.up * size * 0.2f) * scale, rot, new Vector3(size * 1.3f, size * 0.6f, size) * scale, Rock);
+                batch.Add(MeshBatch.Ball, (pos + Vector3.up * size * 0.2f) * scale, rot, new Vector3(size * 1.3f, size * 0.6f, size) * scale, Rock);
             }
         }
 
@@ -171,7 +171,7 @@ namespace SAE
         {
             float h = Range(random, 0.15f, 0.25f);
             batch.Add(MeshBatch.Cube, (at + Vector3.up * h / 2f) * scale, Quaternion.Euler(0f, Range(random, 0f, 90f), 0f), new Vector3(0.06f, h, 0.06f) * scale, MushroomStem);
-            batch.Add(MeshBatch.Gem, (at + Vector3.up * h) * scale, Quaternion.identity, new Vector3(0.22f, 0.12f, 0.22f) * h / 0.2f * scale, MushroomCap);
+            batch.Add(MeshBatch.Ball, (at + Vector3.up * h) * scale, Quaternion.identity, new Vector3(0.22f, 0.12f, 0.22f) * h / 0.2f * scale, MushroomCap);
         }
 
         // Des buissons tout autour, juste au bord du terrain (pas sur l'entrée, la sortie ni l'estrade du joueur).
@@ -200,7 +200,7 @@ namespace SAE
                     var offset = new Vector3(Range(random, -0.4f, 0.4f), 0f, Range(random, -0.4f, 0.4f)) * size;
                     float s = size * (k == 0 ? 1f : 0.7f);
                     var rot = Quaternion.Euler(0f, Range(random, 0f, 360f), 0f);
-                    batch.Add(MeshBatch.Gem, (new Vector3(p.x, s * 0.35f, p.y) + offset) * scale, rot, new Vector3(s, s * 0.8f, s) * scale, k == 0 ? Bush : BushLight);
+                    batch.Add(MeshBatch.Ball, (new Vector3(p.x, s * 0.35f, p.y) + offset) * scale, rot, new Vector3(s, s * 0.8f, s) * scale, k == 0 ? Bush : BushLight);
                 }
             }
             batch.Build(parent, "Buissons");
