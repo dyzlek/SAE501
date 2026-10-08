@@ -4,8 +4,9 @@ using UnityEngine.InputSystem;
 namespace SAE
 {
     // Joueur clavier/souris, pour tester vite sans casque (mode PC : menu SAE → Mode de jeu).
-    // ZQSD : marcher · souris : regarder · clic gauche : appuyer (boutons, coffre) ou prendre (singe, banane),
-    // relâcher le clic : lâcher · A maintenu : fiche du singe visé · Échap : libérer la souris.
+    // ZQSD : marcher · souris : regarder · clic gauche : appuyer (boutons, coffre) ou prendre (singe, banane,
+    // singe récolteur, fléchette), relâcher le clic : lâcher (ou LANCER droit devant : récolteur, fléchette) ·
+    // A maintenu : fiche du singe visé · Échap : libérer la souris.
     // Mêmes règles qu'en VR : on prend un singe ou une banane jusqu'à 6 m (GrabReach.Reach), le singe tenu se pose
     // là où on vise, la banane se lâche au-dessus du panier.
     [RequireComponent(typeof(CharacterController))]
@@ -16,6 +17,7 @@ namespace SAE
         public float reach = 30f;               // portée du clic sur les boutons, en mètres
         public float holdDistance = 0.8f;       // l'objet tenu flotte à cette distance devant les yeux
         public Vector2 holdOffset = new Vector2(0.35f, -0.25f);   // ... décalé en bas à droite, pour ne pas cacher ce qu'on vise
+        public float throwSpeed = 7f;           // en m/s : la vitesse d'un lancer à la souris (droit vers le viseur)
 
         CharacterController controller;
         Transform cam;
@@ -23,6 +25,7 @@ namespace SAE
         float verticalSpeed;
         MonkeyToken heldMonkey;
         Banane heldBanana;
+        IThrowable heldThrowable;             // singe récolteur ou fléchette
 
         void Start()
         {
@@ -50,6 +53,7 @@ namespace SAE
             if (mouse.leftButton.wasPressedThisFrame) Click();
             if (heldMonkey) Carry(heldMonkey.transform);
             if (heldBanana) Carry(heldBanana.transform);
+            if (heldThrowable != null) Carry(((Component)heldThrowable).transform);
             if (mouse.leftButton.wasReleasedThisFrame) Release();
         }
 
@@ -87,6 +91,12 @@ namespace SAE
                 if (inGrabReach && token.Take(cam)) heldMonkey = token;
                 return;
             }
+            var throwable = hit.collider.GetComponentInParent<IThrowable>();
+            if (throwable != null)
+            {
+                if (inGrabReach) { heldThrowable = throwable; throwable.Grab(); }
+                return;
+            }
             var banana = hit.collider.GetComponentInParent<Banane>();
             if (banana)
             {
@@ -106,8 +116,15 @@ namespace SAE
         {
             if (heldMonkey) heldMonkey.Release();     // posé là où on vise, sinon rangé
             if (heldBanana) heldBanana.Lachee();      // elle tombe : dans le panier si on est au-dessus
+            if (heldThrowable != null)                // lancé vers le viseur, un peu en cloche
+            {
+                var held = ((Component)heldThrowable).transform;
+                held.rotation = Quaternion.LookRotation(cam.forward);   // la fléchette part pointe en avant
+                heldThrowable.Throw((cam.forward + Vector3.up * 0.1f) * throwSpeed);
+            }
             heldMonkey = null;
             heldBanana = null;
+            heldThrowable = null;
         }
 
         static void LockCursor(bool locked)
@@ -121,7 +138,7 @@ namespace SAE
         {
             GUI.Label(new Rect(Screen.width / 2f - 5, Screen.height / 2f - 10, 20, 20), "+");
             GUI.Label(new Rect(10, Screen.height - 30, 900, 25),
-                "Mode PC · ZQSD : marcher · Souris : regarder · Clic : appuyer / prendre, relâcher : lâcher · A : infos du singe · Échap : souris");
+                "Mode PC · ZQSD : marcher · Souris : regarder · Clic : appuyer / prendre, relâcher : lâcher ou lancer · A : infos du singe · Échap : souris");
         }
     }
 }

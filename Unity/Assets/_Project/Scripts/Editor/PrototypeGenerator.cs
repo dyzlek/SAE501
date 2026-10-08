@@ -668,6 +668,35 @@ namespace SAE.EditorTools
             }
 
             MakeStatic(cabin);
+
+            // La cible de fléchettes du modèle devient jouable (petit bonus caché)
+            var dartboard = cabin.GetComponentsInChildren<Transform>().FirstOrDefault(t => t.name == "Cible");
+            if (dartboard) BuildDarts(env, dartboard.gameObject);
+        }
+
+        // La cible jouable : un collider plat devant la cible du modèle (DartBoard), une petite ardoise des points en dessous,
+        // et un présentoir avec trois fléchettes à lancer (Dart), qui y reviennent toutes seules.
+        static void BuildDarts(Transform env, GameObject model)
+        {
+            var b = Bounds(model);
+            var outward = new Vector3(b.center.x, 0f, b.center.z).normalized;   // de la pièce vers le mur
+            float depth = Mathf.Abs(outward.x) * b.extents.x + Mathf.Abs(outward.z) * b.extents.z;
+            var face = b.center + outward * (depth - 0.05f);                     // le devant de la cible (5 cm devant le mur)
+
+            var board = new GameObject("Cible (jeu)").transform;
+            board.SetParent(env, false);
+            board.SetPositionAndRotation(face, Quaternion.LookRotation(outward));   // +Z vers le mur, comme les ardoises
+            var col = board.gameObject.AddComponent<BoxCollider>();
+            col.size = new Vector3(0.5f, 0.5f, 0.04f);
+            col.center = new Vector3(0f, 0f, 0.02f);                              // sa face avant est sur celle de la cible
+            var game = board.gameObject.AddComponent<DartBoard>();
+
+            var slate = BuildChalkboard(board, "Ardoise des fléchettes", new Vector3(0f, -0.45f, 0.01f), Quaternion.identity, 0.5f, 0.22f);
+            game.label = Visuals.Text(slate, "", new Vector3(0, 0, -0.05f), 0.04f, Chalk);
+
+            Visuals.Solid("Présentoir à fléchettes", board, new Vector3(0f, -0.68f, -0.05f), new Vector3(0.45f, 0.03f, 0.12f), DarkWood);
+            for (int i = 0; i < 3; i++)
+                Dart.Create(env, board.TransformPoint(new Vector3((i - 1) * 0.12f, -0.65f, -0.05f)), Quaternion.LookRotation(board.right));
         }
 
         // Rien ici ne bouge : Unity regroupe les maillages (moins d'appels de dessin, plus de fps dans le casque)
@@ -938,13 +967,20 @@ namespace SAE.EditorTools
 
             // Une ardoise fixe (pas de billboard) : c'est le panneau entier qui fait face au joueur, au-dessus du comptoir
             var panel = BuildChalkboard(root, "Panneau", new Vector3(0, 2.4f, 0), Quaternion.identity, 0.8f, 0.4f);
-            Visuals.Text(panel, "CAISSE", new Vector3(0, 0.12f, -0.05f), 0.09f, Chalk, title: true);
-            var amount = Visuals.Text(panel, "0", new Vector3(0, -0.05f, -0.05f), 0.22f, TitleGold, title: true);
+            FillMoneyBoard(panel, root.gameObject);
+        }
 
-            var board = root.gameObject.AddComponent<MoneyBoard>();
+        // Le texte d'une caisse (hub ou carte) : « MES BANANES », puis le nombre en gros chiffres dorés.
+        // host : l'objet qui porte le script (au hub, le pied du mur : les « +50 » de fin de vague apparaissent à hauteur d'yeux).
+        static MoneyBoard FillMoneyBoard(Transform panel, GameObject host)
+        {
+            Visuals.Text(panel, "MES BANANES", new Vector3(0, 0.12f, -0.05f), 0.08f, Chalk, title: true);
+            var amount = Visuals.Text(panel, "0", new Vector3(0, -0.05f, -0.05f), 0.22f, TitleGold, title: true);
+            var board = host.AddComponent<MoneyBoard>();
             board.amount = amount;
             board.panel = panel;
             board.frame = panel.Find("Cadre").GetComponent<ColorTint>();
+            return board;
         }
 
         // Comptoir d'amélioration (bananier, récolteur) : un meuble bas en bois avec un bouton rond par amélioration
@@ -1085,6 +1121,7 @@ namespace SAE.EditorTools
             monkey.height = HarvesterSize;
             var view = piece.GetComponent<MonkeyView>();
             if (view.model) root.AddComponent<HarvesterAnimator>().model = view.model.transform;
+            root.AddComponent<HarvesterGrab>();   // on peut le prendre et le lancer, pour rire
             root.SetActive(false);   // il apparaît quand on l'achète
             return monkey;
         }
@@ -1139,11 +1176,16 @@ namespace SAE.EditorTools
             var glowAnchor = new GameObject("Centre").transform;
             glowAnchor.SetParent(chest.transform, false);
             glowAnchor.position = chestBounds.center;
-            // Un trésor dedans : les bananes du bananier, posées sur le lit de feuilles du double fond (Blender/coffre.py)
+            // Un trésor dedans : les bananes du bananier, posées sur le lit de feuilles du double fond (Blender/coffre.py).
+            // Deux rangées de quatre, un peu en vrac : le coffre déborde de bananes (critique de Maxens : « plus de bananes »).
             var bananaModel = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Art/Bananier/FBX/Bananes_Collectible.fbx");
             if (bananaModel)
             {
-                var spots = new[] { new Vector3(-0.32f, 0f, 0.05f), new Vector3(-0.1f, 0f, -0.08f), new Vector3(0.12f, 0f, 0.08f), new Vector3(0.33f, 0f, -0.05f) };
+                var spots = new[]
+                {
+                    new Vector3(-0.34f, 0f, 0.12f), new Vector3(-0.12f, 0f, 0.02f), new Vector3(0.1f, 0f, 0.14f), new Vector3(0.33f, 0f, 0.04f),
+                    new Vector3(-0.3f, 0f, -0.12f), new Vector3(-0.08f, 0f, -0.16f), new Vector3(0.14f, 0f, -0.08f), new Vector3(0.36f, 0f, -0.15f),
+                };
                 for (int i = 0; i < spots.Length; i++)
                 {
                     var banana = (GameObject)PrefabUtility.InstantiatePrefab(bananaModel);
@@ -1252,6 +1294,13 @@ namespace SAE.EditorTools
             for (int side = -1; side <= 1; side += 2)   // le tableau tient sur deux poteaux plantés dans le sol (il ne flotte pas)
                 Visuals.Solid("Poteau du tableau", map.transform, new Vector3(side * 0.92f, (2.4f + GroundY) / 2f, -edge - 0.25f), new Vector3(0.1f, 2.4f - GroundY, 0.1f), Wood);
             BuildBowUpgrades(map.transform, new Vector3(-2f, 0f, -edge - 0.6f), -30f);   // le pupitre ARC de Nicolas
+
+            // La caisse de la carte : on voit ses bananes sans retourner au hub. À droite du pupitre, sur deux poteaux.
+            var cashPos = new Vector3(3.3f, 1.5f, -edge - 1.6f);
+            var cash = BuildChalkboard(map.transform, "Caisse de la carte", cashPos, Quaternion.Euler(0, 20f, 0), 0.8f, 0.4f);
+            FillMoneyBoard(cash, cash.gameObject).spawnPopups = false;
+            for (int side = -1; side <= 1; side += 2)   // plantés dans l'estrade (son dessus est à 0)
+                Visuals.Solid("Poteau de la caisse", cash, new Vector3(side * 0.47f, -cashPos.y / 2f, 0.05f), new Vector3(0.06f, cashPos.y, 0.06f), Wood);
             UseWoodTexture(map.transform);   // l'estrade, les pupitres et les poteaux, en bois comme au hub
             return map.transform;
         }
