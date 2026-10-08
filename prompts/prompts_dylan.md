@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
+### Urgences casque, singes, bananes, décor
+> Fais : enlever le saut en VR (#55), arc sans spam (#60), point d'apparition (#65), téléportation sous le plateau (#67), téléportation hors de la carte (#81), débloquer les singes avec des bananes (#52), traînée derrière ce qu'on lance (#28), animation des bananes qui pourrissent (#75), champignons et montagnes, murs du hub (#61, #66), lumière (#77).
+
 ### Singes récolteurs à lancer, fléchettes, coffre, caisse sur la carte
 > Suite : on ne peut toujours pas prendre les fléchettes ; et quand je lance le singe, il doit atterrir au plus proche de l'endroit où il peut marcher (là où on se téléporte en VR), pas au point de départ.
 >

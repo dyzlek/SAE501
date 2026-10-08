@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit.Inputs.Haptics;
@@ -31,6 +32,22 @@ namespace SAE
             Local = this;
             // Le texte du coffre (« [Touche] Ouvrir… ») suit le joueur actif
             foreach (var prompt in FindObjectsByType<Sae501.Coffres.ChestPrompt>()) prompt.player = head;
+        }
+
+        // Bug du point d'apparition : au lancement, le casque n'est pas encore suivi (la caméra est à 0, 0, 0).
+        // Le joueur était posé au bon endroit... puis le suivi démarrait et le décalait d'autant que l'endroit où il se
+        // tenait dans sa pièce : il pouvait apparaître dans un meuble. On attend donc que le casque soit suivi
+        // (la caméra a bougé, ou 2 s au plus), puis on le remet au point d'arrivée du niveau, regard vers l'avant.
+        const float TrackingTimeout = 2f;
+
+        IEnumerator Start()
+        {
+            if (!origin) yield break;   // mode PC : pas de suivi à attendre
+            for (float t = 0f; t < TrackingTimeout && head.localPosition == Vector3.zero; t += Time.deltaTime)
+                yield return null;
+            yield return null;          // une image de plus : la position du casque est à jour
+            var spawn = LevelSpawn.Of(Levels.Current);
+            if (spawn) TeleportTo(spawn);
         }
 
         // Pose le joueur sur 'spot', tourné dans sa direction. La hauteur du casque (vraie taille du joueur) est gardée.

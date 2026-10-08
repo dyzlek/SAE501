@@ -359,6 +359,10 @@ namespace SAE.EditorTools
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
 
+            // Pas de saut : on se déplace en se téléportant (le saut des Starter Assets secoue la vue, règle de confort)
+            var jump = FindChild(go.transform, "Jump");
+            if (jump) jump.gameObject.SetActive(false);
+
             ShowRays(go);
 
             var rig = go.AddComponent<PlayerRig>();
@@ -644,6 +648,15 @@ namespace SAE.EditorTools
             disc.sharedMesh = Cylinder;
             disc.convex = true;
             Teleportable(zone);
+
+            // Sous le plateau : un bloc invisible du sol jusqu'à la planche. Le rayon de téléportation s'y arrête
+            // (ce n'est pas une zone de téléportation) : on ne se pose plus sous le plateau, la tête dedans.
+            var underBoard = new GameObject("Sous le plateau (bloque la téléportation)");
+            underBoard.transform.SetParent(env, false);
+            var block = underBoard.AddComponent<BoxCollider>();
+            float boardSide = MapLayout.Size * BoardTile + 0.1f;
+            block.center = Around(0f, Ring - 0.9f, 0.45f);
+            block.size = new Vector3(boardSide, 0.9f, boardSide * Mathf.Cos(25f * Mathf.Deg2Rad));
 
             // Un collider par mur : on ne traverse pas, ni en marchant ni en se téléportant (sauf par la porte)
             float r = HubLayout.CabinRadius, h = HubLayout.CabinHeight;
@@ -1281,9 +1294,15 @@ namespace SAE.EditorTools
             Teleportable(Visuals.Solid("Estrade", map.transform, new Vector3(0, -0.25f, -edge - 2.5f), new Vector3(8, 0.5f, 5), Wood));
             // Le sol de toute la prairie (invisible : on voit l'herbe du paysage) : on peut s'y téléporter partout,
             // autour du labyrinthe comme plus loin, et sur les cases du labyrinthe elles-mêmes (voir BuildGrid)
+            // On ne peut s'y téléporter que PRÈS du labyrinthe (TeleportMargin autour) : plus loin, le rayon devient rouge,
+            // on ne part plus se perdre dans les montagnes. La prairie reste solide partout (on ne tombe pas).
             var meadow = Visuals.Solid("Prairie (collider)", map.transform, new Vector3(0, GroundY - 0.05f, 0), new Vector3(180f, 0.1f, 180f), Floor);
             meadow.GetComponent<Renderer>().enabled = false;
-            Teleportable(meadow);
+            const float TeleportMargin = 6f;
+            float zoneSide = 2f * (edge + TeleportMargin);
+            var zone = Visuals.Solid("Zone de téléportation", map.transform, new Vector3(0, GroundY - 0.04f, 0), new Vector3(zoneSide, 0.1f, zoneSide), Floor);
+            zone.GetComponent<Renderer>().enabled = false;   // 1 cm au-dessus de la prairie : c'est elle que le rayon touche
+            Teleportable(zone);
             BuildScenery(map.transform, GroundY);
 
             // Le même pupitre qu'au hub, un peu à droite du point d'arrivée : le passage vers la carte reste libre

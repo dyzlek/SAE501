@@ -116,6 +116,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Claude Code) | Branche `fix/urgences-casque` (partie de `feat/recolteurs-flechettes`, compilé, à tester) : saut des Starter Assets coupé (#55) ; arc avec temps de recharge 0,6 s, tension minimale et corde à attraper à 20 cm (#60) ; joueur VR remis au point d'arrivée une fois le casque suivi (#65) ; bloc invisible sous le plateau contre la téléportation (#67) ; téléportation limitée à 6 m autour du labyrinthe (#81) | À tester |
 | Claude (Claude Code) | Fusion `test/cabane` + `feat/arc-quincy` (Maxens) dans `feat/cabane-arc`, conflit du `PrototypeGenerator` résolu en gardant les deux | À tester |
 | Claude (Claude Code) | 2e fusion avec les derniers commits de Maxens sur `feat/arc-quincy` (mains de Quincy riggées, arc plus petit, tir dans le simulateur VR), sans conflit ; PR #9 ouverte (le merge par Claude a été bloqué faute de relecture, fusionnée ensuite sur GitHub) | Gardé (testé par moi en mode PC) |
 | Claude (Claude Code) | Mise à jour de mon journal et du journal général avec mes 3 captures | Gardé |
