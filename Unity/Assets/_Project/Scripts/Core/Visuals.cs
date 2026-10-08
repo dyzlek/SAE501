@@ -35,15 +35,15 @@ namespace SAE
             return go;
         }
 
-        // Les deux polices des textes 3D (Art/Resources/Fonts, licence libre OFL) : Oswald pour lire (panneaux, prix),
+        // Les deux polices des textes 3D (publiques : la roulette du coffre s'en sert aussi) (Art/Resources/Fonts, licence libre OFL) : Oswald pour lire (panneaux, prix),
         // Bangers pour les titres (style dessin animé, comme Bloons). Sans elles, on retombe sur la police de Unity.
         // Le matériau utilise notre shader « SAE/Texte 3D » (Art/Resources) : celui de Unity ne s'affiche pas
         // correctement dans le casque (un seul œil, à travers les murs). Un matériau par police (chacune a sa texture).
         static Font bodyFont, titleFont;
         static readonly System.Collections.Generic.Dictionary<Font, Material> textMaterials = new System.Collections.Generic.Dictionary<Font, Material>();
 
-        static Font BodyFont => bodyFont ? bodyFont : bodyFont = LoadFont("Fonts/Oswald-Bold");
-        static Font TitleFont => titleFont ? titleFont : titleFont = LoadFont("Fonts/Bangers");
+        public static Font BodyFont => bodyFont ? bodyFont : bodyFont = LoadFont("Fonts/Oswald-Bold");
+        public static Font TitleFont => titleFont ? titleFont : titleFont = LoadFont("Fonts/Bangers");
 
         static Font LoadFont(string path)
         {
@@ -124,6 +124,7 @@ namespace SAE
             {
                 view.body.GetComponent<Renderer>().enabled = false;   // le cube reste comme collider et repère
                 view.model = FitModel(modelAsset, yaw, root.transform, size, out bodySize);
+                RestPose(view.model.transform, root.transform);
             }
             // L'aura n'est créée qu'en jeu : les particules ne bougent pas hors Play, et enregistrées dans la scène
             // pour chaque case elles l'alourdiraient beaucoup. Les cases de la bibliothèque la créent au lancement.
@@ -133,13 +134,36 @@ namespace SAE
             return root;
         }
 
+        // Les modèles sont exportés en pose en T (bras écartés à l'horizontale) : on baisse les bras le long du corps,
+        // un peu écartés et un peu en avant, pour une pose naturelle au hub (bibliothèque, plateau, fiche, coffre).
+        // Les singes animés (carte, récolteurs) partent de cette pose. Le Canon et le Tireur n'ont pas de bras : rien ne change.
+        static void RestPose(Transform model, Transform root)
+        {
+            foreach (var (armName, foreArmName) in new[] { ("LeftArm", "LeftForeArm"), ("RightArm", "RightForeArm") })
+            {
+                Transform arm = null, foreArm = null;
+                foreach (var t in model.GetComponentsInChildren<Transform>())
+                {
+                    if (t.name.EndsWith(armName)) arm = t;
+                    if (t.name.EndsWith(foreArmName)) foreArm = t;
+                }
+                if (!arm || !foreArm) continue;
+                var current = foreArm.position - arm.position;
+                if (current.sqrMagnitude < 1e-8f) continue;
+                // Le singe regarde vers -Z local : le côté de ce bras se lit sur l'axe X de la racine
+                float side = Mathf.Sign(Vector3.Dot(arm.position - root.position, root.right));
+                var down = (-root.up + root.right * side * 0.3f - root.forward * 0.12f).normalized;
+                arm.rotation = Quaternion.FromToRotation(current, down) * arm.rotation;
+            }
+        }
+
         // Les bras écartés (pose en T) peuvent un peu déborder sur les côtés : on ne compte la largeur
         // qu'à 80 % pour mettre le modèle à l'échelle, sinon les singes seraient minuscules.
         const float WidthWeight = 0.8f;
 
         // Pose une copie du modèle dans parent, à la hauteur size et centrée.
         // fittedSize = taille finale du modèle (largeur, hauteur, profondeur) en mètres.
-        static GameObject FitModel(GameObject asset, float yaw, Transform parent, float size, out Vector3 fittedSize)
+        public static GameObject FitModel(GameObject asset, float yaw, Transform parent, float size, out Vector3 fittedSize)
         {
 #if UNITY_EDITOR
             // Hors Play (menu qui met les singes dans la scène) : un lien vers le FBX plutôt qu'une copie complète,

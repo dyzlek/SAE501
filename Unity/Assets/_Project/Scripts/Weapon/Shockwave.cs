@@ -12,16 +12,21 @@ namespace SAE
         static readonly Color WaveColor = new Color(1f, 0.6f, 0.15f);
 
         LineRenderer ring;
+        Color color = WaveColor;
         float radius;
         float age;
 
-        public static void Spawn(Vector3 center, float radius)
+        public static void Spawn(Vector3 center, float radius) => Spawn(center, radius, WaveColor, true);
+
+        // Même onde, d'une autre couleur (ex. l'onde de froid bleue du singe de glace), avec ou sans étincelles.
+        public static void Spawn(Vector3 center, float radius, Color color, bool sparks)
         {
             var go = new GameObject("Onde");
             go.transform.position = center;
             var wave = go.AddComponent<Shockwave>();
             wave.radius = radius;
-            Sparks(center);
+            wave.color = color;
+            if (sparks) Sparks(center);
         }
 
         // Une gerbe d'étincelles orange : 40 petits points qui partent dans tous les sens, retombent et s'éteignent
@@ -78,7 +83,7 @@ namespace SAE
             age += Time.deltaTime;
             float t = Mathf.Clamp01(age / Duration);
             transform.localScale = Vector3.one * Mathf.Lerp(0.2f, radius, t);
-            var c = WaveColor;
+            var c = color;
             c.a = 1f - t;
             ring.startColor = ring.endColor = c;
         }

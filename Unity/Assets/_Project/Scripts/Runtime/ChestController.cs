@@ -109,9 +109,9 @@ namespace Sae501.Coffres
             yield return roulette.Spin(result, odds, spinDuration, LastTypes[best], rollType);
 
             OpenedCount++;
-            roulette.ShowMessage(LastResults.Count == 1 ? result.ToString().ToUpper()
-                                                        : $"{result.ToString().ToUpper()}  (+{LastResults.Count - 1})",
-                                 RarityInfo.ColorOf(result));
+            // Le nom du singe gagné et sa rareté, dans la couleur de la rareté (ex. « CANON VIOLET ! »)
+            string won = $"{(SAE.MonkeyType)LastTypes[best]} {SAE.MonkeyData.RarityName((SAE.Rarity)(int)result)} !".ToUpper();
+            roulette.ShowMessage(LastResults.Count == 1 ? won : $"{won}  (+{LastResults.Count - 1})", RarityInfo.ColorOf(result));
             Opened?.Invoke(LastResults);
             IsBusy = false;
             hideRoutine = StartCoroutine(HideRouletteAfter(hideDelay));

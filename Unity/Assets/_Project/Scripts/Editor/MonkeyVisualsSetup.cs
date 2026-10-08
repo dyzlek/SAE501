@@ -24,6 +24,18 @@ namespace SAE.EditorTools
             "Assets/_Project/Art/Colle/FBX/Colle_Rigged.fbx",
         };
 
+        // Le projectile de chaque type, dans le même ordre.
+        static readonly string[] ProjectilePaths =
+        {
+            "Assets/_Project/Art/Singe_Base/FBX/Dart_Projectile.fbx",
+            "Assets/_Project/Art/Boomerang/FBX/Boomerang_Projectile.fbx",
+            "Assets/_Project/Art/Canon/FBX/Canon_Bomb.fbx",
+            "Assets/_Project/Art/Sniper/FBX/Sniper_Bullet.fbx",
+            "Assets/_Project/Art/Tireur/FBX/Tireur_Tack.fbx",
+            "Assets/_Project/Art/Glace/FBX/Glace_BouleNeige.fbx",
+            "Assets/_Project/Art/Colle/FBX/Colle_Goutte.fbx",
+        };
+
         // Les modèles ont été exportés de dos (ils regardent vers +Z) : on les retourne.
         // Le Tireur est symétrique, inutile de le tourner.
         static readonly float[] Yaw = { 180f, 180f, 180f, 180f, 0f, 180f, 180f };
@@ -45,6 +57,12 @@ namespace SAE.EditorTools
             {
                 visuals.models[i] = AssetDatabase.LoadAssetAtPath<GameObject>(ModelPaths[i]);
                 if (!visuals.models[i]) Debug.LogWarning($"Singes : modèle introuvable pour {(MonkeyType)i} ({ModelPaths[i]}), il restera en cube.");
+            }
+            visuals.projectiles = new GameObject[MonkeyData.TypeCount];
+            for (int i = 0; i < ProjectilePaths.Length; i++)
+            {
+                visuals.projectiles[i] = AssetDatabase.LoadAssetAtPath<GameObject>(ProjectilePaths[i]);
+                if (!visuals.projectiles[i]) Debug.LogWarning($"Singes : projectile introuvable pour {(MonkeyType)i} ({ProjectilePaths[i]}).");
             }
             visuals.auraPrefab = AssetDatabase.LoadAssetAtPath<Aura>(AuraPrefabPath);
             if (!visuals.auraPrefab) Debug.LogWarning($"Singes : prefab de l'aura introuvable ({AuraPrefabPath}).");

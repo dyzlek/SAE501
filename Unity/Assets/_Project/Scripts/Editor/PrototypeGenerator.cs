@@ -53,9 +53,9 @@ namespace SAE.EditorTools
         static readonly Color PlayColor = new Color(0.2f, 0.8f, 0.3f);
         static readonly Color ClearColor = new Color(0.55f, 0.6f, 0.7f);
         static readonly Color HubColor = new Color(0.3f, 0.5f, 1f);
-        static readonly Color PathColor = new Color(0.62f, 0.45f, 0.25f);
-        static readonly Color Grass1 = new Color(0.30f, 0.62f, 0.28f);
-        static readonly Color Grass2 = new Color(0.26f, 0.55f, 0.24f);
+        static readonly Color Grass1 = new Color(0.40f, 0.68f, 0.25f);   // la pelouse du plateau du hub, proche de la prairie
+        static readonly Color Iron = new Color(0.18f, 0.18f, 0.2f);        // la cage des lanternes de l'estrade
+        static readonly Color FlameColor = new Color(1f, 0.72f, 0.25f);    // leur flamme
 
         [MenuItem("SAE/Générer le prototype")]
         public static void Generate()
@@ -65,6 +65,7 @@ namespace SAE.EditorTools
             TagSetup.EnsureTags();
             VRSetup.Configure();
             CabinArt.Build();   // la texture de bois des meubles du hub (la cabane elle-même vient de Blender)
+            EditorTools.MonkeyVisualsSetup.Setup();   // les modèles des singes et de leurs projectiles, toujours à jour
 
             // 1. Le labyrinthe
             NewLevelScene();
@@ -1275,34 +1276,23 @@ namespace SAE.EditorTools
             return b;
         }
 
-        // Grille 8x8 en dalles (sans collider sur le plateau, avec collider sur la carte pour marcher).
+        // Le terrain de jeu : une pelouse carrée, puis le chemin de dalles et le décor (MapDecor), façon Bloons TD.
+        // Sur la carte, la pelouse est invisible : on voit l'herbe de la prairie tout autour (Paysage.glb), posée au même niveau ;
+        // elle garde son collider pour s'y téléporter. Sur le plateau du hub, elle est verte (pas de prairie dessous).
         static void BuildGrid(Transform parent, float tile, float thickness, bool walkable)
         {
             float k = tile / MapLayout.Tile;
-            // Sur la carte, les cases sont rangées sous un même objet, sur lequel on peut se téléporter
-            // (la zone de téléportation prend les colliders de tous ses enfants)
-            var cells = parent;
+            float side = MapLayout.Size * tile;
+            var size = new Vector3(side, thickness, side);
+            var pos = new Vector3(0, -thickness / 2f, 0);
+            var lawn = walkable ? Visuals.Solid("Pelouse", parent, pos, size, Grass1) : Visuals.Box("Pelouse", parent, pos, size, Grass1);
+            lawn.tag = Tags.Terrain;
             if (walkable)
             {
-                cells = new GameObject("Cases").transform;
-                cells.SetParent(parent, false);
+                lawn.GetComponent<Renderer>().enabled = false;
+                Teleportable(lawn);
             }
-            for (int r = 0; r < MapLayout.Size; r++)
-                for (int c = 0; c < MapLayout.Size; c++)
-                {
-                    char ch = MapLayout.At(r, c);
-                    Color color = ch == 'S' ? new Color(0.3f, 0.9f, 0.4f)
-                        : ch == 'E' ? new Color(0.9f, 0.25f, 0.25f)
-                        : ch == '#' ? PathColor
-                        : (r + c) % 2 == 0 ? Grass1 : Grass2;
-
-                    var size = new Vector3(tile, thickness, tile);
-                    var pos = MapLayout.CellLocal(r, c) * k + new Vector3(0, -thickness / 2f, 0);
-                    var cell = walkable ? Visuals.Solid($"Case {r},{c}", cells, pos, size, color)
-                                        : Visuals.Box($"Case {r},{c}", cells, pos, size, color);
-                    cell.tag = ch == '.' ? Tags.Terrain : Tags.Piste;
-                }
-            if (walkable) Teleportable(cells.gameObject);
+            MapDecor.Build(parent, k, withBushes: walkable);   // les buissons dépasseraient du plateau du hub
         }
 
         // ---------------- CARTE ----------------
@@ -1316,10 +1306,10 @@ namespace SAE.EditorTools
             map.AddComponent<WaveSpawner>();
 
             float edge = MapLayout.HalfExtent;
-            const float GroundY = -0.55f;   // le dessus de l'herbe, autour du plateau de jeu
+            const float GroundY = -0.02f;   // le dessus de la prairie : juste sous le terrain de jeu, c'est son herbe qu'on voit (8 oct.)
             Teleportable(Visuals.Solid("Estrade", map.transform, new Vector3(0, -0.25f, -edge - 2.5f), new Vector3(8, 0.5f, 5), Wood));
             // Le sol de toute la prairie (invisible : on voit l'herbe du paysage) : on peut s'y téléporter partout,
-            // autour du labyrinthe comme plus loin, et sur les cases du labyrinthe elles-mêmes (voir BuildGrid)
+            // autour du labyrinthe comme plus loin, et sur la pelouse du terrain de jeu elle-même (voir BuildGrid)
             // On ne peut s'y téléporter que PRÈS du labyrinthe (TeleportMargin autour) : plus loin, le rayon devient rouge,
             // on ne part plus se perdre dans les montagnes. La prairie reste solide partout (on ne tombe pas).
             var meadow = Visuals.Solid("Prairie (collider)", map.transform, new Vector3(0, GroundY - 0.05f, 0), new Vector3(180f, 0.1f, 180f), Floor);
@@ -1346,8 +1336,59 @@ namespace SAE.EditorTools
             FillMoneyBoard(cash, cash.gameObject).spawnPopups = false;
             for (int side = -1; side <= 1; side += 2)   // plantés dans l'estrade (son dessus est à 0)
                 Visuals.Solid("Poteau de la caisse", cash, new Vector3(side * 0.47f, -cashPos.y / 2f, 0.05f), new Vector3(0.06f, cashPos.y, 0.06f), Wood);
+            BuildDeckRailing(map.transform, edge);
             UseWoodTexture(map.transform);   // l'estrade, les pupitres et les poteaux, en bois comme au hub
             return map.transform;
+        }
+
+        // L'habillage de l'estrade (8 x 5 m, son dessus à 0) : un liseré de bois foncé tout autour, une rambarde basse
+        // sur les côtés et à l'arrière (l'avant reste ouvert : on voit la carte et on s'y téléporte), et une lanterne
+        // sur chaque poteau d'angle avant. Pas de collider : la rambarde ne bloque ni la vue ni le rayon de téléportation.
+        static void BuildDeckRailing(Transform map, float edge)
+        {
+            const float HalfWidth = 4f, Depth = 5f, RailHeight = 0.9f;
+            float front = -edge, back = -edge - Depth;
+            var deck = new GameObject("Rambarde de l'estrade").transform;
+            deck.SetParent(map, false);
+
+            // Le liseré, juste au-dessus du plancher : on voit le bord de l'estrade sur l'herbe
+            Visuals.Box("Liseré avant", deck, new Vector3(0, 0.03f, front - 0.06f), new Vector3(HalfWidth * 2f, 0.06f, 0.12f), DarkWood);
+            Visuals.Box("Liseré arrière", deck, new Vector3(0, 0.03f, back + 0.06f), new Vector3(HalfWidth * 2f, 0.06f, 0.12f), DarkWood);
+            for (int side = -1; side <= 1; side += 2)
+                Visuals.Box("Liseré du côté", deck, new Vector3(side * (HalfWidth - 0.06f), 0.03f, (front + back) / 2f), new Vector3(0.12f, 0.06f, Depth), DarkWood);
+
+            // Les rambardes : poteaux tous les mètres environ, deux lisses
+            void Rail(Vector3 from, Vector3 to)
+            {
+                float length = Vector3.Distance(from, to);
+                int posts = Mathf.CeilToInt(length / 1.1f);
+                for (int i = 0; i <= posts; i++)
+                    Visuals.Box("Poteau", deck, Vector3.Lerp(from, to, i / (float)posts) + Vector3.up * RailHeight / 2f, new Vector3(0.09f, RailHeight, 0.09f), Wood);
+                var rot = Quaternion.LookRotation(to - from);
+                foreach (float y in new[] { RailHeight * 0.5f, RailHeight - 0.03f })
+                {
+                    var rail = Visuals.Box("Lisse", deck, (from + to) / 2f + Vector3.up * y, new Vector3(0.06f, 0.07f, length), DarkWood);
+                    rail.transform.localRotation = rot;
+                }
+            }
+            Rail(new Vector3(-HalfWidth + 0.1f, 0, back + 0.1f), new Vector3(HalfWidth - 0.1f, 0, back + 0.1f));
+            for (int side = -1; side <= 1; side += 2)
+                Rail(new Vector3(side * (HalfWidth - 0.1f), 0, back + 0.1f), new Vector3(side * (HalfWidth - 0.1f), 0, front - 0.6f));
+
+            // Une lanterne au bout de chaque rambarde de côté (vers la carte) : un grand poteau, une cage de fer, une flamme
+            for (int side = -1; side <= 1; side += 2)
+            {
+                var foot = new Vector3(side * (HalfWidth - 0.1f), 0, front - 0.6f);
+                Visuals.Box("Poteau de la lanterne", deck, foot + Vector3.up * 0.8f, new Vector3(0.12f, 1.6f, 0.12f), Wood);
+                var lantern = foot + Vector3.up * 1.75f;
+                Visuals.Box("Toit de la lanterne", deck, lantern + Vector3.up * 0.15f, new Vector3(0.26f, 0.04f, 0.26f), Iron);
+                Visuals.Box("Pied de la lanterne", deck, lantern - Vector3.up * 0.15f, new Vector3(0.22f, 0.03f, 0.22f), Iron);
+                for (int cx = -1; cx <= 1; cx += 2)
+                    for (int cz = -1; cz <= 1; cz += 2)
+                        Visuals.Box("Montant", deck, lantern + new Vector3(cx * 0.1f, 0, cz * 0.1f), new Vector3(0.025f, 0.3f, 0.025f), Iron);
+                var flame = Visuals.Box("Flamme", deck, lantern, new Vector3(0.07f, 0.14f, 0.07f), FlameColor);
+                flame.AddComponent<FlameFlicker>();
+            }
         }
 
         // Le pupitre « ARC » : les améliorations de l'arc (perforante, transperçante, tir triple, explosive, voir BowUpgrades),

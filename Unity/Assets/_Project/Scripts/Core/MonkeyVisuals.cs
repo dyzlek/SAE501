@@ -10,6 +10,7 @@ namespace SAE
     {
         public GameObject[] models = new GameObject[MonkeyData.TypeCount];   // dans l'ordre de MonkeyType
         public float[] yaw = new float[MonkeyData.TypeCount];                 // rotation (degrés) pour que le modèle regarde vers -Z
+        public GameObject[] projectiles = new GameObject[MonkeyData.TypeCount];   // ce que lance chaque type (fléchette, bombe…)
         public Aura auraPrefab;                                               // Prefabs/Aura.prefab
 
         static MonkeyVisuals instance;
@@ -31,6 +32,14 @@ namespace SAE
             if (!visuals || (int)type >= visuals.models.Length) return null;
             if ((int)type < visuals.yaw.Length) yaw = visuals.yaw[(int)type];
             return visuals.models[(int)type];
+        }
+
+        // Le projectile d'un type de singe, ou null (on garde alors le trait de tir).
+        public static GameObject Projectile(MonkeyType type)
+        {
+            var visuals = Instance;
+            if (!visuals || visuals.projectiles == null || (int)type >= visuals.projectiles.Length) return null;
+            return visuals.projectiles[(int)type];
         }
     }
 }
