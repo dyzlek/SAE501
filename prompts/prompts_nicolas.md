@@ -2,6 +2,19 @@
 
 _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/nicolas.md)._
 
+## Jeu. 8 oct. 2026
+
+**Roulette de casino.** Crée un système de roulette qui reprend le fonctionnement et les multiplicateurs de la roulette d'un casino classique.
+- Pour le bêta-test, place-la à l'opposé du pupitre d'amélioration de l'arc, pour pouvoir l'essayer facilement.
+- Pour miser, il y aura des boutons pour ajouter ou retirer des bananes ; on peut miser à tout moment, à partir d'une banane.
+- Toujours pour le bêta-test, un bouton garantit à 100 % la mise placée, pour vérifier que les récompenses fonctionnent vraiment.
+
+Suite : le pupitre avec PARI et NUM prend trop de place pour rien, retire-le ; garde seulement MISE +, MISE -, LANCER et 100 %. Pour choisir son numéro et sa couleur, agrandis la roulette et mets-la sur le côté du pupitre, pas derrière. On clique simplement sur la case voulue : une lueur apparaît autour pour confirmer le choix. Si ce n'est pas la bonne, on clique sur une autre, qui la remplace. La lueur reste jusqu'à ce qu'on lance la roue.
+
+Suite : pas de numéro, on parie uniquement sur le noir, le rouge ou le vert. Ajoute un bouton pour tout miser. Dès le début, la mise est à 1. Le bouton pour miser plus passe de +1 à +10, et celui pour miser moins de -1 à -10. En m'inspirant du jeu *How to Fish* : à côté de la roulette, une zone montre des bananes selon la mise (de 1 à 25 : 1 banane ; de 25 à 50 : 2 bananes). Au maximum 6 bananes, pour ne pas surcharger la zone : adapte les paliers à partir de mes valeurs pour 3, 4, 5 et 6 bananes.
+
+Suite : retire les numéros de la roulette. Un scénario rend les boutons et la conservation des mises pénibles : pour le test, j'ai tout misé sur le vert avec le 100 %, ce qui m'a donné énormément de bananes (environ 1000), puis j'ai retout misé et tout perdu. Comme la mise précédente reste affichée et qu'elle était immense (2000), il fallait cliquer pendant des minutes pour miser seulement 20. Donc, quel que soit le résultat, gagné ou perdu, la mise suivante sera de 1 par défaut.
+
 ## Mer. 7 oct. 2026
 
 **Refonte de l'arc.** Que penses-tu de ma refonte de l'arc pour notre projet ?
