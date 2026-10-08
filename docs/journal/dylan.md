@@ -3,6 +3,12 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Jeu. 8 oct. 2026
+**GDD v1 (#12)** : nom « Bloons VR », univers Bloons TD gardé (exercice d'école, modèles maison), périmètre mis à jour avec ce qui est fait.
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | Analyse du projet, puis rédaction du GDD v1 (`docs/GDD.md`) à partir du brouillon v0 et des issues ; branche `docs/gdd-v1`, PR | Gardé (à relire en équipe) |
+
 **Test au casque des PR #95, #96 et #97** : bons au casque : saut coupé (#55), point d'apparition (#65), plateau (#67), singes débloqués avec des bananes (#52), traînée des lancers (#28), bananes qui pourrissent (#75).
 À reprendre (branche `fix/retours-casque`, PR suivante) :
 - **Arc** : 0,6 s entre deux tirs, c'est trop lent → **0,3 s**.
@@ -32,6 +38,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude (Claude Code) | Arrivée sur la carte (#102) : la sortie du chemin passe sur le bord est (le portail rouge cachait la carte depuis l'estrade) ; portails refaits : piliers en blocs de deux gris, arc de 11 blocs, voile lumineux translucide et tourbillon qui tourne (`PortalGlow`) ; estrade habillée : liseré, rambarde sur les côtés et l'arrière, deux lanternes à flamme vacillante. Compilé, à régénérer | Gardé (à tester) |
 | Claude (Claude Code) | Animations des singes (#105) : `TowerAnimator` (en code, comme le récolteur) : respiration, tête et queue, se tourne vers sa cible ; geste par type (lancer par-dessus l'épaule, de côté, fusil épaulé avec recul, bras levés puis frappe au sol, recul du canon, toupie du tireur). `Projectile` : le vrai modèle 3D vole jusqu'au ballon et le touche en arrivant (avant : touché tout de suite). Glace : onde bleue (`Shockwave` en couleur). Modèles des projectiles branchés dans `MonkeyVisuals`, rebranchés à chaque génération. Compilé, à tester | Gardé (à tester) |
 | Claude (Claude Code) | Singes du hub plus en pose en T (#105) : `Visuals.RestPose` baisse les bras le long du corps (un peu écartés, un peu en avant) pour chaque singe créé (bibliothèque, plateau, fiche, coffre) ; les singes animés partent de cette pose. Compilé, à régénérer | Gardé (à tester) |
+| Claude (Claude Code) | Merge de la PR #106 dans main, à la demande de Dylan (sans relecture par un autre membre) : conflit dans `prompts/prompts_dylan.md` résolu en gardant les deux côtés | Gardé |
 
 ## Mer. 7 oct. 2026
 **Décor refait dans Blender (#61, #66)** _(rendus de prévisualisation Blender, pas encore Unity)_

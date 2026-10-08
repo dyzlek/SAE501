@@ -20,6 +20,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 ### Fiche du singe et coffre
 > Quand on appuie sur A, je veux que les informations du singe soient plus lisibles, pas juste des infos données comme ça : à gauche, on voit le singe avec son aura, etc. Et quand on ouvre le coffre, ça doit respecter la DA globale.
 
+### GDD v1
+> Analyse le projet, puis écris le GDD v1. Le jeu s'appelle « Bloons VR » et on garde l'univers de Bloons TD.
+
 ### Retours du test au casque (PR #95 à #97)
 > Le saut, le point d'apparition, la téléportation sous le plateau, le déblocage des singes avec des bananes et les bananes qui pourrissent, c'est bon. L'arc ne se spamme plus, mais je voudrais 0,3 s entre deux tirs. Sur la carte, on peut encore se téléporter dans les arbres. La traînée marche, mais en VR on ne peut pas prendre les fléchettes de loin pour les lancer sur la cible du hub. Beaucoup d'éléments du décor se chevauchent (voir les captures) : je veux des montagnes vraiment plus belles, et le reste un peu plus réaliste. J'aimerais aussi que les flammes soient un peu animées. Je n'ai pas de sensation de lag, mais il faudrait afficher le nombre de fps en VR pour vérifier.
 
