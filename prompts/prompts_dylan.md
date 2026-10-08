@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 7 oct. 2026
 
+### Textes du coffre et des singes, visuel de fusion
+> Dans une autre branche, fais : « Enlever le texte au-dessus du coffre », « Carte en taille réelle : enlever les textes au-dessus des singes » et « Fusion : remplacer le cercle rouge par un visuel "fusion possible" ».
+
 ### Ranger le tableau GitHub
 > Vérifie tout ce que j'ai fait sur le tableau GitHub et corrige ce qui ne va pas.
 >

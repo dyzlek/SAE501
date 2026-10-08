@@ -3,6 +3,10 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Mer. 7 oct. 2026
+**Test de `fix/textes-fusion` (#57, #59, #72) : tout bon.** Fusion dorée sur le plateau : le singe qu'on obtiendra flotte au-dessus du singe posé, avec le halo doré.
+
+![Fusion dorée sur le plateau](../captures/fusion-doree-plateau.webp)
+
 **Ma critique après la fusion** _(mise en forme par l'IA ; issues #65 à #81)_
 1. Régler le problème de point d'apparition (spawn).
 2. Améliorer le hub visuellement, surtout les murs.
@@ -146,6 +150,7 @@ _L'analyse critique de Maxens du même jour est dans [son journal](maxens.md) : 
 | Claude (Claude Code) | Mise à jour du README (état du projet, deux scènes, lancement depuis le Hub) et du journal général (bilan du 7, liste des urgences du 8 oct. classées, avec les issues) | Gardé |
 | Claude (Claude Code) | Lot du 8 oct. (PR #83 : 31 issues, corrections, lancers, bruitages, tutoriel, porte, etc.), fusionné dans `main` sans test : **annulé et retiré de `main` à ma demande** (revert du merge). Le code reste dans l'historique Git (branche `fix/urgences-8oct`) | **Jeté** |
 | Claude (Claude Code) | Tableau GitHub vérifié (PR fusionnées en Fait, #16 #17 #26 fermées car faites, #62 ajoutée) puis réorganisé en trois niveaux : jalons = objectifs de la semaine, 6 **chantiers** (#85 à #90, label `chantier`) avec les tâches en sous-issues, champ « Niveau » sur le tableau ; mode d'emploi dans `ORGANISATION.md` | Gardé |
+| Claude (Claude Code) | Branche `fix/textes-fusion` (compilé, à tester : régénérer avec SAE → Générer le prototype) : plus de texte au-dessus du coffre, la pancarte du prix dit « IL MANQUE … » en rouge (#72) ; plus de nom au-dessus des singes posés sur la carte ni du fantôme (#59) ; en fusion, fantôme doré du singe obtenu au-dessus du singe posé et halo doré, au lieu du fantôme rouge (#57) | Gardé (testé par Dylan : tout bon) |
 | Claude (Claude Code) | Règle n°3 dans `CLAUDE.md` : chaque IA tient le suivi GitHub à jour toute seule (issue, carte En cours / En relecture / Fait, `Ferme #N`), sans assigner ni mentionner personne (pas de mails, à ma demande) | Gardé |
 
 ## Mar. 6 oct. 2026

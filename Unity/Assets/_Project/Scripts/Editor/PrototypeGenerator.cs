@@ -81,7 +81,7 @@ namespace SAE.EditorTools
             var hub = BuildHub();   // avant le joueur : l'installeur des bananes ajoute son TestSouris à Camera.main s'il en trouve une
             var player = BuildPlayers(hubSpawn.position);
             if (!player) return;
-            BuildChest(hub, Around(97f, Ring - 0.2f), player.head);   // estrade de 1,4 m (le coffre de Maxens) : un peu plus près de VIDER, loin du comptoir du bananier
+            BuildChest(hub, Around(97f, Ring - 0.2f));   // estrade de 1,4 m (le coffre de Maxens) : un peu plus près de VIDER, loin du comptoir du bananier
             UseWoodTexture(hub);   // encore une fois : l'estrade et le cadre du coffre sont posés après le reste du hub
             BuildPresence(Level.Hub, hubSpawn);
             new GameObject("Chargement du labyrinthe").AddComponent<LevelLoader>();
@@ -1083,7 +1083,7 @@ namespace SAE.EditorTools
         // Le coffre : le modèle de la cabane (Art/Coffre/Coffre.glb, fait par Blender/coffre.py), avec la roulette
         // et le texte de Nicolas, branché sur notre joueur (ChestClickable) et sur l'argent commun.
         // Il reste fixe, tourné vers le centre ; à l'ouverture : boing et couvercle (ChestLid).
-        static void BuildChest(Transform env, Vector3 pos, Transform player)
+        static void BuildChest(Transform env, Vector3 pos)
         {
             const string ChestModelPath = "Assets/_Project/Art/Coffre/Coffre.glb";
             var model = AssetDatabase.LoadAssetAtPath<GameObject>(ChestModelPath);
@@ -1111,19 +1111,9 @@ namespace SAE.EditorTools
             rouletteGo.AddComponent<Sae501.Coffres.Billboard>();
             var roulette = rouletteGo.AddComponent<Sae501.Coffres.RouletteView>();
 
-            var promptGo = new GameObject("PromptCoffre");
-            promptGo.transform.SetParent(env, false);
-            promptGo.transform.position = new Vector3(pos.x, top + 0.3f, pos.z);
-            promptGo.AddComponent<Sae501.Coffres.Billboard>();
-            var prompt = promptGo.AddComponent<Sae501.Coffres.ChestPrompt>();
-
+            // Plus de texte au-dessus du coffre (ChestPrompt) : le prix est sur la pancarte devant, qui dit aussi ce qui manque
             var controller = chest.AddComponent<Sae501.Coffres.ChestController>();
-
             controller.roulette = roulette;
-            controller.prompt = prompt;
-            prompt.chest = controller;
-            prompt.player = player;
-            prompt.keyLabel = "Touche";   // « [Touche]  Ouvrir le coffre » : on l'ouvre avec la main
             chest.AddComponent<ChestClickable>().chest = controller;
             // Le modèle .glb n'a pas de collider : on en met un autour, pour le toucher ou le viser avec le rayon
             var chestBounds = Bounds(chest);
