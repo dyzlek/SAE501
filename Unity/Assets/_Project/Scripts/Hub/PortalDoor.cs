@@ -5,7 +5,7 @@ namespace SAE
 {
     // Une porte qui mène à un autre niveau : la porte de la cabane (vers la bananeraie) et le portail du retour.
     // On l'enfonce avec la main, on la vise et on appuie (RayPress), ou on clique dessus (mode PC).
-    // Le battant s'ouvre en pivotant sur sa charnière ; à mi-ouverture, un voile noir descend du haut (ScreenCurtain),
+    // Le battant s'ouvre en pivotant sur sa charnière ; dès qu'il s'entrouvre, un voile noir descend du haut (ScreenCurtain),
     // le joueur est envoyé dans l'autre niveau (Levels.Go), puis le voile remonte ; la porte se referme derrière lui. Le script est sur le battant, dont l'origine est la charnière
     // (voir Blender/cabane.py, door_leaf).
     public class PortalDoor : MonoBehaviour, IPressable
@@ -14,6 +14,8 @@ namespace SAE
         public float openAngle = -100f;     // en degrés, autour de la verticale : le signe donne le sens (vers dehors)
         public float openDuration = 1f;     // en secondes
         public float curtainDuration = 1.2f;   // le voile noir, en secondes, dans chaque sens
+
+        const float CurtainStart = 0.3f;    // le voile démarre à 30 % de l'ouverture (la porte entrouverte d'un tiers)
 
         Quaternion closed;
         bool opening;
@@ -34,8 +36,8 @@ namespace SAE
             {
                 // Elle démarre doucement et ralentit à la fin, comme une vraie porte qu'on pousse
                 transform.rotation = Quaternion.Slerp(closed, open, Mathf.SmoothStep(0f, 1f, t));
-                // À mi-ouverture, le voile noir commence à descendre du haut
-                if (curtain == null && t >= 0.5f) curtain = StartCoroutine(ScreenCurtain.Slide(true, curtainDuration));
+                // Quand elle commence à s'ouvrir (un petit tiers), le voile noir commence à descendre du haut
+                if (curtain == null && t >= CurtainStart) curtain = StartCoroutine(ScreenCurtain.Slide(true, curtainDuration));
                 yield return null;
             }
             transform.rotation = open;

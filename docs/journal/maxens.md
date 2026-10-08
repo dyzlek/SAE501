@@ -65,7 +65,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
 - **Fait : un voile noir pendant le passage des portes** (dans les deux sens). Changer de place d'un coup sous les yeux est désagréable en VR. Nouveau script `Player/ScreenCurtain.cs` : un carré noir collé devant la caméra du joueur, dessiné par-dessus tout avec le shader des textes du jeu (compatible casque).
 - **Corrigé après mon test du voile :**
-  - il démarre **à la moitié de l'ouverture de la porte** (avant : une fois la porte ouverte) ;
+  - il démarre **dès que la porte s'entrouvre** (à 30 % de son ouverture ; avant : une fois la porte ouverte, puis à la moitié) ;
   - **sens inversé** : il **descend du haut** pour cacher la vue, et après la téléportation il **remonte** (le bas de l'image réapparaît en premier) ;
   - **beaucoup plus doux et plus lent** : 1,2 s dans chaque sens (avant 0,4 s), un départ et une arrivée en douceur, et un **bord fondu** au lieu d'une ligne nette. Sa taille suit le champ de vision de la caméra, pour que le bord traverse toute l'image (au PC comme au casque). La porte s'ouvre aussi un peu plus lentement (1 s).
   - Testé en Play via Unity MCP : passage cabane → bananeraie complet, voile caché à l'arrivée.

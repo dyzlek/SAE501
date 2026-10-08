@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Jeu. 8 oct. 2026
 
+### Démarrage du voile
+> Parfait. Fais juste démarrer le voile un peu plus tôt, quand la porte commence à s'ouvrir, comme sur la capture.
+
 ### Corrections du voile noir
 > Ça ne va pas encore :
 > 1. le voile doit commencer à la moitié de l'animation d'ouverture de la porte ;
