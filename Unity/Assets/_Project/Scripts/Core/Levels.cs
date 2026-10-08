@@ -3,10 +3,11 @@ using UnityEngine.SceneManagement;
 
 namespace SAE
 {
-    public enum Level { Hub, Carte }
+    public enum Level { Hub, Carte, Bananeraie }
 
-    // Les deux niveaux du jeu, chacun dans sa scène : Hub (la cabane) et Labyrinthe (la carte), loin l'un de l'autre.
-    // Les deux scènes restent chargées (la seconde est chargée EN PLUS de la première, chargement additif) : le monde
+    // Les niveaux du jeu, chacun dans sa scène, loin les uns des autres : Hub (la cabane), Labyrinthe (la carte)
+    // et Bananeraie (le bananier, le panier, les récolteurs et leurs améliorations, derrière la porte de la cabane).
+    // Les scènes restent chargées (la seconde est chargée EN PLUS de la première, chargement additif) : le monde
     // que l'on quitte continue de tourner. Une vague lancée continue pendant qu'on va chercher des bananes au hub,
     // et les bananes tombent pendant qu'on défend la carte.
     // Il n'y a qu'UN joueur (dans la scène Hub) : XRI ne gère bien qu'un seul joueur VR. Changer de niveau, c'est
@@ -16,6 +17,7 @@ namespace SAE
     {
         public const string HubScene = "Hub";
         public const string MapScene = "Labyrinthe";
+        public const string GroveScene = "Bananeraie";
 
         public static Level Current { get; private set; }
         public static event System.Action<Level> Changed;   // on vient d'arriver dans ce niveau
@@ -36,7 +38,12 @@ namespace SAE
             Current = level;
         }
 
-        public static string SceneOf(Level level) => level == Level.Hub ? HubScene : MapScene;
+        public static string SceneOf(Level level) => level switch
+        {
+            Level.Hub => HubScene,
+            Level.Bananeraie => GroveScene,
+            _ => MapScene,
+        };
 
         // Aller dans un niveau : sa scène est chargée si elle ne l'est pas encore (elle s'allumera toute seule),
         // sinon on éteint la présence de l'autre et on allume la sienne (le joueur y est déplacé).

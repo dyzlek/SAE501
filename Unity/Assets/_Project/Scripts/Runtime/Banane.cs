@@ -143,6 +143,9 @@ public class Banane : MonoBehaviour
 
     void AppliquerCouleur(Color c)
     {
+        // Créés ici au besoin, si Awake ne les a pas encore créés
+        mpb ??= new MaterialPropertyBlock();
+        rends ??= GetComponentsInChildren<Renderer>();
         foreach (var r in rends)
         {
             r.GetPropertyBlock(mpb);

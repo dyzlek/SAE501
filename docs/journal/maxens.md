@@ -2,6 +2,44 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Jeu. 8 oct. 2026
+- **Fait : la bananeraie, un nouvel endroit pour tout ce qui concerne la récolte des bananes** (branche `feat/bananeraie-maxens`, partie du `main` à jour, PR #99). Avant, le bananier, l'étal, le panier, le comptoir du bananier et celui des récolteurs étaient tous dans la cabane, autour du joueur : ça faisait beaucoup de choses au même endroit.
+
+  Avant : le comptoir du bananier, l'étal et le bananier derrière la porte ouverte, dans la cabane.
+
+  ![Avant : le bananier et ses comptoirs dans la cabane](../captures/maxens-hub-avant-bananeraie.webp)
+
+  - **la porte de la cabane est fermée** : on l'enfonce avec la main, on la vise et on appuie, ou on clique dessus (mode PC). Elle **s'ouvre en pivotant sur sa charnière**, vers dehors, puis on est **téléporté dans la bananeraie** ; elle se referme derrière nous (nouveau script `Hub/PortalDoor.cs`) ;
+  - **la bananeraie** est un 3e niveau, dans sa propre scène (`Bananeraie.unity`, chargée au lancement avec la carte, comme le labyrinthe) : le bananier produit donc même quand on est ailleurs ;
+  - **la même direction artistique que la cabane** : modélisée par `Blender/cabane.py` (nouvelle fonction `build_bananeraie`, exportée en `Art/Cabane/Bananeraie.glb`), avec les mêmes textures et les mêmes outils : une terrasse en planches au milieu de la prairie, une barrière en rondins, et au fond un abri au toit de chaume avec un mur de rondins. Autour, le même paysage (herbes, champignons, palmiers, montagnes) ;
+  - **dedans** : le bananier et son étal à gauche, le panier et la caisse (l'argent) à droite, et sous l'abri **l'armoire des améliorations**, avec le comptoir BANANIER et le comptoir RÉCOLTEUR côte à côte. Les singes récolteurs attendent devant l'étal et font leurs allers-retours jusqu'au panier ;
+  - **pour revenir** : un **portail** en rondins, avec un battant comme celui de la cabane, qui s'ouvre et ramène au centre de la cabane ;
+  - dans la cabane, il ne reste que la caisse au mur ; la place du bananier et de ses comptoirs est libre ;
+  - **corrigé en passant** : Blender ajoute « .001 » aux noms en double, donc le paysage de la carte n'était **jamais aligné** (avertissement à chaque génération). Les repères sont maintenant trouvés par le début de leur nom. Et certaines bananes faisaient une erreur à chaque image (couleur appliquée avant leur initialisation) : corrigé dans `Banane.cs`.
+  - Testé en Play via Unity MCP : porte de la cabane → bananeraie → portail → retour au centre de la cabane, un singe récolteur acheté qui ramasse les bananes ; aucune erreur.
+
+  La porte de la cabane, fermée puis en train de s'ouvrir :
+
+  ![La porte de la cabane, fermée](../captures/maxens-porte-fermee.png)
+
+  ![La porte s'ouvre vers dehors](../captures/maxens-porte-ouverture.png)
+
+  En arrivant dans la bananeraie : l'étal à gauche, l'armoire des améliorations sous l'abri, le panier et la caisse à droite.
+
+  ![Arrivée dans la bananeraie](../captures/maxens-bananeraie-arrivee.png)
+
+  ![Vue d'ensemble : le bananier, l'étal, l'abri et le panier](../captures/maxens-bananeraie-vue.png)
+
+  Le portail du retour, qui s'ouvre vers la prairie.
+
+  ![Le portail du retour vers la cabane](../captures/maxens-bananeraie-portail.png)
+
+### IA
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Code) | Bananeraie : nouvel endroit modélisé par script Blender dans le style de la cabane (terrasse, barrière, abri, portail), 3e niveau et sa scène, porte de la cabane qui s'ouvre puis téléporte (`PortalDoor`), déménagement du bananier, du panier, des comptoirs et des récolteurs ; testé en Play via Unity MCP | À tester au casque |
+| Claude (Code) | Paysage de la carte enfin aligné (noms « .001 » de Blender), erreurs de couleur des bananes corrigées | Gardé |
+
 ## Mer. 7 oct. 2026
 **Ma critique après la fusion** _(transmise à Dylan, mise en forme par l'IA ; issues #50 à #64)_
 1. Un bouton assis / debout, ce serait sympa.

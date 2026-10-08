@@ -2,6 +2,13 @@
 
 _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (orthographe, clarté, structure : contexte, objectif, contraintes). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/maxens.md)._
 
+## Jeu. 8 oct. 2026
+
+### La bananeraie, derrière une porte
+> Gros chantier : tout ce qui concerne la récolte des bananes doit quitter la cabane pour un autre endroit, dans la même direction artistique (captures jointes de l'état actuel).
+>
+> La porte de la cabane sera fermée. Quand on l'actionne, elle s'ouvre avec une animation, puis on est téléporté dans ce nouvel endroit. On y trouve le bananier, le panier, et l'armoire des améliorations du bananier et des singes récolteurs.
+
 ## Mer. 7 oct. 2026
 
 ### Traverser les ballons
