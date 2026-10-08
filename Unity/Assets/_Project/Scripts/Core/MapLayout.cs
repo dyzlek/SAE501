@@ -21,15 +21,15 @@ namespace SAE
         {
             new Vector2(-12f, 5f),     // entrée, bord ouest
             new Vector2(2.5f, 5f),
-            new Vector2(2.5f, 10f),    // petite boucle au nord
-            new Vector2(-3.5f, 10f),
+            new Vector2(2.5f, 10.5f),   // petite boucle au nord
+            new Vector2(-3.5f, 10.5f),
             new Vector2(-3.5f, -6f),   // longue descente : croise deux fois le chemin
             new Vector2(-8.5f, -6f),
             new Vector2(-8.5f, 0.5f),   // boucle à l'ouest
-            new Vector2(6.5f, 0.5f),
-            new Vector2(6.5f, 6.5f),
-            new Vector2(10.5f, 6.5f),   // boucle à l'est
-            new Vector2(10.5f, -4f),
+            new Vector2(6f, 0.5f),
+            new Vector2(6f, 6.5f),
+            new Vector2(10.8f, 6.5f),   // boucle à l'est
+            new Vector2(10.8f, -4f),
             new Vector2(1.5f, -4f),
             new Vector2(1.5f, -12f),    // sortie, bord sud, juste devant l'estrade du joueur
         };
@@ -60,11 +60,11 @@ namespace SAE
 
         static Vector3 ToMap(Vector2 p) => new Vector3(p.x, 0f, p.y);
 
-        // Peut-on poser un singe de rayon 'radius' en pos (x, z) ? Dans la carte et pas sur le chemin.
-        public static bool CanPlace(Vector2 pos, float radius)
+        // Peut-on poser un singe en pos (x, z) ? Dans la carte, et son centre à au moins margin mètres du bord du chemin.
+        public static bool CanPlace(Vector2 pos, float margin)
         {
-            if (Mathf.Abs(pos.x) > HalfExtent - radius || Mathf.Abs(pos.y) > HalfExtent - radius) return false;
-            return DistanceToPath(pos) >= PathWidth / 2f + radius;
+            if (Mathf.Abs(pos.x) > HalfExtent - margin || Mathf.Abs(pos.y) > HalfExtent - margin) return false;
+            return DistanceToPath(pos) >= PathWidth / 2f + margin;
         }
 
         // Distance (en mètres) entre un point (x, z) et le chemin le plus proche.

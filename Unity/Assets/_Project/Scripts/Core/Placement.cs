@@ -10,7 +10,11 @@ namespace SAE
     // pos = position (x, z) en mètres dans le repère de la carte.
     public static class Placement
     {
-        public const float Radius = TowerManager.TowerSize / 2f;
+        public const float Radius = TowerManager.TowerSize / 2f;   // pour viser un singe posé (le prendre, le fusionner)
+        // Pour poser : deux singes peuvent être côte à côte (le modèle est moins large que sa boîte de 1,2 m),
+        // et un singe peut mordre un peu sur le gravier du bord du chemin. Ainsi on en met 2 × 2 dans les boucles.
+        public const float Spacing = 0.95f;      // distance minimale entre deux singes posés, en mètres
+        public const float PathMargin = 0.45f;   // distance minimale entre le centre du singe et le bord des dalles
 
         public static PlacementAction Evaluate(Vector2 pos, out PlacedMonkey target)
         {
@@ -18,8 +22,9 @@ namespace SAE
             target = GameState.Nearest(pos, Radius * 2f);
 
             if (held == null) return target != null ? PlacementAction.PickUp : PlacementAction.None;
-            if (target != null) return target.monkey.CanFuseWith(held.Value) ? PlacementAction.Fuse : PlacementAction.Blocked;
-            return MapLayout.CanPlace(pos, Radius) ? PlacementAction.Place : PlacementAction.Blocked;
+            if (target != null && target.monkey.CanFuseWith(held.Value)) return PlacementAction.Fuse;
+            if (GameState.Nearest(pos, Spacing) != null) return PlacementAction.Blocked;   // trop collé à un autre singe
+            return MapLayout.CanPlace(pos, PathMargin) ? PlacementAction.Place : PlacementAction.Blocked;
         }
 
         public static void Apply(Vector2 pos)
