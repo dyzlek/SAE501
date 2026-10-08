@@ -2,6 +2,11 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Jeu. 8 oct. 2026
+
+### Retours du test au casque (PR #95 à #97)
+> Le saut, le point d'apparition, la téléportation sous le plateau, le déblocage des singes avec des bananes et les bananes qui pourrissent, c'est bon. L'arc ne se spamme plus, mais je voudrais 0,3 s entre deux tirs. Sur la carte, on peut encore se téléporter dans les arbres. La traînée marche, mais en VR on ne peut pas prendre les fléchettes de loin pour les lancer sur la cible du hub. Beaucoup d'éléments du décor se chevauchent (voir les captures) : je veux des montagnes vraiment plus belles, et le reste un peu plus réaliste. J'aimerais aussi que les flammes soient un peu animées. Je n'ai pas de sensation de lag, mais il faudrait afficher le nombre de fps en VR pour vérifier.
+
 ## Mer. 7 oct. 2026
 
 ### Urgences casque, singes, bananes, décor
