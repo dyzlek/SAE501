@@ -21,6 +21,10 @@ namespace SAE
         static readonly Color BushLight = new Color(0.3f, 0.64f, 0.2f);
         static readonly Color MushroomCap = new Color(0.85f, 0.18f, 0.15f);
         static readonly Color MushroomStem = new Color(0.95f, 0.92f, 0.82f);
+        static readonly Color ArchStone = new Color(0.66f, 0.65f, 0.62f);
+        static readonly Color Arrow = new Color(1f, 0.83f, 0.35f);              // doré, comme les titres du hub
+        static readonly Color EntryGlow = new Color(0.35f, 0.85f, 1f);          // bleu : les ballons arrivent
+        static readonly Color ExitGlow = new Color(1f, 0.3f, 0.2f);             // rouge : danger, ils s'échappent
 
         const float StoneStep = 1f;       // une rangée de dalles par mètre de chemin
         const float StoneHeight = 0.08f;  // épaisseur des dalles, en mètres
@@ -30,6 +34,7 @@ namespace SAE
             var random = new System.Random(501);   // graine fixe : toujours le même décor
             BuildPath(parent, scale, random);
             BuildGrassDecor(parent, scale, random);
+            BuildPortals(parent, scale);
             if (withBushes) BuildBushes(parent, scale, random);
         }
 
@@ -57,6 +62,83 @@ namespace SAE
                 walked += length;
             }
             batch.Build(parent, "Chemin de dalles");
+        }
+
+        // Les portails : une arche de pierre au début et à la fin du chemin, avec un voile coloré
+        // (bleu à l'entrée, d'où sortent les ballons ; rouge à la sortie). Des flèches dorées sur les dalles donnent le sens.
+        static void BuildPortals(Transform parent, float scale)
+        {
+            var points = MapLayout.PathPoints();
+            var batch = new MeshBatch();
+            Portal(batch, parent, points[0], points[1] - points[0], 0.4f, EntryGlow, scale, "Portail d'entrée");
+            int last = points.Count - 1;
+            Portal(batch, parent, points[last], points[last] - points[last - 1], -0.4f, ExitGlow, scale, "Portail de sortie");
+
+            // Trois flèches juste après l'entrée et trois juste avant la sortie
+            for (int k = 0; k < 3; k++)
+            {
+                ArrowAt(batch, points, 2.5f + k * 1.6f, scale);
+                ArrowAt(batch, points, PathLength(points) - 2.5f - k * 1.6f, scale);
+            }
+            batch.Build(parent, "Portails");
+        }
+
+        // Une arche : deux piliers, un arc de 9 blocs, une clé de voûte de la couleur du voile, et le voile lui-même.
+        // end = le bout du chemin (au bord de la carte), forward = le sens de marche des ballons,
+        // inward = de combien avancer l'arche dans la carte (en mètres, dans le sens de marche ; négatif à la sortie).
+        static void Portal(MeshBatch batch, Transform parent, Vector3 end, Vector3 forward, float inward, Color glow, float scale, string name)
+        {
+            var rot = Quaternion.LookRotation(forward.normalized);
+            var origin = end + rot * Vector3.forward * inward;
+            float half = MapLayout.PathWidth / 2f + 0.35f;   // les piliers de chaque côté des dalles
+            const float PillarHeight = 2.2f;
+            Vector3 At(Vector3 local) => (origin + rot * local) * scale;
+
+            for (int side = -1; side <= 1; side += 2)
+            {
+                batch.Add(MeshBatch.Cube, At(new Vector3(side * half, PillarHeight / 2f, 0f)), rot, new Vector3(0.5f, PillarHeight, 0.5f) * scale, ArchStone);
+                batch.Add(MeshBatch.Cube, At(new Vector3(side * half, 0.1f, 0f)), rot, new Vector3(0.7f, 0.2f, 0.7f) * scale, ArchStone);   // le socle
+            }
+            for (int i = 0; i <= 8; i++)
+            {
+                float a = Mathf.PI * i / 8f;   // de la droite (0) à la gauche (pi)
+                var local = new Vector3(Mathf.Cos(a) * half, PillarHeight + Mathf.Sin(a) * half * 0.8f, 0f);
+                var block = rot * Quaternion.Euler(0f, 0f, a * Mathf.Rad2Deg);
+                batch.Add(MeshBatch.Cube, At(local), block, new Vector3(0.45f, 0.55f, 0.55f) * scale, i == 4 ? glow : ArchStone);
+            }
+
+            // Le voile : une boule très aplatie entre les piliers, qui respire (PortalGlow). À part : il bouge.
+            var veil = Visuals.Box(name, parent, At(new Vector3(0f, PillarHeight * 0.62f, 0f)), Vector3.one, glow);
+            veil.GetComponent<MeshFilter>().sharedMesh = MeshBatch.Ball;
+            veil.transform.localRotation = rot;
+            veil.transform.localScale = new Vector3(half * 2f - 0.5f, PillarHeight * 1.2f, 0.06f) * scale;
+            veil.AddComponent<PortalGlow>();
+        }
+
+        // Une flèche dorée (un chevron) posée sur les dalles, à distance mètres du début du chemin, pointée dans le sens de marche.
+        static void ArrowAt(MeshBatch batch, List<Vector3> points, float distance, float scale)
+        {
+            for (int i = 0; i < points.Count - 1; i++)
+            {
+                float length = Vector3.Distance(points[i], points[i + 1]);
+                if (distance > length) { distance -= length; continue; }
+                var rot = Quaternion.LookRotation(points[i + 1] - points[i]);
+                var center = Vector3.Lerp(points[i], points[i + 1], distance / length) + Vector3.up * (StoneHeight * 1.25f);
+                for (int side = -1; side <= 1; side += 2)   // les deux branches du chevron, en V vers l'avant
+                {
+                    var arm = rot * Quaternion.Euler(0f, -side * 45f, 0f);
+                    var pos = center + rot * new Vector3(side * 0.28f, 0f, -0.28f);
+                    batch.Add(MeshBatch.Cube, pos * scale, arm, new Vector3(0.18f, 0.03f, 0.85f) * scale, Arrow);
+                }
+                return;
+            }
+        }
+
+        static float PathLength(List<Vector3> points)
+        {
+            float total = 0f;
+            for (int i = 0; i < points.Count - 1; i++) total += Vector3.Distance(points[i], points[i + 1]);
+            return total;
         }
 
         // Une rangée : une grande dalle sur toute la largeur, ou deux plus petites côte à côte.
