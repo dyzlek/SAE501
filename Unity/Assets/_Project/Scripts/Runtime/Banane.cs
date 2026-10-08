@@ -35,6 +35,7 @@ public class Banane : MonoBehaviour
     public int ValeurActuelle => EstPourrie ? 0 : Valeur;
 
     Bananier source;
+    public Bananier Source => source;   // l'arbre d'où elle est tombée (son étal est source.versCible)
     float dureePourriture, age, ageDisparition;
     bool posee, deposee, lachee;
     bool elanADonner;               // lâchée : il faut lui donner l'élan de la main (voir FixedUpdate)
@@ -143,6 +144,9 @@ public class Banane : MonoBehaviour
 
     void AppliquerCouleur(Color c)
     {
+        // Créés ici au besoin, si Awake ne les a pas encore créés
+        mpb ??= new MaterialPropertyBlock();
+        rends ??= GetComponentsInChildren<Renderer>();
         foreach (var r in rends)
         {
             r.GetPropertyBlock(mpb);

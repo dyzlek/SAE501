@@ -2,6 +2,46 @@
 
 _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (orthographe, clarté, structure : contexte, objectif, contraintes). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/maxens.md)._
 
+## Jeu. 8 oct. 2026
+
+### Une porte commune
+> Ce n'est pas ce que je voulais : la bananeraie et la cabane doivent partager la même porte. Idée simple : enlève le portail de la bananeraie et ajoute un chemin bordé de barrières qui relie la bananeraie à la cabane.
+
+### La bananeraie juste derrière la porte
+> Finalement, je pense que la bananeraie devrait être dans la même scène que la cabane, juste derrière la porte, pour qu'on voie ce qu'il y a derrière. Qu'en penses-tu ?
+>
+> On garde le même fonctionnement : on appuie, la porte s'ouvre, on voit ce qu'il y a derrière, puis la téléportation. Et profites-en pour mettre le voile noir sur toutes les téléportations.
+
+### Le tonneau
+> Élargis le tonneau à droite de l'armoire : il est trop étroit.
+
+### Démarrage du voile
+> Parfait. Fais juste démarrer le voile un peu plus tôt, quand la porte commence à s'ouvrir, comme sur la capture.
+
+### Corrections du voile noir
+> Ça ne va pas encore :
+> 1. le voile doit commencer à la moitié de l'animation d'ouverture de la porte ;
+> 2. inverse le sens : il descend du haut pour cacher la vue, puis remonte ;
+> 3. rends-le beaucoup plus doux et plus lent.
+
+### Une transition au passage des portes
+> Dernier détail : quand on ouvre une porte, dans les deux sens, après l'animation d'ouverture, un voile noir doit monter du bas vers le haut ; une fois téléporté, il disparaît du haut vers le bas.
+
+### Planter d'autres bananiers
+> C'est parfait. Ajoute maintenant une amélioration du bananier qui en plante un de plus : sur la capture, il y a la place pour trois. Au début un seul arbre, un deuxième à la première amélioration, un troisième à la suivante, et ça s'arrête là. Le prix doit être élevé. Les singes récolteurs doivent ensuite pouvoir prendre les bananes des trois arbres.
+
+### Corrections de la bananeraie
+> Après mon test (captures jointes) :
+> 1. Bug : les singes récolteurs ne vont pas vers le nouveau panier, ils partent hors de la terrasse.
+> 2. Ajoute dans la cabane un panneau « Bananeraie » sur la porte.
+> 3. En VR, on ne doit pas pouvoir se téléporter en dehors de la bananeraie, ni dans les objets (le panier, le bananier…).
+> 4. Agrandis un peu le panier et enlève son anse.
+
+### La bananeraie, derrière une porte
+> Gros chantier : tout ce qui concerne la récolte des bananes doit quitter la cabane pour un autre endroit, dans la même direction artistique (captures jointes de l'état actuel).
+>
+> La porte de la cabane sera fermée. Quand on l'actionne, elle s'ouvre avec une animation, puis on est téléporté dans ce nouvel endroit. On y trouve le bananier, le panier, et l'armoire des améliorations du bananier et des singes récolteurs.
+
 ## Mer. 7 oct. 2026
 
 ### Traverser les ballons

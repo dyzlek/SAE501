@@ -18,7 +18,9 @@ using UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets;
 namespace SAE.EditorTools
 {
     // Menu SAE → Générer le prototype : construit les DEUX scènes du jeu (relancer le menu les écrase).
-    //   Hub.unity        : la cabane (bananier, coffre, bibliothèque, plateau) ; c'est la scène de départ.
+    //   Hub.unity        : la cabane (coffre, bibliothèque, plateau) et, juste derrière sa porte, la bananeraie
+    //                      (les bananiers, le panier, les singes récolteurs et l'armoire de leurs améliorations) ;
+    //                      c'est la scène de départ.
     //   Labyrinthe.unity : la carte et ses vagues, où l'on défend avec l'arc (à 1 km du hub).
     // Le hub charge aussi le labyrinthe (LevelLoader) : les deux tournent ensemble, une vague continue quand on est au hub.
     // Un seul joueur (VR et PC), dans le hub : XRI ne gère bien qu'un joueur VR. SE TP / HUB le déplacent d'une scène
@@ -28,6 +30,7 @@ namespace SAE.EditorTools
         const string Folder = "Assets/_Project/Scenes";
         const string HubScenePath = Folder + "/Hub.unity";
         const string MapScenePath = Folder + "/Labyrinthe.unity";   // même nom que Levels.MapScene
+        const string OldGroveScenePath = Folder + "/Bananeraie.unity";   // l'ancienne scène de la bananeraie, supprimée
         const string OldScenePath = Folder + "/Jeu.unity";          // l'ancienne scène unique, supprimée à la génération
         const float BoardTile = 0.2f;    // plateau de 1,6 m : l'élément principal du hub
         const float HandHeight = 0.9f;   // table des bananes et socle du panier : à hauteur de main, pas au sol
@@ -76,10 +79,13 @@ namespace SAE.EditorTools
             BuildPresence(Level.Carte, mapSpawn);   // pas de joueur ici : c'est celui du hub qui vient
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), MapScenePath);
 
-            // 2. Le hub
+            // 2. Le hub, et la bananeraie derrière sa porte
             NewLevelScene();
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(OldGroveScenePath)) AssetDatabase.DeleteAsset(OldGroveScenePath);
             var hubSpawn = Spawn("Spawn Hub", Vector3.zero, Level.Hub);
+            cabinDoor = null;
             var hub = BuildHub();   // avant le joueur : l'installeur des bananes ajoute son TestSouris à Camera.main s'il en trouve une
+            BuildGrove(hub);
             var player = BuildPlayers(hubSpawn.position);
             if (!player) return;
             BuildChest(hub, Around(97f, Ring - 0.2f));   // estrade de 1,4 m (le coffre de Maxens) : un peu plus près de VIDER, loin du comptoir du bananier
@@ -108,7 +114,7 @@ namespace SAE.EditorTools
                 if (part) part.transform.SetParent(presence.transform, true);
             presence.SetActive(false);
 
-            var root = new GameObject(level == Level.Hub ? "Niveau Hub" : "Niveau Carte").AddComponent<LevelPresence>();
+            var root = new GameObject("Niveau " + level).AddComponent<LevelPresence>();
             root.level = level;
             root.presence = presence;
             root.spawn = spawn;
@@ -252,7 +258,6 @@ namespace SAE.EditorTools
                 r.shadowCastingMode = ShadowCastingMode.Off;
             }
             foreach (var angle in CabinWindows) Dust($"Poussières fenêtre {angle}", angle, WindowWidth, WindowBottom, WindowTop);
-            Dust("Poussières porte", 180f, DoorWidth, 0.3f, CabinDoorHeight);
         }
 
         // Le joueur, en deux versions (VR et PC, PlayerMode active la bonne), au point d'arrivée du hub.
@@ -566,17 +571,15 @@ namespace SAE.EditorTools
         //   devant (0°)        : le plateau incliné (la carte en direct), le tableau de la vague au mur au-dessus,
         //                        le pupitre LANCER / SE TP (-41°), le pupitre VIDER (+37°), et le panier sur son tabouret (+54°)
         //   gauche (-82°)      : LA bibliothèque, un seul meuble courbe (7 types × 8 raretés)
-        //   derrière (180°)    : la grande porte ouverte : le bananier dehors, l'étal des bananes juste devant
-        //   arrière-gauche     : le comptoir RÉCOLTEUR (-136°) et la caisse accrochée au mur au-dessus
-        //   arrière-droite     : le comptoir du bananier (137°) ; droite : le coffre (100°) et ses chances
+        //   derrière (180°)    : la grande porte, fermée : on l'ouvre pour aller à la bananeraie (BuildGrove)
+        //   arrière-gauche     : la caisse (l'argent), accrochée au mur
+        //   droite             : le coffre (100°) et ses chances
         const float Ring = HubLayout.Ring;   // rayon du cercle (2,8 m) : tout est posé dessus, le centre reste libre pour circuler
         const float SlotSize = 0.2f;      // une seule bibliothèque compacte (7 types × 8 raretés), tout à portée de bras
         const float SlotStepX = 0.28f;    // espace entre deux raretés
         const float SlotStepY = 0.26f;    // espace entre deux étagères : la plus haute est à 2,1 m
         const float FirstShelfY = 0.55f;  // rangée la plus basse (sans se baisser)
-        const float TreeScale = 1.4f;     // le palmier de Maxens, agrandi, dehors derrière la grande porte
-        const float BasketAngle = HubLayout.BasketAngle;     // le panier, à côté du plateau (HarvesterSetup le déplace aussi dans une scène plus ancienne)
-        const float BasketRadius = HubLayout.BasketRadius;
+        const float TreeScale = 1.4f;     // le palmier de Maxens, agrandi (dans la bananeraie)
 
         // Position sur le cercle. angle 0 = devant, positif = à droite.
         static Vector3 Around(float angleDeg, float radius, float height = 0f)
@@ -604,11 +607,8 @@ namespace SAE.EditorTools
             // À gauche : la bibliothèque (tous les types dans un seul meuble)
             BuildShelf(env, "Bibliotheque", -82f, 0, MonkeyData.TypeCount);
 
-            // Derrière : le bananier dehors, derrière la grande porte ; l'étal des bananes dedans, juste devant la porte
-            var bananier = BuildBananas(env, Around(180f, Ring + 1.3f), 180f, out var panier);
-            BuildMoneyBoard(env, HubLayout.HarvesterPanelAngle);
-            if (bananier) BuildUpgradePanel(env, bananier, 137f);
-            if (bananier && panier) BuildHarvesters(env, bananier, panier);
+            // Derrière : la grande porte (vers la bananeraie, voir BuildCabin) ; la caisse au mur, à gauche
+            BuildMoneyBoard(env, HubLayout.MoneyBoardAngle);
 
             BuildDecor(env);
             UseWoodTexture(env);
@@ -686,6 +686,15 @@ namespace SAE.EditorTools
 
             MakeStatic(cabin);
 
+            // La porte : fermée ; on l'ouvre pour aller à la bananeraie, juste derrière (son arrivée est posée par BuildGrove)
+            var door = cabin.GetComponentsInChildren<Transform>().FirstOrDefault(t => t.name.StartsWith("Porte_Battant"));
+            if (door)
+            {
+                cabinDoor = MakeDoor(door, null, Vector3.zero);
+                DoorSign(door, "BANANERAIE");
+            }
+            else Debug.LogWarning("Hub : battant de la porte introuvable (relancer Blender/cabane.py).");
+
             // Les flammes des bougies vacillent (FlameFlicker) : elles bougent, donc elles ne sont pas « static »
             foreach (var t in cabin.GetComponentsInChildren<Transform>())
                 if (t.name.StartsWith("Flamme_"))
@@ -758,8 +767,8 @@ namespace SAE.EditorTools
             Transform door = null, right = null;
             foreach (var t in cabin.GetComponentsInChildren<Transform>())
             {
-                if (t.name == "Repere_Porte") door = t;
-                if (t.name == "Repere_Droite") right = t;
+                if (t.name.StartsWith("Repere_Porte")) door = t;   // Blender ajoute « .001 » aux noms en double
+                if (t.name.StartsWith("Repere_Droite")) right = t;
             }
             if (!door || !right) { Debug.LogWarning("Hub : repères de la cabane introuvables, cabane non alignée."); return; }
 
@@ -921,7 +930,7 @@ namespace SAE.EditorTools
 
         // Le bananier, son panier et le récolteur, montés par l'installeur de Maxens (BananesInstaller.Construire),
         // appelé tel quel pour ne pas dupliquer son code. Puis on le place sur le cercle, tourné vers le joueur.
-        static Bananier BuildBananas(Transform env, Vector3 pos, float yaw, out Panier panier)
+        static Bananier BuildBananas(Transform env, Vector3 pos, float yaw, Vector3 tablePos, Vector3? basketPos, out Panier panier)
         {
             panier = null;
             var models = AssetDatabase.FindAssets("Bananes_Collectible t:Model");
@@ -932,6 +941,7 @@ namespace SAE.EditorTools
             typeof(BananesInstaller).GetMethod("Construire", Private).Invoke(null, new object[] { Vector3.zero });
 
             var root = GameObject.Find("Systeme_Bananes");
+            root.name = "Bananier et panier";   // le suivant (autre arbre) sera de nouveau « Systeme_Bananes »
             root.transform.SetParent(env, false);
             root.transform.SetPositionAndRotation(pos, Quaternion.Euler(0, yaw, 0));
 
@@ -945,7 +955,6 @@ namespace SAE.EditorTools
             // à hauteur de main : on ne se baisse pas pour les ramasser (règle de confort VR).
             // Une vraie table en bois (4 pieds, rebords, étagère basse avec une caisse), et une grande feuille de bananier
             // posée dessus : les bananes jaunes ressortent bien sur le vert (avant, jaune sur jaune).
-            var tablePos = Around(180f, Ring - 0.1f);   // juste devant la porte, le bananier dehors à 1,4 m
             var table = new GameObject("Etal des bananes").transform;
             table.SetParent(env, false);
             table.SetPositionAndRotation(tablePos, Quaternion.LookRotation(new Vector3(tablePos.x, 0, tablePos.z) - new Vector3(pos.x, 0, pos.z)));
@@ -969,19 +978,28 @@ namespace SAE.EditorTools
 
             // Le panier : à côté du plateau, sur un tabouret rond à hauteur de main (3 pieds, une étagère basse)
             var basket = root.transform.Find("Panier");
-            if (basket)
+            if (basket && basketPos == null)
             {
-                var basketPos = Around(BasketAngle, BasketRadius);
+                // Un arbre en plus : pas de second panier (ni le récolteur automatique de l'installeur, qui y vidait les bananes)
+                Object.DestroyImmediate(basket.gameObject);
+                var auto = root.transform.Find("Recolteur");
+                if (auto) Object.DestroyImmediate(auto.gameObject);
+            }
+            else if (basket)
+            {
                 var stool = new GameObject("Tabouret du panier").transform;
                 stool.SetParent(env, false);
-                stool.localPosition = basketPos;
-                Visuals.Solid("Assise", stool, new Vector3(0, HandHeight - 0.03f, 0), new Vector3(0.48f, 0.03f, 0.48f), DarkWood)
+                stool.position = basketPos.Value;
+                const float Seat = 0.48f * BasketScale;   // l'assise, à la taille du panier agrandi
+                Visuals.Solid("Assise", stool, new Vector3(0, HandHeight - 0.03f, 0), new Vector3(Seat, 0.03f, Seat), DarkWood)
                     .GetComponent<MeshFilter>().sharedMesh = Cylinder;
-                Visuals.Box("Etagere basse", stool, new Vector3(0, 0.3f, 0), new Vector3(0.4f, 0.015f, 0.4f), Wood)
+                Visuals.Box("Etagere basse", stool, new Vector3(0, 0.3f, 0), new Vector3(Seat - 0.08f, 0.015f, Seat - 0.08f), Wood)
                     .GetComponent<MeshFilter>().sharedMesh = Cylinder;
                 for (int i = 0; i < 3; i++)
-                    Visuals.Box("Pied", stool, Around(i * 120f, 0.17f, (HandHeight - 0.06f) / 2f), new Vector3(0.05f, HandHeight - 0.06f, 0.05f), Wood);
-                basket.position = basketPos + Vector3.up * HandHeight;
+                    Visuals.Box("Pied", stool, Around(i * 120f, Seat / 2f - 0.07f, (HandHeight - 0.06f) / 2f), new Vector3(0.05f, HandHeight - 0.06f, 0.05f), Wood);
+                basket.position = basketPos.Value + Vector3.up * HandHeight;
+                basket.localScale *= BasketScale;   // plus grand : on y lance les bananes plus facilement
+                RemoveHandle(basket);
                 panier = basket.GetComponentInChildren<Panier>();
                 // On LANCE les bananes dans le panier : plus de parois ni de poignée qui les renvoient (MeshCollider retiré),
                 // et une zone de dépôt plus haute que le bord, pour qu'un lancer un peu court compte quand même.
@@ -994,6 +1012,42 @@ namespace SAE.EditorTools
                 }
             }
             return bananier;
+        }
+
+        // Le panier de Maxens (Art/Bananier/FBX/Panier.fbx), agrandi et sans son anse : l'anse gênait les lancers.
+        // Son FBX n'est pas modifié : on enregistre à côté une copie du maillage sans ce qui dépasse du bord.
+        const float BasketScale = 1.4f;
+        const string BasketMeshPath = "Assets/_Project/Art/Bananier/Panier_SansAnse.asset";
+        const float BasketRim = 0.49f;   // le bord du panier, en part de sa hauteur avec l'anse (25 cm sur 52) : au-dessus, c'est l'anse
+
+        static void RemoveHandle(Transform basket)
+        {
+            var filter = basket.GetComponentInChildren<MeshFilter>();
+            if (!filter) return;
+            var source = filter.sharedMesh;
+            var vertices = source.vertices;
+            // La hauteur de chaque sommet le long de la verticale (le FBX peut être couché : Z en haut dans Blender)
+            var up = filter.transform.InverseTransformDirection(Vector3.up).normalized;
+            float low = float.MaxValue, high = float.MinValue;
+            foreach (var v in vertices) { float h = Vector3.Dot(v, up); low = Mathf.Min(low, h); high = Mathf.Max(high, h); }
+            float rim = low + (high - low) * BasketRim;
+
+            // On garde les triangles qui ne montent pas au-dessus du bord
+            var kept = new List<int>();
+            var triangles = source.triangles;
+            for (int i = 0; i < triangles.Length; i += 3)
+            {
+                bool handle = false;
+                for (int k = 0; k < 3; k++) handle |= Vector3.Dot(vertices[triangles[i + k]], up) > rim;
+                if (!handle) kept.AddRange(new[] { triangles[i], triangles[i + 1], triangles[i + 2] });
+            }
+            var mesh = Object.Instantiate(source);
+            mesh.name = "Panier_SansAnse";
+            mesh.SetTriangles(kept, 0);
+            mesh.RecalculateBounds();
+            AssetDatabase.DeleteAsset(BasketMeshPath);
+            AssetDatabase.CreateAsset(mesh, BasketMeshPath);
+            filter.sharedMesh = mesh;
         }
 
         // La caisse : un panneau en bois avec l'argent total en gros chiffres dorés, à côté du panier.
@@ -1029,12 +1083,12 @@ namespace SAE.EditorTools
         // +Z local = vers le mur. Renvoie les boutons (leur dessus qui s'enfonce s'appelle « Bouton ») et le texte de chaque colonne.
         const float CounterStep = 0.36f;
 
-        static Transform BuildCounter(Transform env, string name, string title, float angle, string[] names,
+        static Transform BuildCounter(Transform env, string name, string title, Vector3 pos, float yaw, string[] names,
             out Transform[] buttons, out TextMesh[] labels)
         {
             var root = new GameObject(name).transform;
             root.SetParent(env, false);
-            root.SetPositionAndRotation(Around(angle, Ring - 0.45f), Quaternion.Euler(0, angle, 0));
+            root.SetPositionAndRotation(pos, Quaternion.Euler(0, yaw, 0));
             int columns = names.Length;
             float width = columns * CounterStep + 0.16f;
 
@@ -1090,16 +1144,16 @@ namespace SAE.EditorTools
         }
 
         // Comptoir d'amélioration du bananier : 3 gros boutons ronds à enfoncer (production, fraîcheur, valeur).
-        static void BuildUpgradePanel(Transform env, Bananier bananier, float angle)
+        static void BuildUpgradePanel(Transform env, BananaOrchard orchard, Vector3 pos, float yaw)
         {
-            var stats = new[] { BananaStat.Frequence, BananaStat.Pourriture, BananaStat.Valeur };
-            BuildCounter(env, "Comptoir bananier", "BANANIER", angle, new[] { "PRODUCTION", "FRAÎCHEUR", "VALEUR" }, out var buttons, out var labels);
+            var stats = new[] { BananaStat.Frequence, BananaStat.Pourriture, BananaStat.Valeur, BananaStat.Arbres };
+            BuildCounter(env, "Comptoir bananier", "BANANIER", pos, yaw, new[] { "PRODUCTION", "FRAÎCHEUR", "VALEUR", "+1 ARBRE" }, out var buttons, out var labels);
             for (int i = 0; i < stats.Length; i++)
             {
                 buttons[i].name = $"Bouton {stats[i]}";
                 var up = buttons[i].gameObject.AddComponent<UpgradeButton>();
                 buttons[i].gameObject.AddComponent<RayPress>();
-                up.bananier = bananier;
+                up.orchard = orchard;
                 up.stat = stats[i];
                 up.cap = buttons[i].Find("Bouton");
                 up.label = labels[i];
@@ -1108,22 +1162,17 @@ namespace SAE.EditorTools
 
         // Les singes récolteurs : le comptoir « RÉCOLTEUR » (acheter un singe de plus, puis vitesse, cadence et rendement
         // pour toute l'équipe, voir HarvesterCrew) et les singes eux-mêmes, cachés jusqu'à leur achat.
-        // Chacun attend à sa place, en arc de cercle devant l'étal des bananes.
-        const int HarvesterCount = 4;          // le maximum de singes qu'on peut acheter
+        // Chacun attend à sa place (homes), devant l'étal des bananes.
         const float HarvesterSize = 0.55f;     // taille d'un singe, en mètres
-        const float HarvesterSpacing = 12f;    // en degrés, entre les places de deux singes
 
-        static void BuildHarvesters(Transform env, Bananier bananier, Panier panier)
+        static void BuildHarvesters(Transform env, BananaOrchard orchard, Panier panier, Vector3 pos, float yaw, Vector3[] homes, Vector3 lookAt)
         {
-            var counter = BuildCounter(env, "Comptoir récolteur", "RÉCOLTEUR", HubLayout.HarvesterPanelAngle,
+            var counter = BuildCounter(env, "Comptoir récolteur", "RÉCOLTEUR", pos, yaw,
                 new[] { "+1 SINGE", "VITESSE", "CADENCE", "RENDEMENT" }, out var buttons, out var labels);
             var crew = counter.gameObject.AddComponent<HarvesterCrew>();
-            crew.monkeys = new HarvesterMonkey[HarvesterCount];
-            for (int i = 0; i < HarvesterCount; i++)
-            {
-                float offset = (i % 2 == 0 ? 1 : -1) * ((i + 1) / 2) * HarvesterSpacing;   // 0, -12, +12, -24 : de part et d'autre
-                crew.monkeys[i] = BuildHarvester(env, crew, bananier, panier, HubLayout.HarvesterHomeAngle + offset);
-            }
+            crew.monkeys = new HarvesterMonkey[homes.Length];   // le maximum de singes qu'on peut acheter
+            for (int i = 0; i < homes.Length; i++)
+                crew.monkeys[i] = BuildHarvester(env, crew, orchard, panier, homes[i], lookAt);
 
             var stats = new[] { HarvesterStat.Vitesse, HarvesterStat.Vitesse, HarvesterStat.Cadence, HarvesterStat.Rendement };
             for (int i = 0; i < buttons.Length; i++)
@@ -1140,12 +1189,13 @@ namespace SAE.EditorTools
             }
         }
 
-        static HarvesterMonkey BuildHarvester(Transform env, HarvesterCrew crew, Bananier bananier, Panier panier, float homeAngle)
+        static HarvesterMonkey BuildHarvester(Transform env, HarvesterCrew crew, BananaOrchard orchard, Panier panier, Vector3 home, Vector3 lookAt)
         {
             var root = new GameObject("Singe récolteur");
             root.transform.SetParent(env, false);
-            var home = Around(homeAngle, HubLayout.HarvesterHomeRadius);
-            root.transform.SetPositionAndRotation(home, Quaternion.LookRotation(-home));   // tourné vers le centre
+            var look = lookAt - home;
+            look.y = 0f;
+            root.transform.SetPositionAndRotation(home, Quaternion.LookRotation(look));   // tourné vers le milieu de la terrasse
 
             // Le singe classique, posé au sol. Le modèle regarde vers -Z : on le retourne pour qu'il marche vers l'avant (+Z).
             var piece = Visuals.MonkeyPiece(new Monkey(MonkeyType.Classique, Rarity.Gris), root.transform,
@@ -1154,9 +1204,8 @@ namespace SAE.EditorTools
 
             var monkey = root.AddComponent<HarvesterMonkey>();
             monkey.crew = crew;
-            monkey.bananier = bananier;
+            monkey.orchard = orchard;
             monkey.panier = panier;
-            monkey.table = bananier.versCible;
             monkey.home = home;
             monkey.height = HarvesterSize;
             var view = piece.GetComponent<MonkeyView>();
@@ -1164,6 +1213,219 @@ namespace SAE.EditorTools
             root.AddComponent<HarvesterGrab>();   // on peut le prendre et le lancer, pour rire
             root.SetActive(false);   // il apparaît quand on l'achète
             return monkey;
+        }
+
+        // ---------------- BANANERAIE ----------------
+        // Derrière la porte de la cabane : une terrasse au milieu de la prairie, fermée par une barrière en rondins, ouverte
+        // sur une allée bordée de barrières qui mène à la porte (Blender/cabane.py, build_bananeraie -> Art/Cabane/Bananeraie.glb).
+        // La porte de la cabane est la seule : on la passe dans les deux sens (PortalDoor).
+        // Le joueur arrive au bout de l'allée, regard vers +Z : les bananiers et leurs étals à gauche, le panier et la caisse
+        // à droite, et au fond, sous l'abri, l'armoire des améliorations (BANANIER et RÉCOLTEUR côte à côte).
+        // Les singes récolteurs attendent devant l'étal.
+        // Tout est construit autour de l'origine (comme le modèle), puis posé d'un bloc derrière la cabane, retourné :
+        // l'allée arrive à la porte ; on voit la bananeraie en l'ouvrant (et par les fenêtres). Le paysage est celui de la cabane.
+        // Mesures : celles de build_bananeraie dans cabane.py (BAN_*, SHED_*), à garder identiques.
+        const float GroveX0 = -4.6f, GroveX1 = 4.6f, GroveZ0 = -3.6f, GroveZ1 = 4.8f;   // la terrasse
+        const float PathHalf = 1.1f, WalkZ = -4.7f, PathZ = -6.45f;                     // l'allée : demi-largeur, fin des planches, bout contre la cabane
+        const float ShedX = 3.2f, ShedZ0 = 2.9f, ShedZ1 = 4.6f;                          // l'abri (mur de rondins au fond)
+        static readonly Vector3 GroveCenter = new Vector3(0f, 0f, -10.1f);  // derrière la porte de la cabane (GROVE_Z dans cabane.py)
+        static readonly Quaternion GroveYaw = Quaternion.Euler(0f, 180f, 0f);  // retournée : l'allée vers la cabane
+        static readonly Vector3 GroveSpawn = new Vector3(0f, 0f, -2.3f);   // au bout de l'allée, regard vers l'abri
+        static readonly Vector3 CabinArrival = new Vector3(0f, 0f, -1.4f); // en rentrant : dans la cabane, devant la porte, regard vers le plateau
+        static PortalDoor cabinDoor;                                       // la porte de la cabane (BuildCabin), qui mène à la bananeraie
+        static readonly Vector3 GroveMiddle = new Vector3(0f, 0f, 0.6f);    // le milieu de la terrasse
+
+        static void BuildGrove(Transform hub)
+        {
+            var env = new GameObject("Bananeraie").transform;
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(CabinFolder + "Bananeraie.glb");
+            if (!asset) { Debug.LogWarning("Bananeraie : Bananeraie.glb introuvable. Lancer Blender/cabane.py (voir l'en-tête du script)."); return; }
+            var model = (GameObject)PrefabUtility.InstantiatePrefab(asset);
+            model.name = "Decor";
+            model.transform.SetParent(env, false);
+            AlignCabin(model.transform);
+            MakeStatic(model);
+
+            // Colliders invisibles : la terrasse, la barrière (ouverte sur l'allée), l'allée, le mur et les poteaux de l'abri
+            const float FenceH = 1.1f, Thick = 0.15f;
+            float midZ = (GroveZ0 + GroveZ1) / 2f, depth = GroveZ1 - GroveZ0;
+            Blocker(env, "Terrasse", new Vector3(0f, -0.05f, midZ), new Vector3(GroveX1 - GroveX0, 0.1f, depth));
+            Blocker(env, "Barrière avant gauche", new Vector3((GroveX0 - PathHalf) / 2f, FenceH / 2f, GroveZ0), new Vector3(-PathHalf - GroveX0, FenceH, Thick));
+            Blocker(env, "Barrière avant droite", new Vector3((GroveX1 + PathHalf) / 2f, FenceH / 2f, GroveZ0), new Vector3(GroveX1 - PathHalf, FenceH, Thick));
+            Blocker(env, "Passage de l'allée", new Vector3(0f, -0.05f, (GroveZ0 + WalkZ) / 2f), new Vector3(2f * PathHalf, 0.1f, GroveZ0 - WalkZ));
+            for (int side = -1; side <= 1; side += 2)
+                Blocker(env, "Barrière de l'allée", new Vector3(side * PathHalf, FenceH / 2f, (GroveZ0 + PathZ) / 2f), new Vector3(Thick, FenceH, GroveZ0 - PathZ));
+            Blocker(env, "Barrière du fond", new Vector3(0f, FenceH / 2f, GroveZ1), new Vector3(GroveX1 - GroveX0, FenceH, Thick));
+            Blocker(env, "Barrière gauche", new Vector3(GroveX0, FenceH / 2f, midZ), new Vector3(Thick, FenceH, depth));
+            Blocker(env, "Barrière droite", new Vector3(GroveX1, FenceH / 2f, midZ), new Vector3(Thick, FenceH, depth));
+            Blocker(env, "Mur de l'abri", new Vector3(0f, 1.4f, ShedZ1), new Vector3(2f * ShedX + 0.3f, 2.8f, 0.3f));
+            for (int side = -1; side <= 1; side += 2)
+                Blocker(env, "Poteau de l'abri", new Vector3(side * ShedX, 1.4f, ShedZ0), new Vector3(0.24f, 2.8f, 0.24f));
+
+            // La zone de téléportation : la terrasse et l'allée, à 30 cm de la barrière, sans le fond (l'abri et l'armoire)
+            // ni la place des meubles (les trois bananiers et leurs étals, le panier, la caisse). Ailleurs, le rayon s'arrête sur
+            // le collider de la terrasse ou d'un meuble, qui n'est pas une zone : on ne se pose ni dehors ni dans un objet.
+            // Plusieurs pavés sur le même objet : la zone les prend tous.
+            var zone = new GameObject("Zone de téléportation");
+            zone.transform.SetParent(env, false);
+            float zx0 = GroveX0 + 0.3f, zx1 = GroveX1 - 0.3f, zz0 = GroveZ0 + 0.3f, zz1 = ShedZ0 - 0.7f;
+            const float TreeX1 = -1.6f;                                     // les bananiers et leurs étals, tout le long
+            const float BasketX0 = 2.0f, BasketZ0 = -0.3f, BasketZ1 = 0.9f; // le panier sur son tabouret
+            const float BoardX0 = 3.1f, BoardZ0 = 1.2f;                     // la caisse, sur son poteau
+            void Pad(float x0, float x1, float z0, float z1)
+            {
+                var pad = zone.AddComponent<BoxCollider>();
+                pad.center = new Vector3((x0 + x1) / 2f, 0.005f, (z0 + z1) / 2f);
+                pad.size = new Vector3(x1 - x0, 0.01f, z1 - z0);
+            }
+            Pad(TreeX1, BasketX0, zz0, zz1);         // le milieu, de l'étal au panier
+            Pad(BasketX0, zx1, zz0, BasketZ0);       // devant le panier
+            Pad(BasketX0, BoardX0, BasketZ1, zz1);   // entre le panier et la caisse
+            Pad(BoardX0, zx1, BasketZ1, BoardZ0);    // devant la caisse
+            Pad(-PathHalf + 0.3f, PathHalf - 0.3f, PathZ + 0.6f, zz0);   // l'allée, jusqu'à 60 cm du mur de la cabane
+            Teleportable(zone);
+
+            // En rentrant par la porte : dans la cabane, devant elle
+            var backHome = new GameObject("Arrivée dans la cabane").transform;
+            backHome.SetParent(hub, false);
+            backHome.localPosition = CabinArrival;
+            if (cabinDoor)
+            {
+                cabinDoor.returnArrival = backHome;
+                cabinDoor.insideCenter = Vector3.zero;
+                cabinDoor.insideRadius = HubLayout.CabinRadius;
+            }
+
+            // À gauche, le long de la barrière : trois places de bananier, chacun avec son étal devant lui. Un seul arbre
+            // au début (celui du milieu) ; les deux autres s'achètent au comptoir (BananaOrchard), d'abord derrière puis devant.
+            // Le panier est à droite, sur son tabouret, et la caisse à côté.
+            var orchard = new GameObject("Bananiers").AddComponent<BananaOrchard>();
+            orchard.transform.SetParent(env, false);
+            float[] treeZ = { -0.3f, 1.7f, -2.3f };
+            orchard.trees = new Bananier[treeZ.Length];
+            orchard.spots = new GameObject[treeZ.Length];
+            Panier panier = null;
+            for (int i = 0; i < treeZ.Length; i++)
+            {
+                var spot = new GameObject($"Place {i + 1}").transform;   // il pousse depuis le pied de l'arbre
+                spot.SetParent(orchard.transform, false);
+                spot.localPosition = new Vector3(-3.6f, 0f, treeZ[i]);
+                var tree = BuildBananas(spot, spot.position, -90f, new Vector3(-2.3f, 0f, treeZ[i]),
+                                        i == 0 ? new Vector3(2.6f, 0f, 0.3f) : (Vector3?)null, out var basket);
+                if (i == 0) panier = basket;
+                orchard.trees[i] = tree;
+                orchard.spots[i] = spot.gameObject;
+            }
+            BuildGroveMoneyBoard(env, new Vector3(3.6f, 0f, 1.7f));
+
+            // Au fond, sous l'abri : l'armoire des améliorations, BANANIER et RÉCOLTEUR côte à côte, dos au mur
+            float counterZ = ShedZ1 - 0.45f;
+            bool trees = orchard.trees.All(t => t);
+            if (trees) BuildUpgradePanel(env, orchard, new Vector3(-0.85f, 0f, counterZ), 0f);
+            if (trees && panier)
+            {
+                var homes = new[]
+                {
+                    new Vector3(-1.4f, 0f, -0.3f), new Vector3(-1.4f, 0f, -0.9f), new Vector3(-1.4f, 0f, 0.3f), new Vector3(-1.4f, 0f, 0.9f),
+                };
+                BuildHarvesters(env, orchard, panier, new Vector3(0.85f, 0f, counterZ), 0f, homes, GroveMiddle);
+            }
+
+            // Un peu de décor dans les coins de l'abri
+            Prop(env, "Tonneau", new Vector3(2.55f, 0f, 4.05f), 20f, 1f);
+            var barrel = env.Find("Tonneau");
+            if (barrel) barrel.localScale = new Vector3(1.5f, 1f, 1.5f);   // plus large : à côté de l'armoire, il paraissait maigre
+            Prop(env, "Caisse", new Vector3(-2.75f, 0f, 4.1f), 12f, 1f);
+            Prop(env, "Caisse", new Vector3(-2.7f, 0.5f, 4.15f), 35f, 0.8f);
+            UseWoodTexture(env);
+            for (int i = 1; i < orchard.spots.Length; i++) orchard.spots[i].SetActive(false);   // pas encore achetés
+
+            // L'arrivée par la porte de la cabane : au bout de l'allée, regard vers l'abri
+            var arrival = new GameObject("Arrivée dans la bananeraie").transform;
+            arrival.SetParent(env, false);
+            arrival.localPosition = GroveSpawn;
+            if (cabinDoor) cabinDoor.arrival = arrival;
+
+            // Derrière la cabane, d'un bloc. Ce qui est retenu en coordonnées du monde (la place des singes) suit.
+            env.SetPositionAndRotation(GroveCenter, GroveYaw);
+            foreach (var monkey in env.GetComponentsInChildren<HarvesterMonkey>(true))
+            {
+                monkey.home = env.TransformPoint(monkey.home);
+                monkey.areaCenter = env.TransformPoint(GroveMiddle);   // leurs détours passent par le milieu de la terrasse
+                monkey.areaRadius = 3.2f;
+            }
+        }
+
+        // La caisse de la bananeraie : la même ardoise que celle du hub, sur un poteau, tournée vers le milieu de la terrasse
+        static void BuildGroveMoneyBoard(Transform env, Vector3 pos)
+        {
+            var root = new GameObject("Caisse").transform;
+            root.SetParent(env, false);
+            var away = pos - GroveMiddle;
+            away.y = 0f;
+            root.SetPositionAndRotation(pos, Quaternion.LookRotation(away));   // +Z local = dos au joueur, comme au mur du hub
+            Visuals.Box("Poteau", root, new Vector3(0f, 0.8f, 0.06f), new Vector3(0.08f, 1.6f, 0.08f), Wood);
+            var panel = BuildChalkboard(root, "Panneau", new Vector3(0f, 1.65f, 0f), Quaternion.identity, 0.8f, 0.4f);
+            FillMoneyBoard(panel, root.gameObject);
+        }
+
+        // Un collider invisible (on ne passe pas au travers, le rayon de téléportation s'y arrête)
+        static void Blocker(Transform parent, string name, Vector3 center, Vector3 size)
+        {
+            var go = new GameObject(name + " (collider)");
+            go.transform.SetParent(parent, false);
+            var box = go.AddComponent<BoxCollider>();
+            box.center = center;
+            box.size = size;
+        }
+
+        // Un panneau en bois sur la porte (côté du centre de la pièce), le nom de l'endroit en lettres dorées.
+        // Il est accroché au battant : il s'ouvre avec lui.
+        static void DoorSign(Transform leaf, string title)
+        {
+            var b = Bounds(leaf.gameObject);
+            var inside = new Vector3(-b.center.x, 0f, -b.center.z).normalized;   // de la porte vers le centre de la pièce
+            var sign = new GameObject("Panneau " + title).transform;
+            sign.SetPositionAndRotation(new Vector3(b.center.x, 1.75f, b.center.z) + inside * (b.extents.z + 0.02f),
+                                        Quaternion.LookRotation(-inside));   // +Z vers la porte : on le lit depuis la pièce
+            Visuals.Box("Planche", sign, new Vector3(0f, 0f, 0.01f), new Vector3(1.0f, 0.24f, 0.03f), DarkWood);
+            Visuals.Text(sign, title, new Vector3(0f, 0f, -0.01f), 0.15f, TitleGold, title: true);
+            foreach (var t in sign.GetComponentsInChildren<Transform>())
+                GameObjectUtility.SetStaticEditorFlags(t.gameObject, 0);
+            sign.SetParent(leaf, true);   // il garde sa place et son sens, même si la cabane est en miroir
+        }
+
+        // Une porte qui téléporte (PortalDoor) jusqu'à arrival : le battant venu de Blender, dont l'origine est la charnière.
+        // On l'enfonce avec la main, on la vise et on appuie, ou on clique dessus. interior : un point du côté d'où on
+        // l'ouvre (elle s'ouvre de l'autre côté, vers dehors).
+        static PortalDoor MakeDoor(Transform leaf, Transform arrival, Vector3 interior)
+        {
+            foreach (var t in leaf.GetComponentsInChildren<Transform>())
+                GameObjectUtility.SetStaticEditorFlags(t.gameObject, 0);   // elle bouge : pas « static »
+
+            // Un collider à sa taille : la main et le rayon la touchent, et on ne passe pas au travers
+            var b = Bounds(leaf.gameObject);
+            var col = leaf.gameObject.AddComponent<BoxCollider>();
+            col.center = leaf.InverseTransformPoint(b.center);
+            var size = leaf.InverseTransformVector(b.size);
+            col.size = new Vector3(Mathf.Abs(size.x), Mathf.Abs(size.y), Mathf.Abs(size.z));
+            leaf.gameObject.tag = Tags.Bouton;
+
+            // Le sens d'ouverture : on essaie les deux, et on garde celui qui éloigne le battant de l'intérieur
+            var door = leaf.gameObject.AddComponent<PortalDoor>();
+            door.arrival = arrival;
+            var closed = leaf.rotation;
+            float Away(float angle)
+            {
+                leaf.rotation = Quaternion.AngleAxis(angle, Vector3.up) * closed;
+                var c = Bounds(leaf.gameObject).center - interior;
+                return new Vector2(c.x, c.z).sqrMagnitude;
+            }
+            door.openAngle = Away(90f) > Away(-90f) ? 100f : -100f;
+            leaf.rotation = closed;
+
+            leaf.gameObject.AddComponent<RayPress>().hoverScale = 1f;   // une porte ne grossit pas quand on la vise
+            return door;
         }
 
         // Le coffre : le modèle de la cabane (Art/Coffre/Coffre.glb, fait par Blender/coffre.py), avec la roulette

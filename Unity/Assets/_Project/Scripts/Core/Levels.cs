@@ -5,8 +5,8 @@ namespace SAE
 {
     public enum Level { Hub, Carte }
 
-    // Les deux niveaux du jeu, chacun dans sa scène : Hub (la cabane) et Labyrinthe (la carte), loin l'un de l'autre.
-    // Les deux scènes restent chargées (la seconde est chargée EN PLUS de la première, chargement additif) : le monde
+    // Les deux niveaux du jeu, chacun dans sa scène : Hub (la cabane, et la bananeraie derrière sa porte) et Labyrinthe
+    // (la carte), loin l'un de l'autre. Les deux scènes restent chargées (la seconde est chargée EN PLUS de la première, chargement additif) : le monde
     // que l'on quitte continue de tourner. Une vague lancée continue pendant qu'on va chercher des bananes au hub,
     // et les bananes tombent pendant qu'on défend la carte.
     // Il n'y a qu'UN joueur (dans la scène Hub) : XRI ne gère bien qu'un seul joueur VR. Changer de niveau, c'est

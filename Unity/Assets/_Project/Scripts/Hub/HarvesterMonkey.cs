@@ -16,16 +16,17 @@ namespace SAE
     // Les meubles sont contre les murs : pour ne pas les traverser, il passe par le milieu de la pièce (voir WalkTo).
     public class HarvesterMonkey : MonoBehaviour
     {
-        const float FreeRadius = 1.4f;          // en mètres : autour du centre du hub, il n'y a aucun meuble
+        const float FreeRadius = 1.4f;          // en mètres : autour du centre de la terrasse, il n'y a aucun meuble
         const float ThrowDistance = 0.6f;       // en mètres, du centre du panier : devant son tabouret, pas dedans
         const float DunkDistance = 0.45f;
         const float ShortWalk = 1f;             // en mètres : en dessous, pas de crochet par le centre
 
         public HarvesterCrew crew;
-        public Bananier bananier;
+        public BananaOrchard orchard;           // les bananiers : il ramasse sous tous ceux qui sont plantés
         public Panier panier;
-        public Transform table;                 // la table des bananes (Bananier.versCible)
         public Vector3 home;                    // où il attend quand il n'y a rien à ramasser (au sol)
+        public Vector3 areaCenter;              // le milieu de la terrasse de la bananeraie (en coordonnées du monde)
+        public float areaRadius = 3f;           // la terrasse, vue comme un disque : on y repose le singe lancé (HarvesterGrab)
 
         public float jumpDuration = 0.5f;       // en secondes, le saut pour attraper la banane
         public float throwDuration = 0.45f;     // en secondes, le vol de la banane jusqu'au panier
@@ -106,7 +107,7 @@ namespace SAE
         {
             // Le joueur peut la prendre avant nous : on abandonne et on en cherche une autre
             Func<bool> lost = () => !banana || banana.EnMain || banana.Deposee;
-            yield return WalkTo(PickSpot(banana.transform.position), lost);
+            yield return WalkTo(PickSpot(banana), lost);
             if (lost()) yield break;
 
             yield return JumpAndGrab(banana);
@@ -117,11 +118,12 @@ namespace SAE
         Banane FindBanana()
         {
             Banane best = null;
-            foreach (var b in bananier.BananesAuSol)
-            {
-                if (!b || b.EnMain || b.Deposee || b.EstPourrie || crew.IsClaimed(b) || !AtRest(b)) continue;
-                if (!best || b.Progression > best.Progression) best = b;
-            }
+            foreach (var tree in orchard.Active)
+                foreach (var b in tree.BananesAuSol)
+                {
+                    if (!b || b.EnMain || b.Deposee || b.EstPourrie || crew.IsClaimed(b) || !AtRest(b)) continue;
+                    if (!best || b.Progression > best.Progression) best = b;
+                }
             return best;
         }
 
@@ -132,10 +134,12 @@ namespace SAE
             return body.isKinematic ? b.Posee : body.linearVelocity.sqrMagnitude < 0.01f;
         }
 
-        // Où se mettre pour la prendre : au bord de la table si elle est dessus, sinon juste devant elle
-        Vector3 PickSpot(Vector3 bananaPos)
+        // Où se mettre pour la prendre : au bord de l'étal de son arbre si elle est dessus, sinon juste devant elle
+        Vector3 PickSpot(Banane banana)
         {
-            var local = table.InverseTransformPoint(bananaPos);
+            var bananaPos = banana.transform.position;
+            var table = banana.Source ? banana.Source.versCible : null;
+            var local = table ? table.InverseTransformPoint(bananaPos) : Vector3.one * 99f;
             bool onTable = Mathf.Abs(local.x) < 0.75f && Mathf.Abs(local.z) < 0.55f;   // l'étal fait 1,4 × 1 m
             if (!onTable)
             {
@@ -145,11 +149,11 @@ namespace SAE
                 spot.y = home.y;
                 return spot;
             }
-            return TableSpot(local);
+            return TableSpot(table, local);
         }
 
         // Au bord de la table, juste sous la banane, du côté où le singe attend (il ne passe pas sous la table)
-        Vector3 TableSpot(Vector3 local)
+        Vector3 TableSpot(Transform table, Vector3 local)
         {
             float side = Mathf.Sign(table.InverseTransformPoint(home).z);
             var spot = table.TransformPoint(new Vector3(Mathf.Clamp(local.x, -0.6f, 0.6f), 0f, side * 0.7f));
@@ -169,21 +173,22 @@ namespace SAE
         }
 
         // Marcher jusqu'à target. Si le trajet est long et que la ligne droite longe les murs (là où sont les meubles), il fait un crochet
-        // par le milieu de la pièce : on prend le point de la ligne le plus proche du centre, ramené à FreeRadius.
+        // par le milieu de la terrasse : on prend le point de la ligne le plus proche du centre, ramené à FreeRadius.
         IEnumerator WalkTo(Vector3 target, Func<bool> abort)
         {
             var from = transform.position;
-            var closest = ClosestToCenter(new Vector2(from.x, from.z), new Vector2(target.x, target.z));
+            var center = new Vector2(areaCenter.x, areaCenter.z);
+            var closest = ClosestToCenter(new Vector2(from.x, from.z) - center, new Vector2(target.x, target.z) - center);
             bool longWalk = Vector3.Distance(from, target) > ShortWalk;   // un petit pas à côté d'un meuble : tout droit
             if (longWalk && closest.magnitude > FreeRadius)
             {
-                var detour = closest.normalized * FreeRadius;
+                var detour = center + closest.normalized * FreeRadius;
                 yield return WalkStraight(new Vector3(detour.x, target.y, detour.y), abort);
             }
             yield return WalkStraight(target, abort);
         }
 
-        // Le point du segment [a, b] le plus proche du centre du hub (vu de dessus)
+        // Le point du segment [a, b] le plus proche de l'origine (a et b sont pris depuis le milieu de la terrasse, vus de dessus)
         static Vector2 ClosestToCenter(Vector2 a, Vector2 b)
         {
             var ab = b - a;

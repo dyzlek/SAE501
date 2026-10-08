@@ -506,12 +506,11 @@ def empty(name, loc, coll):
 
 # ============================================================ la cabane
 
-def build_floor(M, coll):
-    """Plateforme en planches (dedans + terrasse derrière la porte), posée sur une poutre de rive et des pieux."""
+def build_floor(M, coll, x0=-4.0, x1=4.0, z0=-5.6, z1=4.0, suffix=""):
+    """Plateforme en planches (dedans + terrasse derrière la porte), posée sur une poutre de rive et des pieux.
+    x0..x1 et z0..z1 : ses bornes dans le repère Unity (par défaut, la cabane et sa terrasse, côté porte)."""
     b = Builder([M["plancher"]])
     width, gap, thick = 0.19, 0.008, 0.05
-    x0, x1 = -4.0, 4.0           # Unity x
-    z0, z1 = -5.6, 4.0           # Unity z (la terrasse s'étend derrière, côté porte)
     x = x0
     row = 0
     while x < x1 - 0.01:
@@ -527,7 +526,7 @@ def build_floor(M, coll):
             z += length
         x += width
         row += 1
-    floor = b.finish("Plancher", coll)
+    floor = b.finish("Plancher" + suffix, coll)
 
     # Poutres de rive et pieux (on les voit depuis la terrasse et par les fenêtres)
     b = Builder([M["poutre"]])
@@ -539,7 +538,7 @@ def build_floor(M, coll):
         for za in np.linspace(z0, z1, 6):
             if abs(xa) in (abs(x0),) or za in (z0, z1):
                 b.log(P(xa, -0.19, za), P(xa, GROUND_Y - 0.2, za), 0.08, M["poutre"], M["bout"], int(xa * 100 + za * 7))
-    return floor, b.finish("Charpente_Plancher", coll)
+    return floor, b.finish("Charpente_Plancher" + suffix, coll)
 
 
 def build_walls(M, coll):
@@ -628,7 +627,7 @@ def build_walls(M, coll):
             b.box(center + B @ Vector((0, 0, wy)), (WIN_W, 0.05, 0.035), B, M["poutre"], uv_scale=1 / 1.5)
     frames = b.finish("Encadrements", coll)
 
-    # Volets peints (ouverts contre le mur, dehors) et battant de la porte (ouvert vers l'extérieur)
+    # Volets peints (ouverts contre le mur, dehors) ; le battant de la porte est un objet à part (door_leaf)
     b = Builder([M["peint"]])
     for ang in WINDOWS:
         B = basis(ang)
@@ -639,17 +638,29 @@ def build_walls(M, coll):
             for k in range(3):   # trois lattes par volet
                 b.box(c + B @ Vector((s * (k - 1) * WIN_W / 6, 0, 0)), (WIN_W / 6 - 0.01, 0.03, WIN_Y1 - WIN_Y0), B, M["peint"], uv_scale=1 / 1.2, bevel=0.004)
             b.box(c + B @ Vector((0, 0.02, 0)), (WIN_W / 2, 0.025, 0.06), B, M["peint"], uv_scale=1 / 1.2, bevel=0.004)
-    # Battant de porte : pivote sur le montant droit et s'ouvre dehors, contre le mur
+    shutters = b.finish("Volets", coll)
     B = basis(DOOR)
-    hinge = polar(DOOR, R) + B @ Vector((DOOR_W / 2 + 0.06, LOG_R + 0.05, 0))
-    Bd = B @ Matrix.Rotation(math.radians(-100), 3, "Z")
+    door = door_leaf(M, coll, polar(DOOR, R) + B @ Vector((DOOR_W / 2 + 0.06, LOG_R + 0.05, 0)), B)
+    return [walls, chinking, frames, shutters, door]
+
+
+def door_leaf(M, coll, hinge, B, width=DOOR_W + 0.06, height=DOOR_H):
+    """Battant de porte FERMÉ, en planches peintes, avec deux traverses et une poignée de chaque côté.
+    Objet à part, dont l'origine est sur la charnière (montant droit vu de l'intérieur) : Unity l'ouvre en le tournant
+    autour de l'axe vertical (PortalDoor). B : repère du mur (x le long du mur, y vers l'extérieur, z en haut)."""
+    b = Builder([M["peint"], M["fer"]])
     for k in range(6):
-        x = -DOOR_W + (k + 0.5) * DOOR_W / 6
-        b.box(hinge + Bd @ Vector((x, 0.03, DOOR_H / 2 - 0.02)), (DOOR_W / 6 - 0.01, 0.045, DOOR_H - 0.06), Bd, M["peint"], uv_scale=1 / 1.2, bevel=0.005)
-    for zz in (0.35, DOOR_H - 0.4):
-        b.box(hinge + Bd @ Vector((-DOOR_W / 2, -0.01, zz)), (DOOR_W - 0.06, 0.03, 0.12), Bd, M["peint"], uv_scale=1 / 1.2, bevel=0.006)
-    door = b.finish("Volets_Porte", coll)
-    return [walls, chinking, frames, door]
+        x = -width + (k + 0.5) * width / 6
+        b.box(B @ Vector((x, 0.03, height / 2 - 0.02)), (width / 6 - 0.01, 0.045, height - 0.06), B, M["peint"], uv_scale=1 / 1.2, bevel=0.005)
+    for zz in (0.35, height - 0.4):
+        b.box(B @ Vector((-width / 2, -0.01, zz)), (width - 0.06, 0.03, 0.12), B, M["peint"], uv_scale=1 / 1.2, bevel=0.006)
+    for side in (-1, 1):   # poignées en fer, dedans et dehors, du côté opposé à la charnière
+        b.box(B @ Vector((-width + 0.14, 0.03 + side * 0.06, 1.0)), (0.04, 0.03, 0.2), B, M["fer"], bevel=0.008)
+    for zz in (0.3, height - 0.3):   # pentures (les charnières en fer)
+        b.box(B @ Vector((-0.2, 0.058, zz)), (0.4, 0.008, 0.05), B, M["fer"])
+    ob = b.finish("Porte_Battant", coll)
+    ob.location = hinge
+    return ob
 
 
 def build_roof(M, coll):
@@ -906,9 +917,14 @@ def build_wall_decor(M, coll):
     return [garland, b.finish("Etageres", coll)]
 
 
-# Zones à laisser libres (repère Unity : x à droite, z devant) : la cabane et sa terrasse, ou la zone de jeu de la carte
+# Zones à laisser libres (repère Unity : x à droite, z devant) : la cabane, sa terrasse et la bananeraie derrière elle,
+# ou la zone de jeu de la carte
+GROVE_Z = -10.1     # le centre de la bananeraie, derrière la porte (GroveCenter dans PrototypeGenerator)
+
+
 def hub_clear(x, z):
-    return math.hypot(x, z) < 5.2 or (abs(x) < 4.6 and -6.4 < z < 4.6)
+    return (math.hypot(x, z) < 5.2 or (abs(x) < 4.6 and -6.4 < z < 4.6)
+            or (abs(x) < 6.6 and GROVE_Z - 6.9 < z < GROVE_Z + 4.4))
 
 
 def map_clear(x, z):
@@ -1171,6 +1187,88 @@ def build_palms(M, coll, clear=hub_clear, suffix="", ring=(8, 16), count=14):
     return b.finish("Palmiers" + suffix, coll, recalc=False)
 
 
+# ============================================================ la bananeraie (derrière la porte de la cabane)
+# Une terrasse en planches au milieu de la prairie, fermée par une barrière en rondins, ouverte côté cabane sur une allée
+# bordée de barrières qui mène à la porte de la cabane (la seule porte : on entre et on sort par elle).
+# Modélisée comme si le joueur arrivait par l'allée (côté -Z) en regardant vers +Z : les bananiers à gauche, le panier
+# à droite, et au fond un abri au toit de chaume, au mur de rondins, où Unity pose l'armoire des améliorations.
+# Unity la pose ensuite derrière la cabane, retournée : l'allée arrive à la porte (GroveCenter, GroveYaw).
+# Sans paysage : c'est celui de la cabane, qui laisse sa place libre (hub_clear).
+# Mesures à garder identiques dans PrototypeGenerator (Grove*, Shed*).
+BAN_X0, BAN_X1 = -4.6, 4.6          # la terrasse (repère Unity)
+BAN_Z0, BAN_Z1 = -3.6, 4.8
+PATH_HALF = 1.1                     # demi-largeur de l'allée : le battant de la porte, ouvert, y tient sans toucher la barrière
+WALK_Z = -4.7                       # le passage en planches, de la terrasse (BAN_Z0) jusqu'à la terrasse de la cabane
+PATH_Z = -6.45                      # le bout de l'allée, contre le mur de la cabane (sa porte est à -6,7 dans ce repère)
+SHED_X, SHED_Z0, SHED_Z1 = 3.2, 2.9, 4.6   # l'abri : de -SHED_X à SHED_X, de SHED_Z0 à SHED_Z1
+SHED_H = 2.75
+
+
+def build_bananeraie(M, coll):
+    objs = list(build_floor(M, coll, BAN_X0, BAN_X1, BAN_Z0, BAN_Z1, suffix=" bananeraie"))
+
+    # La barrière : des poteaux en rondins tous les 1,6 m au plus, et deux lisses. Ouverte devant sur l'allée,
+    # elle-même bordée de deux barrières jusqu'au mur de la cabane.
+    b = Builder([M["poutre"], M["bout"]])
+    segments = [((BAN_X0, BAN_Z0), (-PATH_HALF, BAN_Z0)), ((PATH_HALF, BAN_Z0), (BAN_X1, BAN_Z0)),
+                ((-PATH_HALF, BAN_Z0), (-PATH_HALF, PATH_Z)), ((PATH_HALF, BAN_Z0), (PATH_HALF, PATH_Z)),
+                ((BAN_X1, BAN_Z0), (BAN_X1, BAN_Z1)), ((BAN_X1, BAN_Z1), (BAN_X0, BAN_Z1)), ((BAN_X0, BAN_Z1), (BAN_X0, BAN_Z0))]
+    seed = 2000
+    for (xa, za), (xb, zb) in segments:
+        n = max(1, math.ceil(math.hypot(xb - xa, zb - za) / 1.6))
+        pts = [(xa + (xb - xa) * k / n, za + (zb - za) * k / n) for k in range(n + 1)]
+        for (x, z) in pts:
+            b.log(P(x, GROUND_Y - 0.1, z), P(x, 1.05, z), 0.07, M["poutre"], M["bout"], seed, segs=8)
+            seed += 1
+        for y in (0.5, 0.92):
+            b.log(P(xa, y, za), P(xb, y, zb), 0.045, M["poutre"], M["bout"], seed, segs=8)
+            seed += 1
+    objs.append(b.finish("Barriere", coll))
+
+    # Le passage en planches de l'allée, au-dessus de l'herbe, entre la terrasse et celle de la cabane
+    b = Builder([M["plancher"], M["poutre"]])
+    z = BAN_Z0
+    while z > WALK_Z + 0.01:
+        b.box(P(0, -0.025, z - 0.095), (2 * PATH_HALF, 0.18, 0.05), Matrix.Identity(3), M["plancher"],
+              uv_scale=1 / 1.2, uv_offset=(rng.random(), rng.random()), bevel=0.006, tint=rng.uniform(0.78, 1.05))
+        z -= 0.19
+    for side in (-1, 1):   # deux poutres dessous, posées dans l'herbe
+        b.box(P(side * (PATH_HALF - 0.1), -0.12, (BAN_Z0 + WALK_Z) / 2), (0.12, abs(WALK_Z - BAN_Z0), 0.14), Matrix.Identity(3), M["poutre"], uv_scale=1 / 1.5, bevel=0.01)
+    objs.append(b.finish("Allee", coll))
+
+    # L'abri : un mur de rondins au fond, quatre poteaux, des poutres et un toit de chaume à quatre pans
+    b = Builder([M["rondin"], M["bout"], M["poutre"]])
+    y, k = LOG_R, 0
+    while y < SHED_H - 0.05:
+        b.log(P(-SHED_X - 0.15, y, SHED_Z1), P(SHED_X + 0.15, y, SHED_Z1), LOG_R, M["rondin"], M["bout"], 2600 + k)
+        y += 2 * LOG_R * 0.92
+        k += 1
+    for sx in (-1, 1):
+        b.log(P(sx * SHED_X, GROUND_Y - 0.1, SHED_Z0), P(sx * SHED_X, SHED_H + 0.05, SHED_Z0), 0.11, M["rondin"], M["bout"], 2700 + sx)
+        b.log(P(sx * SHED_X, SHED_H, SHED_Z0 - 0.2), P(sx * SHED_X, SHED_H, SHED_Z1 + 0.2), 0.09, M["poutre"], M["bout"], 2710 + sx)
+    b.log(P(-SHED_X - 0.3, SHED_H, SHED_Z0), P(SHED_X + 0.3, SHED_H, SHED_Z0), 0.1, M["poutre"], M["bout"], 2720)
+    objs.append(b.finish("Abri", coll))
+
+    b = Builder([M["chaume"], M["poutre"]])
+    over, eave, top = 0.45, SHED_H + 0.05, SHED_H + 1.1
+    zc = (SHED_Z0 + SHED_Z1) / 2
+    ex0, ex1, ez0, ez1 = -SHED_X - over, SHED_X + over, SHED_Z0 - over, SHED_Z1 + over
+    rl, rr = P(-SHED_X + 1.0, top, zc), P(SHED_X - 1.0, top, zc)
+    c00, c10, c11, c01 = P(ex0, eave, ez0), P(ex1, eave, ez0), P(ex1, eave, ez1), P(ex0, eave, ez1)
+    for quad in ((c00, c10, rr, rl), (c11, c01, rl, rr), (c01, c00, rl), (c10, c11, rr)):
+        uvs = [((v.x + v.y) / 1.6, v.z / 1.6) for v in quad]
+        for mat, dz, up in ((M["chaume"], 0.0, True), (M["poutre"], -0.12, False)):
+            f = b.face([v + Vector((0, 0, dz)) for v in quad], uvs, mat)
+            f.normal_update()
+            if (f.normal.z < 0) == up:
+                f.normal_flip()
+    objs.append(b.finish("Toit_Abri", coll, recalc=False))
+
+    objs.append(empty("Repere_Porte", polar(DOOR, R), coll))      # mêmes repères que la cabane : Unity l'aligne pareil
+    objs.append(empty("Repere_Droite", polar(90, R), coll))
+    return objs
+
+
 # ============================================================ accessoires (posés par Unity)
 
 def build_barrel(M, coll):
@@ -1374,6 +1472,31 @@ def main():
     for o in scenery:
         o.hide_render = True                                       # pas dans les aperçus de la cabane
     print("triangles du paysage :", sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in scenery if o.type == "MESH"))
+
+    # La bananeraie, derrière la cabane : terrasse, barrière, portail, abri (le paysage est celui de la cabane)
+    grove = bpy.data.collections.new("Bananeraie")
+    bpy.context.scene.collection.children.link(grove)
+    grove_objs = build_bananeraie(M, grove)
+    export(grove_objs, os.path.join(OUT, "Bananeraie.glb"))
+    print("triangles de la bananeraie :", sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in grove_objs if o.type == "MESH"))
+    for o in grove_objs:
+        o.hide_render = True
+
+    if "--render-bananeraie" in argv:
+        for o in objs:
+            o.hide_render = True
+        for o in grove_objs:
+            o.hide_render = False
+        cam = setup_preview(grove_objs)
+        folder = argv[argv.index("--render-bananeraie") + 1]
+        os.makedirs(folder, exist_ok=True)
+        for name, loc, target in (("bananeraie_arrivee", P(0, 1.6, -2.4), P(0, 1.2, 3.5)),
+                                  ("bananeraie_portail", P(0.5, 1.6, 2.0), P(0, 1.2, -3.6)),
+                                  ("bananeraie_dehors", P(9, 5, -11), P(0, 0.5, 0.5))):
+            cam.location = loc
+            cam.rotation_euler = (target - loc).to_track_quat("-Z", "Y").to_euler()
+            bpy.context.scene.render.filepath = os.path.join(folder, name + ".png")
+            bpy.ops.render.render(write_still=True)
 
     if "--render" in argv:
         cam = setup_preview(objs)
