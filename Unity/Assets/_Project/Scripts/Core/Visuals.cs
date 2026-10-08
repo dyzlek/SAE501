@@ -35,15 +35,15 @@ namespace SAE
             return go;
         }
 
-        // Les deux polices des textes 3D (Art/Resources/Fonts, licence libre OFL) : Oswald pour lire (panneaux, prix),
+        // Les deux polices des textes 3D (publiques : la roulette du coffre s'en sert aussi) (Art/Resources/Fonts, licence libre OFL) : Oswald pour lire (panneaux, prix),
         // Bangers pour les titres (style dessin animé, comme Bloons). Sans elles, on retombe sur la police de Unity.
         // Le matériau utilise notre shader « SAE/Texte 3D » (Art/Resources) : celui de Unity ne s'affiche pas
         // correctement dans le casque (un seul œil, à travers les murs). Un matériau par police (chacune a sa texture).
         static Font bodyFont, titleFont;
         static readonly System.Collections.Generic.Dictionary<Font, Material> textMaterials = new System.Collections.Generic.Dictionary<Font, Material>();
 
-        static Font BodyFont => bodyFont ? bodyFont : bodyFont = LoadFont("Fonts/Oswald-Bold");
-        static Font TitleFont => titleFont ? titleFont : titleFont = LoadFont("Fonts/Bangers");
+        public static Font BodyFont => bodyFont ? bodyFont : bodyFont = LoadFont("Fonts/Oswald-Bold");
+        public static Font TitleFont => titleFont ? titleFont : titleFont = LoadFont("Fonts/Bangers");
 
         static Font LoadFont(string path)
         {
