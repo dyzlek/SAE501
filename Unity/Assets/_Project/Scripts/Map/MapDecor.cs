@@ -21,7 +21,8 @@ namespace SAE
         static readonly Color BushLight = new Color(0.3f, 0.64f, 0.2f);
         static readonly Color MushroomCap = new Color(0.85f, 0.18f, 0.15f);
         static readonly Color MushroomStem = new Color(0.95f, 0.92f, 0.82f);
-        static readonly Color ArchStone = new Color(0.66f, 0.65f, 0.62f);
+        static readonly Color ArchStone = new Color(0.72f, 0.7f, 0.66f);
+        static readonly Color ArchStoneDark = new Color(0.58f, 0.57f, 0.54f);
         static readonly Color Arrow = new Color(1f, 0.83f, 0.35f);              // doré, comme les titres du hub
         static readonly Color EntryGlow = new Color(0.35f, 0.85f, 1f);          // bleu : les ballons arrivent
         static readonly Color ExitGlow = new Color(1f, 0.3f, 0.2f);             // rouge : danger, ils s'échappent
@@ -83,36 +84,84 @@ namespace SAE
             batch.Build(parent, "Portails");
         }
 
-        // Une arche : deux piliers, un arc de 9 blocs, une clé de voûte de la couleur du voile, et le voile lui-même.
+        // Une arche de pierre : deux piliers en blocs empilés (deux tons de gris), un arc de 11 blocs avec une clé de voûte
+        // de la couleur du portail. Dedans, un voile lumineux et translucide (on voit la carte au travers) et un tourbillon
+        // qui tourne : c'est de là que sortent les ballons (entrée) ou là qu'ils s'échappent (sortie).
         // end = le bout du chemin (au bord de la carte), forward = le sens de marche des ballons,
         // inward = de combien avancer l'arche dans la carte (en mètres, dans le sens de marche ; négatif à la sortie).
         static void Portal(MeshBatch batch, Transform parent, Vector3 end, Vector3 forward, float inward, Color glow, float scale, string name)
         {
             var rot = Quaternion.LookRotation(forward.normalized);
             var origin = end + rot * Vector3.forward * inward;
-            float half = MapLayout.PathWidth / 2f + 0.35f;   // les piliers de chaque côté des dalles
-            const float PillarHeight = 2.2f;
+            float half = MapLayout.PathWidth / 2f + 0.4f;   // les piliers de chaque côté des dalles
+            const float PillarHeight = 2.2f, Block = 0.55f;
             Vector3 At(Vector3 local) => (origin + rot * local) * scale;
 
             for (int side = -1; side <= 1; side += 2)
             {
-                batch.Add(MeshBatch.Cube, At(new Vector3(side * half, PillarHeight / 2f, 0f)), rot, new Vector3(0.5f, PillarHeight, 0.5f) * scale, ArchStone);
-                batch.Add(MeshBatch.Cube, At(new Vector3(side * half, 0.1f, 0f)), rot, new Vector3(0.7f, 0.2f, 0.7f) * scale, ArchStone);   // le socle
+                batch.Add(MeshBatch.Cube, At(new Vector3(side * half, 0.12f, 0f)), rot, new Vector3(0.85f, 0.24f, 0.85f) * scale, ArchStoneDark);   // le socle
+                for (int k = 0; k < 4; k++)   // le pilier : 4 blocs, un sur deux plus foncé
+                {
+                    float y = 0.24f + PillarHeight / 4f * (k + 0.5f) - 0.06f;
+                    batch.Add(MeshBatch.Cube, At(new Vector3(side * half, y, 0f)), rot, new Vector3(Block, PillarHeight / 4f - 0.04f, Block) * scale, k % 2 == 0 ? ArchStone : ArchStoneDark);
+                }
+                batch.Add(MeshBatch.Cube, At(new Vector3(side * half, PillarHeight + 0.12f, 0f)), rot, new Vector3(0.75f, 0.14f, 0.75f) * scale, ArchStoneDark);   // le chapiteau
             }
-            for (int i = 0; i <= 8; i++)
+            float archY = PillarHeight + 0.2f, archRise = half * 0.85f;
+            for (int i = 0; i <= 10; i++)
             {
-                float a = Mathf.PI * i / 8f;   // de la droite (0) à la gauche (pi)
-                var local = new Vector3(Mathf.Cos(a) * half, PillarHeight + Mathf.Sin(a) * half * 0.8f, 0f);
-                var block = rot * Quaternion.Euler(0f, 0f, a * Mathf.Rad2Deg);
-                batch.Add(MeshBatch.Cube, At(local), block, new Vector3(0.45f, 0.55f, 0.55f) * scale, i == 4 ? glow : ArchStone);
+                float a = Mathf.PI * i / 10f;   // de la droite (0) à la gauche (pi)
+                var local = new Vector3(Mathf.Cos(a) * half, archY + Mathf.Sin(a) * archRise, 0f);
+                var tangent = new Vector3(-Mathf.Sin(a) * half, Mathf.Cos(a) * archRise, 0f);   // le bloc suit la courbe de l'arc
+                var block = rot * Quaternion.Euler(0f, 0f, Mathf.Atan2(tangent.y, tangent.x) * Mathf.Rad2Deg + 90f);
+                var color = i == 5 ? glow : (i % 2 == 0 ? ArchStone : ArchStoneDark);
+                float size = i == 5 ? 0.7f : 0.6f;   // la clé de voûte dépasse un peu
+                batch.Add(MeshBatch.Cube, At(local), block, new Vector3(0.42f, size, size) * scale, color);
             }
 
-            // Le voile : une boule très aplatie entre les piliers, qui respire (PortalGlow). À part : il bouge.
-            var veil = Visuals.Box(name, parent, At(new Vector3(0f, PillarHeight * 0.62f, 0f)), Vector3.one, glow);
+            // Le voile et le tourbillon bougent : ils sont à part, avec un matériau lumineux et translucide
+            var center = At(new Vector3(0f, (archY + archRise) * 0.52f, 0f));
+            float width = half * 2f - Block, height = archY + archRise - 0.35f;
+            var veil = Visuals.Box(name, parent, center, Vector3.one, new Color(glow.r, glow.g, glow.b, 0.35f));
             veil.GetComponent<MeshFilter>().sharedMesh = MeshBatch.Ball;
+            veil.GetComponent<Renderer>().sharedMaterial = GlowMaterial;
             veil.transform.localRotation = rot;
-            veil.transform.localScale = new Vector3(half * 2f - 0.5f, PillarHeight * 1.2f, 0.06f) * scale;
-            veil.AddComponent<PortalGlow>();
+            veil.transform.localScale = new Vector3(width, height, 0.04f) * scale;
+
+            var swirl = new GameObject("Tourbillon").transform;
+            swirl.SetParent(parent, false);
+            swirl.localPosition = center;
+            swirl.localRotation = rot;
+            var spiral = new MeshBatch();
+            for (int arm = 0; arm < 3; arm++)
+                for (int k = 0; k < 9; k++)
+                {
+                    float angle = (arm * 120f + k * 32f) * Mathf.Deg2Rad;
+                    float r = 0.12f + k * 0.1f;
+                    float ball = 0.09f + k * 0.018f;
+                    for (int face = -1; face <= 1; face += 2)   // des deux côtés du voile
+                        spiral.Add(MeshBatch.Ball, new Vector3(Mathf.Cos(angle) * r, Mathf.Sin(angle) * r * height / width, face * 0.04f) * scale,
+                                   Quaternion.identity, new Vector3(ball, ball, 0.03f) * scale, Color.Lerp(glow, Color.white, 0.55f));
+                }
+            spiral.Build(swirl, "Tourbillon");
+            foreach (var r in swirl.GetComponentsInChildren<Renderer>()) r.sharedMaterial = GlowMaterial;
+
+            var glowFx = veil.AddComponent<PortalGlow>();
+            glowFx.swirl = swirl;
+            glowFx.spin = inward > 0f ? -90f : 90f;   // l'entrée tourne dans un sens, la sortie dans l'autre
+        }
+
+        // Matériau lumineux (pas d'ombre, pas de lumière à calculer) et translucide : le shader des textes 3D, teinté par ColorTint.
+        static Material glowMaterial;
+        static Material GlowMaterial
+        {
+            get
+            {
+                if (glowMaterial) return glowMaterial;
+                glowMaterial = new Material(Shader.Find("SAE/Texte 3D")) { name = "Portail lumineux" };
+                glowMaterial.SetFloat("_VertexColor", 0f);   // la couleur vient de ColorTint
+                return glowMaterial;
+            }
         }
 
         // Une flèche dorée (un chevron) posée sur les dalles, à distance mètres du début du chemin, pointée dans le sens de marche.

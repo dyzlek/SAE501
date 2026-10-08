@@ -30,8 +30,9 @@ namespace SAE
             new Vector2(6f, 6.5f),
             new Vector2(10.8f, 6.5f),   // boucle à l'est
             new Vector2(10.8f, -4f),
-            new Vector2(1.5f, -4f),
-            new Vector2(1.5f, -12f),    // sortie, bord sud, juste devant l'estrade du joueur
+            new Vector2(2f, -4f),
+            new Vector2(2f, -9f),
+            new Vector2(12f, -9f),      // sortie, bord est : sur le côté, le portail ne cache pas la carte depuis l'estrade
         };
 
         static List<Vector3> pathPoints;

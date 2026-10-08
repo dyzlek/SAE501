@@ -54,6 +54,8 @@ namespace SAE.EditorTools
         static readonly Color ClearColor = new Color(0.55f, 0.6f, 0.7f);
         static readonly Color HubColor = new Color(0.3f, 0.5f, 1f);
         static readonly Color Grass1 = new Color(0.40f, 0.68f, 0.25f);   // la pelouse du plateau du hub, proche de la prairie
+        static readonly Color Iron = new Color(0.18f, 0.18f, 0.2f);        // la cage des lanternes de l'estrade
+        static readonly Color FlameColor = new Color(1f, 0.72f, 0.25f);    // leur flamme
 
         [MenuItem("SAE/Générer le prototype")]
         public static void Generate()
@@ -1333,8 +1335,59 @@ namespace SAE.EditorTools
             FillMoneyBoard(cash, cash.gameObject).spawnPopups = false;
             for (int side = -1; side <= 1; side += 2)   // plantés dans l'estrade (son dessus est à 0)
                 Visuals.Solid("Poteau de la caisse", cash, new Vector3(side * 0.47f, -cashPos.y / 2f, 0.05f), new Vector3(0.06f, cashPos.y, 0.06f), Wood);
+            BuildDeckRailing(map.transform, edge);
             UseWoodTexture(map.transform);   // l'estrade, les pupitres et les poteaux, en bois comme au hub
             return map.transform;
+        }
+
+        // L'habillage de l'estrade (8 x 5 m, son dessus à 0) : un liseré de bois foncé tout autour, une rambarde basse
+        // sur les côtés et à l'arrière (l'avant reste ouvert : on voit la carte et on s'y téléporte), et une lanterne
+        // sur chaque poteau d'angle avant. Pas de collider : la rambarde ne bloque ni la vue ni le rayon de téléportation.
+        static void BuildDeckRailing(Transform map, float edge)
+        {
+            const float HalfWidth = 4f, Depth = 5f, RailHeight = 0.9f;
+            float front = -edge, back = -edge - Depth;
+            var deck = new GameObject("Rambarde de l'estrade").transform;
+            deck.SetParent(map, false);
+
+            // Le liseré, juste au-dessus du plancher : on voit le bord de l'estrade sur l'herbe
+            Visuals.Box("Liseré avant", deck, new Vector3(0, 0.03f, front - 0.06f), new Vector3(HalfWidth * 2f, 0.06f, 0.12f), DarkWood);
+            Visuals.Box("Liseré arrière", deck, new Vector3(0, 0.03f, back + 0.06f), new Vector3(HalfWidth * 2f, 0.06f, 0.12f), DarkWood);
+            for (int side = -1; side <= 1; side += 2)
+                Visuals.Box("Liseré du côté", deck, new Vector3(side * (HalfWidth - 0.06f), 0.03f, (front + back) / 2f), new Vector3(0.12f, 0.06f, Depth), DarkWood);
+
+            // Les rambardes : poteaux tous les mètres environ, deux lisses
+            void Rail(Vector3 from, Vector3 to)
+            {
+                float length = Vector3.Distance(from, to);
+                int posts = Mathf.CeilToInt(length / 1.1f);
+                for (int i = 0; i <= posts; i++)
+                    Visuals.Box("Poteau", deck, Vector3.Lerp(from, to, i / (float)posts) + Vector3.up * RailHeight / 2f, new Vector3(0.09f, RailHeight, 0.09f), Wood);
+                var rot = Quaternion.LookRotation(to - from);
+                foreach (float y in new[] { RailHeight * 0.5f, RailHeight - 0.03f })
+                {
+                    var rail = Visuals.Box("Lisse", deck, (from + to) / 2f + Vector3.up * y, new Vector3(0.06f, 0.07f, length), DarkWood);
+                    rail.transform.localRotation = rot;
+                }
+            }
+            Rail(new Vector3(-HalfWidth + 0.1f, 0, back + 0.1f), new Vector3(HalfWidth - 0.1f, 0, back + 0.1f));
+            for (int side = -1; side <= 1; side += 2)
+                Rail(new Vector3(side * (HalfWidth - 0.1f), 0, back + 0.1f), new Vector3(side * (HalfWidth - 0.1f), 0, front - 0.6f));
+
+            // Une lanterne au bout de chaque rambarde de côté (vers la carte) : un grand poteau, une cage de fer, une flamme
+            for (int side = -1; side <= 1; side += 2)
+            {
+                var foot = new Vector3(side * (HalfWidth - 0.1f), 0, front - 0.6f);
+                Visuals.Box("Poteau de la lanterne", deck, foot + Vector3.up * 0.8f, new Vector3(0.12f, 1.6f, 0.12f), Wood);
+                var lantern = foot + Vector3.up * 1.75f;
+                Visuals.Box("Toit de la lanterne", deck, lantern + Vector3.up * 0.15f, new Vector3(0.26f, 0.04f, 0.26f), Iron);
+                Visuals.Box("Pied de la lanterne", deck, lantern - Vector3.up * 0.15f, new Vector3(0.22f, 0.03f, 0.22f), Iron);
+                for (int cx = -1; cx <= 1; cx += 2)
+                    for (int cz = -1; cz <= 1; cz += 2)
+                        Visuals.Box("Montant", deck, lantern + new Vector3(cx * 0.1f, 0, cz * 0.1f), new Vector3(0.025f, 0.3f, 0.025f), Iron);
+                var flame = Visuals.Box("Flamme", deck, lantern, new Vector3(0.07f, 0.14f, 0.07f), FlameColor);
+                flame.AddComponent<FlameFlicker>();
+            }
         }
 
         // Le pupitre « ARC » : les améliorations de l'arc (perforante, transperçante, tir triple, explosive, voir BowUpgrades),
