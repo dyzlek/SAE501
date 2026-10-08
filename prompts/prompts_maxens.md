@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Jeu. 8 oct. 2026
 
+### Une transition au passage des portes
+> Dernier détail : quand on ouvre une porte, dans les deux sens, après l'animation d'ouverture, un voile noir doit monter du bas vers le haut ; une fois téléporté, il disparaît du haut vers le bas.
+
 ### Planter d'autres bananiers
 > C'est parfait. Ajoute maintenant une amélioration du bananier qui en plante un de plus : sur la capture, il y a la place pour trois. Au début un seul arbre, un deuxième à la première amélioration, un troisième à la suivante, et ça s'arrête là. Le prix doit être élevé. Les singes récolteurs doivent ensuite pouvoir prendre les bananes des trois arbres.
 

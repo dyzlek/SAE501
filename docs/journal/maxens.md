@@ -63,9 +63,15 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
   ![Les 3 bananiers achetés, avec leurs étals ; la colonne +1 ARBRE au comptoir](../captures/maxens-trois-bananiers.png)
 
+- **Fait : un voile noir pendant le passage des portes** (dans les deux sens) : la porte s'ouvre, **un voile noir monte du bas** et cache la vue, on est téléporté, puis **il redescend** (le haut de l'image réapparaît en premier). Changer de place d'un coup sous les yeux est désagréable en VR. C'est un carré noir collé devant la caméra du joueur, dessiné par-dessus tout avec le shader des textes du jeu (compatible casque) : nouveau script `Player/ScreenCurtain.cs`.
+  - Testé en Play via Unity MCP : passage cabane → bananeraie avec le voile, qui disparaît à l'arrivée.
+
+  ![Le voile noir à mi-course](../captures/maxens-voile-noir.png)
+
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Voile noir qui monte puis redescend pendant le passage des portes (VR et PC) ; testé en Play via Unity MCP | À tester au casque |
 | Claude (Code) | Jusqu'à 3 bananiers (achat au comptoir, 500 puis 1 500 bananes), améliorations communes aux 3 arbres, singes qui ramassent sous tous les arbres ; testé en Play via Unity MCP | À tester au casque |
 | Claude (Code) | Corrections de la bananeraie : singes qui vont au bon panier, panneau BANANERAIE sur la porte, téléportation limitée à la terrasse (hors meubles), panier agrandi sans anse ; testé en Play via Unity MCP | À tester au casque |
 | Claude (Code) | Bananeraie : nouvel endroit modélisé par script Blender dans le style de la cabane (terrasse, barrière, abri, portail), 3e niveau et sa scène, porte de la cabane qui s'ouvre puis téléporte (`PortalDoor`), déménagement du bananier, du panier, des comptoirs et des récolteurs ; testé en Play via Unity MCP | À tester au casque |
