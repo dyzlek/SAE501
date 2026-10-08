@@ -323,6 +323,13 @@ def build_materials():
     M["vegetation"].use_backface_culling = False       # brins et pétales sont des plans fins, vus des deux côtés
     M["plume_rouge"] = material("Plume", color=(0.85, 0.12, 0.1), rough=0.6)
     M["plume_rouge"].use_backface_culling = False     # les ailettes des fléchettes sont de simples plans
+    # Champignons (rouge à points blancs, comme dans les contes) et décor des murs (ballons de Bloons, pots)
+    M["champi_chapeau"] = material("Champi_Chapeau", color=(0.85, 0.15, 0.1), rough=0.5)
+    M["champi_pied"] = material("Champi_Pied", color=(0.95, 0.9, 0.78), rough=0.8)
+    M["champi_point"] = material("Champi_Point", color=(0.98, 0.97, 0.94), rough=0.6)
+    M["ballon_deco"] = material("Ballon_Deco", vcol=True, rough=0.3)     # chaque ballon de la guirlande a sa couleur (sommets)
+    M["ficelle"] = material("Ficelle", color=(0.85, 0.8, 0.7), rough=0.9)
+    M["pot"] = material("Pot", color=(0.72, 0.38, 0.22), rough=0.85)    # terre cuite
     return M
 
 
@@ -787,6 +794,74 @@ def build_dartboard(M, coll):
     return b.finish("Cible", coll)
 
 
+def build_wall_decor(M, coll):
+    """Les murs de la cabane habillés (critique du 7 oct. : « surtout les murs ») :
+    - une guirlande de petits ballons colorés (ceux de Bloons !) qui court en haut des murs, en festons ;
+    - deux étagères hautes avec des pots en terre cuite et des livres.
+    Tout est au-dessus de 2,4 m, au-dessus des meubles et des tableaux que Unity pose contre les murs.
+    Pas de guirlande sur le mur de la porte (180°) ni sur celui du tableau des chances du coffre (90°), qui monte haut."""
+    g = random.Random(31)
+    b = Builder([M["ficelle"], M["ballon_deco"]])   # la guirlande à part : les chanfreins des étagères effaceraient ses couleurs
+    colors = [lin(c) for c in ((0.9, 0.12, 0.1), (0.15, 0.45, 0.95), (0.2, 0.75, 0.25), (0.98, 0.85, 0.1), (0.95, 0.4, 0.75))]
+    half = math.tan(math.pi / SIDES)                # demi-largeur d'un mur, en part de son rayon
+    r_in = R - LOG_R - 0.08                          # juste devant les rondins
+    for i in range(SIDES):
+        ang = i * 360 / SIDES
+        if ang in (90, 180):
+            continue
+        B = basis(ang)
+        center = polar(ang, r_in)
+        a0, a1 = center + B @ Vector((-half * r_in, 0, 2.9)), center + B @ Vector((half * r_in, 0, 2.9))
+        pts = []
+        for k in range(13):                          # la ficelle pend en feston (un arc de cercle vers le bas)
+            t = k / 12
+            pts.append(a0.lerp(a1, t) + Vector((0, 0, -0.22 * math.sin(math.pi * t))))
+        for p0, p1 in zip(pts, pts[1:]):
+            mid, d = (p0 + p1) / 2, (p1 - p0)
+            rot = d.to_track_quat("X", "Z").to_matrix()
+            b.box(mid, (d.length, 0.01, 0.01), rot, M["ficelle"])
+        for k in range(1, 12, 2):                     # un ballon sous un point sur deux de la ficelle
+            col = colors[g.randrange(len(colors))]
+            c = pts[k] + Vector((0, 0, -0.13))
+            res = bmesh.ops.create_icosphere(b.bm, subdivisions=1, radius=0.09)   # 80 triangles, lissés : assez pour un petit ballon
+            for v in res["verts"]:
+                v.co.z *= 1.2                         # un ballon est un peu plus haut que large
+                v.co += c
+            for f in {f for v in res["verts"] for f in v.link_faces}:
+                f.material_index = b.mi(M["ballon_deco"])
+                f.smooth = True
+                f.tag = True
+                for loop in f.loops:
+                    loop[b.col] = (*col, 1.0)
+            b.box(c + Vector((0, 0, 0.115)), (0.02, 0.02, 0.03), Matrix.Identity(3), M["ballon_deco"], tint=None)   # le nœud
+
+    garland = b.finish("Guirlande", coll)
+
+    # Deux étagères hautes (à 2,45 m), sur des murs sans fenêtre ni grand tableau
+    b = Builder([M["poutre"], M["pot"], M["peint"]])
+    for ang in (120, 330):
+        B = basis(ang)
+        center = polar(ang, R - LOG_R - 0.18)
+        b.box(center + B @ Vector((0, 0, 2.45)), (1.3, 0.24, 0.04), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.005)
+        for s in (-0.5, 0.5):                         # les équerres
+            b.box(center + B @ Vector((s, 0.06, 2.36)), (0.04, 0.12, 0.16), B, M["poutre"])
+        x = -0.55
+        while x < 0.55:                               # des pots et des piles de livres, un peu en vrac
+            if g.random() < 0.55:
+                h = g.uniform(0.12, 0.22)
+                r = g.uniform(0.05, 0.08)
+                base = center + B @ Vector((x + r, 0, 2.47))
+                b.lathe([(r * 0.7, 0), (r, h * 0.6), (r * 0.75, h), (r * 0.85, h * 1.05)], 10, M["pot"], base)
+                x += 2 * r + 0.05
+            else:
+                for n in range(g.randint(2, 4)):     # livres couchés en pile
+                    w = g.uniform(0.15, 0.2)
+                    b.box(center + B @ Vector((x + 0.1, 0, 2.485 + n * 0.035)), (w, 0.13, 0.03), B @ Matrix.Rotation(g.uniform(-0.3, 0.3), 3, "Z"),
+                          M["peint"], tint=g.uniform(0.5, 1.1))
+                x += 0.25
+    return [garland, b.finish("Etageres", coll)]
+
+
 # Zones à laisser libres (repère Unity : x à droite, z devant) : la cabane et sa terrasse, ou la zone de jeu de la carte
 def hub_clear(x, z):
     return math.hypot(x, z) < 5.2 or (abs(x) < 4.6 and -6.4 < z < 4.6)
@@ -850,8 +925,38 @@ def build_outside(M, coll, clear=hub_clear, seed=5, suffix="", palm_ring=(8, 16)
         coll.objects.link(ob)
         deco.append(ob)
     deco.append(build_grass_and_flowers(M, coll, g, clear, suffix))
+    deco.append(build_mushrooms(M, coll, g, clear, suffix))
     mountains = build_mountains(M, coll, suffix)
     return [ground] + deco + [mountains, build_palms(M, coll, clear, suffix, palm_ring, palm_count)]
+
+
+def build_mushrooms(M, coll, g, clear, suffix):
+    """Des champignons rouges à points blancs : de petites touffes dans l'herbe, et quelques géants plus loin
+    (2 à 3 m, on les voit depuis la cabane et la carte). Pied crème légèrement courbé, chapeau bombé, points blancs."""
+    b = Builder([M["champi_pied"], M["champi_chapeau"], M["champi_point"]])
+
+    def mushroom(x, z, h):
+        base = P(x, GROUND_Y, z)
+        r_stem, r_cap = h * 0.14, h * 0.45
+        b.lathe([(r_stem * 1.2, 0), (r_stem, h * 0.4), (r_stem * 0.9, h * 0.85)], 8, M["champi_pied"], base)
+        cap = [(r_cap * math.cos(t), h * 0.8 + r_cap * 0.75 * math.sin(t)) for t in np.linspace(0, math.pi / 2, 4)]
+        cap[-1] = (0.0001, cap[-1][1])
+        b.lathe([(r_stem * 0.9, h * 0.8)] + cap, 10, M["champi_chapeau"], base)
+        for k in range(int(2 + h * 2.5)):               # les points blancs, posés sur le chapeau (peu : léger pour le casque)
+            t = g.uniform(0.25, 1.2)
+            a = g.uniform(0, 2 * math.pi)
+            p = base + Vector((math.cos(a) * r_cap * math.cos(t), math.sin(a) * r_cap * math.cos(t), h * 0.8 + r_cap * 0.75 * math.sin(t)))
+            s = r_cap * g.uniform(0.08, 0.14)
+            b.box(p, (s, s, s * 0.4), Matrix.Identity(3), M["champi_point"])
+
+    for (cx, cz, _) in scatter(g, 20, 5.5, 28.0, clear):        # petites touffes de 2 à 4
+        for _ in range(g.randint(2, 4)):
+            x, z = cx + g.gauss(0, 0.35), cz + g.gauss(0, 0.35)
+            if not clear(x, z):
+                mushroom(x, z, g.uniform(0.15, 0.4))
+    for (x, z, _) in scatter(g, 7, 14.0, 32.0, clear):          # les géants
+        mushroom(x, z, g.uniform(1.8, 3.0))
+    return b.finish("Champignons" + suffix, coll)
 
 
 def build_grass_and_flowers(M, coll, g, clear, suffix):
@@ -919,15 +1024,29 @@ def build_mountains(M, coll, suffix=""):
     g = random.Random(11 if not suffix else 23)
     b = Builder([M["montagne"]])
     grass, rock, snow = lin((0.36, 0.55, 0.24)), lin((0.52, 0.48, 0.44)), lin((0.95, 0.96, 0.98))
-    count = 22
-    for i in range(count):
-        ang = i * 360 / count + g.uniform(-6, 6)
-        front = abs((ang + 180) % 360 - 180) < 35
-        dist = g.uniform(88, 110) if front else g.uniform(55, 85)
-        height = g.uniform(18, 38)
-        base = g.uniform(18, 30)
+    dark_rock = lin((0.4, 0.37, 0.35))
+    haze = lin((0.62, 0.72, 0.86))      # le bleu du lointain : les montagnes du fond se fondent dans le ciel
+
+    # Trois rangs (amélioré le 7 oct.) : des collines vertes au pied (elles adoucissent la jonction avec la prairie),
+    # la couronne de montagnes, et une chaîne lointaine bleutée derrière (de la profondeur).
+    #            nombre, distance,  hauteur,  base,    brume
+    layers = [(14, (36, 52), (3, 7), (12, 20), 0.0),
+              (22, None, (18, 38), (18, 30), 0.0),
+              (16, (140, 170), (45, 70), (35, 50), 0.55)]
+    peaks = []
+    for (count, dists, heights, bases, mist) in layers:
+        for i in range(count):
+            ang = i * 360 / count + g.uniform(-6, 6)
+            if dists is None:
+                front = abs((ang + 180) % 360 - 180) < 35
+                dist = g.uniform(88, 110) if front else g.uniform(55, 85)
+            else:
+                dist = g.uniform(*dists)
+            peaks.append((ang, dist, g.uniform(*heights), g.uniform(*bases), mist, heights[1] < 10))
+
+    for (ang, dist, height, base, mist, hill) in peaks:
         center = polar(ang, dist, GROUND_Y - 0.5)
-        rings, segs = 7, 18
+        rings, segs = (4, 12) if hill else (10, 18)
         seed = g.random() * 100
         grid = []
         for k in range(rings + 1):
@@ -936,21 +1055,31 @@ def build_mountains(M, coll, suffix=""):
             for j in range(segs):
                 a = 2 * math.pi * j / segs
                 bump = 1 + 0.25 * math.sin(a * 3 + seed) + 0.12 * math.sin(a * 7 + seed * 2)
-                r = base * t * bump
-                h = height * (1 - t) ** 1.4 * (1 + 0.15 * math.sin(a * 5 + seed)) if k else height
+                r = base * t * bump * (1 + g.uniform(-0.06, 0.06) * (k > 0))       # un peu de relief irrégulier
+                if hill:
+                    h = height * (1 - t * t) if k else height                     # colline : un dôme doux
+                else:
+                    ridge = 1 + 0.15 * math.sin(a * 5 + seed) + 0.08 * abs(math.sin(a * 11 + seed * 3))   # arêtes
+                    h = height * (1 - t) ** 1.4 * ridge if k else height
                 p = center + Vector((math.cos(a) * r, math.sin(a) * r, h))
                 row.append(p)
                 if k == 0:
                     break
             grid.append(row)
 
-        def colour(z):
+        def colour(z, center=center, height=height, mist=mist, hill=hill, seed=seed):
             u = (z - center.z) / height
-            if u > 0.72:
-                return snow
-            if u > 0.38:
-                return rock
-            return grass
+            if hill:
+                c = grass
+            elif u > 0.7 + 0.05 * math.sin(seed):                    # la limite de la neige varie d'un sommet à l'autre
+                c = snow
+            elif u > 0.5:
+                c = rock
+            elif u > 0.35:
+                c = dark_rock
+            else:
+                c = grass
+            return tuple(x * (1 - mist) + hz * mist for x, hz in zip(c, haze))
 
         top = grid[0][0]
         for j in range(segs):
@@ -1180,6 +1309,7 @@ def main():
     objs.append(build_lanterns(M, cabin))
     objs.append(build_rug(M, cabin))
     objs.append(build_dartboard(M, cabin))
+    objs += build_wall_decor(M, cabin)
     objs += build_outside(M, cabin)
     objs.append(empty("Repere_Porte", polar(DOOR, R), cabin))
     objs.append(empty("Repere_Droite", polar(90, R), cabin))
