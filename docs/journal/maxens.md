@@ -34,9 +34,25 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
   ![Le portail du retour vers la cabane](../captures/maxens-bananeraie-portail.png)
 
+- **Corrigé après mon test de la bananeraie :**
+  - **les singes récolteurs partaient hors de la terrasse**, à travers la barrière, au lieu d'aller au panier : pour contourner les meubles, ils faisaient un détour par le centre de la cabane, fixé au point (0, 0, 0) du monde. La bananeraie est à 1 km : ils partaient vers la cabane. Leur détour passe maintenant par le milieu de la terrasse (`HarvesterMonkey.areaCenter`) ;
+  - **un panneau « BANANERAIE »** sur la porte de la cabane, côté pièce : une planche en bois, lettres dorées. Il est accroché au battant et s'ouvre avec lui ;
+  - **en VR, on ne peut plus se téléporter n'importe où** dans la bananeraie : seulement sur la terrasse, à 30 cm de la barrière, et ni dans le bananier et son étal, ni dans le panier, la caisse ou l'armoire. Dehors, il n'y a pas de zone : le rayon ne trouve rien ;
+  - **le panier est plus grand** (×1,4, son tabouret aussi) **et n'a plus d'anse**, qui gênait les lancers. Mon FBX n'est pas modifié : le générateur enregistre une copie du maillage sans ce qui dépasse du bord (`Art/Bananier/Panier_SansAnse.asset`).
+  - Testé en Play via Unity MCP : deux singes achetés vont bien au panier et y déposent leurs bananes ; rayons de téléportation vérifiés point par point (milieu et portail : oui ; panier, étal, bananier, caisse, armoire, bord et dehors : non).
+
+  Avant : les singes partaient dans la prairie.
+
+  ![Avant : les singes récolteurs hors de la terrasse](../captures/maxens-bananeraie-singes-dehors.webp)
+
+  ![Le panneau BANANERAIE sur la porte de la cabane](../captures/maxens-porte-panneau.png)
+
+  ![Le panier agrandi, sans anse](../captures/maxens-panier-sans-anse.png)
+
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Corrections de la bananeraie : singes qui vont au bon panier, panneau BANANERAIE sur la porte, téléportation limitée à la terrasse (hors meubles), panier agrandi sans anse ; testé en Play via Unity MCP | À tester au casque |
 | Claude (Code) | Bananeraie : nouvel endroit modélisé par script Blender dans le style de la cabane (terrasse, barrière, abri, portail), 3e niveau et sa scène, porte de la cabane qui s'ouvre puis téléporte (`PortalDoor`), déménagement du bananier, du panier, des comptoirs et des récolteurs ; testé en Play via Unity MCP | À tester au casque |
 | Claude (Code) | Paysage de la carte enfin aligné (noms « .001 » de Blender), erreurs de couleur des bananes corrigées | Gardé |
 

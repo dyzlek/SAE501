@@ -16,7 +16,7 @@ namespace SAE
     // Les meubles sont contre les murs : pour ne pas les traverser, il passe par le milieu de la pièce (voir WalkTo).
     public class HarvesterMonkey : MonoBehaviour
     {
-        const float FreeRadius = 1.4f;          // en mètres : autour du centre du hub, il n'y a aucun meuble
+        const float FreeRadius = 1.4f;          // en mètres : autour du centre de la terrasse, il n'y a aucun meuble
         const float ThrowDistance = 0.6f;       // en mètres, du centre du panier : devant son tabouret, pas dedans
         const float DunkDistance = 0.45f;
         const float ShortWalk = 1f;             // en mètres : en dessous, pas de crochet par le centre
@@ -26,6 +26,8 @@ namespace SAE
         public Panier panier;
         public Transform table;                 // la table des bananes (Bananier.versCible)
         public Vector3 home;                    // où il attend quand il n'y a rien à ramasser (au sol)
+        public Vector3 areaCenter;              // le milieu de la terrasse de la bananeraie (en coordonnées du monde)
+        public float areaRadius = 3f;           // la terrasse, vue comme un disque : on y repose le singe lancé (HarvesterGrab)
 
         public float jumpDuration = 0.5f;       // en secondes, le saut pour attraper la banane
         public float throwDuration = 0.45f;     // en secondes, le vol de la banane jusqu'au panier
@@ -169,21 +171,22 @@ namespace SAE
         }
 
         // Marcher jusqu'à target. Si le trajet est long et que la ligne droite longe les murs (là où sont les meubles), il fait un crochet
-        // par le milieu de la pièce : on prend le point de la ligne le plus proche du centre, ramené à FreeRadius.
+        // par le milieu de la terrasse : on prend le point de la ligne le plus proche du centre, ramené à FreeRadius.
         IEnumerator WalkTo(Vector3 target, Func<bool> abort)
         {
             var from = transform.position;
-            var closest = ClosestToCenter(new Vector2(from.x, from.z), new Vector2(target.x, target.z));
+            var center = new Vector2(areaCenter.x, areaCenter.z);
+            var closest = ClosestToCenter(new Vector2(from.x, from.z) - center, new Vector2(target.x, target.z) - center);
             bool longWalk = Vector3.Distance(from, target) > ShortWalk;   // un petit pas à côté d'un meuble : tout droit
             if (longWalk && closest.magnitude > FreeRadius)
             {
-                var detour = closest.normalized * FreeRadius;
+                var detour = center + closest.normalized * FreeRadius;
                 yield return WalkStraight(new Vector3(detour.x, target.y, detour.y), abort);
             }
             yield return WalkStraight(target, abort);
         }
 
-        // Le point du segment [a, b] le plus proche du centre du hub (vu de dessus)
+        // Le point du segment [a, b] le plus proche de l'origine (a et b sont pris depuis le milieu de la terrasse, vus de dessus)
         static Vector2 ClosestToCenter(Vector2 a, Vector2 b)
         {
             var ab = b - a;

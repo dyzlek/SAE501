@@ -4,6 +4,13 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Jeu. 8 oct. 2026
 
+### Corrections de la bananeraie
+> Après mon test (captures jointes) :
+> 1. Bug : les singes récolteurs ne vont pas vers le nouveau panier, ils partent hors de la terrasse.
+> 2. Ajoute dans la cabane un panneau « Bananeraie » sur la porte.
+> 3. En VR, on ne doit pas pouvoir se téléporter en dehors de la bananeraie, ni dans les objets (le panier, le bananier…).
+> 4. Agrandis un peu le panier et enlève son anse.
+
 ### La bananeraie, derrière une porte
 > Gros chantier : tout ce qui concerne la récolte des bananes doit quitter la cabane pour un autre endroit, dans la même direction artistique (captures jointes de l'état actuel).
 >

@@ -15,8 +15,6 @@ namespace SAE
         const float SettleSpeed = 0.3f;     // en m/s : plus lent que ça, il a fini de rouler
         const float MinFlight = 0.3f;       // en secondes : il ne « se pose » pas dès le lâcher
         const float MaxFlight = 5f;         // en secondes : au-delà, on le remet à sa place
-        public Vector3 areaCenter;                  // le centre de la zone où il se pose (la terrasse de la bananeraie)
-        public float areaRadius = 3f;               // rayon de cette zone, en mètres
 
         HarvesterMonkey monkey;
         Rigidbody body;
@@ -108,9 +106,10 @@ namespace SAE
             flying = false;
             body.isKinematic = true;
             body.useGravity = false;
-            var flat = new Vector3(transform.position.x - areaCenter.x, 0f, transform.position.z - areaCenter.z);
-            flat = Vector3.ClampMagnitude(flat, areaRadius);   // le point de la terrasse le plus proche, au sol
-            var spot = new Vector3(areaCenter.x + flat.x, monkey.home.y, areaCenter.z + flat.z);
+            var center = monkey.areaCenter;
+            var flat = new Vector3(transform.position.x - center.x, 0f, transform.position.z - center.z);
+            flat = Vector3.ClampMagnitude(flat, monkey.areaRadius);   // le point de la terrasse le plus proche, au sol
+            var spot = new Vector3(center.x + flat.x, monkey.home.y, center.z + flat.z);
             var look = Vector3.ProjectOnPlane(transform.forward, Vector3.up);
             transform.SetPositionAndRotation(spot, Quaternion.LookRotation(look.sqrMagnitude > 0.01f ? look : Vector3.forward));
             monkey.PutDown();

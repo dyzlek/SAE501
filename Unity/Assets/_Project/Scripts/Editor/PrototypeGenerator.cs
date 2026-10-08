@@ -696,7 +696,11 @@ namespace SAE.EditorTools
 
             // La porte : fermée ; on l'ouvre pour aller à la bananeraie
             var door = cabin.GetComponentsInChildren<Transform>().FirstOrDefault(t => t.name.StartsWith("Porte_Battant"));
-            if (door) MakeDoor(door, Level.Bananeraie, Vector3.zero);
+            if (door)
+            {
+                MakeDoor(door, Level.Bananeraie, Vector3.zero);
+                DoorSign(door, "BANANERAIE");
+            }
             else Debug.LogWarning("Hub : battant de la porte introuvable (relancer Blender/cabane.py).");
 
             // Les flammes des bougies vacillent (FlameFlicker) : elles bougent, donc elles ne sont pas « static »
@@ -986,13 +990,16 @@ namespace SAE.EditorTools
                 var stool = new GameObject("Tabouret du panier").transform;
                 stool.SetParent(env, false);
                 stool.localPosition = basketPos;
-                Visuals.Solid("Assise", stool, new Vector3(0, HandHeight - 0.03f, 0), new Vector3(0.48f, 0.03f, 0.48f), DarkWood)
+                const float Seat = 0.48f * BasketScale;   // l'assise, à la taille du panier agrandi
+                Visuals.Solid("Assise", stool, new Vector3(0, HandHeight - 0.03f, 0), new Vector3(Seat, 0.03f, Seat), DarkWood)
                     .GetComponent<MeshFilter>().sharedMesh = Cylinder;
-                Visuals.Box("Etagere basse", stool, new Vector3(0, 0.3f, 0), new Vector3(0.4f, 0.015f, 0.4f), Wood)
+                Visuals.Box("Etagere basse", stool, new Vector3(0, 0.3f, 0), new Vector3(Seat - 0.08f, 0.015f, Seat - 0.08f), Wood)
                     .GetComponent<MeshFilter>().sharedMesh = Cylinder;
                 for (int i = 0; i < 3; i++)
-                    Visuals.Box("Pied", stool, Around(i * 120f, 0.17f, (HandHeight - 0.06f) / 2f), new Vector3(0.05f, HandHeight - 0.06f, 0.05f), Wood);
+                    Visuals.Box("Pied", stool, Around(i * 120f, Seat / 2f - 0.07f, (HandHeight - 0.06f) / 2f), new Vector3(0.05f, HandHeight - 0.06f, 0.05f), Wood);
                 basket.position = basketPos + Vector3.up * HandHeight;
+                basket.localScale *= BasketScale;   // plus grand : on y lance les bananes plus facilement
+                RemoveHandle(basket);
                 panier = basket.GetComponentInChildren<Panier>();
                 // On LANCE les bananes dans le panier : plus de parois ni de poignée qui les renvoient (MeshCollider retiré),
                 // et une zone de dépôt plus haute que le bord, pour qu'un lancer un peu court compte quand même.
@@ -1005,6 +1012,42 @@ namespace SAE.EditorTools
                 }
             }
             return bananier;
+        }
+
+        // Le panier de Maxens (Art/Bananier/FBX/Panier.fbx), agrandi et sans son anse : l'anse gênait les lancers.
+        // Son FBX n'est pas modifié : on enregistre à côté une copie du maillage sans ce qui dépasse du bord.
+        const float BasketScale = 1.4f;
+        const string BasketMeshPath = "Assets/_Project/Art/Bananier/Panier_SansAnse.asset";
+        const float BasketRim = 0.49f;   // le bord du panier, en part de sa hauteur avec l'anse (25 cm sur 52) : au-dessus, c'est l'anse
+
+        static void RemoveHandle(Transform basket)
+        {
+            var filter = basket.GetComponentInChildren<MeshFilter>();
+            if (!filter) return;
+            var source = filter.sharedMesh;
+            var vertices = source.vertices;
+            // La hauteur de chaque sommet le long de la verticale (le FBX peut être couché : Z en haut dans Blender)
+            var up = filter.transform.InverseTransformDirection(Vector3.up).normalized;
+            float low = float.MaxValue, high = float.MinValue;
+            foreach (var v in vertices) { float h = Vector3.Dot(v, up); low = Mathf.Min(low, h); high = Mathf.Max(high, h); }
+            float rim = low + (high - low) * BasketRim;
+
+            // On garde les triangles qui ne montent pas au-dessus du bord
+            var kept = new List<int>();
+            var triangles = source.triangles;
+            for (int i = 0; i < triangles.Length; i += 3)
+            {
+                bool handle = false;
+                for (int k = 0; k < 3; k++) handle |= Vector3.Dot(vertices[triangles[i + k]], up) > rim;
+                if (!handle) kept.AddRange(new[] { triangles[i], triangles[i + 1], triangles[i + 2] });
+            }
+            var mesh = Object.Instantiate(source);
+            mesh.name = "Panier_SansAnse";
+            mesh.SetTriangles(kept, 0);
+            mesh.RecalculateBounds();
+            AssetDatabase.DeleteAsset(BasketMeshPath);
+            AssetDatabase.CreateAsset(mesh, BasketMeshPath);
+            filter.sharedMesh = mesh;
         }
 
         // La caisse : un panneau en bois avec l'argent total en gros chiffres dorés, à côté du panier.
@@ -1211,13 +1254,28 @@ namespace SAE.EditorTools
             for (int side = -1; side <= 1; side += 2)
                 Blocker(env, "Poteau de l'abri", new Vector3(side * ShedX, 1.4f, ShedZ0), new Vector3(0.24f, 2.8f, 0.24f));
 
-            // La zone de téléportation : la terrasse, sauf le fond (l'abri et l'armoire) et le bord de la barrière
+            // La zone de téléportation : la terrasse, à 30 cm de la barrière, sans le fond (l'abri et l'armoire)
+            // ni la place des meubles (le bananier et son étal, le panier, la caisse). Ailleurs, le rayon s'arrête sur
+            // le collider de la terrasse ou d'un meuble, qui n'est pas une zone : on ne se pose ni dehors ni dans un objet.
+            // Plusieurs pavés sur le même objet : la zone les prend tous.
             var zone = new GameObject("Zone de téléportation");
             zone.transform.SetParent(env, false);
-            var area = zone.AddComponent<BoxCollider>();
-            float zoneZ0 = GroveZ0 + 0.3f, zoneZ1 = ShedZ0 - 0.7f;
-            area.center = new Vector3(0f, 0.005f, (zoneZ0 + zoneZ1) / 2f);
-            area.size = new Vector3(GroveX1 - GroveX0 - 0.6f, 0.01f, zoneZ1 - zoneZ0);
+            float zx0 = GroveX0 + 0.3f, zx1 = GroveX1 - 0.3f, zz0 = GroveZ0 + 0.3f, zz1 = ShedZ0 - 0.7f;
+            const float TreeX1 = -1.6f, TreeZ0 = -0.3f, TreeZ1 = 1.5f;     // le bananier et son étal
+            const float BasketX0 = 2.0f, BasketZ0 = -0.3f, BasketZ1 = 0.9f; // le panier sur son tabouret
+            const float BoardX0 = 3.1f, BoardZ0 = 1.2f;                     // la caisse, sur son poteau
+            void Pad(float x0, float x1, float z0, float z1)
+            {
+                var pad = zone.AddComponent<BoxCollider>();
+                pad.center = new Vector3((x0 + x1) / 2f, 0.005f, (z0 + z1) / 2f);
+                pad.size = new Vector3(x1 - x0, 0.01f, z1 - z0);
+            }
+            Pad(TreeX1, BasketX0, zz0, zz1);         // le milieu, de l'étal au panier
+            Pad(zx0, TreeX1, zz0, TreeZ0);           // devant le bananier
+            Pad(zx0, TreeX1, TreeZ1, zz1);           // derrière le bananier
+            Pad(BasketX0, zx1, zz0, BasketZ0);       // devant le panier
+            Pad(BasketX0, BoardX0, BasketZ1, zz1);   // entre le panier et la caisse
+            Pad(BoardX0, zx1, BasketZ1, BoardZ0);    // devant la caisse
             Teleportable(zone);
 
             // Le portail du retour : comme la porte de la cabane, il s'ouvre puis ramène au hub
@@ -1249,11 +1307,11 @@ namespace SAE.EditorTools
 
             // Loin du hub, d'un bloc. Ce qui est retenu en coordonnées du monde (la place des singes) suit.
             env.position = GroveCenter;
-            foreach (var monkey in env.GetComponentsInChildren<HarvesterMonkey>(true)) monkey.home += GroveCenter;
-            foreach (var grab in env.GetComponentsInChildren<HarvesterGrab>(true))
+            foreach (var monkey in env.GetComponentsInChildren<HarvesterMonkey>(true))
             {
-                grab.areaCenter = GroveCenter + GroveMiddle;
-                grab.areaRadius = 3.2f;
+                monkey.home += GroveCenter;
+                monkey.areaCenter = GroveCenter + GroveMiddle;   // leurs détours passent par le milieu de la terrasse
+                monkey.areaRadius = 3.2f;
             }
         }
 
@@ -1278,6 +1336,22 @@ namespace SAE.EditorTools
             var box = go.AddComponent<BoxCollider>();
             box.center = center;
             box.size = size;
+        }
+
+        // Un panneau en bois sur la porte (côté du centre de la pièce), le nom de l'endroit en lettres dorées.
+        // Il est accroché au battant : il s'ouvre avec lui.
+        static void DoorSign(Transform leaf, string title)
+        {
+            var b = Bounds(leaf.gameObject);
+            var inside = new Vector3(-b.center.x, 0f, -b.center.z).normalized;   // de la porte vers le centre de la pièce
+            var sign = new GameObject("Panneau " + title).transform;
+            sign.SetPositionAndRotation(new Vector3(b.center.x, 1.75f, b.center.z) + inside * (b.extents.z + 0.02f),
+                                        Quaternion.LookRotation(-inside));   // +Z vers la porte : on le lit depuis la pièce
+            Visuals.Box("Planche", sign, new Vector3(0f, 0f, 0.01f), new Vector3(1.0f, 0.24f, 0.03f), DarkWood);
+            Visuals.Text(sign, title, new Vector3(0f, 0f, -0.01f), 0.15f, TitleGold, title: true);
+            foreach (var t in sign.GetComponentsInChildren<Transform>())
+                GameObjectUtility.SetStaticEditorFlags(t.gameObject, 0);
+            sign.SetParent(leaf, true);   // il garde sa place et son sens, même si la cabane est en miroir
         }
 
         // Une porte vers un autre niveau (PortalDoor) : le battant venu de Blender, dont l'origine est la charnière.
