@@ -53,9 +53,7 @@ namespace SAE.EditorTools
         static readonly Color PlayColor = new Color(0.2f, 0.8f, 0.3f);
         static readonly Color ClearColor = new Color(0.55f, 0.6f, 0.7f);
         static readonly Color HubColor = new Color(0.3f, 0.5f, 1f);
-        static readonly Color PathColor = new Color(0.72f, 0.55f, 0.32f);       // la terre du chemin
-        static readonly Color PathEdgeColor = new Color(0.45f, 0.32f, 0.18f);   // son contour, plus sombre
-        static readonly Color Grass1 = new Color(0.30f, 0.62f, 0.28f);
+        static readonly Color Grass1 = new Color(0.40f, 0.68f, 0.25f);   // la pelouse du plateau du hub, proche de la prairie
 
         [MenuItem("SAE/Générer le prototype")]
         public static void Generate()
@@ -1275,8 +1273,9 @@ namespace SAE.EditorTools
             return b;
         }
 
-        // Le terrain de jeu : une pelouse carrée et, dessus, le chemin de terre qui serpente (MapLayout, dessiné par TrackView).
-        // Sur la carte, la pelouse a un collider (on peut s'y téléporter) ; sur le plateau, c'est le plateau qui porte le collider.
+        // Le terrain de jeu : une pelouse carrée, puis le chemin de dalles et le décor (MapDecor), façon Bloons TD.
+        // Sur la carte, la pelouse est invisible : on voit l'herbe de la prairie tout autour (Paysage.glb), posée au même niveau ;
+        // elle garde son collider pour s'y téléporter. Sur le plateau du hub, elle est verte (pas de prairie dessous).
         static void BuildGrid(Transform parent, float tile, float thickness, bool walkable)
         {
             float k = tile / MapLayout.Tile;
@@ -1285,21 +1284,12 @@ namespace SAE.EditorTools
             var pos = new Vector3(0, -thickness / 2f, 0);
             var lawn = walkable ? Visuals.Solid("Pelouse", parent, pos, size, Grass1) : Visuals.Box("Pelouse", parent, pos, size, Grass1);
             lawn.tag = Tags.Terrain;
-            if (walkable) Teleportable(lawn);
-
-            // Bordure sombre un peu plus large, puis la terre par-dessus : le chemin a un contour net, comme dans Bloons
-            BuildTrack(parent, "Bordure du chemin", k, MapLayout.PathWidth + 0.5f, 0.004f * k + 0.001f, PathEdgeColor);
-            BuildTrack(parent, "Chemin", k, MapLayout.PathWidth, 0.008f * k + 0.002f, PathColor);
-        }
-
-        static void BuildTrack(Transform parent, string name, float scale, float width, float height, Color color)
-        {
-            var track = Visuals.Box(name, parent, new Vector3(0, height, 0), Vector3.one, color);   // un cube pour avoir le matériau du jeu
-            track.tag = Tags.Piste;
-            var view = track.AddComponent<TrackView>();
-            view.scale = scale;
-            view.width = width;
-            view.Build();   // visible tout de suite dans l'éditeur ; refait au lancement
+            if (walkable)
+            {
+                lawn.GetComponent<Renderer>().enabled = false;
+                Teleportable(lawn);
+            }
+            MapDecor.Build(parent, k, withBushes: walkable);   // les buissons dépasseraient du plateau du hub
         }
 
         // ---------------- CARTE ----------------
@@ -1313,7 +1303,7 @@ namespace SAE.EditorTools
             map.AddComponent<WaveSpawner>();
 
             float edge = MapLayout.HalfExtent;
-            const float GroundY = -0.55f;   // le dessus de l'herbe, autour du plateau de jeu
+            const float GroundY = -0.02f;   // le dessus de la prairie : juste sous le terrain de jeu, c'est son herbe qu'on voit (8 oct.)
             Teleportable(Visuals.Solid("Estrade", map.transform, new Vector3(0, -0.25f, -edge - 2.5f), new Vector3(8, 0.5f, 5), Wood));
             // Le sol de toute la prairie (invisible : on voit l'herbe du paysage) : on peut s'y téléporter partout,
             // autour du labyrinthe comme plus loin, et sur la pelouse du terrain de jeu elle-même (voir BuildGrid)

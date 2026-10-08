@@ -6,6 +6,7 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ### Chemin des ballons
 > Améliore le chemin des ballons, en t'inspirant des vraies cartes du jeu (Bloons TD).
+> Suite : rien n'a changé ? Je veux quelque chose de stylé, comme cette carte de Bloons (chemin de dalles qui se croise, herbe, fleurs). Le sol doit être comme l'herbe de base, avec du décor.
 
 ### Fiche du singe et coffre
 > Quand on appuie sur A, je veux que les informations du singe soient plus lisibles, pas juste des infos données comme ça : à gauche, on voit le singe avec son aura, etc. Et quand on ouvre le coffre, ça doit respecter la DA globale.
