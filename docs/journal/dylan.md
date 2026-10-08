@@ -22,6 +22,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
 | Claude (Claude Code) | Branche `fix/retours-casque` (sur `art/decor-lumiere`) : arc à 0,3 s (#60) ; téléportation de la carte à 4 m et paysage dégagé sur 4 m de plus (#81) ; fléchettes sorties du collider du mur (#74) ; `cabane.py` : étagères à côté des lanternes, guirlande remontée, ballons et livres plus réalistes (#66), montagnes en relief continu (#61), bougies et flammes à part (#77) ; `FlameFlicker` (flammes et lumières qui vacillent) ; `FpsCounter` au poignet (#35). `Cabane.glb` (108 000 triangles) et `Paysage.glb` (62 000) réexportés, rendus Blender vérifiés. Testé au casque par Dylan : arc, fléchettes, téléportation, chevauchements, flammes et compteur de fps validés, montagnes et objets plus réalistes aussi | Gardé |
+| Claude (Claude Code) | Branche `feat/fiche-singe-coffre-da` : fiche du singe (bouton A) refaite : vitrine à gauche avec le singe 3D et son aura qui tourne, à droite nom, rareté en couleur, effet, 4 lignes de caractéristiques avec barres (perce, portée, cadence, cibles) et la fusion (#71) ; roulette du coffre habillée comme la cabane : cadre en bois, ardoise, barre dorée, police Bangers, message « CANON VIOLET ! » (#51). Compilé, pas encore testé au casque | Gardé (à tester) |
 
 ## Mer. 7 oct. 2026
 **Décor refait dans Blender (#61, #66)** _(rendus de prévisualisation Blender, pas encore Unity)_

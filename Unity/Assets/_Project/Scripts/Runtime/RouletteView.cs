@@ -9,6 +9,7 @@ namespace Sae501.Coffres
     // de sa rareté, sur un fond de la couleur de la rareté. Pour le casque, seuls les singes qui passent
     // dans la fenêtre sont allumés (environ 7 sur 48).
     // Le canvas est en World Space (dans le décor) : utilisable à l'écran comme en VR.
+    // Même habillage que les ardoises du hub : cadre en bois, fond ardoise, barre et titre dorés, polices du jeu.
     public class RouletteView : MonoBehaviour
     {
         [Header("Taille (en pixels de canvas, 1 px = 2 mm)")]
@@ -34,6 +35,13 @@ namespace Sae501.Coffres
 
         float Pitch => itemWidth + gap;
 
+        // Couleurs de la cabane (les mêmes que la fiche du singe et les ardoises)
+        static readonly Color Wood = new Color(0.45f, 0.3f, 0.18f);
+        static readonly Color DarkWood = new Color(0.3f, 0.19f, 0.11f);
+        static readonly Color Slate = new Color(0.13f, 0.17f, 0.15f, 0.97f);
+        static readonly Color DeepSlate = new Color(0.07f, 0.09f, 0.08f);
+        static readonly Color Gold = new Color(1f, 0.83f, 0.35f);
+
         void Awake() => Build();
 
         void Build()
@@ -46,10 +54,13 @@ namespace Sae501.Coffres
             var canvasRt = (RectTransform)canvasGo.transform;
             canvasRt.sizeDelta = new Vector2(1100f, 330f);
 
-            MakeImage(canvasRt, "Fond", new Color(0f, 0f, 0f, 0.65f), Vector2.zero, canvasRt.sizeDelta);
+            // Cadre en bois, ardoise, puis un liseré de bois foncé autour de la fenêtre
+            MakeImage(canvasRt, "Cadre", Wood, Vector2.zero, canvasRt.sizeDelta + new Vector2(30f, 30f));
+            MakeImage(canvasRt, "Ardoise", Slate, Vector2.zero, canvasRt.sizeDelta);
+            MakeImage(canvasRt, "Bord de la fenetre", DarkWood, new Vector2(0f, 50f), new Vector2(viewportWidth + 16f, itemHeight + 36f));
 
             // Fenêtre qui masque ce qui dépasse de la bande.
-            var viewport = MakeImage(canvasRt, "Fenetre", new Color(0.08f, 0.08f, 0.1f, 1f),
+            var viewport = MakeImage(canvasRt, "Fenetre", DeepSlate,
                 new Vector2(0f, 50f), new Vector2(viewportWidth, itemHeight + 20f));
             viewport.gameObject.AddComponent<RectMask2D>();
             viewportRt = viewport.rectTransform;
@@ -77,9 +88,9 @@ namespace Sae501.Coffres
             }
 
             // Barre centrale (au-dessus de la bande).
-            bar = MakeImage(canvasRt, "Barre", new Color(1f, 0.95f, 0.3f, 1f), new Vector2(0f, 50f), new Vector2(8f, itemHeight + 50f));
+            bar = MakeImage(canvasRt, "Barre", Gold, new Vector2(0f, 50f), new Vector2(8f, itemHeight + 50f));
 
-            message = MakeText(canvasRt, "Message", 44, new Vector2(0f, -100f), new Vector2(1060f, 70f));
+            message = MakeText(canvasRt, "Message", 56, new Vector2(0f, -100f), new Vector2(1060f, 80f));
             message.text = "";
 
             Fill(Rarity.Gris, new[] { 1f, 0, 0, 0, 0, 0, 0 });
@@ -166,11 +177,11 @@ namespace Sae501.Coffres
             ShowVisiblePieces();
         }
 
-        // Fond de case : la couleur de la rareté, assombrie pour que le singe et son aura ressortent.
+        // Fond de case : la couleur de la rareté mêlée à l'ardoise, pour que le singe et son aura ressortent.
         void Paint(Image img, Rarity r)
         {
             if (r == Rarity.LGBT) { img.sprite = rainbow; img.color = new Color(0.55f, 0.55f, 0.55f); }
-            else { img.sprite = null; img.color = Color.Lerp(RarityInfo.ColorOf(r), Color.black, 0.55f); }
+            else { img.sprite = null; img.color = Color.Lerp(RarityInfo.ColorOf(r), DeepSlate, 0.55f); }
         }
 
         // Le singe 3D de la case, devant le fond (côté joueur : -Z), en unités de canvas (pixels).
@@ -201,7 +212,7 @@ namespace Sae501.Coffres
             rt.anchoredPosition = pos;
             rt.sizeDelta = boxSize;
             var t = go.GetComponent<Text>();
-            t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            t.font = SAE.Visuals.TitleFont;   // Bangers, comme les titres du hub
             t.fontSize = size;
             t.alignment = TextAnchor.MiddleCenter;
             t.raycastTarget = false;
