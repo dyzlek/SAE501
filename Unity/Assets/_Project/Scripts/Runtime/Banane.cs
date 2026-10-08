@@ -46,13 +46,17 @@ public class Banane : MonoBehaviour
     static readonly int ColorId = Shader.PropertyToID("_Color");
     static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
 
+    Vector3 tailleFraiche;          // sa taille d'origine (elle se ratatine en pourrissant)
+
     void Awake()
     {
+        tailleFraiche = transform.localScale;
         rb = GetComponent<Rigidbody>();
         rb.isKinematic = true;          // posée au sol, elle ne bouge pas
         rb.useGravity = false;
         if (!GetComponent<SAE.GrabReach>()) gameObject.AddComponent<SAE.GrabReach>();   // attrapable de loin, jusqu'à 6 m (GrabReach.Reach)
         vitesseMain = gameObject.AddComponent<SAE.ThrowVelocity>();   // pour la lancer
+        gameObject.AddComponent<SAE.ThrowTrail>();                     // et la traînée dorée quand elle vole
         rends = GetComponentsInChildren<Renderer>();
         mpb = new MaterialPropertyBlock();
         SAE.PlayerRig.IgnoreCollisions(gameObject);   // on ne peut pas monter sur une banane tenue et s'envoler
@@ -85,12 +89,56 @@ public class Banane : MonoBehaviour
         if (deposee || !posee) return;
         age += Time.deltaTime;
         AppliquerCouleur(Color.Lerp(couleurFraiche, couleurPourrie, Progression));
-        if (!EstPourrie && age >= dureePourriture) EstPourrie = true;
+        if (!EstPourrie && age >= dureePourriture) { EstPourrie = true; Odeur(); }
+        AnimerPourriture();
         if (EstPourrie && !EnMain)
         {
             ageDisparition += Time.deltaTime;
             if (ageDisparition >= delaiDisparition) Detruire();
         }
+    }
+
+    // ---------- l'animation de la pourriture ----------
+    // En pourrissant, la banane se ratatine (jusqu'à 80 % de sa taille). Pourrie, elle dégage une petite odeur verdâtre
+    // qui monte (Odeur), tremblote, puis se dégonfle et disparaît pendant ses dernières secondes au lieu de s'effacer d'un coup.
+    const float TailleFinale = 0.8f;      // taille d'une banane tout juste pourrie (part de la taille fraîche)
+    const float Degonflement = 0.6f;      // en secondes : la fin, où elle rétrécit jusqu'à rien
+
+    void AnimerPourriture()
+    {
+        float taille = Mathf.Lerp(1f, TailleFinale, Progression);
+        if (EstPourrie && !EnMain)
+        {
+            float reste = delaiDisparition - ageDisparition;
+            if (reste < Degonflement) taille *= Mathf.Clamp01(reste / Degonflement);   // elle se dégonfle
+            else transform.Rotate(0f, Mathf.Sin(Time.time * 12f) * 40f * Time.deltaTime, 0f, Space.World);   // elle tremblote
+        }
+        transform.localScale = tailleFraiche * taille;
+    }
+
+    // De petites bulles d'odeur verdâtres qui montent doucement au-dessus de la banane pourrie (elles suivent la banane)
+    void Odeur()
+    {
+        var go = new GameObject("Odeur");
+        go.transform.SetParent(transform, false);
+        var ps = go.AddComponent<ParticleSystem>();
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        var main = ps.main;
+        main.startLifetime = 1.2f;
+        main.startSpeed = 0.15f;
+        main.startSize = new ParticleSystem.MinMaxCurve(0.03f, 0.06f);
+        main.startColor = new Color(0.55f, 0.65f, 0.2f, 0.6f);
+        main.gravityModifier = -0.05f;    // elles montent
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        var emission = ps.emission;
+        emission.rateOverTime = 4f;
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Sphere;
+        shape.radius = 0.05f;
+        var r = go.GetComponent<ParticleSystemRenderer>();
+        r.sharedMaterial = SAE.Visuals.LineMaterial;
+        r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        ps.Play();
     }
 
     void AppliquerCouleur(Color c)
