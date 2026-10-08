@@ -306,8 +306,6 @@ def build_materials():
     M["cire"] = material("Cire", color=(0.95, 0.9, 0.78), rough=0.5)
     M["flamme"] = material("Flamme", color=(1.0, 0.6, 0.2), emission=(1.0, 0.62, 0.25), strength=12)
     M["flamme"].use_backface_culling = False
-    M["vitre_lanterne"] = material("Lanterne_Lumiere", color=(1.0, 0.8, 0.45), emission=(1.0, 0.72, 0.35), strength=5)
-    M["vitre_lanterne"].use_backface_culling = False
     M["roche"] = material("Roche", color=(0.55, 0.53, 0.5), rough=0.9)
     M["joint"] = material("Joint", color=(0.40, 0.33, 0.25), rough=0.95)
     M["buisson"] = material("Buisson", color=(0.22, 0.45, 0.16), rough=0.85)
@@ -330,6 +328,7 @@ def build_materials():
     M["ballon_deco"] = material("Ballon_Deco", vcol=True, rough=0.3)     # chaque ballon de la guirlande a sa couleur (sommets)
     M["ficelle"] = material("Ficelle", color=(0.85, 0.8, 0.7), rough=0.9)
     M["pot"] = material("Pot", color=(0.72, 0.38, 0.22), rough=0.85)    # terre cuite
+    M["livre"] = material("Livre", vcol=True, rough=0.8)                # la couleur de chaque livre vient des sommets
     return M
 
 
@@ -698,6 +697,20 @@ def build_roof(M, coll):
     return [roof, frame]
 
 
+FLAMES = []   # les flammes du lustre et des lanternes : un objet chacune, exportées avec la cabane
+
+
+def flame(M, coll, base, name, size=1.0):
+    """Une flamme de bougie, à part du reste et avec son origine à sa base : dans Unity, FlameFlicker la fait vaciller
+    en l'étirant et en la penchant autour de ce point (8 oct. : « que les flammes soient un peu animées »)."""
+    b = Builder([M["flamme"]])
+    b.lathe([(0.001 * size, 0.0), (0.012 * size, 0.015 * size), (0.009 * size, 0.035 * size), (0.0, 0.065 * size)], 6, M["flamme"], Vector())
+    ob = b.finish(name, coll)
+    ob.location = base
+    FLAMES.append(ob)
+    return ob
+
+
 def build_chandelier(M, coll):
     """Lustre en roue de charrette : jante, 8 rayons, moyeu, 8 bougies avec flamme, 4 chaînes jusqu'au crochet."""
     b = Builder([M["poutre"], M["fer"], M["cire"], M["flamme"], M["bout"]])
@@ -715,7 +728,7 @@ def build_chandelier(M, coll):
         b.lathe([(0.045, 0.0), (0.05, 0.02)], 8, M["fer"], c + Vector((0, 0, 0.03)), cap_bottom=M["fer"])
         h = rng.uniform(0.08, 0.14)
         b.lathe([(0.022, 0.03), (0.022, 0.03 + h), (0.018, 0.04 + h)], 8, M["cire"], c, cap_top=M["cire"], cap_bottom=M["cire"])
-        b.lathe([(0.001, 0.045 + h), (0.012, 0.06 + h), (0.009, 0.08 + h), (0.0, 0.11 + h)], 6, M["flamme"], c)
+        flame(M, coll, c + Vector((0, 0, 0.045 + h)), f"Flamme_Lustre_{k + 1}")
     hook = P(0, y + 0.75, 0)
     for k in range(4):
         b.log(polar(45 + 90 * k, rad, y + 0.02), hook, 0.008, M["fer"], M["fer"], 840 + k, segs=4)
@@ -726,17 +739,20 @@ def build_chandelier(M, coll):
 
 
 def build_lanterns(M, coll):
-    """Deux lanternes en fer accrochées aux murs, une bougie allumée derrière les vitres.
+    """Deux lanternes en fer accrochées aux murs, une bougie allumée entre les montants.
     À -28° (au-dessus du pupitre LANCER / JOUER) : à -60°, elle tombait dans la bibliothèque."""
-    b = Builder([M["fer"], M["vitre_lanterne"]])
-    for i, ang in enumerate((120, -28)):
+    b = Builder([M["fer"], M["cire"]])
+    for i, ang in enumerate(LANTERNS):
         B = basis(ang)
         wall = polar(ang, R - LOG_R - 0.02)
         c = wall + B @ Vector((0, -0.24, 2.35))
         b.box(wall + B @ Vector((0, -0.12, 2.6)), (0.03, 0.26, 0.03), B, M["fer"])           # potence
         b.box(c + Vector((0, 0, 0.27)), (0.02, 0.02, 0.12), B, M["fer"])
         b.lathe([(0.1, 0.0), (0.11, 0.02), (0.1, 0.03)], 8, M["fer"], c - Vector((0, 0, 0.12)), cap_bottom=M["fer"])
-        b.lathe([(0.075, 0.03), (0.075, 0.2)], 8, M["vitre_lanterne"], c - Vector((0, 0, 0.12)))
+        # Une vraie bougie allumée entre les montants (8 oct.) : avant, une vitre lumineuse pleine cachait tout,
+        # et rien ne bougeait. La flamme est un objet à part, animée dans Unity.
+        b.lathe([(0.022, 0.03), (0.022, 0.1), (0.018, 0.108)], 8, M["cire"], c - Vector((0, 0, 0.12)), cap_top=M["cire"])
+        flame(M, coll, c - Vector((0, 0, 0.007)), f"Flamme_Lanterne_{i + 1}", size=1.3)
         for k in range(4):
             a = 45 + 90 * k
             p = c + Vector((math.cos(math.radians(a)) * 0.08, math.sin(math.radians(a)) * 0.08, 0))
@@ -794,38 +810,50 @@ def build_dartboard(M, coll):
     return b.finish("Cible", coll)
 
 
+LANTERNS = (120, -28)                 # angles des lanternes murales (build_lanterns)
+SHELVES = (120, 330)                  # murs des étagères hautes (build_wall_decor)
+
+
 def build_wall_decor(M, coll):
     """Les murs de la cabane habillés (critique du 7 oct. : « surtout les murs ») :
-    - une guirlande de petits ballons colorés (ceux de Bloons !) qui court en haut des murs, en festons ;
-    - deux étagères hautes avec des pots en terre cuite et des livres.
-    Tout est au-dessus de 2,4 m, au-dessus des meubles et des tableaux que Unity pose contre les murs.
+    - une guirlande de petits ballons (ceux de Bloons !) qui court en haut des murs, en festons ;
+    - deux étagères hautes avec des pots en terre cuite, des bocaux et des livres.
+    Corrigé le 8 oct. (« beaucoup d'éléments se chevauchent ») : les étagères étaient pile derrière les lanternes,
+    et les ballons de la guirlande pendaient dans les pots et rentraient dans les rondins. Maintenant :
+    l'étagère est à côté de la lanterne, la guirlande passe tout en haut (au-dessus de 2,65 m) et pas au-dessus
+    des étagères, et les ballons sont devant les rondins.
     Pas de guirlande sur le mur de la porte (180°) ni sur celui du tableau des chances du coffre (90°), qui monte haut."""
     g = random.Random(31)
     b = Builder([M["ficelle"], M["ballon_deco"]])   # la guirlande à part : les chanfreins des étagères effaceraient ses couleurs
-    colors = [lin(c) for c in ((0.9, 0.12, 0.1), (0.15, 0.45, 0.95), (0.2, 0.75, 0.25), (0.98, 0.85, 0.1), (0.95, 0.4, 0.75))]
+    # Des couleurs de vrais ballons de baudruche, un peu moins criardes qu'avant
+    colors = [lin(c) for c in ((0.82, 0.13, 0.12), (0.16, 0.4, 0.82), (0.2, 0.62, 0.26), (0.95, 0.78, 0.15), (0.88, 0.42, 0.68))]
     half = math.tan(math.pi / SIDES)                # demi-largeur d'un mur, en part de son rayon
-    r_in = R - LOG_R - 0.08                          # juste devant les rondins
+    r_in = R - LOG_R - 0.13                          # devant les rondins (un ballon fait 7 cm de rayon)
+    top, sag, drop, radius = 2.96, 0.08, 0.1, 0.07
     for i in range(SIDES):
         ang = i * 360 / SIDES
-        if ang in (90, 180):
+        if ang in (90, 180) or ang in SHELVES:
             continue
         B = basis(ang)
         center = polar(ang, r_in)
-        a0, a1 = center + B @ Vector((-half * r_in, 0, 2.9)), center + B @ Vector((half * r_in, 0, 2.9))
+        a0, a1 = center + B @ Vector((-half * r_in, 0, top)), center + B @ Vector((half * r_in, 0, top))
         pts = []
         for k in range(13):                          # la ficelle pend en feston (un arc de cercle vers le bas)
             t = k / 12
-            pts.append(a0.lerp(a1, t) + Vector((0, 0, -0.22 * math.sin(math.pi * t))))
+            pts.append(a0.lerp(a1, t) + Vector((0, 0, -sag * math.sin(math.pi * t))))
         for p0, p1 in zip(pts, pts[1:]):
             mid, d = (p0 + p1) / 2, (p1 - p0)
             rot = d.to_track_quat("X", "Z").to_matrix()
-            b.box(mid, (d.length, 0.01, 0.01), rot, M["ficelle"])
+            b.box(mid, (d.length, 0.008, 0.008), rot, M["ficelle"])
         for k in range(1, 12, 2):                     # un ballon sous un point sur deux de la ficelle
             col = colors[g.randrange(len(colors))]
-            c = pts[k] + Vector((0, 0, -0.13))
-            res = bmesh.ops.create_icosphere(b.bm, subdivisions=1, radius=0.09)   # 80 triangles, lissés : assez pour un petit ballon
+            c = pts[k] + Vector((0, 0, -drop))
+            res = bmesh.ops.create_icosphere(b.bm, subdivisions=1, radius=radius)   # 80 triangles, lissés : assez pour un petit ballon
             for v in res["verts"]:
-                v.co.z *= 1.2                         # un ballon est un peu plus haut que large
+                v.co.z *= 1.2                         # un ballon est un peu plus haut que large...
+                if v.co.z > 0:
+                    v.co.x *= 1 - v.co.z * 3          # ... et se resserre vers son nœud, en haut, attaché à la ficelle
+                    v.co.y *= 1 - v.co.z * 3
                 v.co += c
             for f in {f for v in res["verts"] for f in v.link_faces}:
                 f.material_index = b.mi(M["ballon_deco"])
@@ -833,32 +861,48 @@ def build_wall_decor(M, coll):
                 f.tag = True
                 for loop in f.loops:
                     loop[b.col] = (*col, 1.0)
-            b.box(c + Vector((0, 0, 0.115)), (0.02, 0.02, 0.03), Matrix.Identity(3), M["ballon_deco"], tint=None)   # le nœud
+            b.box(c + Vector((0, 0, (radius * 1.2 + drop) / 2)), (0.006, 0.006, drop - radius * 1.2 + 0.01), Matrix.Identity(3), M["ficelle"])   # la ficelle du ballon
 
     garland = b.finish("Guirlande", coll)
 
-    # Deux étagères hautes (à 2,45 m), sur des murs sans fenêtre ni grand tableau
-    b = Builder([M["poutre"], M["pot"], M["peint"]])
-    for ang in (120, 330):
+    # Deux étagères hautes (à 2,45 m) sur un côté du mur, l'autre côté étant pour la lanterne
+    b = Builder([M["poutre"], M["pot"], M["livre"], M["cire"]])
+    width = 0.62
+    books = [lin(c) for c in ((0.55, 0.12, 0.1), (0.15, 0.32, 0.25), (0.62, 0.48, 0.2), (0.18, 0.2, 0.4), (0.45, 0.3, 0.2))]   # cuir rouge, vert, ocre, bleu, brun
+    for ang in SHELVES:
         B = basis(ang)
         center = polar(ang, R - LOG_R - 0.18)
-        b.box(center + B @ Vector((0, 0, 2.45)), (1.3, 0.24, 0.04), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.005)
-        for s in (-0.5, 0.5):                         # les équerres
+        lantern = min(LANTERNS, key=lambda a: abs((a - ang + 180) % 360 - 180))
+        x_lantern = (polar(lantern, R) - polar(ang, R)).dot(B @ Vector((1, 0, 0)))
+        side = -1 if x_lantern >= 0 else 1             # du côté opposé à la lanterne
+        center = center + B @ Vector((side * 0.5, 0, 0))
+        b.box(center + B @ Vector((0, 0, 2.45)), (width, 0.24, 0.04), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.005)
+        for s in (-0.22, 0.22):                       # les équerres
             b.box(center + B @ Vector((s, 0.06, 2.36)), (0.04, 0.12, 0.16), B, M["poutre"])
-        x = -0.55
-        while x < 0.55:                               # des pots et des piles de livres, un peu en vrac
-            if g.random() < 0.55:
-                h = g.uniform(0.12, 0.22)
-                r = g.uniform(0.05, 0.08)
+        x = -width / 2 + 0.03
+        for item in ("pot", "livres", "bocal", "pot"):  # un peu de tout, dans le même ordre sur les deux étagères
+            if item == "pot":
+                h, r = g.uniform(0.14, 0.2), g.uniform(0.05, 0.065)
                 base = center + B @ Vector((x + r, 0, 2.47))
-                b.lathe([(r * 0.7, 0), (r, h * 0.6), (r * 0.75, h), (r * 0.85, h * 1.05)], 10, M["pot"], base)
-                x += 2 * r + 0.05
-            else:
-                for n in range(g.randint(2, 4)):     # livres couchés en pile
-                    w = g.uniform(0.15, 0.2)
-                    b.box(center + B @ Vector((x + 0.1, 0, 2.485 + n * 0.035)), (w, 0.13, 0.03), B @ Matrix.Rotation(g.uniform(-0.3, 0.3), 3, "Z"),
-                          M["peint"], tint=g.uniform(0.5, 1.1))
-                x += 0.25
+                b.lathe([(r * 0.6, 0), (r * 0.95, h * 0.35), (r, h * 0.6), (r * 0.6, h * 0.92), (r * 0.7, h)], 12, M["pot"], base)
+                x += 2 * r + 0.03
+            elif item == "bocal":                     # un bocal de cire (des bougies de rechange), couvercle en bois
+                r = 0.045
+                base = center + B @ Vector((x + r, 0, 2.47))
+                b.lathe([(r, 0), (r, 0.11), (r * 0.8, 0.13)], 12, M["cire"], base, cap_top=M["cire"])
+                b.lathe([(r * 0.85, 0.13), (r * 0.85, 0.15)], 12, M["poutre"], base, cap_top=M["poutre"])
+                x += 2 * r + 0.03
+            else:                                     # des livres debout, serrés, de hauteurs et de couleurs différentes
+                for n in range(5):
+                    w, h = g.uniform(0.025, 0.04), g.uniform(0.15, 0.2)
+                    faces = b.box(center + B @ Vector((x + w / 2, 0.02, 2.47 + h / 2)), (w, 0.13, h), B @ Matrix.Rotation(g.uniform(-0.05, 0.05), 3, "Y"),
+                                  M["livre"], tint=1.0)
+                    col = books[g.randrange(len(books))]          # la couverture : une couleur par livre
+                    for f in faces:
+                        for loop in f.loops:
+                            loop[b.col] = (*col, 1.0)
+                    x += w + 0.004
+                x += 0.03
     return [garland, b.finish("Etageres", coll)]
 
 
@@ -868,7 +912,9 @@ def hub_clear(x, z):
 
 
 def map_clear(x, z):
-    return abs(x) < 17 and -23 < z < 17          # le labyrinthe (24 x 24 m), l'estrade et le pupitre devant
+    # le labyrinthe (24 x 24 m), l'estrade et le pupitre devant, et 4 m de plus que la zone de téléportation
+    # (16 m autour du centre, PrototypeGenerator.BuildMap) : on ne se pose plus dans un arbre ou un buisson (8 oct.)
+    return abs(x) < 20 and -24 < z < 20
 
 
 def scatter(g, count, rmin, rmax, clear):
@@ -1010,93 +1056,84 @@ def build_grass_and_flowers(M, coll, g, clear, suffix):
     return b.finish("Herbes et fleurs" + suffix, coll, recalc=False)
 
 
-def outward(face, center):
-    """Tourne la face vers l'extérieur de la montagne (sinon, une seule face étant dessinée, on verrait le ciel au travers)."""
-    face.normal_update()
-    c = face.calc_center_median()
-    if face.normal.dot(Vector((c.x - center.x, c.y - center.y, max(c.z - center.z, 0.0) * 0.3 + 0.01))) < 0:
-        face.normal_flip()
+def smooth(e0, e1, x):
+    t = min(max((x - e0) / (e1 - e0), 0.0), 1.0)
+    return t * t * (3 - 2 * t)
 
 
 def build_mountains(M, coll, suffix=""):
-    """Une couronne de montagnes à l'horizon : pentes vertes, roche, neige au sommet (couleurs par sommet).
-    Devant, elles reculent un peu (plus de profondeur)."""
+    """Une vraie chaîne de montagnes tout autour (refaite le 8 oct. : « je veux que les montagnes soient vraiment plus belles »).
+    Avant : des cônes posés côte à côte. Maintenant : un seul relief continu, une grille en anneaux de 40 à 180 m,
+    sculptée par un bruit « à crêtes » (ridged noise, le bruit des générateurs de terrain) : vallées, arêtes et pics.
+    Couleurs par sommet, selon la hauteur ET la pente : prairie au pied, forêt sombre, roche, et de la neige sur
+    les sommets mais pas dans les pentes raides (comme en vrai). Au loin, tout se fond dans le bleu du ciel
+    (perspective aérienne : c'est ce qui donne la profondeur). Facettes nettes : on garde le style low poly du jeu.
+    Devant le joueur (angle 0), la chaîne commence plus loin : on voit plus de prairie devant le plateau."""
+    from mathutils import noise
     g = random.Random(11 if not suffix else 23)
+    seed = Vector((g.uniform(0, 500), g.uniform(0, 500), g.uniform(0, 500)))
     b = Builder([M["montagne"]])
-    grass, rock, snow = lin((0.36, 0.55, 0.24)), lin((0.52, 0.48, 0.44)), lin((0.95, 0.96, 0.98))
-    dark_rock = lin((0.4, 0.37, 0.35))
-    haze = lin((0.62, 0.72, 0.86))      # le bleu du lointain : les montagnes du fond se fondent dans le ciel
+    grass, forest = lin((0.38, 0.56, 0.24)), lin((0.16, 0.3, 0.14))
+    rock, dark_rock, snow = lin((0.56, 0.52, 0.47)), lin((0.36, 0.33, 0.31)), lin((0.95, 0.96, 0.98))
+    haze = lin((0.64, 0.74, 0.88))
 
-    # Trois rangs (amélioré le 7 oct.) : des collines vertes au pied (elles adoucissent la jonction avec la prairie),
-    # la couronne de montagnes, et une chaîne lointaine bleutée derrière (de la profondeur).
-    #            nombre, distance,  hauteur,  base,    brume
-    layers = [(14, (36, 52), (3, 7), (12, 20), 0.0),
-              (22, None, (18, 38), (18, 30), 0.0),
-              (16, (140, 170), (45, 70), (35, 50), 0.55)]
-    peaks = []
-    for (count, dists, heights, bases, mist) in layers:
-        for i in range(count):
-            ang = i * 360 / count + g.uniform(-6, 6)
-            if dists is None:
-                front = abs((ang + 180) % 360 - 180) < 35
-                dist = g.uniform(88, 110) if front else g.uniform(55, 85)
-            else:
-                dist = g.uniform(*dists)
-            peaks.append((ang, dist, g.uniform(*heights), g.uniform(*bases), mist, heights[1] < 10))
+    def ridged(x, y, scale, octaves=5):
+        """Bruit à crêtes : 1 - |bruit|, au carré, sur plusieurs octaves (des arêtes vives là où le bruit passe par 0)"""
+        h, amp, total, freq = 0.0, 1.0, 0.0, 1.0 / scale
+        for o in range(octaves):
+            n = 1.0 - abs(noise.noise(Vector((x * freq, y * freq, 0.0)) + seed * (o + 1)))
+            h += n * n * amp
+            total += amp
+            amp *= 0.5
+            freq *= 2.05
+        return h / total
 
-    for (ang, dist, height, base, mist, hill) in peaks:
-        center = polar(ang, dist, GROUND_Y - 0.5)
-        rings, segs = (4, 12) if hill else (10, 18)
-        seed = g.random() * 100
-        grid = []
-        for k in range(rings + 1):
-            t = k / rings                                            # 0 = sommet, 1 = pied
-            row = []
-            for j in range(segs):
-                a = 2 * math.pi * j / segs
-                bump = 1 + 0.25 * math.sin(a * 3 + seed) + 0.12 * math.sin(a * 7 + seed * 2)
-                r = base * t * bump * (1 + g.uniform(-0.06, 0.06) * (k > 0))       # un peu de relief irrégulier
-                if hill:
-                    h = height * (1 - t * t) if k else height                     # colline : un dôme doux
-                else:
-                    ridge = 1 + 0.15 * math.sin(a * 5 + seed) + 0.08 * abs(math.sin(a * 11 + seed * 3))   # arêtes
-                    h = height * (1 - t) ** 1.4 * ridge if k else height
-                p = center + Vector((math.cos(a) * r, math.sin(a) * r, h))
-                row.append(p)
-                if k == 0:
-                    break
-            grid.append(row)
+    segs, rings, r0, r1 = 192, 34, 40.0, 180.0
+    radii = [r0 * (r1 / r0) ** (k / rings) for k in range(rings + 1)]     # serré devant, plus lâche au loin
+    grid = []
+    for k, r in enumerate(radii):
+        row = []
+        for j in range(segs):
+            ang = 360 * j / segs
+            front = max(0.0, 1 - abs((ang + 180) % 360 - 180) / 50)      # 0° = devant le joueur
+            start = r0 + 22 * front
+            p = polar(ang, r)
+            main = smooth(start, start + 38, r)                              # la chaîne principale monte...
+            far = smooth(115, 160, r)                                        # ... et une plus haute derrière
+            big = 0.65 + 0.7 * (noise.noise(Vector((p.x / 90, p.y / 90, 0)) + seed) * 0.5 + 0.5)   # des massifs plus hauts que d'autres
+            h = main * (4 + 34 * ridged(p.x, p.y, 44, 4) ** 1.3 * big) + far * 30 * ridged(p.x, p.y, 62, 4)
+            row.append(p + Vector((0, 0, GROUND_Y - 0.4 + h)))
+        grid.append(row)
 
-        def colour(z, center=center, height=height, mist=mist, hill=hill, seed=seed):
-            u = (z - center.z) / height
-            if hill:
-                c = grass
-            elif u > 0.7 + 0.05 * math.sin(seed):                    # la limite de la neige varie d'un sommet à l'autre
-                c = snow
-            elif u > 0.5:
-                c = rock
-            elif u > 0.35:
-                c = dark_rock
-            else:
-                c = grass
-            return tuple(x * (1 - mist) + hz * mist for x, hz in zip(c, haze))
+    def colour(centre, normal, dist):
+        """La couleur d'une facette : sa hauteur, sa pente (lue sur sa normale) et sa distance"""
+        h = centre.z - GROUND_Y
+        slope = math.sqrt(max(1 - normal.z ** 2, 0.0)) / max(normal.z, 0.05)   # 0 = plat, 1 = 45°
+        wobble = noise.noise(Vector((centre.x / 11, centre.y / 11, 1.0)) + seed)   # des limites irrégulières
+        snowline = 25 + 5 * wobble
+        if h > snowline and slope < 1.5:
+            c = snow
+        elif h > snowline - 7 or slope > 1.3:
+            c = dark_rock if slope > 1.7 or wobble > 0.3 else rock
+        elif h > 2.5 + 2 * wobble:
+            t = smooth(2.5, 9, h)
+            c = tuple(a * (1 - t) + f * t for a, f in zip(grass, forest))      # la forêt sur les flancs
+        else:
+            c = grass
+        mist = 0.72 * smooth(55, 175, dist)
+        return tuple(x * (1 - mist) + hz * mist for x, hz in zip(c, haze))
 
-        top = grid[0][0]
+    for k in range(rings):
         for j in range(segs):
             j2 = (j + 1) % segs
-            f = b.face([top, grid[1][j], grid[1][j2]], [(0, 0)] * 3, M["montagne"])
-            outward(f, center)
-            for loop in f.loops:
-                c = colour(loop.vert.co.z)
-                loop[b.col] = (*c, 1)
-            f.tag = True
-        for k in range(1, rings):
-            for j in range(segs):
-                j2 = (j + 1) % segs
-                f = b.face([grid[k][j], grid[k + 1][j], grid[k + 1][j2], grid[k][j2]], [(0, 0)] * 4, M["montagne"])
-                outward(f, center)
+            for tri in ((grid[k][j], grid[k + 1][j], grid[k + 1][j2]), (grid[k][j], grid[k + 1][j2], grid[k][j2])):
+                f = b.face(tri, [(0, 0)] * 3, M["montagne"])
+                f.normal_update()
+                if f.normal.z < 0:
+                    f.normal_flip()
+                centre = (tri[0] + tri[1] + tri[2]) / 3
+                c = colour(centre, f.normal, Vector((centre.x, centre.y)).length)   # une couleur par facette : le style low poly net
                 for loop in f.loops:
-                    c = colour(loop.vert.co.z)
                     loop[b.col] = (*c, 1)
                 f.tag = True
     ob = b.finish("Montagnes" + suffix, coll, recalc=False)
@@ -1307,6 +1344,7 @@ def main():
     objs += build_roof(M, cabin)
     objs.append(build_chandelier(M, cabin))
     objs.append(build_lanterns(M, cabin))
+    objs += FLAMES                                    # les flammes du lustre et des lanternes (objets à part, animés dans Unity)
     objs.append(build_rug(M, cabin))
     objs.append(build_dartboard(M, cabin))
     objs += build_wall_decor(M, cabin)

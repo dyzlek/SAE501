@@ -375,6 +375,7 @@ namespace SAE.EditorTools
             AddFingertip(rig.rightHand);
             GiveHands(rig, out var leftHand, out var rightHand);
             GiveBow(go, rig, leftHand, rightHand);
+            if (rig.leftHand) rig.leftHand.gameObject.AddComponent<FpsCounter>();   // les fps au poignet (éditeur et builds de dev)
             go.AddComponent<MonkeyInfoCard>();   // fiche du singe visé, dans le décor
             return rig;
         }
@@ -684,6 +685,14 @@ namespace SAE.EditorTools
 
             MakeStatic(cabin);
 
+            // Les flammes des bougies vacillent (FlameFlicker) : elles bougent, donc elles ne sont pas « static »
+            foreach (var t in cabin.GetComponentsInChildren<Transform>())
+                if (t.name.StartsWith("Flamme_"))
+                {
+                    GameObjectUtility.SetStaticEditorFlags(t.gameObject, 0);
+                    t.gameObject.AddComponent<FlameFlicker>();
+                }
+
             // La cible de fléchettes du modèle devient jouable (petit bonus caché)
             var dartboard = cabin.GetComponentsInChildren<Transform>().FirstOrDefault(t => t.name == "Cible");
             if (dartboard) BuildDarts(env, dartboard.gameObject);
@@ -691,12 +700,18 @@ namespace SAE.EditorTools
 
         // La cible jouable : un collider plat devant la cible du modèle (DartBoard), une petite ardoise des points en dessous,
         // et un présentoir avec trois fléchettes à lancer (Dart), qui y reviennent toutes seules.
+        const float DartboardFront = HubLayout.CabinRadius - 0.2f;   // le devant de la cible : rondins (12 cm) + 8 cm (cabane.py)
+
         static void BuildDarts(Transform env, GameObject model)
         {
+            // Le devant de la cible, mesuré sur le mur qui la porte (et pas avec la boîte englobante du modèle :
+            // la cible est de biais, sa boîte est plus profonde qu'elle, et les fléchettes se retrouvaient DANS
+            // le collider du mur : le rayon touchait le mur, on ne pouvait pas les prendre (bug du 8 oct.)).
             var b = Bounds(model);
-            var outward = new Vector3(b.center.x, 0f, b.center.z).normalized;   // de la pièce vers le mur
-            float depth = Mathf.Abs(outward.x) * b.extents.x + Mathf.Abs(outward.z) * b.extents.z;
-            var face = b.center + outward * (depth - 0.05f);                     // le devant de la cible (5 cm devant le mur)
+            float step = 360f / CabinSides;
+            float wallAngle = Mathf.Round(Mathf.Atan2(b.center.x, b.center.z) * Mathf.Rad2Deg / step) * step;
+            var outward = Quaternion.Euler(0f, wallAngle, 0f) * Vector3.forward;   // de la pièce vers le mur
+            var face = b.center + outward * (DartboardFront - Vector3.Dot(b.center, outward));
 
             var board = new GameObject("Cible (jeu)").transform;
             board.SetParent(env, false);
@@ -766,6 +781,7 @@ namespace SAE.EditorTools
             light.intensity = intensity;
             light.color = new Color(1f, 0.8f, 0.55f);   // chaude, comme une flamme
             light.shadows = LightShadows.None;           // les ombres des lampes coûtent trop cher sur le casque
+            light.gameObject.AddComponent<FlameFlicker>();   // la lumière vacille avec les flammes
         }
 
         // Les accessoires du modèle Blender (tonneaux, caisses, régimes de bananes), seulement dehors, sur la terrasse :
@@ -1308,7 +1324,7 @@ namespace SAE.EditorTools
             // on ne part plus se perdre dans les montagnes. La prairie reste solide partout (on ne tombe pas).
             var meadow = Visuals.Solid("Prairie (collider)", map.transform, new Vector3(0, GroundY - 0.05f, 0), new Vector3(180f, 0.1f, 180f), Floor);
             meadow.GetComponent<Renderer>().enabled = false;
-            const float TeleportMargin = 6f;
+            const float TeleportMargin = 4f;   // 4 m (6 avant le 8 oct. : on se posait dans les arbres) ; arbres et buissons commencent 4 m plus loin (cabane.py, map_clear)
             float zoneSide = 2f * (edge + TeleportMargin);
             var zone = Visuals.Solid("Zone de téléportation", map.transform, new Vector3(0, GroundY - 0.04f, 0), new Vector3(zoneSide, 0.1f, zoneSide), Floor);
             zone.GetComponent<Renderer>().enabled = false;   // 1 cm au-dessus de la prairie : c'est elle que le rayon touche

@@ -2,6 +2,27 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Jeu. 8 oct. 2026
+**Test au casque des PR #95, #96 et #97** : bons au casque : saut coupé (#55), point d'apparition (#65), plateau (#67), singes débloqués avec des bananes (#52), traînée des lancers (#28), bananes qui pourrissent (#75).
+À reprendre (branche `fix/retours-casque`, PR suivante) :
+- **Arc** : 0,6 s entre deux tirs, c'est trop lent → **0,3 s**.
+- **Téléportation sur la carte** : on se posait dans les arbres → zone de téléportation réduite à 4 m autour du labyrinthe, et arbres, buissons et champignons du paysage repoussés 4 m plus loin.
+- **Fléchettes impossibles à prendre de loin en VR** : cause trouvée : la cible était placée avec la boîte englobante du modèle (plus profonde que la cible, qui est de biais), et les fléchettes se retrouvaient **dans le collider invisible du mur**. Le rayon touchait le mur, pas la fléchette, et une fléchette lancée aurait tapé le mur avant la cible. La cible est maintenant placée par rapport au mur qui la porte.
+- **Décor qui se chevauche** (étagères pile derrière les lanternes, ballons de la guirlande dans les pots et dans les rondins) : l'étagère est à côté de la lanterne, la guirlande passe tout en haut et pas au-dessus des étagères, les ballons ont une vraie forme (resserrés vers le nœud) et une ficelle ; livres debout de couleurs différentes, un bocal de bougies.
+- **Montagnes refaites** : un seul relief continu tout autour (bruit « à crêtes », comme un générateur de terrain), prairie, forêt, roche et neige selon la hauteur et la pente, brume bleue au loin.
+- **Flammes animées** : les bougies du lustre et des lanternes vacillent (la lanterne a maintenant une vraie bougie, plus une vitre pleine), et leur lumière aussi.
+- **Compteur de fps** au poignet gauche (vert à 72 et plus), dans l'éditeur et les builds de développement seulement (#35).
+
+![Les nouvelles montagnes](../captures/montagnes-v2-horizon.png)
+
+![La cabane et les montagnes](../captures/montagnes-v2-cabane.png)
+
+![Étagère à côté de la lanterne, plus rien ne se chevauche](../captures/etagere-lanterne.png)
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | Branche `fix/retours-casque` (sur `art/decor-lumiere`) : arc à 0,3 s (#60) ; téléportation de la carte à 4 m et paysage dégagé sur 4 m de plus (#81) ; fléchettes sorties du collider du mur (#74) ; `cabane.py` : étagères à côté des lanternes, guirlande remontée, ballons et livres plus réalistes (#66), montagnes en relief continu (#61), bougies et flammes à part (#77) ; `FlameFlicker` (flammes et lumières qui vacillent) ; `FpsCounter` au poignet (#35). `Cabane.glb` (108 000 triangles) et `Paysage.glb` (62 000) réexportés, rendus Blender vérifiés. Scène Hub et Labyrinthe à régénérer dans Unity ; pas testé au casque | À tester |
+
 ## Mer. 7 oct. 2026
 **Décor refait dans Blender (#61, #66)** _(rendus de prévisualisation Blender, pas encore Unity)_
 

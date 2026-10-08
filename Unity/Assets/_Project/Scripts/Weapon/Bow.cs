@@ -23,7 +23,7 @@ namespace SAE
         public float maxSpeed = 30f;     // vitesse de la flèche à pleine tension, en m/s
         public float limbBend = 12f;     // angle des branches à pleine tension, en degrés
         public Transform aim;            // mode PC : la caméra, la flèche part vers le centre de l'écran ; vide en VR (sens de l'arc)
-        public float reloadTime = 0.6f;  // secondes entre deux tirs : on ne peut plus « spammer » l'arc, comme un vrai arc qu'on recharge
+        public float reloadTime = 0.3f;  // secondes entre deux tirs (0,6 s, trop lent au casque : 0,3 s le 8 oct.) : on ne peut plus « spammer » l'arc, comme un vrai arc qu'on recharge
 
         const float MinDraw = 0.25f;         // en dessous, la flèche tombe au lieu de partir : il faut vraiment tendre l'arc
         const int PreviewPoints = 50;        // points de la courbe de visée

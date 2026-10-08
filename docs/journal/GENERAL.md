@@ -49,6 +49,7 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 | 6 | Lisibilité : argent et prix, bananes visibles sur la carte, visuel « fusion possible », explication des touches, texte du coffre | #63, #64, #57, #54, #72 | _à répartir_ |
 | — | Assets : boutons, ballons MOAB | #21, #20 | Maxens |
 
+- **Test au casque des PR #95 à #97 (Dylan)** : presque tout est bon. Retours corrigés dans la branche `fix/retours-casque` : arc à 0,3 s, plus de téléportation dans les arbres, fléchettes enfin attrapables (elles étaient dans le collider du mur), décor sans chevauchement, nouvelles montagnes, flammes animées, compteur de fps au poignet pour mesurer les 72 fps (#35).
 - **Ménage avant de committer** : des fichiers Unity traînent hors du projet (`Sol.glb`, `Systeme_Bananes.glb`, `Main Camera.glb`, `Directional Light.glb` à la racine de `Assets/`, dossier `_Recovery/`, fichiers de test de performance). À ranger dans `Assets/_Project/Art/` ou à supprimer, pas à pousser tels quels.
 - **Après vendredi** : lancer les singes, traînée, physique des bananes (#27, #28, #29) restent en POURRAIT ; à écrire dans le GDD avant de commencer.
 
