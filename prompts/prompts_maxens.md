@@ -4,6 +4,12 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Jeu. 8 oct. 2026
 
+### Corrections du voile noir
+> Ça ne va pas encore :
+> 1. le voile doit commencer à la moitié de l'animation d'ouverture de la porte ;
+> 2. inverse le sens : il descend du haut pour cacher la vue, puis remonte ;
+> 3. rends-le beaucoup plus doux et plus lent.
+
 ### Une transition au passage des portes
 > Dernier détail : quand on ouvre une porte, dans les deux sens, après l'animation d'ouverture, un voile noir doit monter du bas vers le haut ; une fois téléporté, il disparaît du haut vers le bas.
 

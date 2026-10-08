@@ -63,15 +63,19 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
   ![Les 3 bananiers achetés, avec leurs étals ; la colonne +1 ARBRE au comptoir](../captures/maxens-trois-bananiers.png)
 
-- **Fait : un voile noir pendant le passage des portes** (dans les deux sens) : la porte s'ouvre, **un voile noir monte du bas** et cache la vue, on est téléporté, puis **il redescend** (le haut de l'image réapparaît en premier). Changer de place d'un coup sous les yeux est désagréable en VR. C'est un carré noir collé devant la caméra du joueur, dessiné par-dessus tout avec le shader des textes du jeu (compatible casque) : nouveau script `Player/ScreenCurtain.cs`.
-  - Testé en Play via Unity MCP : passage cabane → bananeraie avec le voile, qui disparaît à l'arrivée.
+- **Fait : un voile noir pendant le passage des portes** (dans les deux sens). Changer de place d'un coup sous les yeux est désagréable en VR. Nouveau script `Player/ScreenCurtain.cs` : un carré noir collé devant la caméra du joueur, dessiné par-dessus tout avec le shader des textes du jeu (compatible casque).
+- **Corrigé après mon test du voile :**
+  - il démarre **à la moitié de l'ouverture de la porte** (avant : une fois la porte ouverte) ;
+  - **sens inversé** : il **descend du haut** pour cacher la vue, et après la téléportation il **remonte** (le bas de l'image réapparaît en premier) ;
+  - **beaucoup plus doux et plus lent** : 1,2 s dans chaque sens (avant 0,4 s), un départ et une arrivée en douceur, et un **bord fondu** au lieu d'une ligne nette. Sa taille suit le champ de vision de la caméra, pour que le bord traverse toute l'image (au PC comme au casque). La porte s'ouvre aussi un peu plus lentement (1 s).
+  - Testé en Play via Unity MCP : passage cabane → bananeraie complet, voile caché à l'arrivée.
 
-  ![Le voile noir à mi-course](../captures/maxens-voile-noir.png)
+  ![Le voile noir à mi-course, qui descend du haut avec son bord fondu](../captures/maxens-voile-noir.png)
 
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
-| Claude (Code) | Voile noir qui monte puis redescend pendant le passage des portes (VR et PC) ; testé en Play via Unity MCP | À tester au casque |
+| Claude (Code) | Voile noir pendant le passage des portes ; puis, après mon test : démarrage à mi-ouverture, descend du haut et remonte, plus lent et doux avec un bord fondu ; testé en Play via Unity MCP | À tester au casque |
 | Claude (Code) | Jusqu'à 3 bananiers (achat au comptoir, 500 puis 1 500 bananes), améliorations communes aux 3 arbres, singes qui ramassent sous tous les arbres ; testé en Play via Unity MCP | À tester au casque |
 | Claude (Code) | Corrections de la bananeraie : singes qui vont au bon panier, panneau BANANERAIE sur la porte, téléportation limitée à la terrasse (hors meubles), panier agrandi sans anse ; testé en Play via Unity MCP | À tester au casque |
 | Claude (Code) | Bananeraie : nouvel endroit modélisé par script Blender dans le style de la cabane (terrasse, barrière, abri, portail), 3e niveau et sa scène, porte de la cabane qui s'ouvre puis téléporte (`PortalDoor`), déménagement du bananier, du panier, des comptoirs et des récolteurs ; testé en Play via Unity MCP | À tester au casque |
