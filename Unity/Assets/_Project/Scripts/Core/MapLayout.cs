@@ -3,70 +3,74 @@ using UnityEngine;
 
 namespace SAE
 {
-    // La piste en labyrinthe. La même description sert à la carte (en grand) et au plateau (en petit).
-    // S = départ des ballons, E = sortie, # = piste, . = terrain où l'on peut poser des singes.
+    // Le chemin des ballons. La même description sert à la carte (en grand) et au plateau (en petit).
+    // Comme dans les cartes de Bloons TD (Monkey Meadow, In The Loop…), c'est un chemin de terre qui serpente
+    // avec des virages arrondis : il entre par un bord de la carte et ressort par un autre, près du joueur.
+    // On le décrit par quelques points de passage ; la courbe lisse qui passe par eux est calculée (Catmull-Rom).
     public static class MapLayout
     {
         public const int Size = 8;
-        public const float Tile = 3f;                 // taille d'une case de la carte, en mètres
+        public const float Tile = 3f;                 // une case de 3 m (sert à la taille du plateau du hub)
         public const float HalfExtent = Size * Tile / 2f;
+        public const float PathWidth = 3f;            // largeur du chemin de terre, en mètres
+        const int StepsPerSegment = 10;               // points calculés entre deux points de passage
 
-        static readonly string[] rows =
+        // Points de passage (x, z) en mètres, centre de la carte = (0, 0), le joueur est au sud (z négatif).
+        // Les allers-retours sont espacés d'au moins 5 m : il reste de la place pour poser des singes entre deux.
+        static readonly Vector2[] waypoints =
         {
-            "S#######",
-            ".......#",
-            ".#######",
-            ".#......",
-            ".######.",
-            "......#.",
-            "E######.",
-            "........",
+            new Vector2(-12f, 7f),    // entrée, bord ouest
+            new Vector2(-3f, 7f),
+            new Vector2(3f, 9f),      // petite bosse vers le nord
+            new Vector2(8.5f, 8f),
+            new Vector2(9f, 3f),      // virage en épingle à l'est
+            new Vector2(5f, 0f),
+            new Vector2(-2f, 1f),     // retour par le milieu
+            new Vector2(-8f, 0f),
+            new Vector2(-8.5f, -5f),  // descente à l'ouest
+            new Vector2(-3f, -8f),
+            new Vector2(4f, -6f),
+            new Vector2(8f, -8.5f),
+            new Vector2(8f, -12f),    // sortie, bord sud, à droite de l'estrade du joueur
         };
 
         static List<Vector3> pathPoints;
 
-        public static char At(int row, int col) => rows[row][col];
-
-        // Centre d'une case dans le repère de la carte. La ligne 0 est au fond, loin du joueur.
-        public static Vector3 CellLocal(int row, int col) =>
-            new Vector3((col - (Size - 1) / 2f) * Tile, 0f, ((Size - 1) / 2f - row) * Tile);
-
-        // Centres des cases de la piste dans l'ordre, du départ à la sortie (repère de la carte).
+        // La courbe du chemin, du départ à la sortie (repère de la carte, y = 0).
         public static List<Vector3> PathPoints()
         {
             if (pathPoints != null) return pathPoints;
             pathPoints = new List<Vector3>();
-            var current = Find('S');
-            var visited = new HashSet<Vector2Int>();
-            Vector2Int[] dirs = { Vector2Int.right, Vector2Int.left, Vector2Int.up, Vector2Int.down };
-
-            while (true)
+            for (int i = 0; i < waypoints.Length - 1; i++)
             {
-                pathPoints.Add(CellLocal(current.y, current.x));
-                visited.Add(current);
-                if (At(current.y, current.x) == 'E') break;
-
-                bool moved = false;
-                foreach (var d in dirs)
+                // Catmull-Rom : la courbe passe par chaque point, en tenant compte du point d'avant et d'après
+                var p0 = waypoints[Mathf.Max(i - 1, 0)];
+                var p1 = waypoints[i];
+                var p2 = waypoints[i + 1];
+                var p3 = waypoints[Mathf.Min(i + 2, waypoints.Length - 1)];
+                for (int s = 0; s < StepsPerSegment; s++)
                 {
-                    var next = current + d;
-                    if (next.x < 0 || next.y < 0 || next.x >= Size || next.y >= Size) continue;
-                    if (At(next.y, next.x) == '.' || visited.Contains(next)) continue;
-                    current = next;
-                    moved = true;
-                    break;
+                    var p = CatmullRom(p0, p1, p2, p3, s / (float)StepsPerSegment);
+                    pathPoints.Add(new Vector3(p.x, 0f, p.y));
                 }
-                if (!moved) { Debug.LogError("MapLayout : la piste ne mène pas à E."); break; }
             }
+            var last = waypoints[waypoints.Length - 1];
+            pathPoints.Add(new Vector3(last.x, 0f, last.y));
             return pathPoints;
         }
 
-        // Peut-on poser un singe de rayon 'radius' en pos (x, z) ? Dans la carte et pas sur la piste.
+        static Vector2 CatmullRom(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, float t)
+        {
+            float t2 = t * t, t3 = t2 * t;
+            return 0.5f * (2f * p1 + (p2 - p0) * t + (2f * p0 - 5f * p1 + 4f * p2 - p3) * t2 + (3f * p1 - p0 - 3f * p2 + p3) * t3);
+        }
+
+        // Peut-on poser un singe de rayon 'radius' en pos (x, z) ? Dans la carte et pas sur le chemin.
         public static bool CanPlace(Vector2 pos, float radius)
         {
             if (Mathf.Abs(pos.x) > HalfExtent - radius || Mathf.Abs(pos.y) > HalfExtent - radius) return false;
             var pts = PathPoints();
-            float minDist = Tile / 2f + radius;
+            float minDist = PathWidth / 2f + radius;
             for (int i = 0; i < pts.Count - 1; i++)
             {
                 var a = new Vector2(pts[i].x, pts[i].z);
@@ -81,14 +85,6 @@ namespace SAE
             var ab = b - a;
             float t = Mathf.Clamp01(Vector2.Dot(p - a, ab) / ab.sqrMagnitude);
             return Vector2.Distance(p, a + t * ab);
-        }
-
-        static Vector2Int Find(char c)
-        {
-            for (int r = 0; r < Size; r++)
-                for (int col = 0; col < Size; col++)
-                    if (rows[r][col] == c) return new Vector2Int(col, r);
-            return Vector2Int.zero;
         }
     }
 }

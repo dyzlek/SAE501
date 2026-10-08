@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Jeu. 8 oct. 2026
 
+### Chemin des ballons
+> Améliore le chemin des ballons, en t'inspirant des vraies cartes du jeu (Bloons TD).
+
 ### Fiche du singe et coffre
 > Quand on appuie sur A, je veux que les informations du singe soient plus lisibles, pas juste des infos données comme ça : à gauche, on voit le singe avec son aura, etc. Et quand on ouvre le coffre, ça doit respecter la DA globale.
 

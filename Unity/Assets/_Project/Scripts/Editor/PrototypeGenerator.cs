@@ -53,9 +53,9 @@ namespace SAE.EditorTools
         static readonly Color PlayColor = new Color(0.2f, 0.8f, 0.3f);
         static readonly Color ClearColor = new Color(0.55f, 0.6f, 0.7f);
         static readonly Color HubColor = new Color(0.3f, 0.5f, 1f);
-        static readonly Color PathColor = new Color(0.62f, 0.45f, 0.25f);
+        static readonly Color PathColor = new Color(0.72f, 0.55f, 0.32f);       // la terre du chemin
+        static readonly Color PathEdgeColor = new Color(0.45f, 0.32f, 0.18f);   // son contour, plus sombre
         static readonly Color Grass1 = new Color(0.30f, 0.62f, 0.28f);
-        static readonly Color Grass2 = new Color(0.26f, 0.55f, 0.24f);
 
         [MenuItem("SAE/Générer le prototype")]
         public static void Generate()
@@ -1275,34 +1275,31 @@ namespace SAE.EditorTools
             return b;
         }
 
-        // Grille 8x8 en dalles (sans collider sur le plateau, avec collider sur la carte pour marcher).
+        // Le terrain de jeu : une pelouse carrée et, dessus, le chemin de terre qui serpente (MapLayout, dessiné par TrackView).
+        // Sur la carte, la pelouse a un collider (on peut s'y téléporter) ; sur le plateau, c'est le plateau qui porte le collider.
         static void BuildGrid(Transform parent, float tile, float thickness, bool walkable)
         {
             float k = tile / MapLayout.Tile;
-            // Sur la carte, les cases sont rangées sous un même objet, sur lequel on peut se téléporter
-            // (la zone de téléportation prend les colliders de tous ses enfants)
-            var cells = parent;
-            if (walkable)
-            {
-                cells = new GameObject("Cases").transform;
-                cells.SetParent(parent, false);
-            }
-            for (int r = 0; r < MapLayout.Size; r++)
-                for (int c = 0; c < MapLayout.Size; c++)
-                {
-                    char ch = MapLayout.At(r, c);
-                    Color color = ch == 'S' ? new Color(0.3f, 0.9f, 0.4f)
-                        : ch == 'E' ? new Color(0.9f, 0.25f, 0.25f)
-                        : ch == '#' ? PathColor
-                        : (r + c) % 2 == 0 ? Grass1 : Grass2;
+            float side = MapLayout.Size * tile;
+            var size = new Vector3(side, thickness, side);
+            var pos = new Vector3(0, -thickness / 2f, 0);
+            var lawn = walkable ? Visuals.Solid("Pelouse", parent, pos, size, Grass1) : Visuals.Box("Pelouse", parent, pos, size, Grass1);
+            lawn.tag = Tags.Terrain;
+            if (walkable) Teleportable(lawn);
 
-                    var size = new Vector3(tile, thickness, tile);
-                    var pos = MapLayout.CellLocal(r, c) * k + new Vector3(0, -thickness / 2f, 0);
-                    var cell = walkable ? Visuals.Solid($"Case {r},{c}", cells, pos, size, color)
-                                        : Visuals.Box($"Case {r},{c}", cells, pos, size, color);
-                    cell.tag = ch == '.' ? Tags.Terrain : Tags.Piste;
-                }
-            if (walkable) Teleportable(cells.gameObject);
+            // Bordure sombre un peu plus large, puis la terre par-dessus : le chemin a un contour net, comme dans Bloons
+            BuildTrack(parent, "Bordure du chemin", k, MapLayout.PathWidth + 0.5f, 0.004f * k + 0.001f, PathEdgeColor);
+            BuildTrack(parent, "Chemin", k, MapLayout.PathWidth, 0.008f * k + 0.002f, PathColor);
+        }
+
+        static void BuildTrack(Transform parent, string name, float scale, float width, float height, Color color)
+        {
+            var track = Visuals.Box(name, parent, new Vector3(0, height, 0), Vector3.one, color);   // un cube pour avoir le matériau du jeu
+            track.tag = Tags.Piste;
+            var view = track.AddComponent<TrackView>();
+            view.scale = scale;
+            view.width = width;
+            view.Build();   // visible tout de suite dans l'éditeur ; refait au lancement
         }
 
         // ---------------- CARTE ----------------
@@ -1319,7 +1316,7 @@ namespace SAE.EditorTools
             const float GroundY = -0.55f;   // le dessus de l'herbe, autour du plateau de jeu
             Teleportable(Visuals.Solid("Estrade", map.transform, new Vector3(0, -0.25f, -edge - 2.5f), new Vector3(8, 0.5f, 5), Wood));
             // Le sol de toute la prairie (invisible : on voit l'herbe du paysage) : on peut s'y téléporter partout,
-            // autour du labyrinthe comme plus loin, et sur les cases du labyrinthe elles-mêmes (voir BuildGrid)
+            // autour du labyrinthe comme plus loin, et sur la pelouse du terrain de jeu elle-même (voir BuildGrid)
             // On ne peut s'y téléporter que PRÈS du labyrinthe (TeleportMargin autour) : plus loin, le rayon devient rouge,
             // on ne part plus se perdre dans les montagnes. La prairie reste solide partout (on ne tombe pas).
             var meadow = Visuals.Solid("Prairie (collider)", map.transform, new Vector3(0, GroundY - 0.05f, 0), new Vector3(180f, 0.1f, 180f), Floor);
