@@ -1,51 +1,49 @@
-# Game Design Document — [Nom du jeu] _(brouillon v0)_
+# Game Design Document — Bloons VR _(v1)_
 
-_v1 à rendre le ven. 9 oct. 2026 (2 pages max) · version finale le ven. 13 nov. Le GDD vit : on le met à jour jusqu'au rendu._
+_v1 rendue le ven. 9 oct. 2026 · version finale le ven. 13 nov. Le GDD vit : on le met à jour jusqu'au rendu._
 
 ## 1. Pitch
-_Proposition :_ Un tower defense en VR où tu es Quincy : tu tires à l'arc sur les ballons, puis tu poses tes singes à la main sur la table de jeu, et tu récoltes tes bananes avant qu'elles ne pourrissent pour en avoir d'autres.
+Un tower defense en VR dans l'univers de Bloons TD : tu es Quincy, tu tires à l'arc sur les ballons, tu poses tes singes à la main sur la maquette, et tu ramasses tes bananes avant qu'elles ne pourrissent.
 
 ## 2. Le geste et la boucle
-- **Gestes :** tirer à l'arc (Quincy) · saisir et poser un singe sur la maquette · ramasser une banane et la jeter dans la caisse.
-- **Boucle :** Le joueur **tire à l'arc et place ses singes** pour **arrêter la vague de ballons**, mais **les ballons arrivent plus vite et plus solides et les bananes pourrissent**, et il gagne **de l'argent à chaque vague finie, qui ouvre des coffres et de nouveaux singes**.
+- **Gestes :** tirer à l'arc (Quincy) · saisir et poser un singe sur la maquette · ramasser une banane et la lancer dans la caisse.
+- **Boucle :** Le joueur **tire à l'arc et place ses singes** pour **arrêter la vague de ballons**, mais **les ballons arrivent plus vite et plus solides et les bananes pourrissent**, et il gagne **de l'argent et des bananes, qui ouvrent le coffre et débloquent de nouveaux singes**.
 
 ## 3. Univers et ambiance
-Univers de Bloons : singes, ballons colorés, ton cartoon. Le guide du tutoriel est Pat Fusty.
-**À trancher :** les assets officiels de Bloons appartiennent à Ninja Kiwi. Ça peut passer en exercice d'école, mais c'est bloquant pour une candidature aux Pégases. Faut-il des assets maison ou low-poly « inspirés de » ?
+Univers de Bloons TD assumé : singes, ballons colorés, ton cartoon et chaleureux. Le hub est une cabane en rondins éclairée aux bougies, au milieu des montagnes ; la carte est un labyrinthe à taille réelle. Le guide du tutoriel est Pat Fusty.
+**Droits :** l'univers appartient à Ninja Kiwi. On le garde comme exercice d'école et fan-game non commercial ; nos modèles sont faits maison (Blender), sans logo ni asset officiel. Une candidature aux Pégases demanderait de renommer et de changer l'habillage.
 
 ## 4. Type de jeu et références
 - **C'est Bloons TD, mais avec ton arc en main et tes singes posés à la main sur une maquette.**
-- Références : Bloons TD 6 (codes TD, types de ballons), Rush Royale (fusion 3 → 1, coffres), Bloons TD VR / Tower Tag (TD en VR), Job Simulator (saisir et lancer des objets).
+- Références : Bloons TD 6 (codes TD, types de ballons), Rush Royale (fusion 3 → 1, coffre), Job Simulator (saisir et lancer des objets), In Death / The Lab (tir à l'arc VR).
 
 ## 5. Mécaniques et patterns
-- **Tours (singes) :** classique, boomerang, canon, sniper, tireur de punaises, singe de glace, encolleur.
-- **Fusion :** 3 singes de même type et même niveau donnent 1 singe du niveau suivant.
-- **Coffres (gacha) :** raretés gris, vert, bleu, violet, légendaire, arc-en-ciel. Le prix augmente à chaque coffre ouvert. Le légendaire et l'arc-en-ciel sont peut-être hors des coffres.
-- **Économie :** tuer un ballon ne rapporte rien ; finir une vague ou tuer un boss rapporte de l'argent.
-- **Bananier** (améliorable) : les bananes tombent, il faut les ramasser et les mettre dans la caisse avant qu'elles pourrissent. Plus tard, on peut acheter un singe récolteur, payant et limité.
-- **Roulette :** on mise ses gains, qui sont soit perdus, soit multipliés.
-- **Quincy :** il tire à l'arc pendant les vagues. Son arc s'améliore (cadence, tir x3). Il ne tire pas dans le hub où l'on place les singes.
-- **Ennemis :** ballons normaux (couleurs = résistance), ballons cœur (ils se régénèrent), ballons blindés. Deux boss : le dirigeable rouge et le dirigeable bleu.
-- **Affordances :** la banane mûre brille (on la ramasse), la caisse est ouverte (on y dépose), un singe saisi montre sa portée au sol, un ballon rouge est dangereux.
+- **Deux temps :** le **hub** (on est géant devant la maquette : on pose, fusionne, achète) puis la **vague** (on est à taille réelle sur la carte, l'arc en main).
+- **Singes :** posés à la main ; un singe saisi montre sa portée au sol. **Fusion :** 3 singes de même type et même niveau donnent 1 singe du niveau suivant.
+- **Économie :** finir une vague rapporte de l'argent ; les **bananes** (ramassées au bananier et lancées dans la caisse) débloquent les nouveaux singes. Le **coffre** donne des récompenses tirées à la roulette.
+- **Bananier :** les bananes tombent, mûrissent puis pourrissent ; il faut les récolter à temps. Un singe récolteur peut aider.
+- **Quincy :** tire à l'arc pendant les vagues (bander, viser, lâcher ; 0,3 s entre deux tirs).
+- **Ennemis :** ballons de couleur (la couleur = la résistance), puis un boss final : le dirigeable rouge.
+- **Affordances :** la banane mûre brille, la caisse est ouverte, la poignée de l'arc appelle la main, un objet s'éclaire quand la main approche.
 
 ## 6. Pourquoi la VR
-- **Les mains :** bander l'arc, viser et lâcher ; poser un singe sur la carte ; ramasser et jeter les bananes.
-- **Le regard :** surveiller plusieurs chemins et repérer la banane qui pourrit pendant la vague.
-- **La présence et l'échelle :** on est géant penché sur la maquette (le hub), puis à taille réelle au milieu des ballons (Quincy).
-- *Test de l'écran :* à la souris, poser des tours et cliquer des bananes marche aussi bien. **Ce sont l'arc et le double jeu « gérer la base tout en défendant » qui justifient la VR.**
+- **Les mains :** bander l'arc, viser et lâcher ; poser un singe sur la carte ; lancer les bananes.
+- **Le regard :** surveiller le chemin des ballons et repérer la banane qui pourrit.
+- **La présence et l'échelle :** géant penché sur la maquette dans le hub, puis à taille réelle au milieu des ballons.
+- *Test de l'écran :* à la souris, poser des tours marche aussi bien. **C'est l'arc, le changement d'échelle et le double jeu « gérer la base tout en défendant » qui justifient la VR.**
 
-## 7. Périmètre _(proposition, à valider en équipe)_
+## 7. Périmètre
 | DOIT | DEVRAIT | POURRAIT | NE FERA PAS |
 |---|---|---|---|
-| 1 carte, 1 chemin, ~10 vagues + un boss final (le dirigeable rouge) | Fusion 3 → 1 (niveaux 1 à 3) | 5-7 singes | Plusieurs cartes |
-| Quincy à l'arc (tir physique) | Bananier améliorable et bananes qui pourrissent | Roulette | Méta-progression entre les parties |
-| 3 singes posables à la main (classique, canon, glace) | Coffre simple avec 3 raretés | Ballon cœur, dirigeable bleu | Raretés légendaire et arc-en-ciel, gacha complet |
-| Bananes → caisse → argent | Ballon blindé | Améliorations de l'arc | Singe récolteur automatique |
-| Tutoriel avec Pat Fusty (niveau 1) | | | Multijoueur |
-| Ballons normaux (3 couleurs) | | | |
+| 1 carte, 1 chemin, ~10 vagues + boss final (dirigeable rouge) | Fusion 3 → 1 (niveaux 1 à 3) | Plus de singes (5 à 7) | Plusieurs cartes |
+| Quincy à l'arc (tir physique) | Bananes qui pourrissent, singe récolteur | Améliorations de l'arc | Méta-progression entre les parties |
+| 3 singes posables à la main | Coffre et roulette simples | Ballon cœur, ballon blindé | Raretés légendaire / arc-en-ciel, gacha complet |
+| Bananes → caisse → déblocage des singes | Décor soigné (cabane, montagnes, lumière) | Casino, cible de fléchettes | Multijoueur |
+| Tutoriel avec Pat Fusty (niveau 1) | | | Scénario, monde ouvert |
+| Ballons normaux (3 couleurs), argent lisible | | | |
 
 ## 8. Choix de confort
-- **Déplacement :** téléportation entre quelques points fixes (hub et postes de tir). Pas de déplacement libre au stick.
+- **Déplacement :** téléportation seulement, limitée à la zone de jeu (pas de saut, pas de déplacement au stick).
 - **Rotation :** snap turn par crans de 45°.
-- **Interface :** argent et vague affichés sur un panneau dans le décor, et sur la montre au poignet.
-- **Technique :** 72 fps minimum ; peu de ballons à l'écran (pooling, low-poly) ; 1 unité = 1 m ; vagues courtes.
+- **Interface :** argent, bananes et vague sur des panneaux dans le décor et au poignet, à 1-2 m ; pas de texte collé au visage.
+- **Technique :** 72 fps minimum (compteur au poignet en build de test) ; low-poly ; 1 unité = 1 m ; vagues courtes ; tout à portée de bras.
