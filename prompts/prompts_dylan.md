@@ -6,6 +6,7 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ### Arrivée sur la carte et animations des singes
 > Améliore cet endroit (l'arrivée sur la carte, voir la capture) et le portail, et ajoute des animations pour chaque singe.
+> Suite : au hub, j'aimerais que les singes ne soient plus en pose en T.
 
 ### Portails et bac à sable
 > Ajoute un portail au début et à la fin du chemin pour montrer le sens. Je voudrais aussi commencer les animations des différents singes : passe tous les singes en débloqués et gratuits, juste pour les voir.

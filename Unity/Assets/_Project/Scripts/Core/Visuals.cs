@@ -124,6 +124,7 @@ namespace SAE
             {
                 view.body.GetComponent<Renderer>().enabled = false;   // le cube reste comme collider et repère
                 view.model = FitModel(modelAsset, yaw, root.transform, size, out bodySize);
+                RestPose(view.model.transform, root.transform);
             }
             // L'aura n'est créée qu'en jeu : les particules ne bougent pas hors Play, et enregistrées dans la scène
             // pour chaque case elles l'alourdiraient beaucoup. Les cases de la bibliothèque la créent au lancement.
@@ -131,6 +132,29 @@ namespace SAE
             if (withLabel)
                 Label(root.transform, $"{MonkeyData.ShortName(m.type)}{(int)m.level + 1}", new Vector3(0, size * 0.9f, 0), size * 0.45f, Color.black);
             return root;
+        }
+
+        // Les modèles sont exportés en pose en T (bras écartés à l'horizontale) : on baisse les bras le long du corps,
+        // un peu écartés et un peu en avant, pour une pose naturelle au hub (bibliothèque, plateau, fiche, coffre).
+        // Les singes animés (carte, récolteurs) partent de cette pose. Le Canon et le Tireur n'ont pas de bras : rien ne change.
+        static void RestPose(Transform model, Transform root)
+        {
+            foreach (var (armName, foreArmName) in new[] { ("LeftArm", "LeftForeArm"), ("RightArm", "RightForeArm") })
+            {
+                Transform arm = null, foreArm = null;
+                foreach (var t in model.GetComponentsInChildren<Transform>())
+                {
+                    if (t.name.EndsWith(armName)) arm = t;
+                    if (t.name.EndsWith(foreArmName)) foreArm = t;
+                }
+                if (!arm || !foreArm) continue;
+                var current = foreArm.position - arm.position;
+                if (current.sqrMagnitude < 1e-8f) continue;
+                // Le singe regarde vers -Z local : le côté de ce bras se lit sur l'axe X de la racine
+                float side = Mathf.Sign(Vector3.Dot(arm.position - root.position, root.right));
+                var down = (-root.up + root.right * side * 0.3f - root.forward * 0.12f).normalized;
+                arm.rotation = Quaternion.FromToRotation(current, down) * arm.rotation;
+            }
         }
 
         // Les bras écartés (pose en T) peuvent un peu déborder sur les côtés : on ne compte la largeur
