@@ -49,9 +49,24 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
   ![Le panier agrandi, sans anse](../captures/maxens-panier-sans-anse.png)
 
+- **Fait : jusqu'à 3 bananiers dans la bananeraie** :
+  - **3 places** le long de la barrière de gauche, chacune avec son étal : au début, **un seul arbre** (celui du milieu) ;
+  - au comptoir BANANIER, une **4e colonne « +1 ARBRE »** : le 2e arbre coûte **500 bananes**, le 3e **1 500**, puis le bouton disparaît (« tous plantés »). L'arbre acheté **pousse** sous nos yeux (il grandit et rebondit un peu) ;
+  - les améliorations **PRODUCTION, FRAÎCHEUR et VALEUR valent pour les 3 arbres**, même ceux pas encore achetés : un nouvel arbre arrive au même niveau que les autres (nouveau script `Hub/BananaOrchard.cs`, le verger) ;
+  - **les singes récolteurs ramassent sous tous les arbres plantés** : chaque banane sait de quel arbre elle vient, le singe va au bord du bon étal ;
+  - la zone de téléportation exclut toute la bande des bananiers (un arbre peut y pousser).
+  - Testé en Play via Unity MCP : achat refusé sans argent, 2e arbre à 500, 3e à 1 500, puis plus rien à acheter ; une amélioration de production monte les 3 arbres ; les singes vident les 3 étals. Aucune erreur.
+
+  Ma capture : la place libre pour deux autres arbres.
+
+  ![Avant : un seul bananier, de la place pour deux autres](../captures/maxens-bananeraie-un-arbre.webp)
+
+  ![Les 3 bananiers achetés, avec leurs étals ; la colonne +1 ARBRE au comptoir](../captures/maxens-trois-bananiers.png)
+
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Jusqu'à 3 bananiers (achat au comptoir, 500 puis 1 500 bananes), améliorations communes aux 3 arbres, singes qui ramassent sous tous les arbres ; testé en Play via Unity MCP | À tester au casque |
 | Claude (Code) | Corrections de la bananeraie : singes qui vont au bon panier, panneau BANANERAIE sur la porte, téléportation limitée à la terrasse (hors meubles), panier agrandi sans anse ; testé en Play via Unity MCP | À tester au casque |
 | Claude (Code) | Bananeraie : nouvel endroit modélisé par script Blender dans le style de la cabane (terrasse, barrière, abri, portail), 3e niveau et sa scène, porte de la cabane qui s'ouvre puis téléporte (`PortalDoor`), déménagement du bananier, du panier, des comptoirs et des récolteurs ; testé en Play via Unity MCP | À tester au casque |
 | Claude (Code) | Paysage de la carte enfin aligné (noms « .001 » de Blender), erreurs de couleur des bananes corrigées | Gardé |

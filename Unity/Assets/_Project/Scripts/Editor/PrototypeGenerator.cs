@@ -938,7 +938,7 @@ namespace SAE.EditorTools
 
         // Le bananier, son panier et le récolteur, montés par l'installeur de Maxens (BananesInstaller.Construire),
         // appelé tel quel pour ne pas dupliquer son code. Puis on le place sur le cercle, tourné vers le joueur.
-        static Bananier BuildBananas(Transform env, Vector3 pos, float yaw, Vector3 tablePos, Vector3 basketPos, out Panier panier)
+        static Bananier BuildBananas(Transform env, Vector3 pos, float yaw, Vector3 tablePos, Vector3? basketPos, out Panier panier)
         {
             panier = null;
             var models = AssetDatabase.FindAssets("Bananes_Collectible t:Model");
@@ -949,6 +949,7 @@ namespace SAE.EditorTools
             typeof(BananesInstaller).GetMethod("Construire", Private).Invoke(null, new object[] { Vector3.zero });
 
             var root = GameObject.Find("Systeme_Bananes");
+            root.name = "Bananier et panier";   // le suivant (autre arbre) sera de nouveau « Systeme_Bananes »
             root.transform.SetParent(env, false);
             root.transform.SetPositionAndRotation(pos, Quaternion.Euler(0, yaw, 0));
 
@@ -985,11 +986,18 @@ namespace SAE.EditorTools
 
             // Le panier : à côté du plateau, sur un tabouret rond à hauteur de main (3 pieds, une étagère basse)
             var basket = root.transform.Find("Panier");
-            if (basket)
+            if (basket && basketPos == null)
+            {
+                // Un arbre en plus : pas de second panier (ni le récolteur automatique de l'installeur, qui y vidait les bananes)
+                Object.DestroyImmediate(basket.gameObject);
+                var auto = root.transform.Find("Recolteur");
+                if (auto) Object.DestroyImmediate(auto.gameObject);
+            }
+            else if (basket)
             {
                 var stool = new GameObject("Tabouret du panier").transform;
                 stool.SetParent(env, false);
-                stool.localPosition = basketPos;
+                stool.position = basketPos.Value;
                 const float Seat = 0.48f * BasketScale;   // l'assise, à la taille du panier agrandi
                 Visuals.Solid("Assise", stool, new Vector3(0, HandHeight - 0.03f, 0), new Vector3(Seat, 0.03f, Seat), DarkWood)
                     .GetComponent<MeshFilter>().sharedMesh = Cylinder;
@@ -997,7 +1005,7 @@ namespace SAE.EditorTools
                     .GetComponent<MeshFilter>().sharedMesh = Cylinder;
                 for (int i = 0; i < 3; i++)
                     Visuals.Box("Pied", stool, Around(i * 120f, Seat / 2f - 0.07f, (HandHeight - 0.06f) / 2f), new Vector3(0.05f, HandHeight - 0.06f, 0.05f), Wood);
-                basket.position = basketPos + Vector3.up * HandHeight;
+                basket.position = basketPos.Value + Vector3.up * HandHeight;
                 basket.localScale *= BasketScale;   // plus grand : on y lance les bananes plus facilement
                 RemoveHandle(basket);
                 panier = basket.GetComponentInChildren<Panier>();
@@ -1144,16 +1152,16 @@ namespace SAE.EditorTools
         }
 
         // Comptoir d'amélioration du bananier : 3 gros boutons ronds à enfoncer (production, fraîcheur, valeur).
-        static void BuildUpgradePanel(Transform env, Bananier bananier, Vector3 pos, float yaw)
+        static void BuildUpgradePanel(Transform env, BananaOrchard orchard, Vector3 pos, float yaw)
         {
-            var stats = new[] { BananaStat.Frequence, BananaStat.Pourriture, BananaStat.Valeur };
-            BuildCounter(env, "Comptoir bananier", "BANANIER", pos, yaw, new[] { "PRODUCTION", "FRAÎCHEUR", "VALEUR" }, out var buttons, out var labels);
+            var stats = new[] { BananaStat.Frequence, BananaStat.Pourriture, BananaStat.Valeur, BananaStat.Arbres };
+            BuildCounter(env, "Comptoir bananier", "BANANIER", pos, yaw, new[] { "PRODUCTION", "FRAÎCHEUR", "VALEUR", "+1 ARBRE" }, out var buttons, out var labels);
             for (int i = 0; i < stats.Length; i++)
             {
                 buttons[i].name = $"Bouton {stats[i]}";
                 var up = buttons[i].gameObject.AddComponent<UpgradeButton>();
                 buttons[i].gameObject.AddComponent<RayPress>();
-                up.bananier = bananier;
+                up.orchard = orchard;
                 up.stat = stats[i];
                 up.cap = buttons[i].Find("Bouton");
                 up.label = labels[i];
@@ -1165,14 +1173,14 @@ namespace SAE.EditorTools
         // Chacun attend à sa place (homes), devant l'étal des bananes.
         const float HarvesterSize = 0.55f;     // taille d'un singe, en mètres
 
-        static void BuildHarvesters(Transform env, Bananier bananier, Panier panier, Vector3 pos, float yaw, Vector3[] homes, Vector3 lookAt)
+        static void BuildHarvesters(Transform env, BananaOrchard orchard, Panier panier, Vector3 pos, float yaw, Vector3[] homes, Vector3 lookAt)
         {
             var counter = BuildCounter(env, "Comptoir récolteur", "RÉCOLTEUR", pos, yaw,
                 new[] { "+1 SINGE", "VITESSE", "CADENCE", "RENDEMENT" }, out var buttons, out var labels);
             var crew = counter.gameObject.AddComponent<HarvesterCrew>();
             crew.monkeys = new HarvesterMonkey[homes.Length];   // le maximum de singes qu'on peut acheter
             for (int i = 0; i < homes.Length; i++)
-                crew.monkeys[i] = BuildHarvester(env, crew, bananier, panier, homes[i], lookAt);
+                crew.monkeys[i] = BuildHarvester(env, crew, orchard, panier, homes[i], lookAt);
 
             var stats = new[] { HarvesterStat.Vitesse, HarvesterStat.Vitesse, HarvesterStat.Cadence, HarvesterStat.Rendement };
             for (int i = 0; i < buttons.Length; i++)
@@ -1189,7 +1197,7 @@ namespace SAE.EditorTools
             }
         }
 
-        static HarvesterMonkey BuildHarvester(Transform env, HarvesterCrew crew, Bananier bananier, Panier panier, Vector3 home, Vector3 lookAt)
+        static HarvesterMonkey BuildHarvester(Transform env, HarvesterCrew crew, BananaOrchard orchard, Panier panier, Vector3 home, Vector3 lookAt)
         {
             var root = new GameObject("Singe récolteur");
             root.transform.SetParent(env, false);
@@ -1204,9 +1212,8 @@ namespace SAE.EditorTools
 
             var monkey = root.AddComponent<HarvesterMonkey>();
             monkey.crew = crew;
-            monkey.bananier = bananier;
+            monkey.orchard = orchard;
             monkey.panier = panier;
-            monkey.table = bananier.versCible;
             monkey.home = home;
             monkey.height = HarvesterSize;
             var view = piece.GetComponent<MonkeyView>();
@@ -1255,13 +1262,13 @@ namespace SAE.EditorTools
                 Blocker(env, "Poteau de l'abri", new Vector3(side * ShedX, 1.4f, ShedZ0), new Vector3(0.24f, 2.8f, 0.24f));
 
             // La zone de téléportation : la terrasse, à 30 cm de la barrière, sans le fond (l'abri et l'armoire)
-            // ni la place des meubles (le bananier et son étal, le panier, la caisse). Ailleurs, le rayon s'arrête sur
+            // ni la place des meubles (les trois bananiers et leurs étals, le panier, la caisse). Ailleurs, le rayon s'arrête sur
             // le collider de la terrasse ou d'un meuble, qui n'est pas une zone : on ne se pose ni dehors ni dans un objet.
             // Plusieurs pavés sur le même objet : la zone les prend tous.
             var zone = new GameObject("Zone de téléportation");
             zone.transform.SetParent(env, false);
             float zx0 = GroveX0 + 0.3f, zx1 = GroveX1 - 0.3f, zz0 = GroveZ0 + 0.3f, zz1 = ShedZ0 - 0.7f;
-            const float TreeX1 = -1.6f, TreeZ0 = -0.3f, TreeZ1 = 1.5f;     // le bananier et son étal
+            const float TreeX1 = -1.6f;                                     // les bananiers et leurs étals, tout le long
             const float BasketX0 = 2.0f, BasketZ0 = -0.3f, BasketZ1 = 0.9f; // le panier sur son tabouret
             const float BoardX0 = 3.1f, BoardZ0 = 1.2f;                     // la caisse, sur son poteau
             void Pad(float x0, float x1, float z0, float z1)
@@ -1271,8 +1278,6 @@ namespace SAE.EditorTools
                 pad.size = new Vector3(x1 - x0, 0.01f, z1 - z0);
             }
             Pad(TreeX1, BasketX0, zz0, zz1);         // le milieu, de l'étal au panier
-            Pad(zx0, TreeX1, zz0, TreeZ0);           // devant le bananier
-            Pad(zx0, TreeX1, TreeZ1, zz1);           // derrière le bananier
             Pad(BasketX0, zx1, zz0, BasketZ0);       // devant le panier
             Pad(BasketX0, BoardX0, BasketZ1, zz1);   // entre le panier et la caisse
             Pad(BoardX0, zx1, BasketZ1, BoardZ0);    // devant la caisse
@@ -1283,20 +1288,39 @@ namespace SAE.EditorTools
             if (gate) MakeDoor(gate, Level.Hub, GroveMiddle);
             else Debug.LogWarning("Bananeraie : battant du portail introuvable (relancer Blender/cabane.py).");
 
-            // Le bananier à gauche, son étal devant lui ; le panier à droite, sur son tabouret, et la caisse à côté
-            var bananier = BuildBananas(env, new Vector3(-3.6f, 0f, 0.6f), -90f, new Vector3(-2.3f, 0f, 0.6f), new Vector3(2.6f, 0f, 0.3f), out var panier);
+            // À gauche, le long de la barrière : trois places de bananier, chacun avec son étal devant lui. Un seul arbre
+            // au début (celui du milieu) ; les deux autres s'achètent au comptoir (BananaOrchard), d'abord derrière puis devant.
+            // Le panier est à droite, sur son tabouret, et la caisse à côté.
+            var orchard = new GameObject("Bananiers").AddComponent<BananaOrchard>();
+            orchard.transform.SetParent(env, false);
+            float[] treeZ = { -0.3f, 1.7f, -2.3f };
+            orchard.trees = new Bananier[treeZ.Length];
+            orchard.spots = new GameObject[treeZ.Length];
+            Panier panier = null;
+            for (int i = 0; i < treeZ.Length; i++)
+            {
+                var spot = new GameObject($"Place {i + 1}").transform;   // il pousse depuis le pied de l'arbre
+                spot.SetParent(orchard.transform, false);
+                spot.localPosition = new Vector3(-3.6f, 0f, treeZ[i]);
+                var tree = BuildBananas(spot, spot.position, -90f, new Vector3(-2.3f, 0f, treeZ[i]),
+                                        i == 0 ? new Vector3(2.6f, 0f, 0.3f) : (Vector3?)null, out var basket);
+                if (i == 0) panier = basket;
+                orchard.trees[i] = tree;
+                orchard.spots[i] = spot.gameObject;
+            }
             BuildGroveMoneyBoard(env, new Vector3(3.6f, 0f, 1.7f));
 
             // Au fond, sous l'abri : l'armoire des améliorations, BANANIER et RÉCOLTEUR côte à côte, dos au mur
             float counterZ = ShedZ1 - 0.45f;
-            if (bananier) BuildUpgradePanel(env, bananier, new Vector3(-0.85f, 0f, counterZ), 0f);
-            if (bananier && panier)
+            bool trees = orchard.trees.All(t => t);
+            if (trees) BuildUpgradePanel(env, orchard, new Vector3(-0.85f, 0f, counterZ), 0f);
+            if (trees && panier)
             {
                 var homes = new[]
                 {
-                    new Vector3(-1.4f, 0f, 0.6f), new Vector3(-1.4f, 0f, 0f), new Vector3(-1.4f, 0f, 1.2f), new Vector3(-1.4f, 0f, -0.6f),
+                    new Vector3(-1.4f, 0f, -0.3f), new Vector3(-1.4f, 0f, -0.9f), new Vector3(-1.4f, 0f, 0.3f), new Vector3(-1.4f, 0f, 0.9f),
                 };
-                BuildHarvesters(env, bananier, panier, new Vector3(0.67f, 0f, counterZ), 0f, homes, GroveMiddle);
+                BuildHarvesters(env, orchard, panier, new Vector3(0.85f, 0f, counterZ), 0f, homes, GroveMiddle);
             }
 
             // Un peu de décor dans les coins de l'abri
@@ -1304,6 +1328,7 @@ namespace SAE.EditorTools
             Prop(env, "Caisse", new Vector3(-2.75f, 0f, 4.1f), 12f, 1f);
             Prop(env, "Caisse", new Vector3(-2.7f, 0.5f, 4.15f), 35f, 0.8f);
             UseWoodTexture(env);
+            for (int i = 1; i < orchard.spots.Length; i++) orchard.spots[i].SetActive(false);   // pas encore achetés
 
             // Loin du hub, d'un bloc. Ce qui est retenu en coordonnées du monde (la place des singes) suit.
             env.position = GroveCenter;

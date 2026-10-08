@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Jeu. 8 oct. 2026
 
+### Planter d'autres bananiers
+> C'est parfait. Ajoute maintenant une amélioration du bananier qui en plante un de plus : sur la capture, il y a la place pour trois. Au début un seul arbre, un deuxième à la première amélioration, un troisième à la suivante, et ça s'arrête là. Le prix doit être élevé. Les singes récolteurs doivent ensuite pouvoir prendre les bananes des trois arbres.
+
 ### Corrections de la bananeraie
 > Après mon test (captures jointes) :
 > 1. Bug : les singes récolteurs ne vont pas vers le nouveau panier, ils partent hors de la terrasse.
