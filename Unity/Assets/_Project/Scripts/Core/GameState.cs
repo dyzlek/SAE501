@@ -44,7 +44,18 @@ namespace SAE
             unlocked[(int)MonkeyType.Classique] = true;
         }
 
-        public static bool IsUnlocked(MonkeyType t) => unlocked[(int)t];
+        // Bac à sable (pour travailler les animations) : tous les types débloqués et chaque singe en stock illimité.
+        // Il ne s'active que dans l'éditeur, par le menu SAE > Bac à sable (case cochée), jamais dans un build.
+        public static bool Sandbox { get; private set; }
+        public const string SandboxPref = "SAE.BacASable";
+        const int SandboxStock = 99;
+
+#if UNITY_EDITOR
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        static void ReadSandbox() => Sandbox = UnityEditor.EditorPrefs.GetBool(SandboxPref, false);
+#endif
+
+        public static bool IsUnlocked(MonkeyType t) => Sandbox || unlocked[(int)t];
 
         public static void Unlock(MonkeyType t)
         {
@@ -52,7 +63,7 @@ namespace SAE
             NotifyChanged();
         }
 
-        public static int Count(Monkey m) => owned[(int)m.type, (int)m.level];
+        public static int Count(Monkey m) => Sandbox ? SandboxStock : owned[(int)m.type, (int)m.level];
 
         public static void AddToInventory(Monkey m)
         {
@@ -64,7 +75,7 @@ namespace SAE
         public static bool TakeFromInventory(Monkey m)
         {
             if (Count(m) <= 0) return false;
-            owned[(int)m.type, (int)m.level]--;
+            if (!Sandbox) owned[(int)m.type, (int)m.level]--;   // en bac à sable, le stock ne baisse jamais
             Held = m;
             NotifyChanged();
             return true;

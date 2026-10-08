@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Jeu. 8 oct. 2026
 
+### Portails et bac à sable
+> Ajoute un portail au début et à la fin du chemin pour montrer le sens. Je voudrais aussi commencer les animations des différents singes : passe tous les singes en débloqués et gratuits, juste pour les voir.
+
 ### Chemin des ballons
 > Améliore le chemin des ballons, en t'inspirant des vraies cartes du jeu (Bloons TD).
 > Suite : rien n'a changé ? Je veux quelque chose de stylé, comme cette carte de Bloons (chemin de dalles qui se croise, herbe, fleurs). Le sol doit être comme l'herbe de base, avec du décor.
