@@ -917,9 +917,14 @@ def build_wall_decor(M, coll):
     return [garland, b.finish("Etageres", coll)]
 
 
-# Zones à laisser libres (repère Unity : x à droite, z devant) : la cabane et sa terrasse, ou la zone de jeu de la carte
+# Zones à laisser libres (repère Unity : x à droite, z devant) : la cabane, sa terrasse et la bananeraie derrière elle,
+# ou la zone de jeu de la carte
+GROVE_Z = -10.1     # le centre de la bananeraie, derrière la porte (GroveCenter dans PrototypeGenerator)
+
+
 def hub_clear(x, z):
-    return math.hypot(x, z) < 5.2 or (abs(x) < 4.6 and -6.4 < z < 4.6)
+    return (math.hypot(x, z) < 5.2 or (abs(x) < 4.6 and -6.4 < z < 4.6)
+            or (abs(x) < 6.6 and GROVE_Z - 6.9 < z < GROVE_Z + 4.4))
 
 
 def map_clear(x, z):
@@ -1182,20 +1187,18 @@ def build_palms(M, coll, clear=hub_clear, suffix="", ring=(8, 16), count=14):
     return b.finish("Palmiers" + suffix, coll, recalc=False)
 
 
-# ============================================================ la bananeraie (le niveau des bananes)
-# Derrière la porte de la cabane : une terrasse en planches au milieu de la prairie, fermée par une barrière en rondins.
-# Le joueur arrive devant le portail (derrière lui, côté -Z) et regarde vers +Z : le bananier à gauche, le panier
+# ============================================================ la bananeraie (derrière la porte de la cabane)
+# Une terrasse en planches au milieu de la prairie, fermée par une barrière en rondins, avec un portail.
+# Modélisée comme si le joueur arrivait devant le portail (côté -Z) en regardant vers +Z : les bananiers à gauche, le panier
 # à droite, et au fond un abri au toit de chaume, au mur de rondins, où Unity pose l'armoire des améliorations.
-# Mesures à garder identiques dans PrototypeGenerator (BananeraieLayout).
+# Unity la pose ensuite derrière la cabane, retournée : le portail fait face à la porte (GroveCenter, GroveYaw).
+# Sans paysage : c'est celui de la cabane, qui laisse sa place libre (hub_clear).
+# Mesures à garder identiques dans PrototypeGenerator (Grove*, Shed*).
 BAN_X0, BAN_X1 = -4.6, 4.6          # la terrasse (repère Unity)
 BAN_Z0, BAN_Z1 = -3.6, 4.8
 GATE_HALF = DOOR_W / 2 + 0.12       # demi-largeur du portail (entre les deux poteaux)
 SHED_X, SHED_Z0, SHED_Z1 = 3.2, 2.9, 4.6   # l'abri : de -SHED_X à SHED_X, de SHED_Z0 à SHED_Z1
 SHED_H = 2.75
-
-
-def ban_clear(x, z):
-    return abs(x) < 6.4 and -5.4 < z < 6.6
 
 
 def build_bananeraie(M, coll):
@@ -1255,7 +1258,6 @@ def build_bananeraie(M, coll):
                 f.normal_flip()
     objs.append(b.finish("Toit_Abri", coll, recalc=False))
 
-    objs += build_outside(M, coll, clear=ban_clear, seed=63, suffix=" bananeraie", palm_ring=(8, 16), palm_count=16)
     objs.append(empty("Repere_Porte", polar(DOOR, R), coll))      # mêmes repères que la cabane : Unity l'aligne pareil
     objs.append(empty("Repere_Droite", polar(90, R), coll))
     return objs
@@ -1465,7 +1467,7 @@ def main():
         o.hide_render = True                                       # pas dans les aperçus de la cabane
     print("triangles du paysage :", sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in scenery if o.type == "MESH"))
 
-    # La bananeraie (scène Bananeraie) : terrasse, barrière, portail, abri, et le même paysage autour
+    # La bananeraie, derrière la cabane : terrasse, barrière, portail, abri (le paysage est celui de la cabane)
     grove = bpy.data.collections.new("Bananeraie")
     bpy.context.scene.collection.children.link(grove)
     grove_objs = build_bananeraie(M, grove)

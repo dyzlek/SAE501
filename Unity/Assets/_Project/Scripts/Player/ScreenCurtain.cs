@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace SAE
 {
-    // Le voile noir des portes (PortalDoor) : il descend du haut pour cacher la vue, le joueur est téléporté à l'abri,
+    // Le voile noir des téléportations (les portes PortalDoor, les boutons SE TP et HUB) : il descend du haut pour cacher
+    // la vue, le joueur est téléporté à l'abri,
     // puis il remonte pour la découvrir (le bas de l'image réapparaît en premier). Son bord est fondu, et il démarre
     // et s'arrête en douceur : rien de brusque dans le casque.
     // C'est un carré noir collé devant la caméra du joueur, juste après sa distance minimale d'affichage (0,03 m),
@@ -14,7 +15,28 @@ namespace SAE
         const float Distance = 0.06f;   // en mètres devant l'œil
         const float Feather = 0.6f;     // le bord fondu, en part de la demi-hauteur de l'image
 
+        public const float Duration = 1.2f;   // en secondes, dans chaque sens
+
         static Transform curtain;
+
+        public static bool Busy { get; private set; }   // une téléportation est en cours : on n'en lance pas une autre
+
+        // Sans rechargement du domaine (Enter Play Mode rapide), les statiques survivent d'une partie à l'autre : on repart de zéro
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetState() { Busy = false; curtain = null; }
+
+        // Le voile descend, move() déplace le joueur, puis le voile remonte. coverStarted : le voile est déjà descendu
+        // (une porte le fait descendre pendant qu'elle s'ouvre).
+        public static IEnumerator Teleport(System.Action move, bool coverStarted = false)
+        {
+            Busy = true;
+            if (!coverStarted) yield return Slide(true, Duration);
+            yield return new WaitForSeconds(0.15f);
+            move();
+            yield return null;                    // le joueur est bien arrivé
+            yield return Slide(false, Duration);
+            Busy = false;
+        }
         static float hiddenY, coveredY;   // le voile au-dessus de l'image (caché), ou devant toute l'image
 
         // Le voile descend (cover = true) ou remonte (cover = false), en duration secondes

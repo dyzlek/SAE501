@@ -4,6 +4,11 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Jeu. 8 oct. 2026
 
+### La bananeraie juste derrière la porte
+> Finalement, je pense que la bananeraie devrait être dans la même scène que la cabane, juste derrière la porte, pour qu'on voie ce qu'il y a derrière. Qu'en penses-tu ?
+>
+> On garde le même fonctionnement : on appuie, la porte s'ouvre, on voit ce qu'il y a derrière, puis la téléportation. Et profites-en pour mettre le voile noir sur toutes les téléportations.
+
 ### Le tonneau
 > Élargis le tonneau à droite de l'armoire : il est trop étroit.
 

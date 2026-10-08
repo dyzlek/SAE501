@@ -76,9 +76,21 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
   ![Le tonneau élargi](../captures/maxens-tonneau-elargi.png)
 
+- **Changé : la bananeraie est maintenant juste derrière la porte de la cabane, dans la même scène** (au lieu d'une scène à part, à 1 km) :
+  - en ouvrant la porte, **on voit vraiment ce qu'il y a derrière** : la terrasse de la cabane, puis le portail de la bananeraie qui lui fait face ; on la voit aussi par les fenêtres ;
+  - on garde le même fonctionnement : on appuie, la porte s'ouvre, le voile noir descend, on est posé devant l'armoire, le voile remonte. Le portail ramène dans la cabane, devant la porte ;
+  - **le voile noir sert maintenant pour toutes les téléportations** : les deux portes, et les boutons SE TP (vers la carte) et HUB (retour) ;
+  - plus de 3e scène ni de 3e niveau : tout est dans le Hub, sous le même soleil. La bananeraie n'a plus son propre paysage (prairie, palmiers, montagnes) : c'est celui de la cabane, qui lui laisse la place (`hub_clear` dans `cabane.py`). Elle passe de 78 000 à 20 000 triangles.
+  - Testé en Play via Unity MCP : porte → bananeraie, portail → cabane, SE TP → carte, chaque fois sous le voile ; aucune erreur.
+
+  ![Par la porte ouverte, le portail de la bananeraie juste derrière](../captures/maxens-porte-ouverte-bananeraie.png)
+
+  ![Vue d'ensemble : la cabane, sa terrasse et la bananeraie derrière](../captures/maxens-cabane-et-bananeraie.png)
+
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Bananeraie déplacée juste derrière la porte de la cabane (même scène, visible par la porte et les fenêtres), voile noir pour toutes les téléportations (portes, SE TP, HUB) ; testé en Play via Unity MCP | À tester au casque |
 | Claude (Code) | Voile noir pendant le passage des portes ; puis, après mon test : démarrage à mi-ouverture, descend du haut et remonte, plus lent et doux avec un bord fondu ; testé en Play via Unity MCP | À tester au casque |
 | Claude (Code) | Jusqu'à 3 bananiers (achat au comptoir, 500 puis 1 500 bananes), améliorations communes aux 3 arbres, singes qui ramassent sous tous les arbres ; testé en Play via Unity MCP | À tester au casque |
 | Claude (Code) | Corrections de la bananeraie : singes qui vont au bon panier, panneau BANANERAIE sur la porte, téléportation limitée à la terrasse (hors meubles), panier agrandi sans anse ; testé en Play via Unity MCP | À tester au casque |
