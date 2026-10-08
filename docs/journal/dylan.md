@@ -3,6 +3,12 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Jeu. 8 oct. 2026
+**GDD v1 (#12)** : nom « Bloons VR », univers Bloons TD gardé (exercice d'école, modèles maison), périmètre mis à jour avec ce qui est fait.
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | Analyse du projet, puis rédaction du GDD v1 (`docs/GDD.md`) à partir du brouillon v0 et des issues ; branche `docs/gdd-v1`, PR | Gardé (à relire en équipe) |
+
 **Test au casque des PR #95, #96 et #97** : bons au casque : saut coupé (#55), point d'apparition (#65), plateau (#67), singes débloqués avec des bananes (#52), traînée des lancers (#28), bananes qui pourrissent (#75).
 À reprendre (branche `fix/retours-casque`, PR suivante) :
 - **Arc** : 0,6 s entre deux tirs, c'est trop lent → **0,3 s**.
