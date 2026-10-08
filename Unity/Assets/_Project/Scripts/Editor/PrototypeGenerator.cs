@@ -65,6 +65,7 @@ namespace SAE.EditorTools
             TagSetup.EnsureTags();
             VRSetup.Configure();
             CabinArt.Build();   // la texture de bois des meubles du hub (la cabane elle-même vient de Blender)
+            EditorTools.MonkeyVisualsSetup.Setup();   // les modèles des singes et de leurs projectiles, toujours à jour
 
             // 1. Le labyrinthe
             NewLevelScene();

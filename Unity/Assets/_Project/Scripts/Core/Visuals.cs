@@ -139,7 +139,7 @@ namespace SAE
 
         // Pose une copie du modèle dans parent, à la hauteur size et centrée.
         // fittedSize = taille finale du modèle (largeur, hauteur, profondeur) en mètres.
-        static GameObject FitModel(GameObject asset, float yaw, Transform parent, float size, out Vector3 fittedSize)
+        public static GameObject FitModel(GameObject asset, float yaw, Transform parent, float size, out Vector3 fittedSize)
         {
 #if UNITY_EDITOR
             // Hors Play (menu qui met les singes dans la scène) : un lien vers le FBX plutôt qu'une copie complète,
