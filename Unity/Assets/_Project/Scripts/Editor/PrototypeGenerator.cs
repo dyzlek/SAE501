@@ -1215,20 +1215,21 @@ namespace SAE.EditorTools
         }
 
         // ---------------- BANANERAIE ----------------
-        // Derrière la porte de la cabane : une terrasse au milieu de la prairie, fermée par une barrière en rondins,
-        // avec un portail pour rentrer (Blender/cabane.py, build_bananeraie -> Art/Cabane/Bananeraie.glb).
-        // Le joueur arrive devant le portail, regard vers +Z : le bananier et son étal à gauche, le panier et la caisse
+        // Derrière la porte de la cabane : une terrasse au milieu de la prairie, fermée par une barrière en rondins, ouverte
+        // sur une allée bordée de barrières qui mène à la porte (Blender/cabane.py, build_bananeraie -> Art/Cabane/Bananeraie.glb).
+        // La porte de la cabane est la seule : on la passe dans les deux sens (PortalDoor).
+        // Le joueur arrive au bout de l'allée, regard vers +Z : les bananiers et leurs étals à gauche, le panier et la caisse
         // à droite, et au fond, sous l'abri, l'armoire des améliorations (BANANIER et RÉCOLTEUR côte à côte).
         // Les singes récolteurs attendent devant l'étal.
         // Tout est construit autour de l'origine (comme le modèle), puis posé d'un bloc derrière la cabane, retourné :
-        // le portail fait face à la porte, qu'on voit en l'ouvrant (et par les fenêtres). Le paysage est celui de la cabane.
+        // l'allée arrive à la porte ; on voit la bananeraie en l'ouvrant (et par les fenêtres). Le paysage est celui de la cabane.
         // Mesures : celles de build_bananeraie dans cabane.py (BAN_*, SHED_*), à garder identiques.
         const float GroveX0 = -4.6f, GroveX1 = 4.6f, GroveZ0 = -3.6f, GroveZ1 = 4.8f;   // la terrasse
-        const float GateHalf = 0.77f;                                                    // le portail : DOOR_W / 2 + 0.12
+        const float PathHalf = 1.1f, WalkZ = -4.7f, PathZ = -6.45f;                     // l'allée : demi-largeur, fin des planches, bout contre la cabane
         const float ShedX = 3.2f, ShedZ0 = 2.9f, ShedZ1 = 4.6f;                          // l'abri (mur de rondins au fond)
         static readonly Vector3 GroveCenter = new Vector3(0f, 0f, -10.1f);  // derrière la porte de la cabane (GROVE_Z dans cabane.py)
-        static readonly Quaternion GroveYaw = Quaternion.Euler(0f, 180f, 0f);  // retournée : le portail vers la cabane
-        static readonly Vector3 GroveSpawn = new Vector3(0f, 0f, -2.3f);   // devant le portail, regard vers l'abri
+        static readonly Quaternion GroveYaw = Quaternion.Euler(0f, 180f, 0f);  // retournée : l'allée vers la cabane
+        static readonly Vector3 GroveSpawn = new Vector3(0f, 0f, -2.3f);   // au bout de l'allée, regard vers l'abri
         static readonly Vector3 CabinArrival = new Vector3(0f, 0f, -1.4f); // en rentrant : dans la cabane, devant la porte, regard vers le plateau
         static PortalDoor cabinDoor;                                       // la porte de la cabane (BuildCabin), qui mène à la bananeraie
         static readonly Vector3 GroveMiddle = new Vector3(0f, 0f, 0.6f);    // le milieu de la terrasse
@@ -1244,12 +1245,15 @@ namespace SAE.EditorTools
             AlignCabin(model.transform);
             MakeStatic(model);
 
-            // Colliders invisibles : la terrasse, la barrière (sauf le portail), le mur et les poteaux de l'abri
+            // Colliders invisibles : la terrasse, la barrière (ouverte sur l'allée), l'allée, le mur et les poteaux de l'abri
             const float FenceH = 1.1f, Thick = 0.15f;
             float midZ = (GroveZ0 + GroveZ1) / 2f, depth = GroveZ1 - GroveZ0;
             Blocker(env, "Terrasse", new Vector3(0f, -0.05f, midZ), new Vector3(GroveX1 - GroveX0, 0.1f, depth));
-            Blocker(env, "Barrière avant gauche", new Vector3((GroveX0 - GateHalf) / 2f, FenceH / 2f, GroveZ0), new Vector3(-GateHalf - GroveX0, FenceH, Thick));
-            Blocker(env, "Barrière avant droite", new Vector3((GroveX1 + GateHalf) / 2f, FenceH / 2f, GroveZ0), new Vector3(GroveX1 - GateHalf, FenceH, Thick));
+            Blocker(env, "Barrière avant gauche", new Vector3((GroveX0 - PathHalf) / 2f, FenceH / 2f, GroveZ0), new Vector3(-PathHalf - GroveX0, FenceH, Thick));
+            Blocker(env, "Barrière avant droite", new Vector3((GroveX1 + PathHalf) / 2f, FenceH / 2f, GroveZ0), new Vector3(GroveX1 - PathHalf, FenceH, Thick));
+            Blocker(env, "Passage de l'allée", new Vector3(0f, -0.05f, (GroveZ0 + WalkZ) / 2f), new Vector3(2f * PathHalf, 0.1f, GroveZ0 - WalkZ));
+            for (int side = -1; side <= 1; side += 2)
+                Blocker(env, "Barrière de l'allée", new Vector3(side * PathHalf, FenceH / 2f, (GroveZ0 + PathZ) / 2f), new Vector3(Thick, FenceH, GroveZ0 - PathZ));
             Blocker(env, "Barrière du fond", new Vector3(0f, FenceH / 2f, GroveZ1), new Vector3(GroveX1 - GroveX0, FenceH, Thick));
             Blocker(env, "Barrière gauche", new Vector3(GroveX0, FenceH / 2f, midZ), new Vector3(Thick, FenceH, depth));
             Blocker(env, "Barrière droite", new Vector3(GroveX1, FenceH / 2f, midZ), new Vector3(Thick, FenceH, depth));
@@ -1257,7 +1261,7 @@ namespace SAE.EditorTools
             for (int side = -1; side <= 1; side += 2)
                 Blocker(env, "Poteau de l'abri", new Vector3(side * ShedX, 1.4f, ShedZ0), new Vector3(0.24f, 2.8f, 0.24f));
 
-            // La zone de téléportation : la terrasse, à 30 cm de la barrière, sans le fond (l'abri et l'armoire)
+            // La zone de téléportation : la terrasse et l'allée, à 30 cm de la barrière, sans le fond (l'abri et l'armoire)
             // ni la place des meubles (les trois bananiers et leurs étals, le panier, la caisse). Ailleurs, le rayon s'arrête sur
             // le collider de la terrasse ou d'un meuble, qui n'est pas une zone : on ne se pose ni dehors ni dans un objet.
             // Plusieurs pavés sur le même objet : la zone les prend tous.
@@ -1277,15 +1281,19 @@ namespace SAE.EditorTools
             Pad(BasketX0, zx1, zz0, BasketZ0);       // devant le panier
             Pad(BasketX0, BoardX0, BasketZ1, zz1);   // entre le panier et la caisse
             Pad(BoardX0, zx1, BasketZ1, BoardZ0);    // devant la caisse
+            Pad(-PathHalf + 0.3f, PathHalf - 0.3f, PathZ + 0.6f, zz0);   // l'allée, jusqu'à 60 cm du mur de la cabane
             Teleportable(zone);
 
-            // Le portail du retour : comme la porte de la cabane, il s'ouvre puis ramène au hub
-            var gate = model.GetComponentsInChildren<Transform>().FirstOrDefault(t => t.name.StartsWith("Porte_Battant"));
+            // En rentrant par la porte : dans la cabane, devant elle
             var backHome = new GameObject("Arrivée dans la cabane").transform;
             backHome.SetParent(hub, false);
             backHome.localPosition = CabinArrival;
-            if (gate) MakeDoor(gate, backHome, GroveMiddle);
-            else Debug.LogWarning("Bananeraie : battant du portail introuvable (relancer Blender/cabane.py).");
+            if (cabinDoor)
+            {
+                cabinDoor.returnArrival = backHome;
+                cabinDoor.insideCenter = Vector3.zero;
+                cabinDoor.insideRadius = HubLayout.CabinRadius;
+            }
 
             // À gauche, le long de la barrière : trois places de bananier, chacun avec son étal devant lui. Un seul arbre
             // au début (celui du milieu) ; les deux autres s'achètent au comptoir (BananaOrchard), d'abord derrière puis devant.
@@ -1331,7 +1339,7 @@ namespace SAE.EditorTools
             UseWoodTexture(env);
             for (int i = 1; i < orchard.spots.Length; i++) orchard.spots[i].SetActive(false);   // pas encore achetés
 
-            // L'arrivée par la porte de la cabane : devant le portail, regard vers l'abri
+            // L'arrivée par la porte de la cabane : au bout de l'allée, regard vers l'abri
             var arrival = new GameObject("Arrivée dans la bananeraie").transform;
             arrival.SetParent(env, false);
             arrival.localPosition = GroveSpawn;

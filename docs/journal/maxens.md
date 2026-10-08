@@ -87,9 +87,16 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
   ![Vue d'ensemble : la cabane, sa terrasse et la bananeraie derrière](../captures/maxens-cabane-et-bananeraie.png)
 
+- **Changé : une seule porte, commune à la cabane et à la bananeraie** :
+  - **le portail de la bananeraie est retiré** : sa barrière s'ouvre côté cabane sur une **allée bordée de barrières** qui mène jusqu'à la porte de la cabane, avec un **passage en planches** au-dessus de l'herbe. L'allée fait 2,2 m de large, pour que le battant ouvert ne traverse pas la barrière ;
+  - **la porte de la cabane marche dans les deux sens** : depuis la cabane, elle envoie au bout de l'allée, dans la bananeraie ; depuis l'allée, elle ramène dans la cabane, devant elle. Toujours avec le voile noir ;
+  - en VR, on peut se téléporter dans l'allée jusqu'à 60 cm du mur, pour revenir à la porte.
+  - Scènes régénérées et code compilé (Unity était fermé : génération lancée sans interface). **Pas encore testé en Play.**
+
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Code) | Porte commune : portail retiré, allée bordée de barrières jusqu'à la porte de la cabane, porte qui téléporte dans les deux sens | À tester |
 | Claude (Code) | Bananeraie déplacée juste derrière la porte de la cabane (même scène, visible par la porte et les fenêtres), voile noir pour toutes les téléportations (portes, SE TP, HUB) ; testé en Play via Unity MCP | À tester au casque |
 | Claude (Code) | Voile noir pendant le passage des portes ; puis, après mon test : démarrage à mi-ouverture, descend du haut et remonte, plus lent et doux avec un bord fondu ; testé en Play via Unity MCP | À tester au casque |
 | Claude (Code) | Jusqu'à 3 bananiers (achat au comptoir, 500 puis 1 500 bananes), améliorations communes aux 3 arbres, singes qui ramassent sous tous les arbres ; testé en Play via Unity MCP | À tester au casque |

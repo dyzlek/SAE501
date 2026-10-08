@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Jeu. 8 oct. 2026
 
+### Une porte commune
+> Ce n'est pas ce que je voulais : la bananeraie et la cabane doivent partager la même porte. Idée simple : enlève le portail de la bananeraie et ajoute un chemin bordé de barrières qui relie la bananeraie à la cabane.
+
 ### La bananeraie juste derrière la porte
 > Finalement, je pense que la bananeraie devrait être dans la même scène que la cabane, juste derrière la porte, pour qu'on voie ce qu'il y a derrière. Qu'en penses-tu ?
 >
