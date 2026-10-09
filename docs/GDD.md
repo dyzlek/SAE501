@@ -52,6 +52,24 @@ Univers de Bloons TD assumé : singes, ballons colorés, ton cartoon et chaleure
   - un objet s'éclaire quand la main ou le rayon le vise ;
   - des panneaux sur les portes indiquent où elles mènent (BANANERAIE depuis la cabane, CABANE depuis dehors).
 
+## 5 bis. Tutoriel (niveau 1)
+Une consigne à la fois, écrite sur des tableaux du décor (suspendu dans la cabane, sur poteaux dans la bananeraie et sur la carte), avec une flèche dorée qui rebondit au-dessus de ce qu'il faut toucher. Chaque étape arrive avec son titre qui surgit, sa consigne écrite lettre par lettre et une gerbe de petits ballons.
+1. **L'univers** en trois tableaux (Monkey Lane, l'alerte aux Bloons, « toi, c'est Quincy »), avec un bouton SUIVANT.
+2. **La vague 1 à l'arc seul** : SE TP, LANCER, puis tirer. On n'a encore aucun singe.
+3. **Le premier singe**, offert : on rentre au hub, on le prend dans la bibliothèque et on le pose sur le plateau.
+4. **Les bananes** : passer la porte, lancer une banane dans le panier.
+5. **Le coffre et la fusion**, puis on lance la vague 2 et le tutoriel est fini.
+
+Un bouton PASSER saute tout (le premier singe est quand même offert).
+
+**Prix (équilibrés le 9 oct.) :**
+- **Gains :** une banane vaut 5 au départ, une vague finie rapporte 20 + 10 × son numéro.
+- **Coffre :** 40, plus 15 par vague vaincue.
+- **Déblocage des types :** Boomerang 150, Punaise 200, Glace 300, Canon 400, Colle 500, Sniper 600.
+- **Améliorations de l'arc :** de 100 à 1 300.
+- **Singes récolteurs :** 150, puis 300, etc.
+- **Arbres :** 500, puis 1 500.
+
 ## 6. Pourquoi la VR
 - **Les mains :** on bande l'arc, on vise et on lâche ; on pose un singe sur la maquette ; on lance les bananes dans le panier ; on pousse la porte.
 - **Le regard :** on surveille le chemin des ballons, on repère la banane qui pourrit, on suit la bille de la roulette.
@@ -66,10 +84,10 @@ Univers de Bloons TD assumé : singes, ballons colorés, ton cartoon et chaleure
 | Quincy à l'arc (tir physique) ✅ | Bananes qui pourrissent, singes récolteurs ✅ | Améliorations de l'arc ✅ | Méta-progression entre les parties |
 | Singes posés à la main ✅ | Coffre et roulette simples ✅ | Ballons cœur et blindé ✅ | Gacha complet, achats réels |
 | Bananes → panier → déblocage des singes ✅ | Décor soigné (cabane, montagnes, lumière) ✅ | Roulette de casino, cible de fléchettes ✅ (bonus) | Multijoueur |
-| Tutoriel avec Pat Fusty (niveau 1) — **à faire** | Animations des singes ✅ | 2e et 3e bananiers ✅ | Scénario, monde ouvert |
+| Tutoriel intégré (niveau 1) ✅ | Animations des singes ✅ | 2e et 3e bananiers ✅ | Scénario, monde ouvert |
 | Ballons de couleur, argent lisible ✅ | | | |
 
-_✅ = déjà dans le jeu (à valider au casque). Reste pour S2-S3 : le tutoriel, l'équilibrage, les tests du silence et la stabilité._
+_✅ = déjà dans le jeu (à valider au casque). Reste pour S2-S3 : l'équilibrage, les tests du silence et la stabilité._
 
 ## 8. Choix de confort
 - **Déplacement :** téléportation seulement, limitée aux zones de jeu (pas de saut, pas de déplacement au stick). Un voile noir fondu couvre chaque téléportation et chaque passage de porte.

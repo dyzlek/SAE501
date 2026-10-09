@@ -37,12 +37,9 @@ namespace SAE
         // sur les plaques de la bibliothèque (TypeUnlockPlaque). Le coffre ne donne que des types débloqués.
         static readonly bool[] unlocked = new bool[MonkeyData.TypeCount];
 
-        // On commence avec un singe Classique gris, pour pouvoir défendre la première vague.
-        static GameState()
-        {
-            owned[(int)MonkeyType.Classique, (int)Rarity.Gris] = 1;
-            unlocked[(int)MonkeyType.Classique] = true;
-        }
+        // On commence sans singe : la vague 1 se gagne à l'arc, et le tutoriel offre ensuite le premier Classique gris
+        // (Tutorial.GiveFirstMonkey, aussi quand on passe le tutoriel).
+        static GameState() => unlocked[(int)MonkeyType.Classique] = true;
 
         // Bac à sable (pour travailler les animations) : tous les types débloqués et chaque singe en stock illimité.
         // Il ne s'active que dans l'éditeur, par le menu SAE > Bac à sable (case cochée), jamais dans un build.

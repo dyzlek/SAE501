@@ -10,8 +10,8 @@ namespace SAE
     // L'équipe note aussi la banane que chaque singe est parti chercher, pour que deux singes ne courent pas après la même.
     public class HarvesterCrew : MonoBehaviour
     {
-        public const bool Free = true;          // à passer à false quand on voudra faire payer
-        public const int FirstPrice = 200;      // prix du 1er singe (en bananes) si Free = false ; le 2e coûte 2 fois plus, etc.
+        public const bool Free = false;         // payant depuis le 9 oct. (true : tout gratuit, pour tester)
+        public const int FirstPrice = 150;      // prix du 1er singe (en bananes) ; le 2e coûte 2 fois plus, etc.
         public const int MaxLevel = 5;
 
         public HarvesterMonkey[] monkeys;       // tous les singes possibles, cachés au départ : leur nombre est le maximum

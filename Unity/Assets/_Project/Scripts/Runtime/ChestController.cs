@@ -15,8 +15,8 @@ namespace Sae501.Coffres
         [Header("Règles")]
         // Le coffre suit la progression du joueur : plus on a vaincu de vagues, plus il est cher,
         // mais meilleur (raretés débloquées, meilleures chances). Payé avec l'argent commun (SAE.Economy).
-        public int basePrice = 25;
-        public int pricePerWave = 20;
+        public int basePrice = 40;      // le 1er coffre : la récompense de la vague 1 (30) + 2 bananes
+        public int pricePerWave = 15;   // +15 par vague vaincue (équilibré le 9 oct.)
         public int Progress => SAE.GameState.WavesWon;
         public int Price => basePrice + pricePerWave * Progress;
         public const int MonkeysPerChest = 1;   // toujours un seul singe : ce sont ses chances d'être rare qui montent avec les vagues

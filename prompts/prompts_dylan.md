@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Ven. 9 oct. 2026
 
+### Tutoriel et prix équilibrés
+> J'aimerais faire un tutoriel. D'abord, expliquer un peu l'univers de façon stylée, puis faire la première vague avec l'arc seul, puis expliquer comment poser les singes, etc. Je te laisse faire. Mets aussi des prix équilibrés : par exemple, les singes sont payants maintenant.
+
 ### Merge et 100 vagues
 > Merge la version actuelle, puis rends les vagues cohérentes : l'objectif est d'aller plus loin, donc pas seulement 10 vagues. Pour l'instant, fais-en 100.
 
