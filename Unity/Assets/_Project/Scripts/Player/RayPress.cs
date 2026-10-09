@@ -66,8 +66,9 @@ namespace SAE
 
         void Press(Transform hand)
         {
-            target?.Press();
-            PlayerRig.Buzz(hand, 0.6f);
+            if (target == null) return;
+            bool done = Tutorial.TryPress(target);   // pendant le tutoriel, seul ce qu'il demande est permis
+            PlayerRig.Buzz(hand, done ? 0.6f : 0.15f);
         }
     }
 }

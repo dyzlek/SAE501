@@ -103,7 +103,8 @@ namespace SAE
                 if (inGrabReach && !banana.Deposee) { heldBanana = banana; banana.Prise(); }
                 return;
             }
-            hit.collider.GetComponentInParent<IPressable>()?.Press();
+            var pressable = hit.collider.GetComponentInParent<IPressable>();
+            if (pressable != null) Tutorial.TryPress(pressable);   // pendant le tutoriel, seul ce qu'il demande est permis
         }
 
         void Carry(Transform held)

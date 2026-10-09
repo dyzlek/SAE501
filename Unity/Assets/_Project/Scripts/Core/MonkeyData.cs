@@ -35,7 +35,9 @@ namespace SAE
         };
 
         // Prix pour débloquer chaque type (en bananes), dans l'ordre de MonkeyType. Le Classique est offert.
-        static readonly int[] unlockPrices = { 0, 40, 120, 200, 60, 80, 150 };
+        // Prix de déblocage, en bananes (Classique, Boomerang, Canon, Sniper, Punaise, Glace, Colle). Équilibrés le 9 oct. :
+        // une banane vaut 5, une vague finie 20 + 10 par vague ; le Boomerang vers la vague 3, le Sniper vers la 10.
+        static readonly int[] unlockPrices = { 0, 150, 400, 600, 200, 300, 500 };
         public static int UnlockPrice(MonkeyType t) => unlockPrices[(int)t];
 
         public static string ShortName(MonkeyType t) => shortNames[(int)t];

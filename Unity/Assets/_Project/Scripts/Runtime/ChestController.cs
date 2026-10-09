@@ -15,10 +15,10 @@ namespace Sae501.Coffres
         [Header("Règles")]
         // Le coffre suit la progression du joueur : plus on a vaincu de vagues, plus il est cher,
         // mais meilleur (raretés débloquées, meilleures chances). Payé avec l'argent commun (SAE.Economy).
-        public int basePrice = 25;
-        public int pricePerWave = 20;
+        public int basePrice = 40;      // le 1er coffre : la récompense de la vague 1 (30) + 2 bananes
+        public int pricePerWave = 15;   // +15 par vague vaincue (équilibré le 9 oct.)
         public int Progress => SAE.GameState.WavesWon;
-        public int Price => basePrice + pricePerWave * Progress;
+        public int Price => SAE.Tutorial.ForcedChest ? 0 : basePrice + pricePerWave * Progress;   // le coffre du tutoriel est offert
         public const int MonkeysPerChest = 1;   // toujours un seul singe : ce sont ses chances d'être rare qui montent avec les vagues
         // Raretés obtenues au dernier coffre (l'inventaire viendra les récupérer)
         public System.Collections.Generic.List<Rarity> LastResults { get; } = new System.Collections.Generic.List<Rarity>();
@@ -72,6 +72,7 @@ namespace Sae501.Coffres
         public void Interact()
         {
             if (IsBusy) return;
+            if (!SAE.Tutorial.Allows(SAE.TutorialAction.Chest)) { SAE.Tutorial.Refuse(); return; }   // pas encore à cette étape
 
             if (!SAE.Economy.TrySpend(Price, transform.position))
             {
@@ -92,13 +93,14 @@ namespace Sae501.Coffres
             roulette.SetVisible(true);
 
             var odds = CurrentOdds();            // probabilités AVANT cette ouverture
+            bool forced = SAE.Tutorial.ForcedChest;   // tutoriel : un Classique gris, pour montrer la fusion
             // Résultats décidés d'avance (un par singe), la roulette ne fait que montrer le meilleur
             LastResults.Clear();
             LastTypes.Clear();
             for (int i = 0; i < MonkeysPerChest; i++)
             {
-                LastResults.Add(ChestOdds.Roll(odds));
-                LastTypes.Add(rollType != null ? rollType() : 0);
+                LastResults.Add(forced ? (Rarity)0 : ChestOdds.Roll(odds));   // 0 = gris
+                LastTypes.Add(forced ? (int)SAE.MonkeyType.Classique : rollType != null ? rollType() : 0);
             }
             int best = 0;
             for (int i = 1; i < LastResults.Count; i++) if (LastResults[i] > LastResults[best]) best = i;
@@ -113,6 +115,7 @@ namespace Sae501.Coffres
             string won = $"{(SAE.MonkeyType)LastTypes[best]} {SAE.MonkeyData.RarityName((SAE.Rarity)(int)result)} !".ToUpper();
             roulette.ShowMessage(LastResults.Count == 1 ? won : $"{won}  (+{LastResults.Count - 1})", RarityInfo.ColorOf(result));
             Opened?.Invoke(LastResults);
+            if (forced) SAE.Tutorial.ChestOpened();
             IsBusy = false;
             hideRoutine = StartCoroutine(HideRouletteAfter(hideDelay));
         }

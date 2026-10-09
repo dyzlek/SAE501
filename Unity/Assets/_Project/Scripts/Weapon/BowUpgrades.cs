@@ -10,8 +10,8 @@ namespace SAE
     // plusieurs couches, traversent plusieurs ballons et explosent.
     public static class BowUpgrades
     {
-        // Bêta-test : toutes les améliorations sont gratuites. Les vrais prix sont déjà dans les tableaux ci-dessous.
-        public static readonly bool BetaFree = true;   // readonly plutôt que const : pas d'avertissement « code inaccessible »
+        // Payantes depuis le 9 oct. (true : toutes gratuites, pour tester). Les prix sont dans les tableaux ci-dessous.
+        public static readonly bool BetaFree = false;   // readonly plutôt que const : pas d'avertissement « code inaccessible »
 
         // Perforante (les « dégâts ») : couches percées sur CHAQUE ballon touché (index = palier, 0 = sans amélioration)
         static readonly int[] pierceLayers = { 1, 2, 3, 4, 5, 6 };

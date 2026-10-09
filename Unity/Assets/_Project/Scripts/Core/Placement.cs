@@ -23,6 +23,7 @@ namespace SAE
 
             if (held == null) return target != null ? PlacementAction.PickUp : PlacementAction.None;
             if (target != null && target.monkey.CanFuseWith(held.Value)) return PlacementAction.Fuse;
+            if (Tutorial.FusionOnly) return PlacementAction.Blocked;   // tutoriel : il faut le poser SUR le premier singe
             if (GameState.Nearest(pos, Spacing) != null) return PlacementAction.Blocked;   // trop collé à un autre singe
             return MapLayout.CanPlace(pos, PathMargin) ? PlacementAction.Place : PlacementAction.Blocked;
         }
