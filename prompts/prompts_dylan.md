@@ -4,6 +4,10 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Ven. 9 oct. 2026
 
+### Bas du plateau : pose impossible
+> Sur le bas de la carte (le plateau du hub), on ne peut pas poser de singe.
+> Suite : il n'y a pas de fantôme, on ne peut simplement pas poser.
+
 ### Téléportation vers les améliorations
 > J'aimerais qu'on puisse se téléporter vers la zone d'amélioration du bananier et du singe.
 

@@ -659,8 +659,11 @@ namespace SAE.EditorTools
             underBoard.transform.SetParent(env, false);
             var block = underBoard.AddComponent<BoxCollider>();
             float boardSide = MapLayout.Size * BoardTile + 0.1f;
-            block.center = Around(0f, Ring - 0.9f, 0.45f);
-            block.size = new Vector3(boardSide, 0.9f, boardSide * Mathf.Cos(25f * Mathf.Deg2Rad));
+            // Il s'arrête sous le bord avant du plateau (le plus bas : 0,95 - 0,8 × sin 25° ≈ 0,61 m, moins la planche) :
+            // à 0,9 m, il dépassait du plateau incliné et arrêtait le rayon de pose sur tout le bas de la carte (9 oct.)
+            const float BlockTop = 0.5f;
+            block.center = Around(0f, Ring - 0.9f, BlockTop / 2f);
+            block.size = new Vector3(boardSide, BlockTop, boardSide * Mathf.Cos(25f * Mathf.Deg2Rad));
 
             // Un collider par mur : on ne traverse pas, ni en marchant ni en se téléportant (sauf par la porte)
             float r = HubLayout.CabinRadius, h = HubLayout.CabinHeight;
