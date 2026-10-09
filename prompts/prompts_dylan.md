@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Ven. 9 oct. 2026
 
+### Téléportation vers les améliorations
+> J'aimerais qu'on puisse se téléporter vers la zone d'amélioration du bananier et du singe.
+
 ### Cible de fléchettes vide
 > Pour les fléchettes, j'aimerais qu'il n'y en ait pas sur la cible au départ (peut-être autour).
 

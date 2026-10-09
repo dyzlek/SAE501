@@ -1265,7 +1265,7 @@ namespace SAE.EditorTools
             for (int side = -1; side <= 1; side += 2)
                 Blocker(env, "Poteau de l'abri", new Vector3(side * ShedX, 1.4f, ShedZ0), new Vector3(0.24f, 2.8f, 0.24f));
 
-            // La zone de téléportation : la terrasse et l'allée, à 30 cm de la barrière, sans le fond (l'abri et l'armoire)
+            // La zone de téléportation : la terrasse et l'allée, à 30 cm de la barrière, et sous l'abri jusqu'à 30 cm de l'armoire
             // ni la place des meubles (les trois bananiers et leurs étals, le panier, la caisse). Ailleurs, le rayon s'arrête sur
             // le collider de la terrasse ou d'un meuble, qui n'est pas une zone : on ne se pose ni dehors ni dans un objet.
             // Plusieurs pavés sur le même objet : la zone les prend tous.
@@ -1287,6 +1287,8 @@ namespace SAE.EditorTools
             Pad(BoardX0, zx1, BasketZ1, BoardZ0);    // devant la caisse
             Pad(-PathHalf + 0.3f, PathHalf - 0.3f, PathZ + 0.6f, zz0);   // l'allée, jusqu'à 60 cm du mur de la cabane
             Pad(zx1, GroveX1 - 0.3f, zz0, RouletteFrontZ - 0.3f);       // la partie agrandie, devant la roulette
+            Pad(-2.2f, 2.1f, zz1, ShedZ1 - 0.95f);                     // sous l'abri, devant l'armoire des améliorations (son devant est à 3,95 m),
+                                                                        // entre les caisses (-2,75) et le tonneau (2,55)
             Teleportable(zone);
 
             // En rentrant par la porte : dans la cabane, devant elle
