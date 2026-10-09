@@ -1599,6 +1599,8 @@ namespace SAE.EditorTools
             for (int side = -1; side <= 1; side += 2)   // le tableau tient sur deux poteaux plantés dans le sol (il ne flotte pas)
                 Visuals.Solid("Poteau du tableau", map.transform, new Vector3(side * 0.92f, (2.4f + GroundY) / 2f, -edge - 0.25f), new Vector3(0.1f, 2.4f - GroundY, 0.1f), Wood);
             BuildBowUpgrades(map.transform, new Vector3(-2f, 0f, -edge - 0.6f), -30f);   // le pupitre ARC de Nicolas
+            // La roulette (bêta-test) : à l'opposé du pupitre ARC, derrière le point d'arrivée à droite, tournée vers lui
+            BuildRoulette(map.transform, new Vector3(2.3f, 0f, -edge - 3.9f), 180f);
 
             // La caisse de la carte : on voit ses bananes sans retourner au hub. À droite du pupitre, sur deux poteaux.
             var cashPos = new Vector3(3.3f, 1.5f, -edge - 1.6f);
@@ -1702,6 +1704,151 @@ namespace SAE.EditorTools
                     .transform.localRotation = Quaternion.Euler(90f, 0, 0);
             }
             UseWoodTexture(root);
+        }
+
+        // La roulette de casino (bêta-test, voir RouletteTable). Vue du joueur, de gauche à droite : sur une table au tapis vert,
+        // une grande roue à portée de main (on clique une case pour choisir sa couleur) et le tapis des mises, cadré de laiton,
+        // où des bananes montrent la mise (comme dans How to Fish) ; puis un pupitre de 5 boutons
+        // (MISE -10, MISE +10, TOUT, LANCER, 100 %) ; derrière, l'ardoise sur deux poteaux.
+        static readonly Color RouletteRed = new Color(0.75f, 0.12f, 0.1f);
+        static readonly Color RouletteBlack = new Color(0.1f, 0.1f, 0.1f);
+        static readonly Color RouletteGreen = new Color(0.1f, 0.5f, 0.25f);
+
+        static void BuildRoulette(Transform map, Vector3 pos, float yaw)
+        {
+            var root = new GameObject("Roulette").transform;
+            root.SetParent(map, false);
+            root.localPosition = pos;
+            root.localRotation = Quaternion.Euler(0, yaw, 0);   // +Z local = à l'opposé du joueur, comme les pupitres
+            var table = root.gameObject.AddComponent<RouletteTable>();
+
+            // La table, à gauche du pupitre, à la hauteur d'un plan de travail : la roue, puis le tapis des mises
+            const float TableY = 0.85f, TableX = -0.6f, TableW = 1.7f, TableD = 1.05f, WheelX = -0.95f, MatX = -0.05f;
+            Visuals.Solid("Table de la roue", root, new Vector3(TableX, TableY / 2f, 0), new Vector3(TableW, TableY, TableD), Wood);
+            Visuals.Box("Tapis", root, new Vector3(TableX, TableY + 0.005f, 0), new Vector3(TableW - 0.03f, 0.01f, TableD - 0.03f), RouletteGreen);
+            BuildWheel(root, table, new Vector3(WheelX, TableY + 0.01f, 0));
+            BuildStakeMat(root, table, new Vector3(MatX, TableY + 0.01f, 0));
+
+            // Le pupitre des mises, à droite de la table
+            const float ConsoleX = 1.27f;
+            var actions = new[] { RouletteButton.Action.StakeLess, RouletteButton.Action.StakeMore, RouletteButton.Action.AllIn, RouletteButton.Action.Spin, RouletteButton.Action.Guarantee };
+            var names = new[] { "MISE -10", "MISE +10", "TOUT", "LANCER", "100 %" };
+            var top = BuildConsole(root, "Roulette", new Vector3(ConsoleX, 0f, 0f), actions.Length, 0f);
+            for (int i = 0; i < actions.Length; i++)
+            {
+                float x = (i - (actions.Length - 1) / 2f) * ConsoleStep;
+                var button = RoundButton(top, new Vector3(x, 0f, 0.07f));
+                button.name = $"Bouton {actions[i]}";
+                var rb = button.gameObject.AddComponent<RouletteButton>();
+                button.gameObject.AddComponent<RayPress>();
+                rb.table = table;
+                rb.action = actions[i];
+                rb.cap = button.Find("Bouton");
+
+                Visuals.Box("Plaque", top, new Vector3(x, 0.004f, -0.14f), new Vector3(ConsoleStep - 0.04f, 0.008f, 0.1f), DarkWood);
+                Visuals.Text(top, names[i], new Vector3(x, 0.012f, -0.14f), 0.06f, TitleGold, title: true)
+                    .transform.localRotation = Quaternion.Euler(90f, 0, 0);
+            }
+
+            // L'ardoise des mises, derrière, sur deux poteaux, et l'enseigne au-dessus
+            const float BoardY = 1.75f, BoardZ = 0.8f, BoardW = 1.6f, BoardH = 0.6f;
+            const float BoardX = 0.35f;   // au milieu de l'ensemble table + pupitre
+            var board = BuildChalkboard(root, "Ardoise de la roulette", new Vector3(BoardX, BoardY, BoardZ), Quaternion.identity, BoardW, BoardH);
+            table.board = Visuals.Text(board, "", new Vector3(0, 0, -0.05f), 0.055f, Chalk);
+            float signY = BoardY + BoardH / 2f + 0.2f;
+            for (int side = -1; side <= 1; side += 2)
+                Visuals.Box("Poteau", root, new Vector3(BoardX + side * (BoardW / 2f + 0.09f), signY / 2f, BoardZ + 0.03f), new Vector3(0.06f, signY, 0.06f), Wood);
+            Visuals.Box("Enseigne", root, new Vector3(BoardX, signY, BoardZ), new Vector3(BoardW + 0.3f, 0.2f, 0.05f), DarkWood);
+            Visuals.Text(root, "ROULETTE", new Vector3(BoardX, signY, BoardZ - 0.03f), 0.13f, TitleGold, title: true);
+            UseWoodTexture(root);
+        }
+
+        // Le tapis des mises, à côté de la roue : un cadre de laiton, 6 bananes du bananier posées dessus (RouletteTable
+        // n'en montre qu'une par tranche de 25 bananes misées) et la mise écrite au-dessus.
+        static void BuildStakeMat(Transform root, RouletteTable table, Vector3 localPos)
+        {
+            const float MatW = 0.5f, MatD = 0.7f;
+            Visuals.Box("Cadre du tapis des mises", root, localPos + new Vector3(0, 0.003f, 0), new Vector3(MatW + 0.04f, 0.006f, MatD + 0.04f), Brass);
+            Visuals.Box("Tapis des mises", root, localPos + new Vector3(0, 0.005f, 0), new Vector3(MatW, 0.006f, MatD), RouletteGreen * 1.2f);
+            table.stakeLabel = Visuals.Label(root, "", localPos + new Vector3(0, 0.4f, 0), 0.08f, Chalk);
+
+            // Deux colonnes de trois : la première banane devant, à gauche, la sixième au fond, à droite
+            var bananaModel = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Art/Bananier/FBX/Bananes_Collectible.fbx");
+            table.stakeBananas = new GameObject[6];
+            for (int i = 0; i < table.stakeBananas.Length; i++)
+            {
+                var spot = localPos + new Vector3((i % 2 == 0 ? -1f : 1f) * 0.12f, 0.01f + ChestBananaScale * 0.12f, (i / 2 - 1) * 0.22f);
+                GameObject banana;
+                if (bananaModel)
+                {
+                    banana = (GameObject)PrefabUtility.InstantiatePrefab(bananaModel);
+                    banana.transform.SetParent(root, false);
+                    banana.transform.localScale = Vector3.one * ChestBananaScale;
+                    foreach (var col in banana.GetComponentsInChildren<Collider>()) Object.DestroyImmediate(col);   // pour le décor : on ne les prend pas
+                }
+                else banana = Visuals.Box("Banane", root, Vector3.zero, new Vector3(0.18f, 0.04f, 0.05f), Color.yellow);   // sans le modèle, un bloc jaune
+                banana.name = $"Banane misée {i + 1}";
+                banana.transform.localPosition = spot;
+                banana.transform.localRotation = Quaternion.Euler(80f, 50f * i + 20f, 0f);   // couchées, un peu en vrac, comme dans le coffre
+                table.stakeBananas[i] = banana;
+            }
+        }
+
+        // La roue : une cuvette en bois, le plateau qui tourne avec ses 37 cases sans numéro (rouges, noires, le zéro vert) dans l'ordre
+        // d'une vraie roue européenne, la bille, et le repère doré côté joueur où la bille s'arrête.
+        // Chaque case est cliquable (RoulettePocket) ; la lueur dorée de la case choisie est rangée sous la case 0 au départ.
+        static void BuildWheel(Transform root, RouletteTable table, Vector3 localPos)
+        {
+            const float PocketRadius = 0.36f, PocketY = 0.008f;
+            var wheelRoot = new GameObject("Roue").transform;
+            wheelRoot.SetParent(root, false);
+            wheelRoot.localPosition = localPos;
+            var wheel = wheelRoot.gameObject.AddComponent<RouletteWheel>();
+            wheel.pocketRadius = PocketRadius;
+            wheel.rimRadius = 0.44f;
+            table.wheel = wheel;
+
+            Visuals.Box("Cuvette", wheelRoot, new Vector3(0, 0.01f, 0), new Vector3(0.98f, 0.01f, 0.98f), DarkWood)
+                .GetComponent<MeshFilter>().sharedMesh = Cylinder;
+            Visuals.Box("Repère", wheelRoot, new Vector3(0, 0.03f, -0.48f), new Vector3(0.025f, 0.025f, 0.05f), Brass);
+
+            var rotor = new GameObject("Plateau").transform;
+            rotor.SetParent(wheelRoot, false);
+            rotor.localPosition = new Vector3(0, 0.02f, 0);
+            wheel.rotor = rotor;
+            Visuals.Box("Disque", rotor, Vector3.zero, new Vector3(0.84f, 0.005f, 0.84f), RouletteBlack)
+                .GetComponent<MeshFilter>().sharedMesh = Cylinder;
+            Visuals.Box("Moyeu", rotor, new Vector3(0, 0.02f, 0), new Vector3(0.16f, 0.02f, 0.16f), Brass)
+                .GetComponent<MeshFilter>().sharedMesh = Cylinder;
+
+            for (int i = 0; i < RouletteRules.Numbers; i++)
+            {
+                int n = RouletteRules.WheelOrder[i];
+                var slot = new GameObject($"Case {n}").transform;   // tourné vers sa case : la case est sur son +Z local
+                slot.SetParent(rotor, false);
+                slot.localRotation = Quaternion.Euler(0, i * 360f / RouletteRules.Numbers, 0);
+                var kind = RouletteRules.ColorOf(n);
+                var color = kind == RouletteColor.Vert ? RouletteGreen : kind == RouletteColor.Rouge ? RouletteRed : RouletteBlack;
+                var pocket = Visuals.Box("Case", slot, new Vector3(0, PocketY, PocketRadius), new Vector3(0.05f, 0.006f, 0.09f), color);
+                pocket.tag = Tags.Bouton;
+                pocket.AddComponent<BoxCollider>().size = new Vector3(1f, 5f, 1f);   // plus haut que la case : facile à toucher du bout de la manette
+                var p = pocket.AddComponent<RoulettePocket>();
+                p.table = table;
+                p.color = kind;
+                pocket.AddComponent<RayPress>();
+                // La lueur : un peu plus grande que la case et juste dessous, elle dépasse tout autour (sœur de la case :
+                // elle ne grossit pas quand on vise la case)
+                p.glow = Visuals.Box("Lueur", slot, new Vector3(0, PocketY - 0.0035f, PocketRadius), new Vector3(0.064f, 0.007f, 0.11f), Color.yellow)
+                    .GetComponent<ColorTint>();
+            }
+
+            var ball = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            ball.name = "Bille";
+            Visuals.Kill(ball.GetComponent<Collider>());
+            ball.transform.SetParent(wheelRoot, false);
+            ball.transform.localScale = Vector3.one * 0.03f;
+            ball.AddComponent<ColorTint>().Set(Color.white);
+            wheel.ball = ball.transform;
         }
     }
 }
