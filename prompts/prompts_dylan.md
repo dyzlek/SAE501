@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Ven. 9 oct. 2026
 
+### GDD v2 en .md et en .docx
+> Refais le GDD en .md et fais-en une version qu'on peut rendre en .docx.
+
 ### Roulette : rien sur le tapis à 0 banane
 > Je ne veux pas voir la banane et « 1 » sur le tapis des mises quand mon compte est à 0.
 
