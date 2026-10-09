@@ -924,7 +924,7 @@ GROVE_Z = -10.1     # le centre de la bananeraie, derrière la porte (GroveCente
 
 def hub_clear(x, z):
     return (math.hypot(x, z) < 5.2 or (abs(x) < 4.6 and -6.4 < z < 4.6)
-            or (abs(x) < 6.6 and GROVE_Z - 6.9 < z < GROVE_Z + 4.4))
+            or (abs(x) < 11.4 and GROVE_Z - 6.9 < z < GROVE_Z + 4.4))   # 11,4 : la terrasse agrandie (BAN_X1) + 2 m
 
 
 def map_clear(x, z):
@@ -1195,7 +1195,7 @@ def build_palms(M, coll, clear=hub_clear, suffix="", ring=(8, 16), count=14):
 # Unity la pose ensuite derrière la cabane, retournée : l'allée arrive à la porte (GroveCenter, GroveYaw).
 # Sans paysage : c'est celui de la cabane, qui laisse sa place libre (hub_clear).
 # Mesures à garder identiques dans PrototypeGenerator (Grove*, Shed*).
-BAN_X0, BAN_X1 = -4.6, 4.6          # la terrasse (repère Unity)
+BAN_X0, BAN_X1 = -4.6, 9.4          # la terrasse (repère Unity), agrandie à droite pour la roulette (9 oct.)
 BAN_Z0, BAN_Z1 = -3.6, 4.8
 PATH_HALF = 1.1                     # demi-largeur de l'allée : le battant de la porte, ouvert, y tient sans toucher la barrière
 WALK_Z = -4.7                       # le passage en planches, de la terrasse (BAN_Z0) jusqu'à la terrasse de la cabane

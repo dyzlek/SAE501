@@ -4,6 +4,10 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Ven. 9 oct. 2026
 
+### Fusion du casino de Nicolas, roulette dans le hub
+> Fusionne maintenant le travail de Nicolas avec le nôtre, mais je veux le casino dans le hub et non dans le labyrinthe.
+> Suite : dans la bananeraie, et si besoin agrandis la zone de base.
+
 ### Banane qui tressaute dans la main
 > Quand je prends une banane, ce n'est pas fluide : elle fait des hauts et des bas.
 

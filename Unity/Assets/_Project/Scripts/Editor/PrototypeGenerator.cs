@@ -1225,7 +1225,10 @@ namespace SAE.EditorTools
         // Tout est construit autour de l'origine (comme le modèle), puis posé d'un bloc derrière la cabane, retourné :
         // l'allée arrive à la porte ; on voit la bananeraie en l'ouvrant (et par les fenêtres). Le paysage est celui de la cabane.
         // Mesures : celles de build_bananeraie dans cabane.py (BAN_*, SHED_*), à garder identiques.
-        const float GroveX0 = -4.6f, GroveX1 = 4.6f, GroveZ0 = -3.6f, GroveZ1 = 4.8f;   // la terrasse
+        const float GroveX0 = -4.6f, GroveX1 = 9.4f, GroveZ0 = -3.6f, GroveZ1 = 4.8f;   // la terrasse (agrandie à droite pour la roulette)
+        const float OldGroveX1 = 4.6f;                                                  // le bord droit d'avant : la caisse et le panier sont avant
+        static readonly Vector3 RouletteSpot = new Vector3(6.9f, 0f, 2.6f);             // la roulette, au fond de la partie agrandie, face au joueur
+        const float RouletteFrontZ = 2.05f;                                             // le bord avant de sa table
         const float PathHalf = 1.1f, WalkZ = -4.7f, PathZ = -6.45f;                     // l'allée : demi-largeur, fin des planches, bout contre la cabane
         const float ShedX = 3.2f, ShedZ0 = 2.9f, ShedZ1 = 4.6f;                          // l'abri (mur de rondins au fond)
         static readonly Vector3 GroveCenter = new Vector3(0f, 0f, -10.1f);  // derrière la porte de la cabane (GROVE_Z dans cabane.py)
@@ -1249,13 +1252,13 @@ namespace SAE.EditorTools
             // Colliders invisibles : la terrasse, la barrière (ouverte sur l'allée), l'allée, le mur et les poteaux de l'abri
             const float FenceH = 1.1f, Thick = 0.15f;
             float midZ = (GroveZ0 + GroveZ1) / 2f, depth = GroveZ1 - GroveZ0;
-            Blocker(env, "Terrasse", new Vector3(0f, -0.05f, midZ), new Vector3(GroveX1 - GroveX0, 0.1f, depth));
+            Blocker(env, "Terrasse", new Vector3((GroveX0 + GroveX1) / 2f, -0.05f, midZ), new Vector3(GroveX1 - GroveX0, 0.1f, depth));
             Blocker(env, "Barrière avant gauche", new Vector3((GroveX0 - PathHalf) / 2f, FenceH / 2f, GroveZ0), new Vector3(-PathHalf - GroveX0, FenceH, Thick));
             Blocker(env, "Barrière avant droite", new Vector3((GroveX1 + PathHalf) / 2f, FenceH / 2f, GroveZ0), new Vector3(GroveX1 - PathHalf, FenceH, Thick));
             Blocker(env, "Passage de l'allée", new Vector3(0f, -0.05f, (GroveZ0 + WalkZ) / 2f), new Vector3(2f * PathHalf, 0.1f, GroveZ0 - WalkZ));
             for (int side = -1; side <= 1; side += 2)
                 Blocker(env, "Barrière de l'allée", new Vector3(side * PathHalf, FenceH / 2f, (GroveZ0 + PathZ) / 2f), new Vector3(Thick, FenceH, GroveZ0 - PathZ));
-            Blocker(env, "Barrière du fond", new Vector3(0f, FenceH / 2f, GroveZ1), new Vector3(GroveX1 - GroveX0, FenceH, Thick));
+            Blocker(env, "Barrière du fond", new Vector3((GroveX0 + GroveX1) / 2f, FenceH / 2f, GroveZ1), new Vector3(GroveX1 - GroveX0, FenceH, Thick));
             Blocker(env, "Barrière gauche", new Vector3(GroveX0, FenceH / 2f, midZ), new Vector3(Thick, FenceH, depth));
             Blocker(env, "Barrière droite", new Vector3(GroveX1, FenceH / 2f, midZ), new Vector3(Thick, FenceH, depth));
             Blocker(env, "Mur de l'abri", new Vector3(0f, 1.4f, ShedZ1), new Vector3(2f * ShedX + 0.3f, 2.8f, 0.3f));
@@ -1268,7 +1271,7 @@ namespace SAE.EditorTools
             // Plusieurs pavés sur le même objet : la zone les prend tous.
             var zone = new GameObject("Zone de téléportation");
             zone.transform.SetParent(env, false);
-            float zx0 = GroveX0 + 0.3f, zx1 = GroveX1 - 0.3f, zz0 = GroveZ0 + 0.3f, zz1 = ShedZ0 - 0.7f;
+            float zx0 = GroveX0 + 0.3f, zx1 = OldGroveX1 - 0.3f, zz0 = GroveZ0 + 0.3f, zz1 = ShedZ0 - 0.7f;
             const float TreeX1 = -1.6f;                                     // les bananiers et leurs étals, tout le long
             const float BasketX0 = 2.0f, BasketZ0 = -0.3f, BasketZ1 = 0.9f; // le panier sur son tabouret
             const float BoardX0 = 3.1f, BoardZ0 = 1.2f;                     // la caisse, sur son poteau
@@ -1283,6 +1286,7 @@ namespace SAE.EditorTools
             Pad(BasketX0, BoardX0, BasketZ1, zz1);   // entre le panier et la caisse
             Pad(BoardX0, zx1, BasketZ1, BoardZ0);    // devant la caisse
             Pad(-PathHalf + 0.3f, PathHalf - 0.3f, PathZ + 0.6f, zz0);   // l'allée, jusqu'à 60 cm du mur de la cabane
+            Pad(zx1, GroveX1 - 0.3f, zz0, RouletteFrontZ - 0.3f);       // la partie agrandie, devant la roulette
             Teleportable(zone);
 
             // En rentrant par la porte : dans la cabane, devant elle
@@ -1317,6 +1321,9 @@ namespace SAE.EditorTools
                 orchard.spots[i] = spot.gameObject;
             }
             BuildGroveMoneyBoard(env, new Vector3(3.6f, 0f, 1.7f));
+
+            // La roulette de Nicolas (bêta-test), dans la partie agrandie à droite, tournée vers le joueur
+            BuildRoulette(env, RouletteSpot, 0f);
 
             // Au fond, sous l'abri : l'armoire des améliorations, BANANIER et RÉCOLTEUR côte à côte, dos au mur
             float counterZ = ShedZ1 - 0.45f;
@@ -1599,8 +1606,6 @@ namespace SAE.EditorTools
             for (int side = -1; side <= 1; side += 2)   // le tableau tient sur deux poteaux plantés dans le sol (il ne flotte pas)
                 Visuals.Solid("Poteau du tableau", map.transform, new Vector3(side * 0.92f, (2.4f + GroundY) / 2f, -edge - 0.25f), new Vector3(0.1f, 2.4f - GroundY, 0.1f), Wood);
             BuildBowUpgrades(map.transform, new Vector3(-2f, 0f, -edge - 0.6f), -30f);   // le pupitre ARC de Nicolas
-            // La roulette (bêta-test) : à l'opposé du pupitre ARC, derrière le point d'arrivée à droite, tournée vers lui
-            BuildRoulette(map.transform, new Vector3(2.3f, 0f, -edge - 3.9f), 180f);
 
             // La caisse de la carte : on voit ses bananes sans retourner au hub. À droite du pupitre, sur deux poteaux.
             var cashPos = new Vector3(3.3f, 1.5f, -edge - 1.6f);
@@ -1714,10 +1719,10 @@ namespace SAE.EditorTools
         static readonly Color RouletteBlack = new Color(0.1f, 0.1f, 0.1f);
         static readonly Color RouletteGreen = new Color(0.1f, 0.5f, 0.25f);
 
-        static void BuildRoulette(Transform map, Vector3 pos, float yaw)
+        static void BuildRoulette(Transform parent, Vector3 pos, float yaw)
         {
             var root = new GameObject("Roulette").transform;
-            root.SetParent(map, false);
+            root.SetParent(parent, false);
             root.localPosition = pos;
             root.localRotation = Quaternion.Euler(0, yaw, 0);   // +Z local = à l'opposé du joueur, comme les pupitres
             var table = root.gameObject.AddComponent<RouletteTable>();
