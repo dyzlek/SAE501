@@ -15,7 +15,6 @@ namespace SAE
         const float SettleSpeed = 0.3f;     // en m/s : plus lent que ça, il a fini de rouler
         const float MinFlight = 0.3f;       // en secondes : il ne « se pose » pas dès le lâcher
         const float MaxFlight = 5f;         // en secondes : au-delà, on le remet à sa place
-        const float WalkRadius = HubLayout.Ring - 0.9f;   // 1,9 m : le disque libre au centre (zone de téléportation du hub)
 
         HarvesterMonkey monkey;
         Rigidbody body;
@@ -101,15 +100,16 @@ namespace SAE
             if (lost || settled) Land();
         }
 
-        // Il se remet debout, au sol, dans la cabane ; puis HarvesterMonkey le renvoie au travail
+        // Il se remet debout, au sol, sur la terrasse de la bananeraie ; puis HarvesterMonkey le renvoie au travail
         void Land()
         {
             flying = false;
             body.isKinematic = true;
             body.useGravity = false;
-            var flat = new Vector3(transform.position.x, 0f, transform.position.z);
-            flat = Vector3.ClampMagnitude(flat, WalkRadius);   // le point du disque libre le plus proche, au sol
-            var spot = new Vector3(flat.x, monkey.home.y, flat.z);
+            var center = monkey.areaCenter;
+            var flat = new Vector3(transform.position.x - center.x, 0f, transform.position.z - center.z);
+            flat = Vector3.ClampMagnitude(flat, monkey.areaRadius);   // le point de la terrasse le plus proche, au sol
+            var spot = new Vector3(center.x + flat.x, monkey.home.y, center.z + flat.z);
             var look = Vector3.ProjectOnPlane(transform.forward, Vector3.up);
             transform.SetPositionAndRotation(spot, Quaternion.LookRotation(look.sqrMagnitude > 0.01f ? look : Vector3.forward));
             monkey.PutDown();

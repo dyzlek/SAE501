@@ -2,6 +2,112 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Jeu. 8 oct. 2026
+- **Fait : la bananeraie, un nouvel endroit pour tout ce qui concerne la récolte des bananes** (branche `feat/bananeraie-maxens`, partie du `main` à jour, PR #99). Avant, le bananier, l'étal, le panier, le comptoir du bananier et celui des récolteurs étaient tous dans la cabane, autour du joueur : ça faisait beaucoup de choses au même endroit.
+
+  Avant : le comptoir du bananier, l'étal et le bananier derrière la porte ouverte, dans la cabane.
+
+  ![Avant : le bananier et ses comptoirs dans la cabane](../captures/maxens-hub-avant-bananeraie.webp)
+
+  - **la porte de la cabane est fermée** : on l'enfonce avec la main, on la vise et on appuie, ou on clique dessus (mode PC). Elle **s'ouvre en pivotant sur sa charnière**, vers dehors, puis on est **téléporté dans la bananeraie** ; elle se referme derrière nous (nouveau script `Hub/PortalDoor.cs`) ;
+  - **la bananeraie** est un 3e niveau, dans sa propre scène (`Bananeraie.unity`, chargée au lancement avec la carte, comme le labyrinthe) : le bananier produit donc même quand on est ailleurs ;
+  - **la même direction artistique que la cabane** : modélisée par `Blender/cabane.py` (nouvelle fonction `build_bananeraie`, exportée en `Art/Cabane/Bananeraie.glb`), avec les mêmes textures et les mêmes outils : une terrasse en planches au milieu de la prairie, une barrière en rondins, et au fond un abri au toit de chaume avec un mur de rondins. Autour, le même paysage (herbes, champignons, palmiers, montagnes) ;
+  - **dedans** : le bananier et son étal à gauche, le panier et la caisse (l'argent) à droite, et sous l'abri **l'armoire des améliorations**, avec le comptoir BANANIER et le comptoir RÉCOLTEUR côte à côte. Les singes récolteurs attendent devant l'étal et font leurs allers-retours jusqu'au panier ;
+  - **pour revenir** : un **portail** en rondins, avec un battant comme celui de la cabane, qui s'ouvre et ramène au centre de la cabane ;
+  - dans la cabane, il ne reste que la caisse au mur ; la place du bananier et de ses comptoirs est libre ;
+  - **corrigé en passant** : Blender ajoute « .001 » aux noms en double, donc le paysage de la carte n'était **jamais aligné** (avertissement à chaque génération). Les repères sont maintenant trouvés par le début de leur nom. Et certaines bananes faisaient une erreur à chaque image (couleur appliquée avant leur initialisation) : corrigé dans `Banane.cs`.
+  - Testé en Play via Unity MCP : porte de la cabane → bananeraie → portail → retour au centre de la cabane, un singe récolteur acheté qui ramasse les bananes ; aucune erreur.
+
+  La porte de la cabane, fermée puis en train de s'ouvrir :
+
+  ![La porte de la cabane, fermée](../captures/maxens-porte-fermee.png)
+
+  ![La porte s'ouvre vers dehors](../captures/maxens-porte-ouverture.png)
+
+  En arrivant dans la bananeraie : l'étal à gauche, l'armoire des améliorations sous l'abri, le panier et la caisse à droite.
+
+  ![Arrivée dans la bananeraie](../captures/maxens-bananeraie-arrivee.png)
+
+  ![Vue d'ensemble : le bananier, l'étal, l'abri et le panier](../captures/maxens-bananeraie-vue.png)
+
+  Le portail du retour, qui s'ouvre vers la prairie.
+
+  ![Le portail du retour vers la cabane](../captures/maxens-bananeraie-portail.png)
+
+- **Corrigé après mon test de la bananeraie :**
+  - **les singes récolteurs partaient hors de la terrasse**, à travers la barrière, au lieu d'aller au panier : pour contourner les meubles, ils faisaient un détour par le centre de la cabane, fixé au point (0, 0, 0) du monde. La bananeraie est à 1 km : ils partaient vers la cabane. Leur détour passe maintenant par le milieu de la terrasse (`HarvesterMonkey.areaCenter`) ;
+  - **un panneau « BANANERAIE »** sur la porte de la cabane, côté pièce : une planche en bois, lettres dorées. Il est accroché au battant et s'ouvre avec lui ;
+  - **en VR, on ne peut plus se téléporter n'importe où** dans la bananeraie : seulement sur la terrasse, à 30 cm de la barrière, et ni dans le bananier et son étal, ni dans le panier, la caisse ou l'armoire. Dehors, il n'y a pas de zone : le rayon ne trouve rien ;
+  - **le panier est plus grand** (×1,4, son tabouret aussi) **et n'a plus d'anse**, qui gênait les lancers. Mon FBX n'est pas modifié : le générateur enregistre une copie du maillage sans ce qui dépasse du bord (`Art/Bananier/Panier_SansAnse.asset`).
+  - Testé en Play via Unity MCP : deux singes achetés vont bien au panier et y déposent leurs bananes ; rayons de téléportation vérifiés point par point (milieu et portail : oui ; panier, étal, bananier, caisse, armoire, bord et dehors : non).
+
+  Avant : les singes partaient dans la prairie.
+
+  ![Avant : les singes récolteurs hors de la terrasse](../captures/maxens-bananeraie-singes-dehors.webp)
+
+  ![Le panneau BANANERAIE sur la porte de la cabane](../captures/maxens-porte-panneau.png)
+
+  ![Le panier agrandi, sans anse](../captures/maxens-panier-sans-anse.png)
+
+- **Fait : jusqu'à 3 bananiers dans la bananeraie** :
+  - **3 places** le long de la barrière de gauche, chacune avec son étal : au début, **un seul arbre** (celui du milieu) ;
+  - au comptoir BANANIER, une **4e colonne « +1 ARBRE »** : le 2e arbre coûte **500 bananes**, le 3e **1 500**, puis le bouton disparaît (« tous plantés »). L'arbre acheté **pousse** sous nos yeux (il grandit et rebondit un peu) ;
+  - les améliorations **PRODUCTION, FRAÎCHEUR et VALEUR valent pour les 3 arbres**, même ceux pas encore achetés : un nouvel arbre arrive au même niveau que les autres (nouveau script `Hub/BananaOrchard.cs`, le verger) ;
+  - **les singes récolteurs ramassent sous tous les arbres plantés** : chaque banane sait de quel arbre elle vient, le singe va au bord du bon étal ;
+  - la zone de téléportation exclut toute la bande des bananiers (un arbre peut y pousser).
+  - Testé en Play via Unity MCP : achat refusé sans argent, 2e arbre à 500, 3e à 1 500, puis plus rien à acheter ; une amélioration de production monte les 3 arbres ; les singes vident les 3 étals. Aucune erreur.
+
+  Ma capture : la place libre pour deux autres arbres.
+
+  ![Avant : un seul bananier, de la place pour deux autres](../captures/maxens-bananeraie-un-arbre.webp)
+
+  ![Les 3 bananiers achetés, avec leurs étals ; la colonne +1 ARBRE au comptoir](../captures/maxens-trois-bananiers.png)
+
+- **Fait : un voile noir pendant le passage des portes** (dans les deux sens). Changer de place d'un coup sous les yeux est désagréable en VR. Nouveau script `Player/ScreenCurtain.cs` : un carré noir collé devant la caméra du joueur, dessiné par-dessus tout avec le shader des textes du jeu (compatible casque).
+- **Corrigé après mon test du voile :**
+  - il démarre **dès que la porte s'entrouvre** (à 30 % de son ouverture ; avant : une fois la porte ouverte, puis à la moitié) ;
+  - **sens inversé** : il **descend du haut** pour cacher la vue, et après la téléportation il **remonte** (le bas de l'image réapparaît en premier) ;
+  - **beaucoup plus doux et plus lent** : 1,2 s dans chaque sens (avant 0,4 s), un départ et une arrivée en douceur, et un **bord fondu** au lieu d'une ligne nette. Sa taille suit le champ de vision de la caméra, pour que le bord traverse toute l'image (au PC comme au casque). La porte s'ouvre aussi un peu plus lentement (1 s).
+  - Testé en Play via Unity MCP : passage cabane → bananeraie complet, voile caché à l'arrivée.
+
+  ![Le voile noir à mi-course, qui descend du haut avec son bord fondu](../captures/maxens-voile-noir.png)
+
+- **Corrigé :** le tonneau sous l'abri, à droite de l'armoire, était trop maigre : il est **50 % plus large** (même hauteur).
+
+  ![Le tonneau élargi](../captures/maxens-tonneau-elargi.png)
+
+- **Changé : la bananeraie est maintenant juste derrière la porte de la cabane, dans la même scène** (au lieu d'une scène à part, à 1 km) :
+  - en ouvrant la porte, **on voit vraiment ce qu'il y a derrière** : la terrasse de la cabane, puis le portail de la bananeraie qui lui fait face ; on la voit aussi par les fenêtres ;
+  - on garde le même fonctionnement : on appuie, la porte s'ouvre, le voile noir descend, on est posé devant l'armoire, le voile remonte. Le portail ramène dans la cabane, devant la porte ;
+  - **le voile noir sert maintenant pour toutes les téléportations** : les deux portes, et les boutons SE TP (vers la carte) et HUB (retour) ;
+  - plus de 3e scène ni de 3e niveau : tout est dans le Hub, sous le même soleil. La bananeraie n'a plus son propre paysage (prairie, palmiers, montagnes) : c'est celui de la cabane, qui lui laisse la place (`hub_clear` dans `cabane.py`). Elle passe de 78 000 à 20 000 triangles.
+  - Testé en Play via Unity MCP : porte → bananeraie, portail → cabane, SE TP → carte, chaque fois sous le voile ; aucune erreur.
+
+  ![Par la porte ouverte, le portail de la bananeraie juste derrière](../captures/maxens-porte-ouverte-bananeraie.png)
+
+  ![Vue d'ensemble : la cabane, sa terrasse et la bananeraie derrière](../captures/maxens-cabane-et-bananeraie.png)
+
+- **Changé : une seule porte, commune à la cabane et à la bananeraie** :
+  - **le portail de la bananeraie est retiré** : sa barrière s'ouvre côté cabane sur une **allée bordée de barrières** qui mène jusqu'à la porte de la cabane, avec un **passage en planches** au-dessus de l'herbe. L'allée fait 2,2 m de large, pour que le battant ouvert ne traverse pas la barrière ;
+  - **la porte de la cabane marche dans les deux sens** : depuis la cabane, elle envoie au bout de l'allée, dans la bananeraie ; depuis l'allée, elle ramène dans la cabane, devant elle. Toujours avec le voile noir ;
+  - en VR, on peut se téléporter dans l'allée jusqu'à 60 cm du mur, pour revenir à la porte.
+  - Testé en Play via Unity MCP : cabane → bout de l'allée par la porte, puis retour par la même porte depuis la bananeraie, sous le voile ; téléportation VR possible dans l'allée, pas sur ses barrières ni hors de l'allée ; aucune erreur.
+
+  ![L'allée bordée de barrières entre la cabane et la bananeraie](../captures/maxens-allee-vue.png)
+
+  ![Depuis la bananeraie : l'allée mène à la porte de la cabane](../captures/maxens-allee-vers-porte.png)
+
+### IA
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Code) | Porte commune : portail retiré, allée bordée de barrières jusqu'à la porte de la cabane, porte qui téléporte dans les deux sens ; testé en Play via Unity MCP | À tester au casque |
+| Claude (Code) | Bananeraie déplacée juste derrière la porte de la cabane (même scène, visible par la porte et les fenêtres), voile noir pour toutes les téléportations (portes, SE TP, HUB) ; testé en Play via Unity MCP | À tester au casque |
+| Claude (Code) | Voile noir pendant le passage des portes ; puis, après mon test : démarrage à mi-ouverture, descend du haut et remonte, plus lent et doux avec un bord fondu ; testé en Play via Unity MCP | À tester au casque |
+| Claude (Code) | Jusqu'à 3 bananiers (achat au comptoir, 500 puis 1 500 bananes), améliorations communes aux 3 arbres, singes qui ramassent sous tous les arbres ; testé en Play via Unity MCP | À tester au casque |
+| Claude (Code) | Corrections de la bananeraie : singes qui vont au bon panier, panneau BANANERAIE sur la porte, téléportation limitée à la terrasse (hors meubles), panier agrandi sans anse ; testé en Play via Unity MCP | À tester au casque |
+| Claude (Code) | Bananeraie : nouvel endroit modélisé par script Blender dans le style de la cabane (terrasse, barrière, abri, portail), 3e niveau et sa scène, porte de la cabane qui s'ouvre puis téléporte (`PortalDoor`), déménagement du bananier, du panier, des comptoirs et des récolteurs ; testé en Play via Unity MCP | À tester au casque |
+| Claude (Code) | Paysage de la carte enfin aligné (noms « .001 » de Blender), erreurs de couleur des bananes corrigées | Gardé |
+
 ## Mer. 7 oct. 2026
 **Ma critique après la fusion** _(transmise à Dylan, mise en forme par l'IA ; issues #50 à #64)_
 1. Un bouton assis / debout, ce serait sympa.
