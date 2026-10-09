@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Ven. 9 oct. 2026
 
+### GDD complet
+> Fais un GDD ultra complet (avec les captures du jeu et le support de lancement de la SAÉ).
+
 ### Porte en VR
 > En VR, quand je passe le tutoriel, je ne peux pas traverser la porte.
 > Suite : après avoir appuyé sur PASSER, je voulais aller dehors, mais la porte me renvoie dans le hub.

@@ -7,6 +7,7 @@ lines = open(src, encoding='utf-8').read().split('\n')
 ACC = '2E7D32'
 def runs(t, size=None, color=None):
     out = []
+    t = t.replace('`', '')   # le code en ligne est écrit tel quel, sans les accents graves
     for part in re.split(r'(\*\*[^*]+\*\*|_[^_]+_(?=\W|$))', t):
         if not part: continue
         b = part.startswith('**'); i = part.startswith('_') and part.endswith('_') and len(part) > 2
@@ -50,7 +51,10 @@ while i < len(lines):
             i += 1
         body.append(table(rows)); continue
     if s.startswith('# '): body.append(para(s[2:], 'Title', after=120))
+    elif s.startswith('### '): body.append(para(s[4:], 'Heading2', keep=True))
     elif s.startswith('## '): body.append(para(s[3:], 'Heading1', keep=True))
+    elif s == '---': pass
+    elif s.startswith('> '): body.append(para('_' + s[2:].replace('**', '') + '_', ind=1))
     elif re.match(r'^\s*- ', l):
         ind = (len(l) - len(l.lstrip())) // 2
         body.append(para(s[2:], bullet=True, ind=ind, after=40))
@@ -62,6 +66,7 @@ styles = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xm
 <w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/><w:sz w:val="21"/><w:lang w:val="fr-FR"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="80" w:line="264" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>
 <w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>
 <w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:rPr><w:b/><w:color w:val="{ACC}"/><w:sz w:val="40"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="160" w:after="60"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/><w:color w:val="{ACC}"/><w:sz w:val="24"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="240" w:after="80"/><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="2" w:color="{ACC}"/></w:pBdr><w:outlineLvl w:val="0"/></w:pPr><w:rPr><w:b/><w:color w:val="{ACC}"/><w:sz w:val="28"/></w:rPr></w:style>
 </w:styles>'''
 ct = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>'''
