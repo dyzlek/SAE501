@@ -1,14 +1,12 @@
-# Game Design Document — Bloons VR _(v3, complète)_
+# Bloons VR — Game Design Document
 
-_SAÉ 5D.01 « Dispositifs interactifs » · BUT MMI 3 · IUT de Béziers · Unity 6 (6000.6) + C# · casque Meta Quest._
-_Équipe : Dylan, Maxens, Nicolas. Encadrement : A. Chollet (game design), N. Maurin (gestion de projet), D. Di Pierro (technique), I. Lojdi (3D et optimisation)._
-_v1 le ven. 9 oct. 2026 · v3 (complète) le 9 oct., d'après l'état réel du jeu · version finale le ven. 13 nov._
+_Un tower defense en réalité virtuelle · Dylan, Maxens et Nicolas · BUT MMI 3, IUT de Béziers (SAÉ 5D.01)_
 
----
+![La cabane des singes : le tableau du tutoriel accueille le joueur au-dessus de la maquette de la carte.](captures/gdd/tutoriel-tableau.png)
 
 ## 1. Fiche d'identité
 
-| | |
+| Élément | Détail |
 |---|---|
 | **Titre de travail** | Bloons VR (fan-game d'école, à renommer pour une diffusion) |
 | **Genre** | Tower defense + tir à l'arc + gestion légère |
@@ -62,6 +60,12 @@ L'univers de Bloons TD est assumé : des singes, des ballons colorés, un chemin
 | **La cabane (hub)** | Cabane ronde en rondins, toit de chaume, lustre en roue de charrette, lanternes, guirlande de ballons, tapis rond à motifs | Poser et fusionner les singes sur la maquette, ouvrir le coffre, lancer les vagues, jouer aux fléchettes |
 | **La bananeraie** | Derrière la grande porte : terrasse en planches fermée par une barrière, allée, abri en rondins, 1 à 3 bananiers, panier sur tabouret, roulette | Récolter les bananes, améliorer les arbres, acheter des récolteurs, miser à la roulette |
 | **La carte** | Prairie façon Monkey Lane : chemin de dalles qui se croise deux fois, fleurs, champignons, buissons, palmiers, montagnes low-poly, deux portails en pierre | Défendre à l'arc depuis une estrade en bois, améliorer l'arc |
+
+![La cabane vue du tapis : la bibliothèque des singes à gauche, la maquette au centre, le tableau des vagues au mur.](captures/gdd/cabane-interieur.png)
+
+![Depuis la bananeraie : la cabane, sa porte « CABANE » et l'allée bordée de barrières.](captures/gdd/cabane-exterieur.png)
+
+![La carte à taille réelle : le chemin de dalles, les portails d'entrée et de sortie, l'estrade du joueur à droite.](captures/gdd/carte-vue.png)
 
 ### 4.3 Direction artistique
 - **Style :** low-poly coloré et lisible, sans textures réalistes, des formes rondes et des couleurs saturées. Tout est fait maison par scripts Blender (`Blender/cabane.py`, `coffre.py`) : aucun asset téléchargé.
@@ -153,6 +157,8 @@ Le coffre se paie en bananes : **40 + 15 par vague vaincue**. Il s'ouvre en roul
 
 Les chances sont affichées sur un tableau au mur à côté du coffre (transparence).
 
+![Le coffre, son prix, et le tableau de ses chances au mur. À droite, la porte de la bananeraie.](captures/gdd/cabane-coffre-porte.png)
+
 ### 7.5 Quincy et l'arc
 - **Tir physique :** la tension dépend du recul de la main. Il y a 0,3 s entre deux tirs, pour ne pas « spammer ».
 - **L'arc n'existe que sur la carte :** au hub, on a les mains libres.
@@ -165,6 +171,8 @@ Le **pupitre ARC**, sur l'estrade, vend des améliorations qui se cumulent :
 | **Transperçante** | Ballons traversés par flèche : 1 → 8 | 150, 300, 500, 800, 1 300 |
 | **Tir triple** | 2 flèches de plus, à ±8° | 500 |
 | **Explosion** | Onde au contact : 3 à 8 ballons, rayon 1 à 3 m | 150, 300, 500, 800, 1 300 |
+
+![L'estrade de la carte : le pupitre LANCER / HUB, le tableau de la vague, le pupitre ARC à gauche. L'arc est en main.](captures/gdd/carte-estrade.png)
 
 ### 7.6 Les ballons
 
@@ -218,6 +226,8 @@ Elles sont calculées par une formule (`WaveBook.Make`) qui monte sans à-coups,
 - Ils ramassent les bananes de tous les arbres et les lancent dans le panier. Ils ratent leur lancer 1 fois sur 4 : ils boudent, puis vont la rechercher. Ils font un dunk 1 fois sur 5.
 - On les améliore en vitesse, cadence et rendement, sur 5 niveaux chacune (100 × 1,6^niveau).
 
+![Sous l'abri de la bananeraie : les comptoirs BANANIER et RÉCOLTEUR, le panier au premier plan, un bananier et son étal à gauche.](captures/gdd/bananeraie-abri.png)
+
 ### 7.9 Les bonus du hub
 - **Roulette (casino), dans la bananeraie :**
   - roue européenne de 37 cases ;
@@ -225,6 +235,8 @@ Elles sont calculées par une formule (`WaveBook.Make`) qui monte sans à-coups,
   - on mise par 10, ou TOUT ;
   - le rouge et le noir paient 1 contre 1, le vert (le zéro) 35 contre 1 ;
   - des bananes posées sur le tapis montrent la mise.
+![La roulette : la roue européenne, le tapis des mises (une banane misée) et le pupitre des mises.](captures/gdd/roulette.png)
+
 - **Cible de fléchettes, au mur de la cabane :** 3 fléchettes par manche, 5 à 50 points selon l'anneau, meilleur score affiché. C'est une pause ludique sans enjeu.
 
 ### 7.10 Économie

@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Ven. 9 oct. 2026
 
+### Confirmation de PASSER, GDD avec images
+> Quand on clique sur PASSER, demande si on est sûr de vouloir sauter le tutoriel. Pour le GDD : pas de « v3 complète », etc. Réalise-le comme un vrai GDD, avec des images.
+
 ### GDD complet
 > Fais un GDD ultra complet (avec les captures du jeu et le support de lancement de la SAÉ).
 

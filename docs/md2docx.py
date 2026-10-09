@@ -40,6 +40,25 @@ def table(rows):
                  para(c, after=0, size=18, color='FFFFFF' if k == 0 else None).replace('<w:rPr>', '<w:rPr><w:b/>' if k == 0 else '<w:rPr>') + '</w:tc>'
         x += '</w:tr>'
     return x + '</w:tbl>' + para('', after=60)
+images = []   # (chemin, rId) : les images du document, rangées dans word/media
+def image(path, caption):
+    import struct, os
+    full = os.path.join(os.path.dirname(os.path.abspath(src)), path)
+    with open(full, 'rb') as f: head = f.read(24)
+    w, h = struct.unpack('>II', head[16:24])          # taille d'un PNG, lue dans son en-tête
+    cx = 5900000; cy = int(cx * h / w)                 # ~16 cm de large, proportions gardées
+    rid = f'rIdImg{len(images) + 1}'; n = len(images) + 1
+    images.append((full, rid))
+    pic = (f'<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="120" w:after="40"/><w:keepNext/></w:pPr><w:r><w:drawing>'
+           f'<wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"><wp:extent cx="{cx}" cy="{cy}"/>'
+           f'<wp:docPr id="{n}" name="Image {n}"/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">'
+           f'<a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">'
+           f'<pic:nvPicPr><pic:cNvPr id="{n}" name="image{n}.png"/><pic:cNvPicPr/></pic:nvPicPr>'
+           f'<pic:blipFill><a:blip xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:embed="{rid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>'
+           f'<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="{cx}" cy="{cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>'
+           f'</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>')
+    cap = para(caption, after=160, size=18, color='666666').replace('<w:pPr>', '<w:pPr><w:jc w:val="center"/>', 1).replace('<w:rPr>', '<w:rPr><w:i/>')
+    return pic + cap
 body = []; i = 0
 while i < len(lines):
     l = lines[i]; s = l.strip()
@@ -50,7 +69,9 @@ while i < len(lines):
             if not all(re.fullmatch(r'-+', c) for c in cells): rows.append(cells)
             i += 1
         body.append(table(rows)); continue
-    if s.startswith('# '): body.append(para(s[2:], 'Title', after=120))
+    m = re.match(r'^!\[(.*)\]\((.+)\)$', s)
+    if m: body.append(image(m.group(2), m.group(1)))
+    elif s.startswith('# '): body.append(para(s[2:], 'Title', after=120))
     elif s.startswith('### '): body.append(para(s[4:], 'Heading2', keep=True))
     elif s.startswith('## '): body.append(para(s[3:], 'Heading1', keep=True))
     elif s == '---': pass
@@ -69,10 +90,12 @@ styles = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xm
 <w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="160" w:after="60"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/><w:color w:val="{ACC}"/><w:sz w:val="24"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="240" w:after="80"/><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="2" w:color="{ACC}"/></w:pBdr><w:outlineLvl w:val="0"/></w:pPr><w:rPr><w:b/><w:color w:val="{ACC}"/><w:sz w:val="28"/></w:rPr></w:style>
 </w:styles>'''
-ct = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>'''
+ct = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>'''
 rels = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>'''
-drels = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'''
+drels_head = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'''
+drels = drels_head + ''.join(f'<Relationship Id="{rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/{rid}.png"/>' for _, rid in images) + '</Relationships>'
 with zipfile.ZipFile(dst, 'w', zipfile.ZIP_DEFLATED) as z:
     z.writestr('[Content_Types].xml', ct); z.writestr('_rels/.rels', rels)
     z.writestr('word/document.xml', doc); z.writestr('word/styles.xml', styles); z.writestr('word/_rels/document.xml.rels', drels)
+    for full, rid in images: z.write(full, f'word/media/{rid}.png')
 print('ok', dst)
