@@ -183,6 +183,18 @@ namespace SAE
         // Le coffre du tutoriel : gratuit, et il donne un Classique gris (pour la fusion qui suit)
         public static bool ForcedChest => Active && Current == Step.Chest;
 
+        // Étape de la fusion : le singe tenu ne peut que fusionner, pas se poser à côté (Placement.Evaluate).
+        // Seulement si un singe à fusionner est déjà posé ; sinon (le premier a été rangé), on peut en reposer un.
+        public static bool FusionOnly
+        {
+            get
+            {
+                if (!Active || Current != Step.Fusion || GameState.Held == null) return false;
+                foreach (var p in GameState.Placed) if (p.monkey.CanFuseWith(GameState.Held.Value)) return true;
+                return false;
+            }
+        }
+
         public static void ChestOpened()
         {
             if (Current == Step.Chest) GoTo(Step.Fusion);

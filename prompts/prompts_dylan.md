@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Ven. 9 oct. 2026
 
+### Tutoriel : fusion obligatoire
+> Quand le tutoriel montre qu'on peut fusionner, on peut aussi placer le deuxième singe ailleurs.
+
 ### Tutoriel : la bananeraie
 > Dans le tutoriel, explique l'amélioration du bananier, l'achat des singes qui travaillent pour nous et le casino.
 
