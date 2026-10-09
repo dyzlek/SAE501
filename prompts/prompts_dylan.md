@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Ven. 9 oct. 2026
 
+### Vagues difficiles
+> Les vagues doivent être vraiment dures.
+
 ### Résolution de conflit de merge (PR #125)
 > Résous les conflits de merge dans cette pull request.
 
