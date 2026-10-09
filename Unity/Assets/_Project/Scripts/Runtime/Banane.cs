@@ -88,7 +88,7 @@ public class Banane : MonoBehaviour
     void Update()
     {
         if (deposee || !posee) return;
-        age += Time.deltaTime;
+        if (!EnMain) age += Time.deltaTime;   // tenue (par le joueur ou un singe), elle ne pourrit pas ; lâchée, ça reprend
         AppliquerCouleur(Color.Lerp(couleurFraiche, couleurPourrie, Progression));
         if (!EstPourrie && age >= dureePourriture) { EstPourrie = true; Odeur(); }
         AnimerPourriture();
@@ -163,6 +163,9 @@ public class Banane : MonoBehaviour
         vitesseMain.Clear();
         StopAllCoroutines();
     }
+
+    /// Un singe récolteur l'a laissée par terre (lancer raté) : elle n'est plus tenue, elle se remet à pourrir.
+    public void PoseeParTerre() => EnMain = false;
 
     public void Lachee()
     {

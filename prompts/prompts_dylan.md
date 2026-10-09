@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Ven. 9 oct. 2026
 
+### Porte animée et pourriture en pause
+> Deux choses : d'abord, quand on vise la porte, elle s'anime. Ensuite, quand moi ou les singes prenons une banane, la pourriture ralentit, voire s'arrête ; quand on la relâche, elle reprend.
+
 ### GDD v2 en .md et en .docx
 > Refais le GDD en .md et fais-en une version qu'on peut rendre en .docx.
 

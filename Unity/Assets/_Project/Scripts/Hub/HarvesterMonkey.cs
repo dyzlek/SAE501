@@ -264,6 +264,7 @@ namespace SAE
                 if (!banana) yield break;
                 yield return WalkTo(banana.transform.position - (banana.transform.position - transform.position).normalized * 0.25f, null);
                 Carried = banana;
+                banana.Prise();   // de nouveau en main : elle ne pourrit plus
             }
         }
 
@@ -291,6 +292,7 @@ namespace SAE
                 }
                 yield return Fly(banana, to, throwDuration);
                 if (banana && !miss) panier.RecevoirPart(banana, crew.Share);
+                if (banana && miss) banana.PoseeParTerre();   // par terre, elle se remet à pourrir
             }
             ThrowPhase = 0f;
         }
