@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Ven. 9 oct. 2026
 
+### Banane qui tressaute dans la main
+> Quand je prends une banane, ce n'est pas fluide : elle fait des hauts et des bas.
+
 ### Panneau pour rentrer dans la cabane
 > Avant de fusionner le travail de Nicolas, ajoute une pancarte dehors pour qu'on comprenne qu'on peut rentrer dans le hub.
 

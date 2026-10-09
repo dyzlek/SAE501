@@ -155,6 +155,9 @@ public static class BananesInstaller
             var far = grabType.GetProperty("farAttachMode");
             if (far != null && far.PropertyType.IsEnum) far.SetValue(grab, Enum.Parse(far.PropertyType, "Near"));
             var ease = grabType.GetProperty("attachEaseInTime"); if (ease != null) ease.SetValue(grab, 0.15f);
+            // la taille, c'est Banane qui la gère (elle se ratatine en pourrissant) : si le grab la suivait aussi,
+            // les deux se battraient à chaque image et la banane tressauterait dans la main
+            var scale = grabType.GetProperty("trackScale"); if (scale != null) scale.SetValue(grab, false);
             Debug.Log("Bananes : XR Grab Interactable ajouté à la banane et branché (Prise / Lachee).");
         }
         else Debug.LogWarning("Bananes : XR Interaction Toolkit non trouvé — la banane n'est pas attrapable en VR (clic souris seulement).");
