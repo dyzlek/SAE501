@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Ven. 9 oct. 2026
 
+### Résolution de conflit de merge (PR #125)
+> Résous les conflits de merge dans cette pull request.
+
 ### Confirmation de PASSER, GDD avec images
 > Quand on clique sur PASSER, demande si on est sûr de vouloir sauter le tutoriel. Pour le GDD : pas de « v3 complète », etc. Réalise-le comme un vrai GDD, avec des images.
 
