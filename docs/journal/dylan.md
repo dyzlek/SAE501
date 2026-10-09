@@ -3,6 +3,26 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Ven. 9 oct. 2026
+**Ce que j'ai fait :**
+- **Fusion du travail des trois :** la bananeraie de Maxens et la roulette de Nicolas sont dans `main` (PR #117). La roulette est déplacée dans la bananeraie, agrandie pour l'accueillir.
+- **Corrections :**
+  - panneau CABANE sur la porte, porte qui s'entrouvre quand on la vise ;
+  - porte en VR qui renvoyait dans la cabane (on regarde maintenant la position du casque) ;
+  - banane fluide en main, et qui ne pourrit plus tant qu'on la tient ;
+  - cible de fléchettes vide au départ ;
+  - téléportation jusqu'aux comptoirs de la bananeraie ;
+  - bas du plateau où l'on ne pouvait pas poser de singe.
+- **100 vagues progressives** à la place des 10 vagues écrites à la main (#118).
+- **Tutoriel intégré** de 17 étapes (#32) : univers, vague 1 à l'arc seul, premier singe, bananes, comptoirs, coffre offert et fusion, interactions bloquées hors consigne. Je l'ai testé une première fois et il a été corrigé d'après mes retours. Ensuite, **confirmation avant de PASSER** (#125, PR #126).
+- **Prix équilibrés** (#120) : fin du « gratuit » de bêta-test.
+- **GDD complet** avec 8 captures du jeu, en `.md` et en `.docx` (#43, PR #124).
+- **Diffusion du casque :** j'ai vu comment diffuser l'écran du casque pour la démo (casting Meta, Meta Quest Developer Hub ou scrcpy, sans changer le jeu).
+
+**Ce qui bloque / reste à faire :**
+- Presque tout ce qui a été fait aujourd'hui doit encore être **testé au casque**, après avoir régénéré les scènes (SAE > Générer le prototype, bac à sable décoché).
+- Le jeu n'a toujours **pas de son** (#34). Il n'y a pas d'écran de victoire / défaite clair (#31).
+- PR #124 (GDD) et #126 (PASSER) à relire et merger.
+- Des modifs Unity locales (XR Rig, profil Quest, scènes) sont rangées dans un stash : à trier.
 
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
@@ -24,6 +44,9 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude (Claude Code) | Merge de la PR #121 (tutoriel) dans main, à la demande de Dylan. Puis porte en VR (#122) : `PortalDoor` jugeait dedans/dehors avec la base du rig XR, qui peut être loin du casque (on téléporte le casque, pas la base) : il renvoyait dans la cabane. Nouveau `PlayerRig.HeadPosition` (le casque), utilisé par la porte et le tutoriel. Branche `fix/porte-vr`. Compilé, à tester au casque | Gardé (à tester) |
 | Claude (Claude Code) | GDD v3 complet (#43), branche \`docs/gdd-complet\` : 17 parties (fiche, pitch, boucles, univers et DA, références, contrôles, mécaniques chiffrées d'après le code : singes, raretés, coffre, arc, ballons, 100 vagues, bananeraie, économie ; tutoriel en 17 étapes, level design, interface et feedback, pourquoi la VR, pourquoi c'est un bon jeu, MoSCoW, confort, technique, production, risques, oral). \`md2docx.py\` gère maintenant les sous-titres et les citations ; \`GDD.docx\` vérifié dans Word (12 pages). À relire en équipe | Gardé (à relire) |
 | Claude (Claude Code) | GDD présenté comme un vrai document (#43) : titre « Bloons VR — Game Design Document », plus de mentions de version, 8 captures du jeu (converties en PNG dans \`docs/captures/gdd/\`) placées dans les parties, avec légende. \`md2docx.py\` intègre maintenant les images. \`GDD.docx\` : 16 pages, vérifié dans Word | Gardé (à relire) |
+| Claude (Claude Code) | Confirmation de PASSER dans le tutoriel (#125, PR #126, branche `feat/tuto-passer`) : « PASSER LE TUTORIEL ? Tu es sûr ? », boutons OUI / NON. Compilé, pas testé | Gardé (à tester) |
+| Claude (Claude Code) | Conseils pour diffuser l'écran du casque avec le jeu compilé (casting Meta, Meta Quest Developer Hub, scrcpy) : rien de modifié dans le projet | Gardé (conseil) |
+| Claude (Claude Code) | Mise à jour de ce journal (résumé de la journée) et du README (état du projet, lancement, tutoriel, build et diffusion) | Gardé |
 
 ## Jeu. 8 oct. 2026
 **GDD v1 (#12)** : nom « Bloons VR », univers Bloons TD gardé (exercice d'école, modèles maison), périmètre mis à jour avec ce qui est fait.
