@@ -9,7 +9,7 @@ namespace SAE
     // - ATTAQUE : la vague suit sa liste de groupes (WaveBook), écrite à l'avance.
     // Chaque vague commence avec toutes les vies (startLives). Perdre une vague ne fait pas tout recommencer :
     // on reprend AU DÉBUT de cette vague (singes posés et argent gardés).
-    // Victoire après la vague 10 (le dirigeable rouge), puis mode infini pour qui veut continuer.
+    // Victoire après la vague 100 (la finale aux 4 dirigeables rouges), puis mode infini pour qui veut continuer.
     // Règle du GDD : éclater un ballon ne rapporte rien, finir une vague rapporte de l'argent.
     // Rien n'est affiché à l'écran (nausée en VR) : les tableaux WaveBoard du décor lisent Wave, Lives et Status.
     public class WaveSpawner : MonoBehaviour
@@ -19,14 +19,15 @@ namespace SAE
 
         public float balloonHeight = 1f;
         public int startLives = 20;
-        public List<WaveData> waves = WaveBook.Default();
+        // Pas gardé dans la scène : c'est WaveBook qui fait foi (avant, la scène gardait une vieille liste de 10 vagues)
+        [System.NonSerialized] public List<WaveData> waves = WaveBook.Default();
 
         List<Vector3> path;
 
         public int Wave { get; private set; } = 1;   // la vague en cours, ou la prochaine à lancer
         public int Lives { get; private set; }
         public bool Running { get; private set; }
-        public bool Won { get; private set; }         // la vague 10 a été gagnée
+        public bool Won { get; private set; }         // la vague 100 a été gagnée
         public string Status { get; private set; } = "Prépare-toi, puis appuie sur LANCER";
 
         public int LastWrittenWave => waves.Count;

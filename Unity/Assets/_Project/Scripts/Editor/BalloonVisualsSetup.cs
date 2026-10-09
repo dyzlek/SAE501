@@ -11,7 +11,7 @@ namespace SAE.EditorTools
         const string AssetPath = "Assets/_Project/Resources/BalloonVisuals.asset";
 
         // Un FBX par sorte, dans l'ordre de BalloonKind (Normal, Rapide, Blindé, Boss, Dirigeable, Coeur).
-        // Le boss est le MOAB (bleu), le dirigeable rouge de la vague 10 est le BFB.
+        // Le boss est le MOAB (bleu), le dirigeable rouge (vagues 25, 50, 75, 100) est le BFB.
         static readonly string[] ModelPaths =
         {
             "Assets/_Project/Art/Ballons/FBX/Ballon_Normal.fbx",
