@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Ven. 9 oct. 2026
 
+### Merge et 100 vagues
+> Merge la version actuelle, puis rends les vagues cohérentes : l'objectif est d'aller plus loin, donc pas seulement 10 vagues. Pour l'instant, fais-en 100.
+
 ### Bas du plateau : pose impossible
 > Sur le bas de la carte (le plateau du hub), on ne peut pas poser de singe.
 > Suite : il n'y a pas de fantôme, on ne peut simplement pas poser.

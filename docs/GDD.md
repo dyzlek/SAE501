@@ -42,7 +42,7 @@ Univers de Bloons TD assumé : singes, ballons colorés, ton cartoon et chaleure
   - **Comptoir :** il améliore la production, la fraîcheur et la valeur des bananes pour tous les arbres.
   - **Récolteurs :** des singes récolteurs ramassent et lancent les bananes à notre place.
 - **Quincy à l'arc :** bander, viser, lâcher, avec 0,3 s entre deux tirs. Le pupitre ARC propose des améliorations qui se cumulent : flèche perforante, transperçante, tir triple, explosion.
-- **Ballons :** normal (la couleur indique la résistance), rapide, blindé, cœur (il se regonfle), puis les boss : un gros ballon lent et, pour finir, le dirigeable rouge. 10 vagues.
+- **Ballons :** normal (la couleur indique la résistance), rapide, blindé, cœur (il se regonfle), puis les boss : un gros ballon lent (dès la vague 15) et le dirigeable rouge (vagues 25, 50, 75). **100 vagues** de difficulté progressive : chaque sorte de ballon arrive à son palier, puis son nombre et sa solidité montent. La vague 100 (4 dirigeables rouges) donne la victoire, et le mode infini continue ensuite.
 - **Bonus du hub :**
   - une cible de fléchettes au mur (3 fléchettes par manche, meilleur score) ;
   - une roulette de casino dans la bananeraie, où l'on mise des bananes sur une couleur (version bêta-test).
@@ -62,7 +62,7 @@ Univers de Bloons TD assumé : singes, ballons colorés, ton cartoon et chaleure
 ## 7. Périmètre
 | DOIT | DEVRAIT | POURRAIT | NE FERA PAS |
 |---|---|---|---|
-| 1 carte, 1 chemin, 10 vagues + boss final (dirigeable rouge) ✅ | Fusion et raretés ✅ | Plus de types de singes | Plusieurs cartes |
+| 1 carte, 1 chemin, 100 vagues progressives + finale (dirigeables rouges) ✅ | Fusion et raretés ✅ | Plus de types de singes | Plusieurs cartes |
 | Quincy à l'arc (tir physique) ✅ | Bananes qui pourrissent, singes récolteurs ✅ | Améliorations de l'arc ✅ | Méta-progression entre les parties |
 | Singes posés à la main ✅ | Coffre et roulette simples ✅ | Ballons cœur et blindé ✅ | Gacha complet, achats réels |
 | Bananes → panier → déblocage des singes ✅ | Décor soigné (cabane, montagnes, lumière) ✅ | Roulette de casino, cible de fléchettes ✅ (bonus) | Multijoueur |
