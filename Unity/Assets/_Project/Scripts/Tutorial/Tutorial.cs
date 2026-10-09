@@ -4,7 +4,7 @@ namespace SAE
 {
     // Les endroits que la flèche du tutoriel peut montrer (TutorialTarget les marque dans les scènes).
     // Panel = le tableau du tutoriel lui-même (étapes à lire) ; FirstMonkey = la case du Classique gris de la bibliothèque.
-    public enum TutorialSpot { None, Panel, HubTeleport, MapLaunch, MapHub, Library, FirstMonkey, Board, Door, Basket, Chest, HubLaunch }
+    public enum TutorialSpot { None, Panel, HubTeleport, MapLaunch, MapHub, Library, FirstMonkey, Board, Door, Basket, Chest, HubLaunch, Orchard, Harvesters, Casino }
 
     // Ce que le joueur essaie de faire : pendant le tutoriel, seul ce que demande l'étape en cours est permis
     public enum TutorialAction { GoMap, GoHub, Launch, ClearBoard, Door, Chest, TakeMonkey, Other }
@@ -14,7 +14,8 @@ namespace SAE
     //   1. trois tableaux pour raconter l'univers (bouton SUIVANT)
     //   2. aller sur la carte, lancer la vague 1 et la gagner À L'ARC SEUL, sans laisser passer un seul ballon
     //   3. récompense : le premier singe ; retour au hub, la bibliothèque, prendre le singe, le poser sur le plateau
-    //   4. passer la porte, ramasser une banane et la lancer dans le panier
+    //   4. passer la porte, ramasser une banane et la lancer dans le panier ; puis, dans la bananeraie, ce qu'on y achète :
+    //      le comptoir du bananier, les singes récolteurs (ils travaillent pour nous) et le casino
     //   5. ouvrir le coffre (offert, il donne un 2e Classique gris), puis fusionner les deux singes
     //   6. lancer la vague 2 : fin du tutoriel
     // Une étape « à faire » passe toute seule à la suivante quand le joueur l'a faite (IsDone).
@@ -27,7 +28,7 @@ namespace SAE
             Welcome, Bloons, Quincy,          // l'univers
             GoMap, Launch, Shoot,             // la vague 1, à l'arc
             Reward, Library, Take, Place,     // le premier singe
-            Bananas,                          // la bananeraie
+            Bananas, Orchard, Harvesters, Casino,   // la bananeraie et ce qu'on y achète
             Chest, Fusion,                    // le coffre et la fusion
             NextWave,                         // la vague 2
             Done
@@ -67,6 +68,9 @@ namespace SAE
             Step.Take => "TON PREMIER SINGE",
             Step.Place => "POSE-LE",
             Step.Bananas => "LES BANANES",
+            Step.Orchard => "LE COMPTOIR DU BANANIER",
+            Step.Harvesters => "LES SINGES RÉCOLTEURS",
+            Step.Casino => "LE CASINO",
             Step.Chest => "LE COFFRE",
             Step.Fusion => "LA FUSION",
             Step.NextWave => "À TOI DE JOUER !",
@@ -89,6 +93,9 @@ namespace SAE
             Step.Take => "Ton singe est là (la flèche).\nVise-le et serre le grip\npour le prendre.",
             Step.Place => "Vise le plateau et lâche-le\nprès du chemin (pas dessus).\nVert : c'est bon. Rouge : impossible.",
             Step.Bananas => "Les bananes paient tout. Passe la\nporte DERRIÈRE TOI, et lance une\nbanane dans le panier.",
+            Step.Orchard => "Au fond, sous l'abri : améliore tes\nbananiers (production, fraîcheur,\nvaleur) ou plante un nouvel arbre.",
+            Step.Harvesters => "À côté, achète des singes récolteurs :\nils ramassent les bananes et les\nlancent dans le panier pour toi !",
+            Step.Casino => "À droite, la roulette : mise tes\nbananes sur une couleur. Tu peux\ngagner gros... ou tout perdre !",
             Step.Chest => "Le coffre donne un singe au hasard.\nLe premier est offert : rentre\ndans la cabane et ouvre-le !",
             Step.Fusion => "Prends ton nouveau singe et pose-le\nSUR le premier : 2 singes identiques\nfusionnent en un singe plus fort !",
             Step.NextWave => "Lance la vague 2 avec LANCER.\n100 vagues t'attendent...\nbonne chance !",
@@ -96,7 +103,8 @@ namespace SAE
         };
 
         // Les étapes où l'on lit, puis appuie sur SUIVANT (les autres passent toutes seules)
-        public static bool NeedsNext(Step s) => s == Step.Welcome || s == Step.Bloons || s == Step.Quincy || s == Step.Library;
+        public static bool NeedsNext(Step s) => s == Step.Welcome || s == Step.Bloons || s == Step.Quincy || s == Step.Library
+                                              || s == Step.Orchard || s == Step.Harvesters || s == Step.Casino;
 
         // Ce que montre la flèche
         public static TutorialSpot Spot(Step s) => s switch
@@ -110,6 +118,9 @@ namespace SAE
             Step.Take => TutorialSpot.FirstMonkey,
             Step.Place => TutorialSpot.Board,
             Step.Bananas => PlayerInCabin() ? TutorialSpot.Door : TutorialSpot.Basket,
+            Step.Orchard => TutorialSpot.Orchard,
+            Step.Harvesters => TutorialSpot.Harvesters,
+            Step.Casino => TutorialSpot.Casino,
             Step.Chest => PlayerInCabin() ? TutorialSpot.Chest : TutorialSpot.Door,
             Step.Fusion => GameState.Held != null || !PlayerInCabin() ? TutorialSpot.Board : TutorialSpot.FirstMonkey,
             Step.NextWave => TutorialSpot.HubLaunch,

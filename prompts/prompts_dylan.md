@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Ven. 9 oct. 2026
 
+### Tutoriel : la bananeraie
+> Dans le tutoriel, explique l'amélioration du bananier, l'achat des singes qui travaillent pour nous et le casino.
+
 ### Tutoriel : retours après le premier test
 > Le tutoriel est mal indiqué, on ne remarque pas le panneau. Il me félicite même si je n'ai éclaté aucun ballon et il passe au niveau suivant (je n'ai juste pas tiré, pour voir). Pour poser le premier singe, c'est mal indiqué, et la flèche est à l'envers. Il n'y a pas d'indication pour la porte. Fais montrer le coffre et la fusion : au premier coffre, on doit obtenir un singe normal pour montrer ensuite la fusion. Pendant le tutoriel, on ne doit pas pouvoir faire d'autre interaction que ce qu'il demande. Montre aussi les singes.
 

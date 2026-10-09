@@ -1486,6 +1486,9 @@ namespace SAE.EditorTools
             bool trees = orchard.trees.All(t => t);
             if (trees) BuildUpgradePanel(env, orchard, new Vector3(-0.85f, 0f, counterZ), 0f);
             if (panier) Target(panier.transform, panier.transform.position, TutorialSpot.Basket, Level.Hub, 0.7f);
+            Target(env, env.TransformPoint(new Vector3(-0.85f, 2.3f, counterZ)), TutorialSpot.Orchard, Level.Hub, 0f);      // au-dessus des enseignes
+            Target(env, env.TransformPoint(new Vector3(0.85f, 2.3f, counterZ)), TutorialSpot.Harvesters, Level.Hub, 0f);
+            Target(env, env.TransformPoint(RouletteSpot + new Vector3(0f, 2.4f, 0.8f)), TutorialSpot.Casino, Level.Hub, 0f);   // au-dessus de l'enseigne ROULETTE
             // Le tableau du tutoriel, à droite de l'arrivée, tourné vers elle
             BuildTutorialBoard(env, new Vector3(1.9f, 1.5f, -1.2f), Quaternion.Euler(0f, 55f, 0f), Level.Hub, hanging: false);
             if (trees && panier)
