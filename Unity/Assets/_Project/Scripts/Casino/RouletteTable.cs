@@ -39,6 +39,11 @@ namespace SAE
 
         void Awake() => pockets = GetComponentsInChildren<RoulettePocket>();
 
+        // Le compte change (bananes déposées, achat...) : le tapis et l'ardoise suivent
+        void OnEnable() => Economy.MoneyChanged += OnMoneyChanged;
+        void OnDisable() => Economy.MoneyChanged -= OnMoneyChanged;
+        void OnMoneyChanged(int money, Vector3? where) => Refresh();
+
         void Start()
         {
             ShowGlow();
@@ -146,17 +151,18 @@ namespace SAE
         // L'ardoise, et les bananes du tapis des mises
         void Refresh()
         {
-            int shown = Spinning ? played : stake;
-            int piles = Mathf.Clamp((shown + BananasPerPile - 1) / BananasPerPile, 1, stakeBananas.Length);   // arrondi au-dessus
+            // On ne montre jamais plus que ce qu'on a : compte à 0, tapis vide et pas de texte
+            int shown = Spinning ? played : Mathf.Min(stake, Economy.Money);
+            int piles = Mathf.Clamp((shown + BananasPerPile - 1) / BananasPerPile, 0, stakeBananas.Length);   // arrondi au-dessus
             for (int i = 0; i < stakeBananas.Length; i++) stakeBananas[i].SetActive(i < piles);
-            stakeLabel.text = $"<color=#FFD45A>{shown}</color> bananes";
+            stakeLabel.text = shown > 0 ? $"<color=#FFD45A>{shown}</color> {(shown > 1 ? "bananes" : "banane")}" : "";
 
             string pick = selected.HasValue
                 ? $"{RouletteRules.Colored(selected.Value)} (paie {RouletteRules.Payout(selected.Value)} contre 1)"
                 : "<color=#9AA89A>aucune</color>";
             var text = new System.Text.StringBuilder();
             text.Append($"couleur : {pick}\n");
-            text.Append($"mise : <color=#FFD45A>{stake}</color>\n");
+            text.Append($"mise : <color=#FFD45A>{Mathf.Min(stake, Economy.Money)}</color>\n");
             text.Append(lastResult).Append('\n');
             var last = new List<string>();
             foreach (var h in history) last.Add(RouletteRules.Colored(h));
