@@ -47,10 +47,10 @@ namespace SAE
 
     // Le livre des vagues : 100 vagues calculées par une même formule, pour une difficulté qui monte sans à-coups,
     // avec des paliers façon Bloons TD (un nouveau ballon apparaît, puis revient de plus en plus souvent) :
-    //   vague 1 à 3   : ballons normaux seulement, on découvre l'arc et les singes
-    //   vague 4       : premiers rapides       vague 8  : premiers blindés     vague 12 : premiers cœurs (se regonflent)
-    //   vague 15      : premier boss (gros ballon lent), puis un toutes les 5 vagues ; dès la 50, à chaque vague
-    //   vague 25, 50, 75 : un dirigeable rouge ; vague 100 : la finale, 4 dirigeables rouges -> victoire
+    //   vague 1       : 8 ballons simples (le tutoriel, à l'arc seul)
+    //   vague 3       : premiers rapides       vague 6  : premiers blindés     vague 9  : premiers cœurs (se regonflent)
+    //   vague 10      : premier boss (gros ballon lent), puis un toutes les 5 vagues ; dès la 35, à chaque vague
+    //   vague 20, 40, 60, 80 : 1 à 4 dirigeables rouges ; vague 100 : la finale, 5 dirigeables rouges -> victoire
     // Après la 100 : mode infini, la même formule continue.
     // Tout se règle ici (nombres, couches, écarts) ; rien n'est gardé dans la scène.
     public static class WaveBook
@@ -63,6 +63,9 @@ namespace SAE
         static BalloonGroup C(int count, int layers) => new BalloonGroup(BalloonKind.Coeur, count, layers, 1f);
         static BalloonGroup Boss(int count, int layers) => new BalloonGroup(BalloonKind.Boss, count, layers, 2.5f, 2f);
         static BalloonGroup Blimp(int count, int layers) => new BalloonGroup(BalloonKind.Dirigeable, count, layers, 3f, 4f);
+
+        const int MaxGroup = 60;   // ballons au plus par groupe
+        static int Cap(int count) => Mathf.Min(count, MaxGroup);
 
         public static List<WaveData> Default()
         {
@@ -79,20 +82,24 @@ namespace SAE
         {
             var groups = new List<BalloonGroup>();
 
-            // Normaux : toujours là. 8 au début, ~68 à la vague 100 ; 1 couche, puis +1 toutes les 8 vagues ; de plus en plus serrés
-            float interval = Mathf.Lerp(0.8f, 0.3f, Mathf.Clamp01((w - 1) / 60f));
-            groups.Add(N(8 + w * 6 / 10, 1 + w / 8, interval));
-            if (w >= 3) groups.Add(N(4 + w / 4, 2 + w / 8, interval));          // un 2e groupe, plus solide
+            // Vague 1 : le tutoriel, à l'arc seul (aucun ballon ne doit passer) : elle reste simple.
+            if (w == 1) return new WaveData(N(8, 1, 0.8f));
 
-            if (w >= 4) groups.Add(R(2 + (w - 4) * 3 / 5, 1 + (w - 4) / 10));     // rapides
-            if (w >= 8) groups.Add(B(1 + (w - 8) / 2, 2 + (w - 8) / 10));         // blindés
-            if (w >= 12 && w % 2 == 0) groups.Add(C(1 + (w - 12) / 6, 2 + (w - 12) / 8));   // cœurs, une vague sur deux
+            // DIFFICILE (9 oct.) : les ballons arrivent tôt, nombreux, serrés, et gagnent vite des couches.
+            // Chaque groupe est plafonné à MaxGroup ballons : au-delà, ce sont les couches qui montent (le Quest suit).
+            float interval = Mathf.Lerp(0.6f, 0.2f, Mathf.Clamp01((w - 2) / 40f));
+            groups.Add(N(Cap(8 + w), 1 + w / 5, interval));                               // normaux : +1 couche toutes les 5 vagues
+            groups.Add(N(Cap(3 + w / 2), 2 + w / 5, interval));                           // un 2e groupe, plus solide
 
-            // Boss : toutes les 5 vagues à partir de la 15, puis à chaque vague dès la 50
-            if (w >= 15 && (w % 5 == 0 || w >= 50)) groups.Add(Boss(1 + (w - 15) / 20, 10 + w / 2));
+            if (w >= 3) groups.Add(R(Cap(2 + (w - 3)), 1 + (w - 3) / 6));                 // rapides dès la 3
+            if (w >= 6) groups.Add(B(Cap(1 + (w - 6) * 2 / 3), 2 + (w - 6) / 6));         // blindés dès la 6
+            if (w >= 9) groups.Add(C(Cap(1 + (w - 9) / 4), 2 + (w - 9) / 5));             // cœurs dès la 9, à chaque vague
 
-            // Dirigeables rouges : aux vagues 25, 50, 75, et 4 pour la finale (100) ; en infini, toutes les 25 vagues
-            if (w % 25 == 0) groups.Add(Blimp(w / 25, 60 + w));
+            // Boss : toutes les 5 vagues à partir de la 10, puis à chaque vague dès la 35
+            if (w >= 10 && (w % 5 == 0 || w >= 35)) groups.Add(Boss(1 + (w - 10) / 12, 15 + w));
+
+            // Dirigeables rouges : toutes les 20 vagues (1 à la 20, 2 à la 40... 5 pour la finale, la 100)
+            if (w % 20 == 0) groups.Add(Blimp(w / 20, 100 + 2 * w));
 
             return new WaveData(groups.ToArray());
         }
