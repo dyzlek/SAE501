@@ -28,8 +28,8 @@ namespace SAE
             if (target == null) return;
 
             nextPress = Time.time + cooldown;
-            target.Press();
-            PlayerRig.Buzz(transform, 0.6f);
+            bool done = Tutorial.TryPress(target);   // pendant le tutoriel, seul ce qu'il demande est permis
+            PlayerRig.Buzz(transform, done ? 0.6f : 0.15f);
         }
     }
 }

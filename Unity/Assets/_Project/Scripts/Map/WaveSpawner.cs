@@ -91,6 +91,7 @@ namespace SAE
                 foreach (var b in new List<Balloon>(Balloon.All)) Destroy(b.gameObject);
                 Lives = startLives;
                 Status = $"Vague {Wave} perdue : relance-la";
+                Tutorial.WaveLost();   // le tableau du tutoriel dit de la relancer
             }
             else
             {
@@ -122,6 +123,7 @@ namespace SAE
             PlayerRig.IgnoreCollisions(go);   // le joueur traverse les ballons et les boss ; les flèches les touchent toujours
         }
 
-        public void BalloonEscaped(int layers) => Lives = Mathf.Max(0, Lives - layers);
+        // Un ballon est passé. Vague 1 du tutoriel : aucun ne doit passer, elle est ratée tout de suite.
+        public void BalloonEscaped(int layers) => Lives = Tutorial.StrictWave ? 0 : Mathf.Max(0, Lives - layers);
     }
 }

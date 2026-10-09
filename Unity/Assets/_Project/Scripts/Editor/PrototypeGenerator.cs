@@ -569,7 +569,7 @@ namespace SAE.EditorTools
             for (int side = -1; side <= 1; side += 2)
             {
                 var bar = Visuals.Box("Branche", pointer, new Vector3(side * 0.045f, 0.06f, 0f), new Vector3(0.035f, 0.14f, 0.035f), TitleGold);
-                bar.transform.localRotation = Quaternion.Euler(0f, 0f, side * 35f);
+                bar.transform.localRotation = Quaternion.Euler(0f, 0f, -side * 35f);   // le haut s'écarte : un V qui pointe vers le bas
             }
             var ball = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             ball.name = "Boule";
@@ -578,19 +578,20 @@ namespace SAE.EditorTools
             ball.transform.localPosition = new Vector3(0f, 0.2f, 0f);
             ball.transform.localScale = Vector3.one * 0.06f;
             ball.AddComponent<ColorTint>().Set(TitleGold);
+            pointer.localScale = Vector3.one * 1.8f;   // bien visible de loin
             pointer.gameObject.SetActive(false);
             runner.pointer = pointer;
 
-            // Suspendu au-dessus du plateau, légèrement penché vers le joueur, à 2,3 m de lui
-            BuildTutorialBoard(env, Around(0f, 2.3f, 2.3f), Quaternion.Euler(-10f, 0f, 0f), hanging: true);
+            // Suspendu au-dessus du plateau (son bas reste au-dessus du bord du plateau), penché vers le joueur, à 2 m de lui
+            BuildTutorialBoard(env, Around(0f, 2.0f, 2.05f), Quaternion.Euler(-10f, 0f, 0f), Level.Hub, hanging: true);
         }
 
         // Un tableau du tutoriel (TutorialBoard) : ardoise, titre doré, consigne à la craie, numéro d'étape,
         // SUIVANT et PASSER, et une gerbe de petits ballons derrière. hanging : suspendu par deux cordes
         // jusqu'au plafond de la cabane ; sinon, sur deux poteaux plantés dans le sol.
-        static void BuildTutorialBoard(Transform parent, Vector3 localPos, Quaternion localRotation, bool hanging)
+        static void BuildTutorialBoard(Transform parent, Vector3 localPos, Quaternion localRotation, Level level, bool hanging)
         {
-            const float W = 1.5f, H = 0.95f;
+            const float W = 1.8f, H = 1.1f;   // grand : on doit le remarquer tout de suite
             var root = new GameObject("Tableau du tutoriel").transform;
             root.SetParent(parent, false);
             root.localPosition = localPos;
@@ -601,13 +602,17 @@ namespace SAE.EditorTools
             var slate = BuildChalkboard(visual, "Ardoise", Vector3.zero, Quaternion.identity, W, H);
             var board = root.gameObject.AddComponent<TutorialBoard>();
             board.visual = visual.gameObject;
-            board.title = Visuals.Text(slate, "", new Vector3(0f, 0.33f, -0.05f), 0.11f, TitleGold, title: true);
-            board.body = Visuals.Text(slate, "", new Vector3(0f, 0.04f, -0.05f), 0.065f, Chalk);
-            board.progress = Visuals.Text(slate, "", new Vector3(0f, -0.35f, -0.05f), 0.045f, new Color(0.6f, 0.65f, 0.6f));
+            board.title = Visuals.Text(slate, "", new Vector3(0f, 0.4f, -0.05f), 0.12f, TitleGold, title: true);
+            board.body = Visuals.Text(slate, "", new Vector3(0f, 0.06f, -0.05f), 0.075f, Chalk);
+            board.progress = Visuals.Text(slate, "", new Vector3(0f, -0.42f, -0.05f), 0.05f, new Color(0.6f, 0.65f, 0.6f));
+            // Le cadre lumineux qui pulse, un peu plus grand que l'ardoise, juste derrière (TutorialBoard l'anime)
+            board.glow = Visuals.Box("Cadre lumineux", slate, new Vector3(0f, 0f, 0.035f), new Vector3(W + 0.3f, H + 0.3f, 0.02f), TitleGold).GetComponent<ColorTint>();
+            // La flèche montre le tableau pendant les étapes à lire
+            Target(root, root.position + root.up * (H / 2f + 0.25f), TutorialSpot.Panel, level, 0f);
 
             // Les deux boutons, sortis de l'ardoise vers le joueur : SUIVANT à droite (vert), PASSER à gauche (gris)
-            board.nextButton = TutorialButtonOn(slate, 0.55f, "SUIVANT", PlayColor, TutorialButton.Action.Next);
-            TutorialButtonOn(slate, -0.55f, "PASSER", new Color(0.45f, 0.45f, 0.47f), TutorialButton.Action.Skip);
+            board.nextButton = TutorialButtonOn(slate, 0.68f, "SUIVANT", PlayColor, TutorialButton.Action.Next);
+            TutorialButtonOn(slate, -0.68f, "PASSER", new Color(0.45f, 0.45f, 0.47f), TutorialButton.Action.Skip);
 
             // Les cordes (jusqu'au plafond, 3 m) ou les poteaux (jusqu'au sol)
             float top = H / 2f + 0.06f, bottom = -H / 2f - 0.06f;
@@ -665,7 +670,7 @@ namespace SAE.EditorTools
         // Un bouton rond du tableau du tutoriel, tourné vers le joueur, avec son nom à côté (vers le centre du tableau)
         static GameObject TutorialButtonOn(Transform slate, float x, string label, Color color, TutorialButton.Action action)
         {
-            var button = RoundButton(slate, new Vector3(x, -0.33f, -0.05f));
+            var button = RoundButton(slate, new Vector3(x, -0.4f, -0.05f));
             button.localRotation = Quaternion.Euler(-90f, 0f, 0f);   // son dessus regarde le joueur (-Z)
             button.name = "Bouton " + label;
             var cap = button.Find("Bouton");
@@ -674,7 +679,7 @@ namespace SAE.EditorTools
             b.action = action;
             b.cap = cap;
             button.gameObject.AddComponent<RayPress>();
-            var text = Visuals.Text(slate, label, new Vector3(x - Mathf.Sign(x) * 0.25f, -0.33f, -0.05f), 0.06f, TitleGold, title: true);
+            var text = Visuals.Text(slate, label, new Vector3(x - Mathf.Sign(x) * 0.27f, -0.4f, -0.05f), 0.07f, TitleGold, title: true);
             text.transform.SetParent(button, true);   // le nom disparaît avec le bouton (SUIVANT n'est pas toujours là)
             return button.gameObject;
         }
@@ -1482,7 +1487,7 @@ namespace SAE.EditorTools
             if (trees) BuildUpgradePanel(env, orchard, new Vector3(-0.85f, 0f, counterZ), 0f);
             if (panier) Target(panier.transform, panier.transform.position, TutorialSpot.Basket, Level.Hub, 0.7f);
             // Le tableau du tutoriel, à droite de l'arrivée, tourné vers elle
-            BuildTutorialBoard(env, new Vector3(1.9f, 1.45f, -1.2f), Quaternion.Euler(0f, 55f, 0f), hanging: false);
+            BuildTutorialBoard(env, new Vector3(1.9f, 1.5f, -1.2f), Quaternion.Euler(0f, 55f, 0f), Level.Hub, hanging: false);
             if (trees && panier)
             {
                 var homes = new[]
@@ -1759,7 +1764,7 @@ namespace SAE.EditorTools
             Target(mapLaunch.transform, mapLaunch.transform.position, TutorialSpot.MapLaunch, Level.Carte, 0.3f);
             Target(mapHub.transform, mapHub.transform.position, TutorialSpot.MapHub, Level.Carte, 0.3f);
             // Le tableau du tutoriel, à gauche de l'arrivée, tourné vers elle (le pupitre ARC reste visible derrière)
-            BuildTutorialBoard(map.transform, new Vector3(-3.2f, 1.55f, -edge - 1.9f), Quaternion.Euler(0f, -60f, 0f), hanging: false);
+            BuildTutorialBoard(map.transform, new Vector3(-3.2f, 1.6f, -edge - 1.9f), Quaternion.Euler(0f, -60f, 0f), Level.Carte, hanging: false);
             BuildWaveBoard(map.transform, new Vector3(0, 2.4f, -edge - 0.3f), Quaternion.identity);
             for (int side = -1; side <= 1; side += 2)   // le tableau tient sur deux poteaux plantés dans le sol (il ne flotte pas)
                 Visuals.Solid("Poteau du tableau", map.transform, new Vector3(side * 0.92f, (2.4f + GroundY) / 2f, -edge - 0.25f), new Vector3(0.1f, 2.4f - GroundY, 0.1f), Wood);

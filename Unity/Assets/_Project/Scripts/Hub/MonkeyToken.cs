@@ -125,6 +125,7 @@ namespace SAE
         public bool Take(Transform byHand)
         {
             if (Held != null) return false;
+            if (!Tutorial.Allows(TutorialAction.TakeMonkey)) { Tutorial.Refuse(); return false; }   // pas encore à cette étape
             Held = this;
             hand = byHand;
             slot.Detach(this);                      // la case en pose un autre si on en a encore

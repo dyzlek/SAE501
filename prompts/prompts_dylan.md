@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Ven. 9 oct. 2026
 
+### Tutoriel : retours après le premier test
+> Le tutoriel est mal indiqué, on ne remarque pas le panneau. Il me félicite même si je n'ai éclaté aucun ballon et il passe au niveau suivant (je n'ai juste pas tiré, pour voir). Pour poser le premier singe, c'est mal indiqué, et la flèche est à l'envers. Il n'y a pas d'indication pour la porte. Fais montrer le coffre et la fusion : au premier coffre, on doit obtenir un singe normal pour montrer ensuite la fusion. Pendant le tutoriel, on ne doit pas pouvoir faire d'autre interaction que ce qu'il demande. Montre aussi les singes.
+
 ### Tutoriel et prix équilibrés
 > J'aimerais faire un tutoriel. D'abord, expliquer un peu l'univers de façon stylée, puis faire la première vague avec l'arc seul, puis expliquer comment poser les singes, etc. Je te laisse faire. Mets aussi des prix équilibrés : par exemple, les singes sont payants maintenant.
 
