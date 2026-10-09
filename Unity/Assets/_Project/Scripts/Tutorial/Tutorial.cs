@@ -208,7 +208,7 @@ namespace SAE
         static bool PlayerInCabin()
         {
             if (Levels.Current != Level.Hub) return false;
-            var p = PlayerRig.Local ? PlayerRig.Local.transform.position : Vector3.zero;
+            var p = PlayerRig.Local ? PlayerRig.Local.HeadPosition : Vector3.zero;
             return new Vector2(p.x, p.z).magnitude < HubLayout.CabinRadius;
         }
 

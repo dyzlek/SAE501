@@ -53,7 +53,7 @@ namespace SAE
         {
             var player = PlayerRig.Local;
             if (opening || ScreenCurtain.Busy || !player) return;
-            var flat = player.transform.position - insideCenter;
+            var flat = player.HeadPosition - insideCenter;   // la tête : la base du rig peut être loin du casque
             flat.y = 0f;
             var target = flat.magnitude < insideRadius ? arrival : returnArrival;   // dedans : on sort ; dehors : on rentre
             if (target) StartCoroutine(OpenAndGo(target));

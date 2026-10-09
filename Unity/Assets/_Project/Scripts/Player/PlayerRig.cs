@@ -20,6 +20,10 @@ namespace SAE
         XROrigin origin;
         CharacterController body;
 
+        // Où est vraiment le joueur : sa tête (le casque). En VR, la base du rig (transform) peut être à plusieurs mètres
+        // du casque, selon où l'on se tient dans sa zone de jeu : c'est le casque qu'on téléporte, pas la base.
+        public Vector3 HeadPosition => origin && origin.Camera ? origin.Camera.transform.position : transform.position;
+
         void Awake()
         {
             origin = GetComponent<XROrigin>();       // null en mode PC
