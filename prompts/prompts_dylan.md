@@ -2,6 +2,24 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Ven. 9 oct. 2026
+
+### Roulette : rien sur le tapis à 0 banane
+> Je ne veux pas voir la banane et « 1 » sur le tapis des mises quand mon compte est à 0.
+
+### Fusion du casino de Nicolas, roulette dans le hub
+> Fusionne maintenant le travail de Nicolas avec le nôtre, mais je veux le casino dans le hub et non dans le labyrinthe.
+> Suite : dans la bananeraie, et si besoin agrandis la zone de base.
+
+### Banane qui tressaute dans la main
+> Quand je prends une banane, ce n'est pas fluide : elle fait des hauts et des bas.
+
+### Panneau pour rentrer dans la cabane
+> Avant de fusionner le travail de Nicolas, ajoute une pancarte dehors pour qu'on comprenne qu'on peut rentrer dans le hub.
+
+### Fusion du travail de Maxens
+> Je veux le projet qui réunit mon travail, celui de Nicolas et celui de Maxens. Commence par fusionner le travail de Maxens dans ma branche.
+
 ## Jeu. 8 oct. 2026
 
 ### Arrivée sur la carte et animations des singes

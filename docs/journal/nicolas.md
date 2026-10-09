@@ -2,6 +2,22 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Jeu. 8 oct. 2026
+**Roulette de casino (bêta-test)** _(branche `feat/roulette-casino`)_
+- **Fait :** une roulette européenne (0 à 36) sur l'estrade de la carte, à l'opposé du pupitre ARC (derrière le point d'arrivée, à droite). On choisit sa case en cliquant dessus, directement sur une grande roue posée à côté du pupitre : une lueur dorée l'entoure, cliquer une autre case la remplace, et la lueur reste jusqu'au lancer. Un numéro paie 35 contre 1, comme au casino. Le pupitre n'a que 4 boutons : `MISE -`, `MISE +` (1 banane par appui, dès 1 banane, à tout moment), `LANCER` et `100 %` (la bille tombe forcément sur la case choisie, pour vérifier les gains).
+- **Après mon premier test :** le pupitre de choix du pari (`< PARI`, `PARI >`, `< NUM`, `NUM >`) prenait trop de place, il est retiré ; la roue est agrandie et posée sur le côté, plus derrière ; le choix se fait en cliquant la case.
+- **Après mon deuxième test (inspiration How to Fish) :** plus de numéros, on parie seulement sur une couleur : en cliquant une case, toutes les cases de sa couleur s'allument. Rouge et noir paient 1 contre 1, vert (le zéro) 35 contre 1. La mise part à 1, `MISE -10` / `MISE +10` l'ajustent de 10, `TOUT` mise toutes ses bananes ; elle est payée au lancer et reste réglée pour le suivant. À côté de la roue, un tapis des mises montre des bananes : une par tranche de 25 (1-25 : 1, 26-50 : 2, 51-75 : 3, 76-100 : 4, 101-125 : 5, plus de 125 : 6, le maximum).
+- **Après mon troisième test :** les numéros sont retirés de la roue (et de l'ardoise : on n'y voit plus que les couleurs sorties). Problème trouvé : après un « tout » à 100 % sur le vert (environ 1000 bananes) puis un « tout » perdu, la mise restait à 2000 et il fallait cliquer pendant des minutes pour redescendre à 20. Désormais, après chaque lancer, gagné ou perdu, la mise repart de 1 ; pendant que la roue tourne, le tapis montre la mise en jeu.
+- **À faire :** régénérer la scène (*SAE → Générer le prototype*), tester au casque et en mode PC.
+
+### IA
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude Code | Roulette de casino : `RouletteRules`, `RouletteWheel`, `RouletteTable`, `RouletteButton` (nouveaux, dossier `Scripts/Casino`), table, roue et pupitres dans `PrototypeGenerator` | Jeté en partie (pupitre de choix du pari, paris autres que le plein) |
+| Claude Code | Roulette refaite d'après mon test : roue agrandie à côté du pupitre, cases cliquables avec lueur (`RoulettePocket`, nouveau), pupitre réduit à 4 boutons | Jeté en partie (pari sur un numéro) |
+| Claude Code | Roulette en paris sur la couleur, mise de départ à 1, pas de 10, bouton TOUT, tapis des mises avec 1 à 6 bananes (`BuildStakeMat`) | Gardé, corrigé ensuite |
+| Claude Code | Roue sans numéros, mise remise à 1 après chaque lancer | À valider (test) |
+
 ## Mer. 7 oct. 2026
 **Mon analyse critique du jeu** _(transmise par Dylan, qui corrige sur la branche `fix-all` ; mise en forme par l'IA)_
 1. **Bibliothèque :** le texte « Bibliothèque » suit la caméra au lieu de rester fixe.

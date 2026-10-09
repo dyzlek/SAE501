@@ -2,14 +2,15 @@ using UnityEngine;
 
 namespace SAE
 {
-    public enum BananaStat { Frequence, Pourriture, Valeur }
+    public enum BananaStat { Frequence, Pourriture, Valeur, Arbres }
 
-    // Gros bouton rond du comptoir d'amélioration du bananier (Maxens) : on l'enfonce avec la main, on paie, la stat monte d'un niveau.
+    // Gros bouton rond du comptoir d'amélioration du bananier (Maxens) : on l'enfonce avec la main, on paie, la stat monte d'un niveau
+    // pour TOUS les bananiers (BananaOrchard), plantés ou pas encore. « +1 ARBRE » (Arbres) plante le bananier suivant.
     // Le bouton est vert si on peut payer, gris sinon, flash rouge si refusé. Il s'enfonce quand on appuie.
     // Au niveau max, le bouton disparaît et l'ardoise affiche MAX.
     public class UpgradeButton : MonoBehaviour, IPressable
     {
-        public Bananier bananier;
+        public BananaOrchard orchard;
         public BananaStat stat;
         public Transform cap;          // le dessus du bouton, qui s'enfonce
         public TextMesh label;         // le texte sur l'ardoise, au-dessus du bouton
@@ -24,25 +25,35 @@ namespace SAE
         float refused;      // 1 = flash rouge « pas assez d'argent »
         ColorTint capTint;
 
+        // Tous les arbres ont les mêmes niveaux : on lit ceux du premier
         Bananier.Stat S => stat switch
         {
-            BananaStat.Frequence => bananier.frequence,
-            BananaStat.Pourriture => bananier.pourriture,
-            _ => bananier.valeur,
+            BananaStat.Frequence => orchard.First.frequence,
+            BananaStat.Pourriture => orchard.First.pourriture,
+            _ => orchard.First.valeur,
         };
+
+        bool Trees => stat == BananaStat.Arbres;
+        int Price => Trees ? orchard.Price : S.PrixAmelioration;
+        bool Done => Trees ? orchard.Full : S.EstAuMax;
 
         string Title => stat switch
         {
             BananaStat.Frequence => "PRODUCTION",
             BananaStat.Pourriture => "FRAÎCHEUR",
-            _ => "VALEUR",
+            BananaStat.Valeur => "VALEUR",
+            _ => "BANANIERS",
         };
+
+        string Level => Trees ? $"{orchard.Count} / {orchard.trees.Length}"
+                      : S.niveauMax > 0 ? $"niv {S.niveau} / {S.niveauMax}" : $"niv {S.niveau}";
 
         string Effect => stat switch
         {
             BananaStat.Frequence => $"1 banane / {S.Valeur:0.#} s",
             BananaStat.Pourriture => $"pourrit en {S.Valeur:0} s",
-            _ => $"{S.Valeur:0} par banane",
+            BananaStat.Valeur => $"{S.Valeur:0} par banane",
+            _ => orchard.Full ? "tous plantés" : "1 arbre de plus",
         };
 
         // Le texte d'une colonne de l'ardoise : titre doré, niveau, effet, puis le prix (ou MAX en vert).
@@ -57,15 +68,20 @@ namespace SAE
         public void Press()
         {
             pressed = 1f;
-            if (S.EstAuMax) return;
-            int price = S.PrixAmelioration;
-            if (!Economy.TrySpend(price, transform.position)) { refused = 1f; return; }
-            switch (stat)
+            if (Done) return;
+            if (Trees)
             {
-                case BananaStat.Frequence: bananier.AmeliorerFrequence(); break;
-                case BananaStat.Pourriture: bananier.AmeliorerPourriture(); break;
-                default: bananier.AmeliorerValeur(); break;
+                if (!orchard.Buy(transform.position)) refused = 1f;
+                return;
             }
+            if (!Economy.TrySpend(Price, transform.position)) { refused = 1f; return; }
+            foreach (var tree in orchard.trees)
+                switch (stat)
+                {
+                    case BananaStat.Frequence: tree.AmeliorerFrequence(); break;
+                    case BananaStat.Pourriture: tree.AmeliorerPourriture(); break;
+                    default: tree.AmeliorerValeur(); break;
+                }
         }
 
         void Start()
@@ -76,16 +92,15 @@ namespace SAE
 
         void Update()
         {
-            if (!bananier) return;
-            string level = S.niveauMax > 0 ? $"niv {S.niveau} / {S.niveauMax}" : $"niv {S.niveau}";
-            label.text = Board(Title, level, Effect, S.PrixAmelioration, S.EstAuMax);
-            if (S.EstAuMax) { gameObject.SetActive(false); return; }   // plus rien à améliorer : le bouton s'en va
+            if (!orchard) return;
+            label.text = Board(Title, Level, Effect, Price, Done);
+            if (Done) { gameObject.SetActive(false); return; }   // plus rien à améliorer : le bouton s'en va
 
             pressed = Mathf.MoveTowards(pressed, 0f, Time.deltaTime * 5f);
             refused = Mathf.MoveTowards(refused, 0f, Time.deltaTime * 2f);
             cap.localPosition = capRest + Vector3.down * (0.015f * pressed);
 
-            var color = Economy.CanAfford(S.PrixAmelioration) ? Affordable : TooExpensive;
+            var color = Economy.CanAfford(Price) ? Affordable : TooExpensive;
             capTint.Set(Color.Lerp(color, Refused, refused));
         }
     }

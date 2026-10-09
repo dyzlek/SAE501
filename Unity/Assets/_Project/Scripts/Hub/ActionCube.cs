@@ -49,7 +49,9 @@ namespace SAE
             if (Blocked) return;
             switch (action)
             {
-                case Action.Teleport: Levels.Go(destination); break;
+                case Action.Teleport:
+                    if (!ScreenCurtain.Busy) StartCoroutine(ScreenCurtain.Teleport(() => Levels.Go(destination)));   // sous le voile noir
+                    break;
                 case Action.ClearBoard:
                     // Plateau déjà vide : rien à payer. Pas assez de bananes : rien ne se passe.
                     if (GameState.Placed.Count > 0 && Economy.TrySpend(ClearBoardPrice, transform.position))

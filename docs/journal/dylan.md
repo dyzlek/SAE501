@@ -2,6 +2,16 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Ven. 9 oct. 2026
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | Fusion de `feat/bananeraie-maxens` dans `feat/portails-animations`, sans conflit. Mes modifs Unity non commitées (scènes Hub et Labyrinthe, prefabs, matériaux de la cabane) sont mises de côté dans un stash, car Maxens a aussi modifié les deux scènes. Pas encore testé dans Unity | Gardé (à tester) |
+| Claude (Claude Code) | Panneau « CABANE » sur la face extérieure de la porte, vu depuis la bananeraie : on comprend qu'on peut rentrer (#108). `DoorSign` pose maintenant un panneau de chaque côté. Compilé, scène Hub à régénérer, pas testé au casque | Gardé (à tester) |
+| Claude (Claude Code) | Banane qui tressaute en main (#109) : le XR Grab suivait la taille de la banane (Track Scale) pendant que `Banane` la change à chaque image en pourrissant ; les deux se battaient. Track Scale coupé dans le prefab et dans `BananesInstaller`. Compilé, pas testé au casque | Gardé (à tester) |
+| Claude (Claude Code) | Fusion de `feat/casino-nicolas` (sans conflit), puis roulette déplacée de la carte vers la bananeraie (#110) : terrasse agrandie de 4,8 m à droite dans `Blender/cabane.py` (BAN_X1 = 9,4, paysage dégagé plus large), `Bananeraie.glb` et `Cabane.glb` réexportés ; dans `PrototypeGenerator`, colliders de la terrasse et des barrières recentrés, zone de téléportation en plus devant la roulette, `BuildRoulette` appelé dans `BuildGrove`. Compilé (csproj complétés le temps du test), scène Hub à régénérer, pas testé au casque | Gardé (à tester) |
+| Claude (Claude Code) | Roulette (#110) : à 0 banane, le tapis des mises montrait quand même une banane et « 1 bananes ». `RouletteTable` n'affiche plus que min(mise, compte) : tapis vide et pas de texte à 0, « 1 banane » au singulier, et mise à jour quand le compte change (`Economy.MoneyChanged`). Compilé, pas testé | Gardé (à tester) |
+
 ## Jeu. 8 oct. 2026
 **GDD v1 (#12)** : nom « Bloons VR », univers Bloons TD gardé (exercice d'école, modèles maison), périmètre mis à jour avec ce qui est fait.
 
