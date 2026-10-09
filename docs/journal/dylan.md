@@ -7,6 +7,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
 | Claude (Claude Code) | Fusion de `feat/bananeraie-maxens` dans `feat/portails-animations`, sans conflit. Mes modifs Unity non commitées (scènes Hub et Labyrinthe, prefabs, matériaux de la cabane) sont mises de côté dans un stash, car Maxens a aussi modifié les deux scènes. Pas encore testé dans Unity | Gardé (à tester) |
+| Claude (Claude Code) | Panneau « CABANE » sur la face extérieure de la porte, vu depuis la bananeraie : on comprend qu'on peut rentrer (#108). `DoorSign` pose maintenant un panneau de chaque côté. Compilé, scène Hub à régénérer, pas testé au casque | Gardé (à tester) |
 
 ## Jeu. 8 oct. 2026
 **GDD v1 (#12)** : nom « Bloons VR », univers Bloons TD gardé (exercice d'école, modèles maison), périmètre mis à jour avec ce qui est fait.

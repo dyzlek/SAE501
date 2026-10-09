@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Ven. 9 oct. 2026
 
+### Panneau pour rentrer dans la cabane
+> Avant de fusionner le travail de Nicolas, ajoute une pancarte dehors pour qu'on comprenne qu'on peut rentrer dans le hub.
+
 ### Fusion du travail de Maxens
 > Je veux le projet qui réunit mon travail, celui de Nicolas et celui de Maxens. Commence par fusionner le travail de Maxens dans ma branche.
 

@@ -691,7 +691,7 @@ namespace SAE.EditorTools
             if (door)
             {
                 cabinDoor = MakeDoor(door, null, Vector3.zero);
-                DoorSign(door, "BANANERAIE");
+                DoorSign(door, "BANANERAIE", "CABANE");   // dehors : on comprend qu'on peut rentrer
             }
             else Debug.LogWarning("Hub : battant de la porte introuvable (relancer Blender/cabane.py).");
 
@@ -1381,13 +1381,21 @@ namespace SAE.EditorTools
 
         // Un panneau en bois sur la porte (côté du centre de la pièce), le nom de l'endroit en lettres dorées.
         // Il est accroché au battant : il s'ouvre avec lui.
-        static void DoorSign(Transform leaf, string title)
+        // Un panneau de chaque côté de la porte : title se lit depuis la pièce, outsideTitle depuis dehors (null : aucun).
+        static void DoorSign(Transform leaf, string title, string outsideTitle = null)
         {
             var b = Bounds(leaf.gameObject);
             var inside = new Vector3(-b.center.x, 0f, -b.center.z).normalized;   // de la porte vers le centre de la pièce
+            SignBoard(leaf, b, inside, title);
+            if (outsideTitle != null) SignBoard(leaf, b, -inside, outsideTitle);
+        }
+
+        // Une planche avec un titre doré, collée sur la face du battant tournée vers side (on la lit de ce côté).
+        static void SignBoard(Transform leaf, Bounds b, Vector3 side, string title)
+        {
             var sign = new GameObject("Panneau " + title).transform;
-            sign.SetPositionAndRotation(new Vector3(b.center.x, 1.75f, b.center.z) + inside * (b.extents.z + 0.02f),
-                                        Quaternion.LookRotation(-inside));   // +Z vers la porte : on le lit depuis la pièce
+            sign.SetPositionAndRotation(new Vector3(b.center.x, 1.75f, b.center.z) + side * (b.extents.z + 0.02f),
+                                        Quaternion.LookRotation(-side));   // +Z vers la porte : texte côté lecteur
             Visuals.Box("Planche", sign, new Vector3(0f, 0f, 0.01f), new Vector3(1.0f, 0.24f, 0.03f), DarkWood);
             Visuals.Text(sign, title, new Vector3(0f, 0f, -0.01f), 0.15f, TitleGold, title: true);
             foreach (var t in sign.GetComponentsInChildren<Transform>())
