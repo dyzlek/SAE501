@@ -41,7 +41,7 @@ namespace SAE
                 position = slot.transform.position + Vector3.up * SlotHeight;
                 return true;
             }
-            var target = TutorialTarget.Nearest(spot, Levels.Current, PlayerRig.Local ? PlayerRig.Local.transform.position : Vector3.zero);
+            var target = TutorialTarget.Nearest(spot, Levels.Current, PlayerRig.Local ? PlayerRig.Local.HeadPosition : Vector3.zero);
             if (!target) return false;
             position = target.transform.position + Vector3.up * target.height;
             return true;

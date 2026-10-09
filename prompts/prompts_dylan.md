@@ -4,6 +4,10 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Ven. 9 oct. 2026
 
+### Porte en VR
+> En VR, quand je passe le tutoriel, je ne peux pas traverser la porte.
+> Suite : après avoir appuyé sur PASSER, je voulais aller dehors, mais la porte me renvoie dans le hub.
+
 ### Tutoriel : fusion obligatoire
 > Quand le tutoriel montre qu'on peut fusionner, on peut aussi placer le deuxième singe ailleurs.
 
