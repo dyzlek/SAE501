@@ -789,7 +789,8 @@ def build_rug(M, coll):
 
 
 def build_dartboard(M, coll):
-    """Une cible de fléchettes au mur (les singes de Bloons lancent des fléchettes !), avec trois fléchettes plantées."""
+    """Une cible de fléchettes au mur (les singes de Bloons lancent des fléchettes !). La cible est vide (on y lance les vraies,
+    voir Dart.cs) ; trois fléchettes ratées sont plantées dans le mur autour (9 oct.)."""
     ang, offset, y = 30, -0.35, 1.85
     B = basis(ang)
     c = polar(ang, R - LOG_R - 0.02) + B @ Vector((offset, -0.03, y))
@@ -809,8 +810,8 @@ def build_dartboard(M, coll):
         k2 = (k + 1) % n
         f = b.face([front[k], back[k], back[k2], front[k2]], [(0, 0), (0, 0.05), (0.1, 0.05), (0.1, 0)], M["poutre"])
     b.face(list(reversed(back)), [(0, 0)] * n, M["poutre"])           # le dos (contre le mur) : la cible est un volume fermé
-    for (dx, dz, tilt) in ((0.02, 0.03, 8), (-0.09, 0.11, -6), (0.12, -0.08, 12)):
-        tip = c + B @ Vector((dx, -0.03, dz))
+    for (dx, dz, tilt) in ((0.33, 0.12, 8), (-0.31, -0.17, -6), (0.08, -0.36, 12)):   # hors de la cible (rayon 0,24)
+        tip = c + B @ Vector((dx, 0.0, dz))   # dans les rondins, juste derrière le devant de la cible
         d = (B @ Vector((math.sin(math.radians(tilt)) * 0.3, -1, 0.15))).normalized()
         b.log(tip, tip + d * 0.1, 0.006, M["fer"], M["fer"], 900, segs=6)
         b.log(tip + d * 0.1, tip + d * 0.16, 0.009, M["plume_rouge"], M["plume_rouge"], 901, segs=6)

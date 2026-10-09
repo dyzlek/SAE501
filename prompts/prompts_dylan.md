@@ -4,6 +4,22 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Ven. 9 oct. 2026
 
+### Bas du plateau : pose impossible
+> Sur le bas de la carte (le plateau du hub), on ne peut pas poser de singe.
+> Suite : il n'y a pas de fantôme, on ne peut simplement pas poser.
+
+### Téléportation vers les améliorations
+> J'aimerais qu'on puisse se téléporter vers la zone d'amélioration du bananier et du singe.
+
+### Cible de fléchettes vide
+> Pour les fléchettes, j'aimerais qu'il n'y en ait pas sur la cible au départ (peut-être autour).
+
+### Porte animée et pourriture en pause
+> Deux choses : d'abord, quand on vise la porte, elle s'anime. Ensuite, quand moi ou les singes prenons une banane, la pourriture ralentit, voire s'arrête ; quand on la relâche, elle reprend.
+
+### GDD v2 en .md et en .docx
+> Refais le GDD en .md et fais-en une version qu'on peut rendre en .docx.
+
 ### Roulette : rien sur le tapis à 0 banane
 > Je ne veux pas voir la banane et « 1 » sur le tapis des mises quand mon compte est à 0.
 
