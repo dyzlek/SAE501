@@ -22,6 +22,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude (Claude Code) | Tutoriel (#32) : 3 étapes à lire dans la bananeraie après la première banane vendue (comptoir du bananier, singes récolteurs, casino), avec la flèche au-dessus de chaque meuble. 17 étapes en tout. Compilé, pas testé | Gardé (à tester) |
 | Claude (Claude Code) | Tutoriel (#32) : à l'étape Fusion, le 2e singe ne peut plus être posé à côté, seulement SUR le premier (\`Tutorial.FusionOnly\` dans \`Placement.Evaluate\` : fantôme rouge ailleurs). Si le premier a été rangé, on peut en reposer un. Compilé, pas testé | Gardé (à tester) |
 | Claude (Claude Code) | Merge de la PR #121 (tutoriel) dans main, à la demande de Dylan. Puis porte en VR (#122) : `PortalDoor` jugeait dedans/dehors avec la base du rig XR, qui peut être loin du casque (on téléporte le casque, pas la base) : il renvoyait dans la cabane. Nouveau `PlayerRig.HeadPosition` (le casque), utilisé par la porte et le tutoriel. Branche `fix/porte-vr`. Compilé, à tester au casque | Gardé (à tester) |
+| Claude (Claude Code) | Tutoriel (#125), branche `feat/tuto-passer` : PASSER demande une confirmation (« PASSER LE TUTORIEL ? Tu es sûr ? ») ; les boutons deviennent OUI (saute) et NON (reprend). `Tutorial.Confirming` / `Skip()`, libellés changés par `TutorialBoard`. Compilé, scènes à régénérer, pas testé | Gardé (à tester) |
 
 ## Jeu. 8 oct. 2026
 **GDD v1 (#12)** : nom « Bloons VR », univers Bloons TD gardé (exercice d'école, modèles maison), périmètre mis à jour avec ce qui est fait.

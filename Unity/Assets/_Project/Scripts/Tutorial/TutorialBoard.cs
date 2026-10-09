@@ -17,7 +17,8 @@ namespace SAE
         public TextMesh title;
         public TextMesh body;
         public TextMesh progress;          // « 3 / 14 »
-        public GameObject nextButton;      // SUIVANT
+        public GameObject nextButton;      // SUIVANT (NON pendant la confirmation de PASSER)
+        public GameObject skipButton;      // PASSER (OUI pendant la confirmation)
         public ParticleSystem confetti;
         public ColorTint glow;             // le cadre lumineux, derrière l'ardoise
 
@@ -57,13 +58,23 @@ namespace SAE
             visual.SetActive(on);
             if (!on) return;
             var step = Tutorial.Current;
-            title.text = Tutorial.Title(step);
-            fullBody = Tutorial.Body(step);
+            bool confirm = Tutorial.Confirming;   // PASSER appuyé : on demande si on est sûr
+            title.text = confirm ? "PASSER LE TUTORIEL ?" : Tutorial.Title(step);
+            fullBody = confirm ? "Tu es sûr ? Tu ne verras pas la suite\ndes explications (le premier singe\nte sera quand même offert)." : Tutorial.Body(step);
             body.text = "";
             progress.text = $"{(int)step + 1} / {(int)Tutorial.Step.Done}";
-            nextButton.SetActive(Tutorial.NeedsNext(step));
+            nextButton.SetActive(confirm || Tutorial.NeedsNext(step));
+            SetLabel(nextButton, confirm ? "NON" : "SUIVANT");
+            SetLabel(skipButton, confirm ? "OUI" : "PASSER");
             shownAt = Time.time;
             if (confetti) confetti.Play();
+        }
+
+        // Le nom écrit à côté d'un bouton (le texte 3D rangé sous le bouton)
+        static void SetLabel(GameObject button, string text)
+        {
+            var label = button ? button.GetComponentInChildren<TextMesh>(true) : null;
+            if (label) label.text = text;
         }
 
         void Shake() => refusedAt = Time.time;

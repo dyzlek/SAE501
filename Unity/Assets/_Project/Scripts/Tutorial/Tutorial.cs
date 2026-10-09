@@ -48,6 +48,7 @@ namespace SAE
         {
             Current = Step.Welcome;
             monkeyGiven = waveLost = false;
+            Confirming = false;
             moneyAtStep = 0;
             Changed = null;
             Refused = null;
@@ -242,18 +243,32 @@ namespace SAE
             while (Active && !NeedsNext(Current) && IsDone(Current)) GoTo(Current + 1);
         }
 
-        // Bouton SUIVANT
+        // PASSER demande d'abord une confirmation : le tableau affiche « TU ES SÛR ? »,
+        // le bouton de droite devient NON (on reprend), celui de gauche OUI (on saute tout).
+        public static bool Confirming { get; private set; }
+
+        // Bouton de droite : SUIVANT, ou NON pendant la confirmation
         public static void Next()
         {
+            if (Confirming) { Confirming = false; Changed?.Invoke(); return; }   // on reprend où on en était
             if (Active && NeedsNext(Current)) GoTo(Current + 1);
         }
 
-        // Bouton PASSER : tout de suite à la fin, avec le premier singe
+        // Bouton de gauche : PASSER (demande confirmation), puis OUI
+        public static void Skip()
+        {
+            if (!Active) return;
+            if (Confirming) Finish();
+            else { Confirming = true; Changed?.Invoke(); }
+        }
+
+        // Fin du tutoriel, avec le premier singe
         public static void Finish() => GoTo(Step.Done);
 
         static void GoTo(Step s)
         {
             Current = s;
+            Confirming = false;
             waveLost = false;
             moneyAtStep = Economy.Money;
             if (s >= Step.Reward) GiveFirstMonkey();

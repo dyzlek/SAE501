@@ -612,7 +612,7 @@ namespace SAE.EditorTools
 
             // Les deux boutons, sortis de l'ardoise vers le joueur : SUIVANT à droite (vert), PASSER à gauche (gris)
             board.nextButton = TutorialButtonOn(slate, 0.68f, "SUIVANT", PlayColor, TutorialButton.Action.Next);
-            TutorialButtonOn(slate, -0.68f, "PASSER", new Color(0.45f, 0.45f, 0.47f), TutorialButton.Action.Skip);
+            board.skipButton = TutorialButtonOn(slate, -0.68f, "PASSER", new Color(0.45f, 0.45f, 0.47f), TutorialButton.Action.Skip);
 
             // Les cordes (jusqu'au plafond, 3 m) ou les poteaux (jusqu'au sol)
             float top = H / 2f + 0.06f, bottom = -H / 2f - 0.06f;

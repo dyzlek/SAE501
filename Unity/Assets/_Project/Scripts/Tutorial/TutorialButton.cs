@@ -27,7 +27,7 @@ namespace SAE
         {
             pressed = 1f;
             if (action == Action.Next) Tutorial.Next();
-            else Tutorial.Finish();
+            else Tutorial.Skip();   // PASSER : demande confirmation (puis OUI)
         }
     }
 }
