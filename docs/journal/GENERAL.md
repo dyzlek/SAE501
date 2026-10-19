@@ -30,6 +30,7 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 | 2026-10-07 | Dans le hub, on ne se téléporte plus que **dans un disque de 1,9 m au centre** de la cabane, devant les meubles | Plus de téléportation dans un meuble, contre un mur ou dehors (Dylan) |
 | 2026-10-07 | **Lumière** : pas de faux rayons dessinés ; vraie lumière du soleil et ombres, poussières dans le soleil, réglages de l'image (`Art/Lumiere.asset`), halo (Bloom) coupé sur le casque | Plus réaliste, et rien de coûteux pour le Quest (Dylan) |
 | 2026-10-07 | **Suivi de projet sur GitHub** : une issue par tâche (responsable, label `prio:` = périmètre du GDD), un jalon par semaine (S1/S2/S3), tableau [Project](https://github.com/users/dyzlek/projects/2) À faire / En cours / En relecture / Fait, PR avec `Ferme #N`. Mode d'emploi : [ORGANISATION.md](../ORGANISATION.md) | Outil de suivi demandé (note de gestion de projet) ; tout au même endroit que le code (Dylan) |
+| 2026-10-19 | **Objectifs de la semaine 2** : 17 objectifs (vagues, gestes VR, économie, hub/records, classements) en issues #129 à #145, détail dans [OBJECTIFS_S2.md](../OBJECTIFS_S2.md) et dans le périmètre du GDD. Classement en ligne et coop = hors périmètre (sans jalon) | Liste de Dylan ; multijoueur = NE FERA PAS dans le support de lancement |
 | _à trancher_ | Nom du jeu · assets Bloons ou maison · périmètre définitif | Avant le GDD v1 (ven. 9 oct.) |
 
 ## Jalons

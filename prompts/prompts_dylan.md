@@ -2,6 +2,11 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Lun. 19 oct. 2026
+
+### Objectifs de la semaine 2
+> Objectifs de la semaine. A. Vagues : boss qui se divise en petits ballons, ballons camouflés, modificateurs de palier (brouillard, nuit, pluie, pour les boss, etc.), combo de vagues parfaites, annonce de la vague spéciale (cloches ou musique différente). B. Gestes VR : bombes à lancer à la main (glace, collante, piège à clous), pouvoir de Quincy (pluie de flèches en levant l’arc), vibrations différentes selon l’action. C. Singes et économie : bananes dorées rares, améliorations d’arc en plus (flèches qui rebondissent, etc.). D. Hub, records, ambiance, confort : mur des records, trophées de paliers dans la cabane (10, 50, 100 vagues, 1 000 bananes, etc.). Classements et multijoueur : classement local sur place, classement local gardé entre deux lancements, classement en ligne, coop à deux casques, coop casque VR et PC. Crée les issues, modifie la documentation et ouvre une PR.
+
 ## Ven. 9 oct. 2026
 
 ### Résolution de conflit de merge (PR #125)
