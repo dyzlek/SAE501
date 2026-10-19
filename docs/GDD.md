@@ -182,8 +182,10 @@ Le **pupitre ARC**, sur l'estrade, vend des améliorations qui se cumulent :
 | **Rapide** | 0,65 | ×1,7 | Petit et vif |
 | **Blindé** | 1 | ×0,8 | Moitié moins de dégâts, ne peut pas être ralenti |
 | **Cœur** | 0,9 | ×1 | Regagne une couche toutes les 2 s |
-| **Boss (MOAB)** | 1,8 | ×0,6 | Très solide, hélice qui tourne |
-| **Dirigeable rouge (BFB)** | 2,2 | ×0,35 | Boss final, blindé, insensible au ralentissement |
+| **Boss (MOAB)** | 1,8 | ×0,6 | Très solide, hélice qui tourne ; **en éclatant, lâche 4 ballons normaux** |
+| **Dirigeable rouge (BFB)** | 2,2 | ×0,35 | Boss final, blindé, insensible au ralentissement ; **en éclatant, lâche 2 boss** |
+
+**Les boss se divisent**, comme dans Bloons TD : les petits ballons repartent de l'endroit où le boss a éclaté, un peu espacés sur la piste, avec une onde de choc. Leurs couches suivent la solidité du boss (un boss à 17 couches lâche des normaux à 3 couches, jusqu'à 6 couches au plus ; le dirigeable lâche des boss au quart de ses couches). Éclater un boss n'est donc pas la fin du danger.
 
 Un ballon qui atteint la sortie retire **autant de vies que ses couches restantes**. On a 20 vies par vague, et elles repartent au maximum à chaque vague. Perdre une vague ne fait pas tout recommencer : on la rejoue, singes et bananes gardés. **Éclater un ballon ne rapporte rien** : seule la vague finie paie, pour pousser à défendre proprement.
 
@@ -204,13 +206,21 @@ Elles sont calculées par une formule (`WaveBook.Make`) qui monte sans à-coups,
 | **100** | **Finale : 4 dirigeables rouges → victoire** | 68 + 29 normaux, 59 rapides, 47 blindés, 15 cœurs, 5 boss, 4 dirigeables à 160 couches |
 | 101 et + | Mode infini, la formule continue | |
 
+**Les vagues spéciales sont annoncées** (celles qui ont un boss ou un dirigeable) :
+- **pendant la préparation**, le tableau prévient : « VAGUE DE BOSS ! » ou « DIRIGEABLE ROUGE EN APPROCHE ! » ;
+- **au lancement**, trois coups de cloche ;
+- **quand le boss entre sur la piste**, un cor grave, et le tableau affiche « LE BOSS ARRIVE ! ».
+
+Les sons s'entendent du hub comme de la carte : on sait qu'il faut y retourner. Les manettes battent deux fois, comme un cœur.
+
 ### 7.8 La bananeraie
 
 **Les bananiers :**
 - une banane tombe toutes les 8 s au départ ;
 - elle vaut 5 ;
 - elle pourrit en 15 s : elle brunit, se ratatine, sent mauvais, puis disparaît ;
-- **tenue en main**, par le joueur ou un singe, elle ne pourrit pas.
+- **tenue en main**, par le joueur ou un singe, elle ne pourrit pas ;
+- **banane dorée** : 1 sur 25 (4 %) tombe dorée et scintille. Elle vaut **10 fois plus** et pourrit **2 fois moins vite**. C'est la petite surprise qui fait courir au pied de l'arbre (réglages sur le bananier : `chanceDoree`, `multiplicateurDore`, `pourritureDoree`).
 
 **Le comptoir BANANIER**, sous l'abri, propose des améliorations communes à tous les arbres. Le prix est multiplié par 1,6 à chaque niveau :
 
@@ -334,7 +344,7 @@ Il n'y a **aucun texte à l'écran**. Tout est écrit sur un objet du décor, à
 - **Le rayon devient coloré** sur ce qui est utilisable.
 - **Un bouton grossit** quand on le vise.
 - **La porte s'entrouvre et frémit** quand on la vise.
-- **Banane :** jaune = mûre, brune qui sent = pourrie.
+- **Banane :** jaune = mûre, brune qui sent = pourrie, dorée qui scintille = rare, elle vaut 10 fois plus.
 - **Fantôme de pose :** vert = possible, rouge = interdit, doré = fusion.
 
 ### 10.3 Feedback de chaque action
@@ -344,13 +354,20 @@ Il n'y a **aucun texte à l'écran**. Tout est écrit sur un objet du décor, à
 | Viser un bouton | Le bouton grossit | « tic » léger | _à faire_ |
 | Appuyer | Le bouton s'enfonce | Moyenne | _à faire_ |
 | Action refusée (tutoriel) | Le tableau tremble, cadre rouge | Très faible | _à faire_ |
-| Éclater un ballon | Le ballon change de couleur, puis disparaît | — | _à faire_ |
-| Vendre une banane | « +5 » qui flotte, la caisse saute | — | _à faire_ |
+| Bander l'arc, tirer | La corde se tend, traînée dorée | Monte avec la tension, coup sec au tir | _à faire_ |
+| Flèche qui touche un ballon | Le ballon change de couleur, puis disparaît | Tic sec dans la main de l'arc | _à faire_ |
+| Boss qui éclate | Onde de choc, les petits ballons en sortent | Grosse secousse, deux mains | _à faire_ |
+| Ballon qui passe (vies perdues) | Les vies baissent sur le tableau (rouges sous 5) | Grondement, deux mains | _à faire_ |
+| Vague spéciale | « VAGUE DE BOSS ! », puis « LE BOSS ARRIVE ! » | Deux battements de cœur | **Cloches**, puis **cor grave** |
+| Vague gagnée / perdue | Message sur le tableau | Trois tics qui montent / un long et sourd | _à faire_ |
+| Attraper une banane | Elle suit la main | Douce et brève | _à faire_ |
+| Vendre une banane | « +5 » qui flotte, la caisse saute | Deux tics | _à faire_ |
+| Vendre une banane dorée | « +50 » qui flotte | Trois tics qui montent | _à faire_ |
 | Fusion | Fantôme doré, halo | Forte | _à faire_ |
 | Coffre | Le couvercle s'ouvre, la roulette tourne, le singe sort en grossissant | — | _à faire_ |
 | Téléportation, porte | Voile noir fondu | — | _à faire_ |
 
-_Le son est le gros manque du jeu : c'est la priorité de la semaine 2 (issue #34)._
+_Chaque action a maintenant sa vibration, avec un motif différent pour la reconnaître sans regarder (`Haptics`). Le son reste le gros manque du jeu (seules les annonces de vague en ont) : c'est la priorité de la semaine 2 (issue #34)._
 
 ## 11. Pourquoi la VR
 - **Les mains :**
@@ -377,12 +394,12 @@ _Le son est le gros manque du jeu : c'est la priorité de la semaine 2 (issue #3
 
 | DOIT | DEVRAIT | POURRAIT | NE FERA PAS |
 |---|---|---|---|
-| 1 carte, 1 chemin, 100 vagues progressives + finale ✅ | Fusion et raretés ✅ | Plus de types de singes | Plusieurs cartes |
-| Quincy à l'arc (tir physique) ✅ | Bananes qui pourrissent, singes récolteurs ✅ | Améliorations de l'arc ✅ | Méta-progression entre les parties, sauvegarde |
+| 1 carte, 1 chemin, 100 vagues progressives + finale ✅ | Fusion et raretés ✅ | Plus de types de singes ; boss qui se divisent ✅, vagues spéciales annoncées ✅ | Plusieurs cartes |
+| Quincy à l'arc (tir physique) ✅ | Bananes qui pourrissent, singes récolteurs ✅ | Améliorations de l'arc ✅, bananes dorées ✅ | Méta-progression entre les parties, sauvegarde |
 | Singes posés à la main ✅ | Coffre et roulette du coffre ✅ | Ballons cœur et blindé ✅ | Gacha complet, achats réels |
 | Bananes → panier → déblocages ✅ | Décor soigné (cabane, montagnes, lumière) ✅ | Roulette de casino, fléchettes ✅ | Multijoueur |
 | Tutoriel intégré (niveau 1) ✅ | Animations des singes ✅ | 2e et 3e bananiers ✅ | Scénario, monde ouvert |
-| Confort : téléportation, snap turn, 72 fps | **Sons et vibrations à chaque action** ⏳ | Musique d'ambiance | Déplacement continu |
+| Confort : téléportation, snap turn, 72 fps | Sons ⏳ et **vibrations à chaque action** ✅ | Musique d'ambiance | Déplacement continu |
 | Écran de victoire / défaite clair ⏳ | Équilibrage testé | | |
 
 _✅ = dans le jeu (à valider au casque) · ⏳ = à faire en semaine 2._

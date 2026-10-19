@@ -10,11 +10,14 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
   - **des vibrations différentes selon l'action** (`Player/Haptics.cs`, des motifs de plusieurs impulsions) : banane attrapée (douce), banane dans le panier (deux tics), banane dorée (trois tics qui montent), flèche qui touche un ballon (tic sec dans la main de l'arc), boss qui éclate (grosse secousse), vies perdues (grondement, au plus deux fois par seconde), vague spéciale (deux battements de cœur), vague gagnée ou perdue.
   - Les singes récolteurs prennent les bananes avec `PriseParSinge()` : ce n'est plus la main du joueur qui vibre quand ils les déposent.
   - Vérifié : le projet compile (aucune erreur, aucun avertissement dans nos scripts). **Pas encore testé en Play ni au casque** (Unity fermé).
+- **GDD mis à jour** (`.md` et `.docx`) : boss qui se divisent (7.6), annonce des vagues spéciales (7.7), bananes dorées (7.8 et affordances), tableau du feedback complété avec toutes les vibrations (10.3), périmètre (13).
+- **Corrigé en relisant la check-list du guide du code** : l'abonnement de la banane à la prise en main est retiré dans `OnDisable`.
 
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
 | Claude Code | Tri de la liste d'idées (ce qui se fait vite), puis code des quatre bonus : division des boss, bananes dorées, annonce des vagues spéciales (sons fabriqués par le code), motifs de vibration ; vérification de la compilation | Gardé (à tester en jeu) |
+| Claude Code | Mise à jour du GDD (.md et .docx), prompts du jour réécrits en détail, journal | Gardé |
 
 ## Jeu. 8 oct. 2026
 - **Fait : la bananeraie, un nouvel endroit pour tout ce qui concerne la récolte des bananes** (branche `feat/bananeraie-maxens`, partie du `main` à jour, PR #99). Avant, le bananier, l'étal, le panier, le comptoir du bananier et celui des récolteurs étaient tous dans la cabane, autour du joueur : ça faisait beaucoup de choses au même endroit.

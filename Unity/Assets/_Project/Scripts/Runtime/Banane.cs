@@ -65,14 +65,18 @@ public class Banane : MonoBehaviour
         rends = GetComponentsInChildren<Renderer>();
         mpb = new MaterialPropertyBlock();
         SAE.PlayerRig.IgnoreCollisions(gameObject);   // on ne peut pas monter sur une banane tenue et s'envoler
+        grab = GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
+    }
 
-        // La main qui l'attrape vibre doucement, et on la retient pour le dépôt dans le panier
-        var grab = GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
-        if (grab) grab.selectEntered.AddListener(args =>
-        {
-            DerniereMain = args.interactorObject.transform;
-            SAE.Haptics.Play(DerniereMain, SAE.Haptics.Grab);
-        });
+    // La main qui l'attrape vibre doucement, et on la retient pour la faire vibrer au dépôt dans le panier
+    UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable grab;
+    void OnEnable() { if (grab) grab.selectEntered.AddListener(AttrapeeParLeJoueur); }
+    void OnDisable() { if (grab) grab.selectEntered.RemoveListener(AttrapeeParLeJoueur); }
+
+    void AttrapeeParLeJoueur(UnityEngine.XR.Interaction.Toolkit.SelectEnterEventArgs args)
+    {
+        DerniereMain = args.interactorObject.transform;
+        SAE.Haptics.Play(DerniereMain, SAE.Haptics.Grab);
     }
 
     public void Initialiser(Bananier bananier, int valeur, float pourriture, Vector3 cible)
