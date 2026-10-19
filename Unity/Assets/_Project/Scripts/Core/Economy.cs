@@ -20,6 +20,7 @@ namespace SAE
         {
             if (amount <= 0) return;
             GameState.Money += amount;
+            Sfx.Play(Sound.Coin, where, 0.7f);
             MoneyChanged?.Invoke(amount, where);
         }
 
@@ -27,6 +28,7 @@ namespace SAE
         {
             if (amount < 0 || GameState.Money < amount) return false;
             GameState.Money -= amount;
+            if (amount > 0) Sfx.Play(Sound.Coin, where, 0.7f, 0.75f);   // plus grave : de l'argent qui part
             MoneyChanged?.Invoke(-amount, where);
             return true;
         }

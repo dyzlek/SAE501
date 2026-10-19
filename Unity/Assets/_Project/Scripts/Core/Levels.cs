@@ -28,6 +28,9 @@ namespace SAE
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetState() { Started = false; LaunchOnArrival = false; }
 
+        // Nouvelle partie (REJOUER) : la scène Hub redémarre seule et choisira de nouveau le niveau de départ
+        public static void Restart() { Started = false; LaunchOnArrival = false; Current = Level.Hub; }
+
         // Appelé par la première scène qui démarre : c'est le niveau où l'on commence
         public static void StartIn(Level level)
         {

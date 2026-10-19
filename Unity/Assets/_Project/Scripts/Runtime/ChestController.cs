@@ -107,6 +107,7 @@ namespace Sae501.Coffres
             Rarity result = LastResults[best];
 
             PlayChestAnimation();
+            SAE.Sfx.Play(SAE.Sound.Chest, transform.position);
             yield return new WaitForSeconds(spinDelay);
             yield return roulette.Spin(result, odds, spinDuration, LastTypes[best], rollType);
 

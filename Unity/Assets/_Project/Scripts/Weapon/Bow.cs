@@ -118,6 +118,7 @@ namespace SAE
                     var velocity = direction.normalized * ShotSpeed;
                     nocked.transform.SetParent(null, true);
                     nocked.Launch(velocity);
+                    Sfx.Play(Sound.Shoot, transform.position, 0.8f, 0.8f + 0.4f * Draw);   // plus aigu quand l'arc est bien tendu
                     nextNock = Time.time + reloadTime;   // on recharge : pas de nouvelle flèche avant reloadTime
                     if (BowUpgrades.TripleShot)
                     {

@@ -37,6 +37,9 @@ namespace SAE
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetLevels() => System.Array.Clear(levels, 0, levels.Length);
 
+        // Nouvelle partie (REJOUER) : l'arc repart sans amélioration
+        public static void Reset() => ResetLevels();
+
         public static int Level(BowUpgrade u) => levels[(int)u];
         public static int MaxLevel(BowUpgrade u) => Prices(u).Length;
         public static bool IsMax(BowUpgrade u) => Level(u) >= MaxLevel(u);

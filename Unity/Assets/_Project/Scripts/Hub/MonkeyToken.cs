@@ -119,6 +119,7 @@ namespace SAE
             if (Held != this) return;
             bool placed = Release();
             PlayerRig.Buzz(args.interactorObject.transform, placed ? 0.7f : 0.2f);
+            Sfx.Play(placed ? Sound.Place : Sound.Deny, transform.position);
         }
 
         // Prendre le singe (en VR, ou au clic en mode PC). byHand = d'où part le rayon de pose.

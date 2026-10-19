@@ -95,6 +95,18 @@ namespace SAE
             NotifyChanged();
         }
 
+        // Nouvelle partie (REJOUER, voir GameRestart) : tout repart de zéro, comme au premier lancement.
+        public static void Reset()
+        {
+            Placed.Clear();
+            Held = null;
+            Money = 0;
+            WavesWon = 0;
+            Array.Clear(owned, 0, owned.Length);
+            Array.Clear(unlocked, 0, unlocked.Length);
+            unlocked[(int)MonkeyType.Classique] = true;
+        }
+
         // Singe posé le plus proche de pos, à moins de maxDistance.
         public static PlacedMonkey Nearest(Vector2 pos, float maxDistance)
         {

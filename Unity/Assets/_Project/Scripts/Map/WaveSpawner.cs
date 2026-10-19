@@ -30,6 +30,10 @@ namespace SAE
         public bool Won { get; private set; }         // la vague 100 a été gagnée
         public string Status { get; private set; } = "Prépare-toi, puis appuie sur LANCER";
 
+        // Pour l'écran de fin (EndScreen) : la vague qu'on vient de perdre, et la victoire finale
+        public event System.Action<int> WaveFailed;
+        public event System.Action GameWon;
+
         public int LastWrittenWave => waves.Count;
         public WaveData Current => Wave <= waves.Count ? waves[Wave - 1] : WaveBook.Endless(Wave);
         public int BossCount => Current.BossCount;
@@ -43,6 +47,9 @@ namespace SAE
             foreach (var p in MapLayout.PathPoints())
                 path.Add(transform.position + p + Vector3.up * balloonHeight);
             Lives = startLives;
+            var end = new GameObject("Ecran de fin").AddComponent<EndScreen>();   // victoire / vague perdue, dans le décor de la carte
+            end.transform.SetParent(transform, false);
+            end.spawner = this;
             if (Levels.LaunchOnArrival)
             {
                 Levels.LaunchOnArrival = false;
@@ -70,6 +77,7 @@ namespace SAE
             Running = true;
             Lives = startLives;   // les vies repartent au maximum à chaque vague
             Status = "Attaque en cours !";
+            Sfx.Play(Sound.WaveStart);
 
             // Les groupes, dans l'ordre
             foreach (var group in wave.groups)
@@ -92,6 +100,8 @@ namespace SAE
                 Lives = startLives;
                 Status = $"Vague {Wave} perdue : relance-la";
                 Tutorial.WaveLost();   // le tableau du tutoriel dit de la relancer
+                Sfx.Play(Sound.WaveLost);
+                WaveFailed?.Invoke(Wave);
             }
             else
             {
@@ -102,8 +112,14 @@ namespace SAE
                 {
                     Won = true;
                     Status = $"VICTOIRE ! +{reward} · mode infini : LANCER";
+                    Sfx.Play(Sound.Victory);
+                    GameWon?.Invoke();
                 }
-                else Status = $"Vague {Wave} gagnée : +{reward}";
+                else
+                {
+                    Status = $"Vague {Wave} gagnée : +{reward}";
+                    Sfx.Play(Sound.WaveWon);
+                }
                 Wave++;
                 Lives = startLives;   // la vague suivante repart avec toutes les vies (affiché pendant la préparation)
             }
@@ -124,6 +140,10 @@ namespace SAE
         }
 
         // Un ballon est passé. Vague 1 du tutoriel : aucun ne doit passer, elle est ratée tout de suite.
-        public void BalloonEscaped(int layers) => Lives = Tutorial.StrictWave ? 0 : Mathf.Max(0, Lives - layers);
+        public void BalloonEscaped(int layers)
+        {
+            Lives = Tutorial.StrictWave ? 0 : Mathf.Max(0, Lives - layers);
+            Sfx.Play(Sound.Leak);
+        }
     }
 }

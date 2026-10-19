@@ -150,6 +150,7 @@ namespace SAE
             if (popped == 0) return pierce;
 
             layers -= popped;
+            Sfx.Play(Sound.Pop, transform.position, 1f, Random.Range(0.9f, 1.15f));   // un peu différent à chaque fois
             if (layers <= 0) Destroy(gameObject);
             else UpdateColor();
             return popped * cost;

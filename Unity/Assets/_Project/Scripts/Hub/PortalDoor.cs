@@ -62,7 +62,8 @@ namespace SAE
         IEnumerator OpenAndGo(Transform target)
         {
             opening = true;
-            var open = Quaternion.AngleAxis(openAngle, Vector3.up) * closed;
+            Sfx.Play(Sound.Door, transform.position);
+            var open =Quaternion.AngleAxis(openAngle, Vector3.up) * closed;
             var from = transform.rotation;           // peut-être déjà entrouverte (visée)
             Coroutine curtain = null;
             for (float t = 0f; t < 1f; t += Time.deltaTime / openDuration)

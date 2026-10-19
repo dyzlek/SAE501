@@ -54,6 +54,15 @@ namespace SAE
             Refused = null;
         }
 
+        // Nouvelle partie (REJOUER) : le tutoriel recommence. Les abonnés (tableaux) sont gardés : ils sont recréés avec la scène.
+        public static void Restart()
+        {
+            Current = Step.Welcome;
+            monkeyGiven = waveLost = false;
+            Confirming = false;
+            moneyAtStep = 0;
+        }
+
         // --- Les textes ---
 
         public static string Title(Step s) => s switch
@@ -272,6 +281,7 @@ namespace SAE
             waveLost = false;
             moneyAtStep = Economy.Money;
             if (s >= Step.Reward) GiveFirstMonkey();
+            if (s != Step.Welcome) Sfx.Play(Sound.Ding);   // une étape de faite
             Changed?.Invoke();
         }
 
