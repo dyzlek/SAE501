@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Jeu. 22 oct. 2026
 
+### Améliorations de l’arc (#138)
+> Maintenant, fais l’issue #138 (nouvelles améliorations de l’arc, comme les flèches qui rebondissent).
+
 ### Tout est rose dans le build
 > Le tableau des scores, la scène du menu, etc. : quand je fais Build and Run, ça bugue vraiment, tout est en rose, donc je ne peux ni voir ni vraiment interagir.
 

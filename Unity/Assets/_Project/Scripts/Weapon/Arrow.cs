@@ -12,6 +12,8 @@ namespace SAE
     //   transperçante (BowUpgrades.PassThrough) : le nombre de ballons qu'elle traverse (tir collatéral).
     // Sans amélioration : 1 couche sur 1 ballon, puis elle disparaît. Si elle touche autre chose qu'un ballon, elle s'y plante.
     // Explosive (BowUpgrades.Explosive) : à chaque ballon touché, une onde perce aussi les ballons voisins.
+    // Rebond (BowUpgrades.Bounces) : au lieu de disparaître après son dernier ballon, elle file tout droit vers le ballon
+    // le plus proche, autant de fois que de rebonds. Givrante (BowUpgrades.Frost) : chaque ballon touché est ralenti.
     [RequireComponent(typeof(Rigidbody))]
     public class Arrow : MonoBehaviour
     {
@@ -23,6 +25,7 @@ namespace SAE
         TrailRenderer trail;
         bool flying;
         int balloonsLeft;
+        int bouncesLeft;
         readonly HashSet<Balloon> touched = new HashSet<Balloon>();   // un ballon n'est touché qu'une fois par flèche
 
         void Awake()
@@ -46,6 +49,7 @@ namespace SAE
         {
             flying = true;
             balloonsLeft = BowUpgrades.PassThrough;   // lu au tir : une amélioration achetée compte dès la flèche suivante
+            bouncesLeft = BowUpgrades.Bounces;
             body.isKinematic = false;
             body.useGravity = true;
             body.linearVelocity = velocity;
@@ -76,8 +80,30 @@ namespace SAE
                 if (shooterHand) Sounds.Quincy();   // de temps en temps, Quincy parle (flèches du joueur seulement)
             }
             balloon.Pop(BowUpgrades.Pierce);
+            if (BowUpgrades.Frost) balloon.Slow(BowUpgrades.FrostFactor, BowUpgrades.FrostSeconds);
             if (BowUpgrades.Explosive) Explode(center, balloon);
-            if (--balloonsLeft <= 0) Destroy(gameObject);   // plus de ballon à traverser : la flèche est détruite
+            if (--balloonsLeft > 0) return;
+            if (bouncesLeft > 0 && Bounce(center)) { bouncesLeft--; balloonsLeft = 1; return; }
+            Destroy(gameObject);   // plus de ballon à traverser ni de rebond : la flèche est détruite
+        }
+
+        // Rebond : vers le ballon pas encore touché le plus proche, en ligne droite (sans gravité : elle ne rate pas sa cible)
+        bool Bounce(Vector3 from)
+        {
+            Balloon next = null;
+            float best = BowUpgrades.BounceRange * BowUpgrades.BounceRange;
+            foreach (var b in Balloon.All)
+            {
+                if (touched.Contains(b)) continue;
+                float d = (b.transform.position - from).sqrMagnitude;
+                if (d < best) { best = d; next = b; }
+            }
+            if (!next) return false;
+            float speed = Mathf.Max(body.linearVelocity.magnitude, 15f);
+            body.useGravity = false;
+            body.linearVelocity = (next.transform.position - transform.position).normalized * speed;
+            Sounds.Play(Sounds.Bouton, transform.position, 0.5f, 1.6f);   // un petit « tic » aigu : elle a rebondi
+            return true;
         }
 
         // L'onde de l'explosion : les ballons les plus proches de celui touché, dans le rayon, perdent des couches.
