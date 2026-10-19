@@ -27,6 +27,9 @@ namespace SAE
         // Vagues vaincues : rendent le coffre plus cher, mais meilleur (raretés, nombre de singes).
         public static int WavesWon;
 
+        // Record de la partie : la plus haute vague gagnée (pas de sauvegarde entre deux lancements du jeu)
+        public static int BestWave;
+
         public static event Action Changed;
         public static void NotifyChanged() => Changed?.Invoke();
 
@@ -102,6 +105,7 @@ namespace SAE
             Held = null;
             Money = 0;
             WavesWon = 0;
+            BestWave = 0;
             Array.Clear(owned, 0, owned.Length);
             Array.Clear(unlocked, 0, unlocked.Length);
             unlocked[(int)MonkeyType.Classique] = true;

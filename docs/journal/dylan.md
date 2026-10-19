@@ -5,7 +5,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 ## Lun. 19 oct. 2026 — MVP de la semaine 2
 **Ce que j'ai fait :** (branche `feat/mvp-s2`, **pas poussée**, rien testé dans Unity ni au casque)
 - Sons du jeu et musique d'ambiance, fabriqués par le code (#34).
-- Écran de victoire / vague perdue et bouton REJOUER (#31).
+- Vagues infinies : plus de victoire ni de fin ; vagues spéciales toutes les 10 vagues, paliers avec bonus, vague parfaite, record (#31). Panneau d'annonce du palier et de la vague perdue.
 - Liste de tout ce qu'on peut faire cette semaine : [MVP_S2.md](../MVP_S2.md).
 
 **Ce qui bloque / reste à faire :** tester tout ça au casque (surtout REJOUER et la position du panneau de fin), décider d'une victoire plus courte que 100 vagues pour le test du vendredi 23.
@@ -13,9 +13,9 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
 | Claude (Claude Code) | Sons (#34), `Core/Sfx.cs` : 14 sons et une musique fabriqués par des formules (onde + enveloppe), 12 haut-parleurs réutilisés, sons 3D. Branchés en une ligne sur le ballon éclaté, l'arc, les boutons (main et rayon), l'argent, la pose des singes, le coffre, la porte, le tutoriel et les vagues. Compilé, pas écouté | Gardé (à écouter) |
-| Claude (Claude Code) | Écran de fin (#31), `Map/EndScreen.cs` : panneau construit au premier besoin devant le point d'arrivée de la carte. Victoire = REJOUER / CONTINUER ; vague perdue = bannière de 5 s (pas pendant le tutoriel). `WaveSpawner` envoie deux événements (`GameWon`, `WaveFailed`). Menu clic droit « Tester la victoire » pour le voir sans jouer 100 vagues. Compilé, pas testé | Gardé (à tester) |
-| Claude (Claude Code) | REJOUER (#31), `Core/GameRestart.cs` : remet à zéro l'argent, l'inventaire, les vagues gagnées (`GameState.Reset`), l'arc (`BowUpgrades.Reset`), le tutoriel (`Tutorial.Restart`) et le niveau (`Levels.Restart`), puis recharge la scène Hub seule. Compilé, pas testé : il faut vérifier que la carte se recharge et que le bananier repart de zéro | Gardé (à tester) |
-| Claude (Claude Code) | `docs/MVP_S2.md` : définition du MVP, ce qui est ajouté, toutes les tâches possibles triées DOIT / DEVRAIT / POURRAIT (avec les numéros d'issues), 10 idées nouvelles, plan de la semaine et check-list du test du silence. Travail fait dans un worktree (`.claude/worktrees/mvp`) pour ne pas toucher aux modifs Unity locales de Dylan. Aucune issue créée ni carte déplacée sur GitHub, et rien poussé, à sa demande | Gardé |
+| Claude (Claude Code) | Correction après ton retour (il n'y a pas de fin, on reste sur la même vague, le but est l'infini) : victoire à 100 vagues retirée. `WaveBook.Make(w)` sans limite, vague spéciale toute les 10 vagues (RUSH, BLINDAGE, COEURS), palier + bonus de bananes, vague parfaite +50 %, record `GameState.BestWave` sur `WaveBoard`. `EndScreen` n'annonce plus que le palier et la vague perdue (bannière de 5 s). Compilé, pas testé. Attention : la PR #128 (vagues dures) touche `WaveBook.Make` et entrera en conflit | Gardé (à tester) |
+| Claude (Claude Code) | `Core/GameRestart.cs` : nouvelle partie (remet à zéro argent, inventaire, record, arc, tutoriel, niveau, puis recharge la cabane). Pas de bouton dans le jeu pour l'instant, seulement le menu clic droit de `EndScreen`. Compilé, pas testé | Gardé (à tester) |
+| Claude (Claude Code) | `docs/MVP_S2.md` réécrit : principe du jeu infini, ce qui est ajouté, tâches DOIT, plus de 30 idées de mécaniques (vagues, gestes VR, singes, hub) avec effort, 5 conseils, questions pour lundi, plan et check-list du test du silence. Fait dans un worktree (`.claude/worktrees/mvp`). Aucune issue créée, rien poussé, à ta demande | Gardé |
 
 ## Ven. 9 oct. 2026
 

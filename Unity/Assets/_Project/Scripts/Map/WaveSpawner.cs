@@ -6,10 +6,11 @@ namespace SAE
 {
     // Les vagues de ballons, en deux phases :
     // - PRÉPARATION : rien n'attaque, on gère les bananes, le coffre et le plateau, puis on appuie sur LANCER ;
-    // - ATTAQUE : la vague suit sa liste de groupes (WaveBook), écrite à l'avance.
+    // - ATTAQUE : la vague suit sa liste de groupes, calculée par WaveBook.
     // Chaque vague commence avec toutes les vies (startLives). Perdre une vague ne fait pas tout recommencer :
     // on reprend AU DÉBUT de cette vague (singes posés et argent gardés).
-    // Victoire après la vague 100 (la finale aux 4 dirigeables rouges), puis mode infini pour qui veut continuer.
+    // Il n'y a PAS de fin : les vagues sont infinies, le but est d'aller le plus loin possible (record). Tous les
+    // 10 vagues, un palier donne un bonus ; une vague sans aucun ballon passé est « parfaite » (+50 %).
     // Règle du GDD : éclater un ballon ne rapporte rien, finir une vague rapporte de l'argent.
     // Rien n'est affiché à l'écran (nausée en VR) : les tableaux WaveBoard du décor lisent Wave, Lives et Status.
     public class WaveSpawner : MonoBehaviour
@@ -19,23 +20,21 @@ namespace SAE
 
         public float balloonHeight = 1f;
         public int startLives = 20;
-        // Pas gardé dans la scène : c'est WaveBook qui fait foi (avant, la scène gardait une vieille liste de 10 vagues)
-        [System.NonSerialized] public List<WaveData> waves = WaveBook.Default();
 
         List<Vector3> path;
 
         public int Wave { get; private set; } = 1;   // la vague en cours, ou la prochaine à lancer
         public int Lives { get; private set; }
         public bool Running { get; private set; }
-        public bool Won { get; private set; }         // la vague 100 a été gagnée
         public string Status { get; private set; } = "Prépare-toi, puis appuie sur LANCER";
 
-        // Pour l'écran de fin (EndScreen) : la vague qu'on vient de perdre, et la victoire finale
+        // Pour le panneau d'annonce (EndScreen) : la vague qu'on vient de perdre, et le palier qu'on vient d'atteindre (vague, bonus)
         public event System.Action<int> WaveFailed;
-        public event System.Action GameWon;
+        public event System.Action<int, int> MilestoneReached;
 
-        public int LastWrittenWave => waves.Count;
-        public WaveData Current => Wave <= waves.Count ? waves[Wave - 1] : WaveBook.Endless(Wave);
+        public const int MilestoneEvery = 10;   // un palier toutes les 10 vagues
+
+        public WaveData Current => WaveBook.Make(Wave);   // infini : la formule ne s'arrête jamais
         public int BossCount => Current.BossCount;
 
         void Awake() => Instance = this;
@@ -106,20 +105,20 @@ namespace SAE
             else
             {
                 GameState.WavesWon++;
-                int reward = 20 + Wave * 10;   // à équilibrer avec la banane (5) et le coffre (25 + 20 par vague vaincue)
-                Economy.Earn(reward);
-                if (Wave == LastWrittenWave)
+                GameState.BestWave = Mathf.Max(GameState.BestWave, Wave);
+                int reward = 20 + Wave * 10;   // à équilibrer avec la banane (5) et le coffre (40 + 15 par vague vaincue)
+                bool perfect = Lives == startLives;   // aucun ballon n'est passé
+                if (perfect) reward += reward / 2;
+                bool milestone = Wave % MilestoneEvery == 0;
+                int bonus = milestone ? 50 * (Wave / MilestoneEvery) : 0;   // palier 10 : +50, palier 20 : +100…
+                Economy.Earn(reward + bonus);
+                Status = $"Vague {Wave} {(perfect ? "PARFAITE" : "gagnée")} : +{reward + bonus}";
+                if (milestone)
                 {
-                    Won = true;
-                    Status = $"VICTOIRE ! +{reward} · mode infini : LANCER";
                     Sfx.Play(Sound.Victory);
-                    GameWon?.Invoke();
+                    MilestoneReached?.Invoke(Wave, bonus);
                 }
-                else
-                {
-                    Status = $"Vague {Wave} gagnée : +{reward}";
-                    Sfx.Play(Sound.WaveWon);
-                }
+                else Sfx.Play(Sound.WaveWon);
                 Wave++;
                 Lives = startLives;   // la vague suivante repart avec toutes les vies (affiché pendant la préparation)
             }
