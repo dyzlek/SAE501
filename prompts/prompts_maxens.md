@@ -16,6 +16,12 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 >
 > Vérifie que tout compile, puis mets à jour le journal, les prompts et le GDD.
 
+### Le journal du jour, avec captures
+> Remplis mon journal du jour comme les autres jours : ce qui a été fait, expliqué en détail, avec des captures d'écran quand elles sont utiles.
+
+### La banane dorée
+> On ne voit pas assez la banane dorée. Ne peut-on pas simplement la mettre d'une couleur dorée, et au pire ajouter une aura légère ?
+
 ## Jeu. 8 oct. 2026
 
 ### Une porte commune

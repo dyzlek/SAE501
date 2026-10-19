@@ -220,7 +220,7 @@ Les sons s'entendent du hub comme de la carte : on sait qu'il faut y retourner. 
 - elle vaut 5 ;
 - elle pourrit en 15 s : elle brunit, se ratatine, sent mauvais, puis disparaît ;
 - **tenue en main**, par le joueur ou un singe, elle ne pourrit pas ;
-- **banane dorée** : 1 sur 25 (4 %) tombe dorée et scintille. Elle vaut **10 fois plus** et pourrit **2 fois moins vite**. C'est la petite surprise qui fait courir au pied de l'arbre (réglages sur le bananier : `chanceDoree`, `multiplicateurDore`, `pourritureDoree`).
+- **banane dorée** : 1 sur 25 (4 %) tombe toute dorée et brillante, avec une aura légère. Elle vaut **10 fois plus** et pourrit **2 fois moins vite**. C'est la petite surprise qui fait courir au pied de l'arbre (réglages sur le bananier : `chanceDoree`, `multiplicateurDore`, `pourritureDoree`).
 
 **Le comptoir BANANIER**, sous l'abri, propose des améliorations communes à tous les arbres. Le prix est multiplié par 1,6 à chaque niveau :
 
@@ -344,7 +344,7 @@ Il n'y a **aucun texte à l'écran**. Tout est écrit sur un objet du décor, à
 - **Le rayon devient coloré** sur ce qui est utilisable.
 - **Un bouton grossit** quand on le vise.
 - **La porte s'entrouvre et frémit** quand on la vise.
-- **Banane :** jaune = mûre, brune qui sent = pourrie, dorée qui scintille = rare, elle vaut 10 fois plus.
+- **Banane :** jaune = mûre, brune qui sent = pourrie, dorée et brillante, avec une aura = rare, elle vaut 10 fois plus.
 - **Fantôme de pose :** vert = possible, rouge = interdit, doré = fusion.
 
 ### 10.3 Feedback de chaque action

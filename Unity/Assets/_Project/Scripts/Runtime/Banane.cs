@@ -11,7 +11,7 @@ using UnityEngine;
 /// Branchement XR (dans l'Inspector du XR Grab Interactable de la banane) :
 ///   Select Entered -> Banane.Prise()     Select Exited -> Banane.Lachee()
 /// Test sans casque : script TestSouris sur la caméra (clic sur une banane = dans le panier).
-/// Banane dorée (rare, voir Bananier.chanceDoree) : dorée et scintillante, elle vaut beaucoup plus et pourrit moins vite.
+/// Banane dorée (rare, voir Bananier.chanceDoree) : toute dorée et brillante, avec une aura légère ; elle vaut beaucoup plus et pourrit moins vite.
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
 public class Banane : MonoBehaviour
@@ -50,6 +50,10 @@ public class Banane : MonoBehaviour
     MaterialPropertyBlock mpb;
     static readonly int ColorId = Shader.PropertyToID("_Color");
     static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+    static readonly int BaseMapId = Shader.PropertyToID("_BaseMap");
+    static readonly int MetallicId = Shader.PropertyToID("_Metallic");
+    static readonly int SmoothnessId = Shader.PropertyToID("_Smoothness");
+    static readonly Color Doree = new Color(1f, 0.68f, 0.05f);
 
     Vector3 tailleFraiche;          // sa taille d'origine (elle se ratatine en pourrissant)
 
@@ -92,34 +96,11 @@ public class Banane : MonoBehaviour
         EstDoree = true;
         Valeur *= multiplicateur;
         dureePourriture *= pourritureX;
-        couleurFraiche = new Color(1f, 0.78f, 0.15f);
+        couleurFraiche = Doree;
         AppliquerCouleur(couleurFraiche);
-        Scintiller();
-    }
-
-    // De petites étincelles dorées autour de la banane, pour la repérer de loin
-    void Scintiller()
-    {
-        var go = new GameObject("Etincelles");
-        go.transform.SetParent(transform, false);
-        var ps = go.AddComponent<ParticleSystem>();
-        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-        var main = ps.main;
-        main.startLifetime = 0.8f;
-        main.startSpeed = 0.1f;
-        main.startSize = new ParticleSystem.MinMaxCurve(0.02f, 0.05f);
-        main.startColor = new Color(1f, 0.85f, 0.3f, 0.9f);
-        main.gravityModifier = -0.02f;
-        main.simulationSpace = ParticleSystemSimulationSpace.World;
-        var emission = ps.emission;
-        emission.rateOverTime = 10f;
-        var shape = ps.shape;
-        shape.shapeType = ParticleSystemShapeType.Sphere;
-        shape.radius = 0.12f;
-        var r = go.GetComponent<ParticleSystemRenderer>();
-        r.sharedMaterial = SAE.Visuals.LineMaterial;
-        r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        ps.Play();
+        // Une aura légère (celle des raretés des singes), à la taille de la banane seule
+        var corps = GetComponent<MeshRenderer>();
+        if (corps) SAE.Aura.Add(gameObject, new ParticleSystem.MinMaxGradient(new Color(1f, 0.85f, 0.3f, 0.35f)), corps.bounds.size);
     }
 
     IEnumerator Tomber(Vector3 de, Vector3 a)
@@ -205,6 +186,13 @@ public class Banane : MonoBehaviour
             r.GetPropertyBlock(mpb);
             mpb.SetColor(ColorId, c);
             mpb.SetColor(BaseColorId, c);
+            if (EstDoree)
+            {
+                // Dorée : la texture jaune est remplacée par du blanc teinté en or, en métal brillant
+                mpb.SetTexture(BaseMapId, Texture2D.whiteTexture);
+                mpb.SetFloat(MetallicId, 0.5f);
+                mpb.SetFloat(SmoothnessId, 0.85f);
+            }
             r.SetPropertyBlock(mpb);
         }
     }
