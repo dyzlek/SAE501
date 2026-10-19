@@ -11,6 +11,7 @@ using UnityEngine;
 /// Branchement XR (dans l'Inspector du XR Grab Interactable de la banane) :
 ///   Select Entered -> Banane.Prise()     Select Exited -> Banane.Lachee()
 /// Test sans casque : script TestSouris sur la caméra (clic sur une banane = dans le panier).
+/// Banane dorée (rare, voir Bananier.chanceDoree) : dorée et scintillante, elle vaut beaucoup plus et pourrit moins vite.
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
 public class Banane : MonoBehaviour
@@ -27,6 +28,9 @@ public class Banane : MonoBehaviour
     public int Valeur { get; private set; }
     public bool EstPourrie { get; private set; }
     public bool EnMain { get; private set; }
+    public bool EstDoree { get; private set; }
+    /// La dernière main du joueur qui l'a tenue (pour la faire vibrer au dépôt). Vide si c'est un singe qui l'a reprise.
+    public Transform DerniereMain { get; private set; }
     public bool Deposee => deposee;
     public bool Posee => posee;      // arrivée au sol (fin de la chute depuis l'arbre)
     /// 0 = fraîche, 1 = pourrie
@@ -61,12 +65,57 @@ public class Banane : MonoBehaviour
         rends = GetComponentsInChildren<Renderer>();
         mpb = new MaterialPropertyBlock();
         SAE.PlayerRig.IgnoreCollisions(gameObject);   // on ne peut pas monter sur une banane tenue et s'envoler
+
+        // La main qui l'attrape vibre doucement, et on la retient pour le dépôt dans le panier
+        var grab = GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
+        if (grab) grab.selectEntered.AddListener(args =>
+        {
+            DerniereMain = args.interactorObject.transform;
+            SAE.Haptics.Play(DerniereMain, SAE.Haptics.Grab);
+        });
     }
 
     public void Initialiser(Bananier bananier, int valeur, float pourriture, Vector3 cible)
     {
         source = bananier; Valeur = valeur; dureePourriture = pourriture;
         StartCoroutine(Tomber(transform.position, cible));
+    }
+
+    /// Fait de cette banane une banane dorée : sa valeur est multipliée, elle pourrit 'pourritureX' fois moins vite.
+    public void RendreDoree(int multiplicateur, float pourritureX)
+    {
+        if (EstDoree) return;
+        EstDoree = true;
+        Valeur *= multiplicateur;
+        dureePourriture *= pourritureX;
+        couleurFraiche = new Color(1f, 0.78f, 0.15f);
+        AppliquerCouleur(couleurFraiche);
+        Scintiller();
+    }
+
+    // De petites étincelles dorées autour de la banane, pour la repérer de loin
+    void Scintiller()
+    {
+        var go = new GameObject("Etincelles");
+        go.transform.SetParent(transform, false);
+        var ps = go.AddComponent<ParticleSystem>();
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        var main = ps.main;
+        main.startLifetime = 0.8f;
+        main.startSpeed = 0.1f;
+        main.startSize = new ParticleSystem.MinMaxCurve(0.02f, 0.05f);
+        main.startColor = new Color(1f, 0.85f, 0.3f, 0.9f);
+        main.gravityModifier = -0.02f;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        var emission = ps.emission;
+        emission.rateOverTime = 10f;
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Sphere;
+        shape.radius = 0.12f;
+        var r = go.GetComponent<ParticleSystemRenderer>();
+        r.sharedMaterial = SAE.Visuals.LineMaterial;
+        r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        ps.Play();
     }
 
     IEnumerator Tomber(Vector3 de, Vector3 a)
@@ -162,6 +211,13 @@ public class Banane : MonoBehaviour
         EnMain = true; posee = true; lachee = false;
         vitesseMain.Clear();
         StopAllCoroutines();
+    }
+
+    /// Un singe récolteur la prend : comme Prise(), mais ce n'est plus le joueur qui la déposera.
+    public void PriseParSinge()
+    {
+        DerniereMain = null;
+        Prise();
     }
 
     /// Un singe récolteur l'a laissée par terre (lancer raté) : elle n'est plus tenue, elle se remet à pourrir.

@@ -2,6 +2,20 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Lun. 19 oct. 2026
+- **Fait : quatre bonus rapides de la liste d'idées** (branche `feat/bonus-maxens`, partie du `main` à jour) :
+  - **les boss se divisent en éclatant**, façon Bloons TD : le boss violet lâche 4 ballons normaux, le dirigeable rouge lâche 2 boss (qui se divisent à leur tour). Les petits repartent de l'endroit où le boss a éclaté, un peu en arrière sur la piste, avec une onde de choc. Leurs couches suivent la solidité du boss (`Balloon.Split`, `WaveSpawner.SpawnSplit`) ;
+  - **bananes dorées** : 4 % des bananes tombent dorées et scintillantes, elles valent 10 fois plus et pourrissent 2 fois moins vite. Les trois réglages sont sur le bananier, dans l'Inspector (`chanceDoree`, `multiplicateurDore`, `pourritureDoree`) ;
+  - **annonce des vagues spéciales** (boss et dirigeable) : le tableau prévient dès la préparation (« VAGUE DE BOSS ! », « DIRIGEABLE ROUGE EN APPROCHE ! »), trois coups de cloche au lancement, puis un cor grave et « LE BOSS ARRIVE ! » quand il entre sur la piste. Les sons sont fabriqués par le code, sans fichier audio, et s'entendent du hub comme de la carte (`Map/WaveAnnouncer.cs`) ;
+  - **des vibrations différentes selon l'action** (`Player/Haptics.cs`, des motifs de plusieurs impulsions) : banane attrapée (douce), banane dans le panier (deux tics), banane dorée (trois tics qui montent), flèche qui touche un ballon (tic sec dans la main de l'arc), boss qui éclate (grosse secousse), vies perdues (grondement, au plus deux fois par seconde), vague spéciale (deux battements de cœur), vague gagnée ou perdue.
+  - Les singes récolteurs prennent les bananes avec `PriseParSinge()` : ce n'est plus la main du joueur qui vibre quand ils les déposent.
+  - Vérifié : le projet compile (aucune erreur, aucun avertissement dans nos scripts). **Pas encore testé en Play ni au casque** (Unity fermé).
+
+### IA
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude Code | Tri de la liste d'idées (ce qui se fait vite), puis code des quatre bonus : division des boss, bananes dorées, annonce des vagues spéciales (sons fabriqués par le code), motifs de vibration ; vérification de la compilation | Gardé (à tester en jeu) |
+
 ## Jeu. 8 oct. 2026
 - **Fait : la bananeraie, un nouvel endroit pour tout ce qui concerne la récolte des bananes** (branche `feat/bananeraie-maxens`, partie du `main` à jour, PR #99). Avant, le bananier, l'étal, le panier, le comptoir du bananier et celui des récolteurs étaient tous dans la cabane, autour du joueur : ça faisait beaucoup de choses au même endroit.
 

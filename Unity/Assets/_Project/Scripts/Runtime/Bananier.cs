@@ -56,6 +56,11 @@ public class Bananier : MonoBehaviour
     [Tooltip("Argent rapporté par une banane")]
     public Stat valeur = new Stat { valeurDeBase = 5f, parNiveau = 3f, limite = 999f, prixDeBase = 80 };
 
+    [Header("Bananes dorées")]
+    [Tooltip("Chance qu'une banane soit dorée (0,04 = 4 %)")] [Range(0f, 1f)] public float chanceDoree = 0.04f;
+    [Tooltip("Une banane dorée vaut autant de fois une banane normale")] public int multiplicateurDore = 10;
+    [Tooltip("Une banane dorée pourrit autant de fois moins vite")] public float pourritureDoree = 2f;
+
     [Header("Boing (optionnel)")]
     [Tooltip("Partie qui fait le boing (Bananier_Arbre). Vide = pas d'animation.")]
     public Transform arbre;
@@ -124,6 +129,7 @@ public class Bananier : MonoBehaviour
         Vector3 pos = pointApparition.position;
         var b = Instantiate(prefabBanane, pos, Quaternion.Euler(0, Random.Range(0f, 360f), 0));
         b.Initialiser(this, ValeurBanane, DureePourriture, PointDeChute());
+        if (Random.value < chanceDoree) b.RendreDoree(multiplicateurDore, pourritureDoree);
         auSol.Add(b);
         if (arbre != null) { StopAllCoroutines(); StartCoroutine(Boing()); }
     }

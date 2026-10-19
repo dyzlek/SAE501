@@ -235,7 +235,7 @@ namespace SAE
         void Grab(Banane banana)
         {
             Carried = banana;
-            banana.Prise();   // elle ne pourrit plus en disparaissant, le panier ne la compte pas toute seule
+            banana.PriseParSinge();   // elle ne pourrit plus en disparaissant, le panier ne la compte pas toute seule
             var body = banana.GetComponent<Rigidbody>();
             body.isKinematic = true;   // lâchée par le joueur, elle tombait : dans ses mains, plus de gravité
             // Le joueur ne peut plus la lui prendre des mains
@@ -264,7 +264,7 @@ namespace SAE
                 if (!banana) yield break;
                 yield return WalkTo(banana.transform.position - (banana.transform.position - transform.position).normalized * 0.25f, null);
                 Carried = banana;
-                banana.Prise();   // de nouveau en main : elle ne pourrit plus
+                banana.PriseParSinge();   // de nouveau en main : elle ne pourrit plus
             }
         }
 

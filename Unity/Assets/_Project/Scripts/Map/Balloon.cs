@@ -12,6 +12,8 @@ namespace SAE
     //   Blindé = Ballon_Blindage, Boss = MOAB (hélice qui tourne), Dirigeable = BFB (2 hélices), Coeur = Ballon_Coeur.
     // Le ballon cœur regagne une couche toutes les 2 s (règle du GDD : il se régénère).
     // S'il atteint la sortie, il retire autant de vies qu'il lui reste de couches.
+    // Un boss éclaté se divise (façon Bloons TD) : le Boss lâche 4 ballons normaux, le Dirigeable lâche 2 Boss
+    // (qui se divisent à leur tour). Les petits repartent de l'endroit où il a éclaté, un peu en arrière sur la piste.
     public class Balloon : MonoBehaviour
     {
         public static readonly List<Balloon> All = new List<Balloon>();
@@ -150,9 +152,36 @@ namespace SAE
             if (popped == 0) return pierce;
 
             layers -= popped;
-            if (layers <= 0) Destroy(gameObject);
+            if (layers <= 0) { Split(); Destroy(gameObject); }
             else UpdateColor();
             return popped * cost;
+        }
+
+        // Ce que lâche un boss éclaté : (sorte, nombre, couches). Les couches suivent la solidité du boss.
+        (BalloonKind kind, int count, int layers) SplitInto() => Kind switch
+        {
+            BalloonKind.Boss => (BalloonKind.Normal, 4, Mathf.Clamp(maxLayers / 5, 2, 6)),
+            BalloonKind.Dirigeable => (BalloonKind.Boss, 2, Mathf.Max(10, maxLayers / 4)),
+            _ => (Kind, 0, 0),
+        };
+
+        const float SplitSpacing = 0.6f;   // écart entre les petits ballons, en mètres le long de la piste
+
+        void Split()
+        {
+            var (kind, count, childLayers) = SplitInto();
+            if (count == 0 || !spawner) return;
+            for (int i = 0; i < count; i++) spawner.SpawnSplit(kind, childLayers, this, i * SplitSpacing);
+            Shockwave.Spawn(transform.position, transform.localScale.x * 1.5f);
+            Haptics.PlayBoth(Haptics.BossPop);
+        }
+
+        // Un petit ballon né d'un boss : il reprend la piste là où le boss a éclaté, 'back' mètres en arrière.
+        public void ContinueFrom(Balloon parent, float back)
+        {
+            nextPoint = parent.nextPoint;
+            Progress = Mathf.Max(0f, parent.Progress - back);
+            transform.position = Vector3.MoveTowards(parent.transform.position, path[nextPoint - 1], back);
         }
 
         public void Slow(float factor, float duration)

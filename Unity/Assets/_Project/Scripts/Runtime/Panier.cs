@@ -55,12 +55,16 @@ public class Panier : MonoBehaviour
     {
         if (b == null || b.Deposee) return 0;
         bool pourrie = b.EstPourrie;
+        bool doree = b.EstDoree && !pourrie;
+        var main = b.DerniereMain;
         int gain = Mathf.RoundToInt(b.Deposer() * part);
         Total += gain; NbBananes++;
         SAE.Economy.Earn(gain, transform.position);   // l'argent du jeu (une seule bourse)
         if (effetDepot != null) Instantiate(effetDepot, transform.position, Quaternion.identity);
         var son = pourrie ? sonPourrie : sonDepot;
         if (son != null) AudioSource.PlayClipAtPoint(son, transform.position);
+        // La main qui l'a lancée vibre : deux tics pour une banane, trois qui montent pour une dorée
+        if (main != null && gain > 0) SAE.Haptics.Play(main, doree ? SAE.Haptics.Golden : SAE.Haptics.Coins);
         onDepot.Invoke(gain, Total);
         OnDepotCode?.Invoke(gain, Total);
         return gain;

@@ -2,6 +2,14 @@
 
 _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (orthographe, clarté, structure : contexte, objectif, contraintes). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/maxens.md)._
 
+## Lun. 19 oct. 2026
+
+### Trier les idées
+> Voici notre liste d'idées (vagues, gestes VR, singes et économie, hub et records, classements et multijoueur). Lesquelles peut-on faire sans y passer trop de temps ?
+
+### Les quatre bonus rapides
+> Fais les quatre idées les plus rapides : boss qui se divise en petits ballons, bananes dorées rares, annonce des vagues spéciales et vibrations différentes selon l'action. Sur une branche à moi, partie de `main`.
+
 ## Jeu. 8 oct. 2026
 
 ### Une porte commune
