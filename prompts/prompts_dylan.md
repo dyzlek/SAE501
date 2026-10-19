@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Lun. 19 oct. 2026
 
+### Gestes VR : bombes et pluie de flèches
+> Oui, enchaîne sur les gestes VR : les bombes à lancer (#134) et la pluie de flèches de Quincy (#135).
+
 ### Vagues de la semaine 2 : annonce, combo, météo
 > Pour les objectifs de la semaine 2 : je laisse à Maxens le boss qui se divise (#129), les ballons camouflés (#130) et les bananes dorées (#137). Fais tout le reste de ce que j’ai sélectionné, en commençant par les vagues.
 

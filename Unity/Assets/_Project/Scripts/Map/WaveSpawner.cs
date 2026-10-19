@@ -24,6 +24,7 @@ namespace SAE
         public int startLives = 20;
 
         List<Vector3> path;
+        public IReadOnlyList<Vector3> Path => path;   // le chemin des ballons (piège à clous)
 
         public int Wave { get; private set; } = 1;   // la vague en cours, ou la prochaine à lancer
         public int Lives { get; private set; }
@@ -62,6 +63,7 @@ namespace SAE
             end.transform.SetParent(transform, false);
             end.spawner = this;
             weather = gameObject.AddComponent<WaveWeather>();   // brouillard, nuit, pluie des vagues annoncées
+            BombRack.Build(transform);                          // les bombes à lancer, à côté du point d'arrivée
             if (Levels.LaunchOnArrival)
             {
                 Levels.LaunchOnArrival = false;

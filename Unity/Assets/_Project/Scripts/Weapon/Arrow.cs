@@ -70,6 +70,7 @@ namespace SAE
 
             var center = balloon.transform.position;
             balloon.Pop(BowUpgrades.Pierce);
+            QuincyPower.AddCharge();   // chaque ballon touché remplit la jauge du pouvoir de Quincy
             if (BowUpgrades.Explosive) Explode(center, balloon);
             if (--balloonsLeft <= 0) Destroy(gameObject);   // plus de ballon à traverser : la flèche est détruite
         }

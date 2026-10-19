@@ -51,6 +51,7 @@ namespace SAE
         {
             Measure();
             preview = AddPreview();
+            gameObject.AddComponent<QuincyPower>();   // la pluie de flèches, quand on lève l'arc (#135)
         }
 
         void LateUpdate() => UpdatePreview();   // après les archers, qui ont réglé la tension pendant Update
