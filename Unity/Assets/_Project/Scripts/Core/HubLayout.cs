@@ -11,5 +11,6 @@ namespace SAE
         public const float CarpetRadius = 1.5f;      // le tapis rond au centre, là où se tient le joueur
 
         public const float MoneyBoardAngle = -136f;  // la caisse (l'argent), accrochée au mur
+        public const float RecordWallAngle = 138f;   // le mur des records et les trophées, en face de la caisse
     }
 }

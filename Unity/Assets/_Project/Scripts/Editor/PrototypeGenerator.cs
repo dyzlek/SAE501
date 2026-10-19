@@ -753,6 +753,12 @@ namespace SAE.EditorTools
             // Derrière : la grande porte (vers la bananeraie, voir BuildCabin) ; la caisse au mur, à gauche
             BuildMoneyBoard(env, HubLayout.MoneyBoardAngle);
 
+            // En face, au mur de droite : le mur des records, le classement et les trophées (RecordWall se construit seul)
+            var records = new GameObject("Mur des records").transform;
+            records.SetParent(env, false);
+            records.SetPositionAndRotation(Around(HubLayout.RecordWallAngle, HubLayout.CabinRadius - 0.3f), Quaternion.Euler(0, HubLayout.RecordWallAngle, 0));   // +Z = vers le mur
+            records.gameObject.AddComponent<RecordWall>();
+
             // Le tutoriel : son tableau suspendu devant le plateau (il cache le tableau de la vague tant qu'il dure),
             // la flèche dorée, et les endroits qu'elle montre au hub
             BuildTutorial(env);

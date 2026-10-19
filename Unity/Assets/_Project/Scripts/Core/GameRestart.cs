@@ -13,6 +13,7 @@ namespace SAE
             GameState.Reset();
             BowUpgrades.Reset();
             QuincyPower.Reset();
+            Records.NewGame();
             Tutorial.Restart();
             Levels.Restart();
             SceneManager.LoadScene(Levels.HubScene, LoadSceneMode.Single);   // Single : la carte est déchargée avec

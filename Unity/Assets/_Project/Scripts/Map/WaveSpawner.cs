@@ -144,6 +144,7 @@ namespace SAE
                 bool milestone = Wave % MilestoneEvery == 0;
                 int bonus = milestone ? 50 * (Wave / MilestoneEvery) : 0;   // palier 10 : +50, palier 20 : +100…
                 Economy.Earn(reward + bonus);
+                Records.WaveWon();   // classement et trophées, enregistrés sur le casque
                 Status = perfect ? $"Vague {Wave} PARFAITE · COMBO x{Combo} : +{reward + bonus}" : $"Vague {Wave} gagnée : +{reward + bonus}";
                 if (Combo >= 2 && !milestone) ComboReached?.Invoke(Combo, comboBonus);   // le palier a déjà son panneau
                 if (milestone)

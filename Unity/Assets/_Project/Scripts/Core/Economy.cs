@@ -20,6 +20,7 @@ namespace SAE
         {
             if (amount <= 0) return;
             GameState.Money += amount;
+            Records.AddBananas(amount);
             Sfx.Play(Sound.Coin, where, 0.7f);
             MoneyChanged?.Invoke(amount, where);
         }

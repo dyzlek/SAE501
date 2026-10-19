@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Lun. 19 oct. 2026
 
+### Records, trophées et classement local
+> Oui, enchaîne sur le mur des records, les trophées et le classement local (#139 à #142).
+
 ### Gestes VR : bombes et pluie de flèches
 > Oui, enchaîne sur les gestes VR : les bombes à lancer (#134) et la pluie de flèches de Quincy (#135).
 
