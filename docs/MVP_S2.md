@@ -135,13 +135,28 @@ _Chacune est notée : **VR** = elle utilise un geste du corps (elle passe le tes
 | Vrais fichiers audio à la place des sons fabriqués | #34 | M |
 | Cible de fléchettes jouable ; mini-jeu de la roulette ; casino (hors périmètre) | #74, #30, #69 | M à L |
 
-### 3.4 NE FERA PAS (rappel du GDD)
+### 3.4 Multijoueur et classements — options (demandé le 19 oct.)
+⚠️ **Le support de lancement dit NON au « multijoueur en ligne »** et le GDD (partie 13) l'a mis dans « NE FERA PAS », comme la sauvegarde. Ce qui suit est donc une **décision à prendre lundi avec Antoine**, pas quelque chose à coder sans accord. Du moins risqué au plus risqué :
+
+| Niveau | Idée | Ce que ça demande | Effort | Risque |
+|---|---|---|---|---|
+| 1 | **Classement local, sur place** : le tableau des meilleures vagues de la session (« Dylan 34, Maxens 28 ») avec un nom choisi par lettres à enfoncer | Un tableau au hub + saisie du nom en VR ; en mémoire, sans fichier | S à M | Très faible : pas de sauvegarde, pas de réseau |
+| 2 | **Classement local gardé** entre deux lancements (fichier sur le casque) | `PlayerPrefs` ou un petit JSON ; touche à la règle « pas de sauvegarde » | M | Faible, mais à faire valider |
+| 3 | **Classement en ligne** (tous les casques de l'IUT et le public) | Un service (Unity Leaderboards, Firebase ou un petit serveur) : compte, clé secrète, réseau au casque, **triche** (n'importe qui envoie « vague 9999 »), RGPD (pseudos) | L | Moyen : dépend du Wi-Fi de l'IUT, hors périmètre technique du cours |
+| 4 | **Spectateur à plat** : un 2e joueur sur PC voit la partie en direct et peut lancer des « bonus » (ballon rapide) | Le casting existe déjà pour la démo ; un vrai client demande du réseau | M à L | Moyen |
+| 5 | **Coop à deux casques** (un pose les singes à la cabane, l'autre tire à l'arc sur la carte) | Netcode for GameObjects + Relay, synchro de l'argent, des singes, des ballons et des mains ; le jeu a **un seul joueur par conception** (XRI, `PlayerRig.Local`, statiques partout) | **XL** | **Très élevé** : refonte de l'architecture, impossible à finir en 3 semaines à 3 |
+| 6 | **Coop asymétrique sans réseau** : un joueur VR, un joueur sur écran à côté (même PC) qui pose les singes avec la souris | Le mode PC existe (`DesktopPlayer`) ; il faut deux vues et deux entrées en même temps | L | Élevé, mais sans réseau |
+
+**Mon avis :** faire le **niveau 1** si on veut un classement (il est dans l'esprit « record » du jeu infini, avec le mur des records), **ne pas faire** le multijoueur réseau (niveaux 5 et 6) : le jeu repose sur un seul joueur qui passe d'une échelle à l'autre. Pour l'oral, on peut en parler comme **piste d'évolution** (« si on avait plus de temps »). Le niveau 3 est intéressant pour les Pégases (un classement général), mais seulement après le gel des fonctions et si Antoine l'accepte.
+
+### 3.5 NE FERA PAS (rappel du GDD)
 Plusieurs cartes · méta-progression ou **sauvegarde entre deux parties** · multijoueur · scénario · déplacement continu · achats réels. **En S3, plus aucune nouvelle fonction** (gel le lundi 9 nov., #38).
 
 ## 4. Questions à trancher lundi (visio avec Antoine)
 1. **Vagues infinies sans fin** : est-ce OK pour le cahier des charges (« une fin » dans le support de lancement : « 1-2 niveaux + une fin ») ? Si on veut garder une fin, une victoire à une vague donnée avec le mode infini derrière (ce que j'avais fait au début) reste possible en 10 lignes.
 2. Un **record sans sauvegarde** (perdu quand on quitte le jeu) suffit-il pour la démo ?
 3. Quelles **mécaniques** de la partie 3.2 on garde (maximum 3 cette semaine) ?
+4. **Classement et multijoueur** (partie 3.4) : on s'arrête au classement local (niveau 1), ou on demande une dérogation à la règle « pas de multijoueur en ligne » ?
 
 ## 5. Plan de la semaine
 
