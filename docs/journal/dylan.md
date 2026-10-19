@@ -2,6 +2,12 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Lun. 19 oct. 2026
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | Objectifs de la semaine 2 : 17 issues créées (#129 à #145, labels prio/type/zone, jalon S2, ajoutées au tableau ; classement en ligne et coop marqués hors périmètre, sans jalon), `docs/OBJECTIFS_S2.md`, périmètre du GDD (.md) complété, décision dans GENERAL.md. Branche `docs/objectifs-s2`, PR. GDD.docx non régénéré | Gardé |
+
 ## Ven. 9 oct. 2026
 
 | Outil | Pour quoi | Gardé / jeté |
