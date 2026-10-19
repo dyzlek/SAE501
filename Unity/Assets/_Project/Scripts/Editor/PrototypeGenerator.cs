@@ -1840,13 +1840,13 @@ namespace SAE.EditorTools
             }
         }
 
-        // Le pupitre « ARC » : les améliorations de l'arc (perforante, transperçante, tir triple, explosive, voir BowUpgrades),
+        // Le pupitre « ARC » : les améliorations de l'arc (perforante, transperçante, tir triple, explosive, rebond, givrante, voir BowUpgrades),
         // sur l'estrade au bord de l'herbe, à gauche du point d'arrivée et tourné vers lui : on s'améliore là où l'on tire.
         // Un pupitre bas (on voit la carte par-dessus) et une petite ardoise posée dessus : niveau, effet et prix de chaque bouton.
         static void BuildBowUpgrades(Transform map, Vector3 pos, float yaw)
         {
-            var upgrades = new[] { BowUpgrade.Perforation, BowUpgrade.Transpercante, BowUpgrade.TirTriple, BowUpgrade.Explosion };
-            var names = new[] { "PERFORANTE", "TRANSPERÇANTE", "TRIPLE", "EXPLOSIVE" };
+            var upgrades = new[] { BowUpgrade.Perforation, BowUpgrade.Transpercante, BowUpgrade.TirTriple, BowUpgrade.Explosion, BowUpgrade.Rebond, BowUpgrade.Givrante };
+            var names = new[] { "PERFORANTE", "TRANSPERÇANTE", "TRIPLE", "EXPLOSIVE", "REBOND", "GIVRANTE" };
             var top = BuildConsole(map, "Arc", pos, upgrades.Length, yaw);
             var root = top.parent;
             float width = upgrades.Length * ConsoleStep + 0.12f;

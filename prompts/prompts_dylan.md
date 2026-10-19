@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Lun. 19 oct. 2026
 
+### Nouvelles améliorations de l’arc
+> Oui, fais les nouvelles améliorations de l’arc (#138), comme les flèches qui rebondissent.
+
 ### Records, trophées et classement local
 > Oui, enchaîne sur le mur des records, les trophées et le classement local (#139 à #142).
 

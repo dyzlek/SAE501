@@ -49,13 +49,17 @@ namespace SAE
                 BowUpgrade.Perforation => "PERFORANTE",
                 BowUpgrade.Transpercante => "TRANSPERÇANTE",
                 BowUpgrade.TirTriple => "TIR TRIPLE",
-                _ => "EXPLOSIVE",
+                BowUpgrade.Explosion => "EXPLOSIVE",
+                BowUpgrade.Rebond => "REBOND",
+                _ => "GIVRANTE",
             };
             string effect = upgrade switch
             {
                 BowUpgrade.Perforation => $"{BowUpgrades.Pierce} couche(s) / ballon",
                 BowUpgrade.Transpercante => $"traverse {BowUpgrades.PassThrough} ballon(s)",
                 BowUpgrade.TirTriple => level > 0 ? "3 flèches" : "1 flèche",
+                BowUpgrade.Rebond => level > 0 ? $"rebondit {BowUpgrades.Bounces} fois" : "aucun rebond",
+                BowUpgrade.Givrante => level > 0 ? $"ralentit à {BowUpgrades.FrostFactor * 100f:0} % · {BowUpgrades.FrostSeconds:0.#} s" : "aucun effet",
                 _ => level > 0 ? $"{BowUpgrades.ExplosionBalloons} ballons · {BowUpgrades.ExplosionRadius:0.#} m · {BowUpgrades.ExplosionLayers} c." : "aucune",
             };
             string text = UpgradeButton.Board(title, $"niv {level} / {BowUpgrades.MaxLevel(upgrade)}", effect, BowUpgrades.Price(upgrade), done);
