@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace SAE
 {
-    public enum Sound { Pop, Shoot, Press, Deny, Coin, Place, Chest, WaveStart, WaveWon, WaveLost, Leak, Ding, Door, Victory }
+    public enum Sound { Pop, Shoot, Press, Deny, Coin, Place, Chest, WaveStart, WaveWon, WaveLost, Leak, Ding, Door, Victory, Bell }
 
     // Tous les sons du jeu, fabriqués par le code au lancement (pas de fichier audio : rien à télécharger, pas de licence).
     // Un son = une petite formule (onde + enveloppe) évaluée pour chaque échantillon. C'est du « chiptune » assumé,
@@ -19,13 +19,14 @@ namespace SAE
 
         static AudioSource[] voices;
         static AudioSource music;
+        static AudioClip calmMusic, tenseMusic;
         static AudioClip[] clips;
         static int next;
         static readonly System.Random Rng = new System.Random(501);
 
         // Sans rechargement du domaine (Enter Play Mode rapide), les statiques survivent d'une partie à l'autre
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetState() { voices = null; music = null; clips = null; next = 0; }
+        static void ResetState() { voices = null; music = null; calmMusic = tenseMusic = null; clips = null; next = 0; }
 
         // Au lancement : on prépare les sons et on lance la musique
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -42,6 +43,16 @@ namespace SAE
             voice.spatialBlend = at.HasValue ? 1f : 0f;   // 1 = vient de l'endroit, 0 = dans la tête
             if (at.HasValue) voice.transform.position = at.Value;
             voice.Play();
+        }
+
+        // Musique plus tendue pendant les vagues de boss et spéciales (#133), la musique calme le reste du temps
+        public static void SetTension(bool tense)
+        {
+            Init();
+            var clip = tense ? tenseMusic : calmMusic;
+            if (music.clip == clip) return;
+            music.clip = clip;
+            music.Play();
         }
 
         // Crée les haut-parleurs et les sons, une seule fois (l'objet survit aux changements de scène)
@@ -78,6 +89,19 @@ namespace SAE
             clips[(int)Sound.Ding] = Make("Ding", 0.3f, Melody(new[] { 880f }, 0.1f, 0.3f));
             clips[(int)Sound.Door] = Make("Porte", 0.45f, t => 0.3f * Sweep(t, 0.45f, 180f, 300f) * Mathf.Sin(Mathf.PI * t / 0.45f) + 0.1f * Noise() * Mathf.Sin(Mathf.PI * t / 0.45f));
             clips[(int)Sound.Victory] = Make("Victoire", 1.8f, Melody(new[] { 523f, 659f, 784f, 1047f, 784f, 1047f, 1319f }, 0.18f, 0.5f));
+            // Trois coups de cloche graves : une note et ses harmoniques « fausses » (×2,4 et ×3,9), qui sonnent métal
+            clips[(int)Sound.Bell] = Make("Cloches", 2f, t =>
+            {
+                float sum = 0f;
+                for (int k = 0; k < 3; k++)
+                {
+                    float local = t - k * 0.55f;
+                    if (local < 0f) continue;
+                    float env = Mathf.Exp(-local * 3f) * Mathf.Min(1f, local / 0.003f);
+                    sum += env * (Tone(local, 330f) + 0.5f * Tone(local, 330f * 2.4f) + 0.25f * Tone(local, 330f * 3.9f));
+                }
+                return 0.3f * sum;
+            });
 
             // La musique : 32 notes pincées, une toutes les 0,45 s. Le bout des dernières notes est ramené au début (t + total),
             // pour que la boucle ne « claque » pas au raccord.
@@ -91,7 +115,16 @@ namespace SAE
             var pluck = Melody(notes, Step, 1.2f);
             music = new GameObject("Musique").AddComponent<AudioSource>();
             music.transform.SetParent(host.transform, false);
-            music.clip = Make("Musique", total, t => pluck(t) + pluck(t + total));
+            calmMusic = Make("Musique", total, t => pluck(t) + pluck(t + total));
+
+            // La musique tendue : une basse qui martèle deux notes en mineur, deux fois plus vite
+            var tense = new[] { 110f, 110f, 131f, 110f, 104f, 104f, 123f, 104f, 110f, 110f, 131f, 147f, 131f, 123f, 104f, 98f };
+            const float TenseStep = 0.22f;
+            float tenseTotal = tense.Length * TenseStep;
+            var drum = Melody(tense, TenseStep, 0.3f);
+            tenseMusic = Make("Musique tendue", tenseTotal, t => 1.6f * (drum(t) + drum(t + tenseTotal)));
+
+            music.clip = calmMusic;
             music.loop = true;
             music.volume = MusicVolume;
             music.spatialBlend = 0f;

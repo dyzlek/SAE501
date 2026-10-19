@@ -3,9 +3,10 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Lun. 19 oct. 2026 — MVP de la semaine 2
-**Ce que j'ai fait :** (branche `feat/mvp-s2`, **pas poussée**, rien testé dans Unity ni au casque)
+**Ce que j'ai fait :** (branche `feat/mvp-s2`, poussée avec une PR, rien testé dans Unity ni au casque)
 - Sons du jeu et musique d'ambiance, fabriqués par le code (#34).
 - Vagues infinies : plus de victoire ni de fin ; vagues spéciales toutes les 10 vagues, paliers avec bonus, vague parfaite, record (#31). Panneau d'annonce du palier et de la vague perdue.
+- Vagues de boss et spéciales annoncées (cloches, musique, panneau) avec leur météo (pluie, brouillard, nuit), et combo de vagues parfaites (#131, #132, #133).
 - Liste de tout ce qu'on peut faire cette semaine : [MVP_S2.md](../MVP_S2.md).
 
 **Ce qui bloque / reste à faire :** tester tout ça au casque (surtout REJOUER et la position du panneau de fin), décider d'une victoire plus courte que 100 vagues pour le test du vendredi 23.
@@ -17,6 +18,8 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude (Claude Code) | `Core/GameRestart.cs` : nouvelle partie (remet à zéro argent, inventaire, record, arc, tutoriel, niveau, puis recharge la cabane). Pas de bouton dans le jeu pour l'instant, seulement le menu clic droit de `EndScreen`. Compilé, pas testé | Gardé (à tester) |
 | Claude (Claude Code) | `docs/MVP_S2.md` réécrit : principe du jeu infini, ce qui est ajouté, tâches DOIT, plus de 30 idées de mécaniques (vagues, gestes VR, singes, hub) avec effort, 5 conseils, questions pour lundi, plan et check-list du test du silence. Fait dans un worktree (`.claude/worktrees/mvp`). Aucune issue créée, rien poussé, à ta demande | Gardé |
 | Claude (Claude Code) | Demande « multijoueur, classements » : pas codé, car « multijoueur en ligne » est dans NE FERA PAS (support de lancement et GDD). Ajouté à `MVP_S2.md` (partie 3.4) six options du classement local au coop à deux casques, avec effort et risque, et une question pour lundi | Gardé (à trancher) |
+| Claude (Claude Code) | Objectifs de la semaine 2 : 17 issues créées (#129 à #145, labels prio/type/zone, jalon S2, ajoutées au tableau ; classement en ligne et coop marqués hors périmètre, sans jalon), `docs/OBJECTIFS_S2.md`, périmètre du GDD (.md) complété, décision dans GENERAL.md. Branche `docs/objectifs-s2`, PR. GDD.docx non régénéré | Gardé |
+| Claude (Claude Code) | Vagues S2 (#131, #132, #133) sur `feat/mvp-s2` : vagues de boss et spéciales annoncées (son `Bell` = 3 coups de cloche, musique tendue `Sfx.SetTension`, panneau « VAGUE SPÉCIALE / UN BOSS ARRIVE » sans dévoiler le contenu, cf. #70, 2 s avant les ballons) ; combo de vagues parfaites (`WaveSpawner.Combo`, +50 % par cran jusqu’à x5, remis à 0 au premier ballon passé ou vague perdue, record `GameState.BestCombo`, panneau COMBO) ; météo `Map/WaveWeather.cs` (brouillard linéaire, nuit = soleil et ambiance baissés, pluie = 350 gouttes/s autour de la tête, transitions de 3 s, carte seulement). #129, #130 et #137 laissés à Maxens (issues mises à jour). Merge de main ; fichier de prompts réparé (lignes en double d’une commande précédente). Compilé (dotnet), pas testé dans Unity ni au casque | Gardé (à tester) |
 
 ## Ven. 9 oct. 2026
 

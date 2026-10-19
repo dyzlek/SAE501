@@ -3,9 +3,10 @@ using UnityEngine;
 namespace SAE
 {
     // Le panneau d'annonce de la carte, dans le décor, à 2,2 m devant le point d'arrivée (rien collé au visage).
-    // Il n'y a pas de fin dans le jeu (les vagues sont infinies), il annonce seulement deux moments, 5 s chacun :
+    // Il n'y a pas de fin dans le jeu (les vagues sont infinies), il annonce seulement quelques moments, 5 s chacun :
     //   - PALIER (toutes les 10 vagues) : « PALIER 20 ! », le bonus de bananes, le record ;
-    //   - VAGUE PERDUE : rien n'est perdu, on rejoue la même vague en la relançant avec LANCER.
+    //   - VAGUE PERDUE : rien n'est perdu, on rejoue la même vague en la relançant avec LANCER ;
+    //   - VAGUE SPÉCIALE / BOSS au départ de la vague (#133), et COMBO de vagues parfaites (#132).
     // Il se construit tout seul au premier besoin, avec des cubes, comme les autres panneaux du jeu.
     // Créé par WaveSpawner.Start, qui lui donne la vague à écouter.
     public class EndScreen : MonoBehaviour
@@ -29,6 +30,8 @@ namespace SAE
         {
             spawner.MilestoneReached += ShowMilestone;
             spawner.WaveFailed += ShowLost;
+            spawner.SpecialWaveStarted += ShowAnnounce;
+            spawner.ComboReached += ShowCombo;
         }
 
         void OnDestroy()
@@ -36,6 +39,8 @@ namespace SAE
             if (!spawner) return;
             spawner.MilestoneReached -= ShowMilestone;
             spawner.WaveFailed -= ShowLost;
+            spawner.SpecialWaveStarted -= ShowAnnounce;
+            spawner.ComboReached -= ShowCombo;
         }
 
         void Update()
@@ -47,6 +52,27 @@ namespace SAE
         [ContextMenu("Tester le palier")] void TestMilestone() => ShowMilestone(20, 100);
         [ContextMenu("Tester la vague perdue")] void TestLost() => ShowLost(7);
         [ContextMenu("Tester REJOUER (nouvelle partie)")] void TestRestart() => GameRestart.Now();
+        [ContextMenu("Tester l'annonce de vague spéciale")] void TestAnnounce() => ShowAnnounce(20);
+        [ContextMenu("Tester le combo")] void TestCombo() => ShowCombo(3, 120);
+
+        // Le contenu n'est pas dévoilé (#70) : on dit seulement que la vague est différente, et quel temps il fait
+        void ShowAnnounce(int wave)
+        {
+            string title = WaveBook.IsSpecial(wave) ? "VAGUE SPÉCIALE !" : "UN BOSS ARRIVE !";
+            string sky = WaveBook.WeatherOf(wave) switch
+            {
+                Weather.Brouillard => "Le brouillard tombe…",
+                Weather.Nuit => "La nuit tombe…",
+                Weather.Pluie => "Il se met à pleuvoir…",
+                _ => "",
+            };
+            Show(title, $"Vague {wave}. {sky}\nTiens bon !", Red);
+        }
+
+        void ShowCombo(int combo, int bonus)
+        {
+            Show($"COMBO x{combo} !", $"{combo} vagues parfaites d'affilée : +{bonus} bananes.\nUn seul ballon passé et le combo retombe.", Gold);
+        }
 
         void ShowMilestone(int wave, int bonus)
         {

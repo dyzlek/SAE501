@@ -30,6 +30,9 @@ namespace SAE
         // Record de la partie : la plus haute vague gagnée (pas de sauvegarde entre deux lancements du jeu)
         public static int BestWave;
 
+        // Record de combo : le plus de vagues parfaites d'affilée (voir WaveSpawner.Combo)
+        public static int BestCombo;
+
         public static event Action Changed;
         public static void NotifyChanged() => Changed?.Invoke();
 
@@ -106,6 +109,7 @@ namespace SAE
             Money = 0;
             WavesWon = 0;
             BestWave = 0;
+            BestCombo = 0;
             Array.Clear(owned, 0, owned.Length);
             Array.Clear(unlocked, 0, unlocked.Length);
             unlocked[(int)MonkeyType.Classique] = true;

@@ -384,8 +384,11 @@ _Le son est le gros manque du jeu : c'est la priorité de la semaine 2 (issue #3
 | Tutoriel intégré (niveau 1) ✅ | Animations des singes ✅ | 2e et 3e bananiers ✅ | Scénario, monde ouvert |
 | Confort : téléportation, snap turn, 72 fps | **Sons et vibrations à chaque action** ⏳ | Musique d'ambiance | Déplacement continu |
 | Écran de victoire / défaite clair ⏳ | Équilibrage testé | | |
+| | Boss qui se divise, ballons camouflés, combo de vagues parfaites, annonce des vagues spéciales ⏳ | Brouillard, nuit, pluie sur certaines vagues | Classement en ligne |
+| | Bombes à lancer, pluie de flèches de Quincy, vibrations par action ⏳ | Classement gardé entre deux lancements | Coop (deux casques, ou casque + PC) |
+| | Bananes dorées, nouvelles améliorations de l'arc, mur des records, trophées, classement local ⏳ | | |
 
-_✅ = dans le jeu (à valider au casque) · ⏳ = à faire en semaine 2._
+_✅ = dans le jeu (à valider au casque) · ⏳ = à faire en semaine 2 (détail : [OBJECTIFS_S2.md](OBJECTIFS_S2.md))._
 
 ## 14. Confort (non négociable)
 - **Déplacement :** téléportation seulement, limitée aux zones de jeu. Pas de saut, pas de déplacement au stick. Un **voile noir fondu** couvre chaque téléportation et chaque passage de porte.

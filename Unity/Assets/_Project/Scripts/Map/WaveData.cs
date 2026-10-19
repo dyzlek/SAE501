@@ -99,5 +99,20 @@ namespace SAE
             2 => new BalloonGroup(BalloonKind.Blinde, 6 + w / 4, 3 + w / 10, 0.7f, 3f),
             _ => new BalloonGroup(BalloonKind.Coeur, 8 + w / 5, 3 + w / 8, 0.6f, 3f),
         };
+
+        // Une vague « à annoncer » (#133) : vague spéciale (toutes les 10) ou vague de boss (toutes les 5 dès la 15)
+        public static bool IsSpecial(int w) => w % 10 == 0;
+        public static bool IsBoss(int w) => w >= 15 && (w % 5 == 0 || w >= 50);
+        public static bool IsAnnounced(int w) => IsSpecial(w) || (w >= 15 && w % 5 == 0);
+
+        // La météo de la vague (#131) : seulement sur les vagues annoncées, elle change à chaque fois
+        // (vague 10 : pluie, 15 : brouillard, 20 : nuit, 25 : pluie…). Les autres vagues sont au grand jour.
+        public static Weather WeatherOf(int w)
+        {
+            if (!IsAnnounced(w)) return Weather.Clair;
+            return (w / 5 % 3) switch { 0 => Weather.Brouillard, 1 => Weather.Nuit, _ => Weather.Pluie };
+        }
     }
+
+    public enum Weather { Clair, Brouillard, Nuit, Pluie }
 }
