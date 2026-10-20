@@ -28,6 +28,12 @@ namespace SAE
         bool hasAim;
         float attackAge = -1f;                     // -1 : pas de tir en cours
         float seed;
+        Renderer seen;                             // pour savoir si une caméra voit le singe
+
+        // Optimisation : 2 os par sommet au lieu de 4 pour tous les modèles à squelette (singes, mains).
+        // Le processeur calcule moitié moins par sommet, et à la taille des singes on ne voit pas la différence.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        static void LighterSkinning() => QualitySettings.skinWeights = SkinWeights.TwoBones;
 
         public void Init(MonkeyType monkeyType, float monkeySize)
         {
@@ -42,6 +48,7 @@ namespace SAE
             restPosition = visual.localPosition;
             restScale = visual.localScale;
             seed = Random.value * 10f;
+            seen = visual.GetComponentInChildren<Renderer>();
 
             leftArm = Bone("LeftArm"); leftForeArm = Bone("LeftForeArm");
             rightArm = Bone("RightArm"); rightForeArm = Bone("RightForeArm"); rightHand = Bone("RightHand");
@@ -80,6 +87,9 @@ namespace SAE
 
         void LateUpdate()
         {
+            // Optimisation : un singe que personne ne voit (dans le dos, ou la carte vue du hub) ne respire pas.
+            // Il reste animé quand il tire, pour que le geste et le projectile restent synchronisés.
+            if (attackAge < 0f && seen && !seen.isVisible) return;
             if (attackAge >= 0f) attackAge += Time.deltaTime;
             if (attackAge > AttackDuration) attackAge = -1f;
             float k = attackAge >= 0f ? attackAge / AttackDuration : -1f;   // avancement du geste (0 → 1), -1 au repos

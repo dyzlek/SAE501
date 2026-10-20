@@ -1731,7 +1731,7 @@ namespace SAE.EditorTools
                 lawn.GetComponent<Renderer>().enabled = false;
                 Teleportable(lawn);
             }
-            MapDecor.Build(parent, k, withBushes: walkable);   // les buissons dépasseraient du plateau du hub
+            MapDecor.Build(parent, k, withBushes: walkable, withGrassDecor: walkable);   // buissons et fleurs : pas sur le plateau du hub (trop petit pour les voir)
         }
 
         // ---------------- CARTE ----------------

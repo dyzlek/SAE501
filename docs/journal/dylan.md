@@ -2,6 +2,12 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Mar. 20 oct. 2026
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | Optimisation (#153), d'après les stats (41 fps, CPU limitant, 231 skinned meshes, 626k triangles) : singes immobiles figés en mesh partagé (`MonkeyView.Freeze`, BakeMesh), singes de la carte à 2 os par sommet et sans animation de repos hors champ (`TowerAnimator`), fleurs en boules de 20 faces et cailloux/champignons en 80 (`MeshBatch.TinyBall/SmallBall`), plus de fleurs ni d'herbes sur le plateau du hub, miniatures des ballons = une boule de 80 faces (`Board`). Compilé, scènes à régénérer, pas mesuré dans Unity | Gardé (à tester) |
+
 ## Lun. 19 oct. 2026
 
 | Outil | Pour quoi | Gardé / jeté |

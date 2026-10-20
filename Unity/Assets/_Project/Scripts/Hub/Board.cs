@@ -78,29 +78,34 @@ namespace SAE
             }
         }
 
-        // La miniature d'un ballon : une copie de son modèle 3D (ou de sa sphère s'il n'en a pas)
+        // La miniature d'un ballon : une simple boule de 80 faces, à la taille et à la couleur du ballon.
+        // Avant, c'était une copie de son modèle 3D : des centaines de modèles complets pour des ballons de 2 cm.
+        // Les dirigeables gardent leur forme allongée (la boule est étirée comme leur boîte).
         GameObject Miniature(Balloon balloon)
         {
             var mini = new GameObject($"Miniature {balloon.name}");
             mini.transform.SetParent(transform, false);
-            if (balloon.Model)
+
+            // Boîte du ballon dans son propre repère (sans son échelle ni sa rotation, que LateUpdate recopie à chaque image)
+            var bounds = new Bounds();
+            bool first = true;
+            foreach (var r in balloon.GetComponentsInChildren<Renderer>())
             {
-                var src = balloon.Model.transform;
-                var copy = Instantiate(balloon.Model, mini.transform, false);
-                copy.transform.SetLocalPositionAndRotation(src.localPosition, src.localRotation);
-                copy.transform.localScale = src.localScale;
-                BalloonVisuals.ApplyTexture(copy, balloon.Kind);   // la copie ne garde pas la texture posée par le code
-                foreach (var spinner in copy.GetComponentsInChildren<Spinner>()) Destroy(spinner);   // pas d'hélice qui tourne en petit
-                if (!balloon.TintedModel)                          // seuls les ballons « teintés » changent de couleur
-                    foreach (var tint in copy.GetComponentsInChildren<ColorTint>()) Destroy(tint);
+                var local = r.localBounds;
+                for (int i = 0; i < 8; i++)
+                {
+                    var corner = local.center + Vector3.Scale(local.extents, new Vector3(i & 1, (i >> 1) & 1, (i >> 2) & 1) * 2f - Vector3.one);
+                    var p = balloon.transform.InverseTransformPoint(r.transform.TransformPoint(corner));
+                    if (first) { bounds = new Bounds(p, Vector3.zero); first = false; }
+                    else bounds.Encapsulate(p);
+                }
             }
-            else
-            {
-                mini.AddComponent<MeshFilter>().sharedMesh = balloon.GetComponent<MeshFilter>().sharedMesh;
-                mini.AddComponent<MeshRenderer>().sharedMaterial = balloon.GetComponent<MeshRenderer>().sharedMaterial;
-                mini.AddComponent<ColorTint>();
-            }
-            foreach (var c in mini.GetComponentsInChildren<Collider>()) Destroy(c);   // une miniature ne se touche pas
+            var size = bounds.size;
+            var offset = bounds.center;
+
+            var ball = Visuals.Box("Boule", mini.transform, offset, size, balloon.GetComponent<ColorTint>().color);
+            ball.GetComponent<MeshFilter>().sharedMesh = MeshBatch.SmallBall;
+            ball.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;   // ombre invisible à cette taille
             return mini;
         }
     }

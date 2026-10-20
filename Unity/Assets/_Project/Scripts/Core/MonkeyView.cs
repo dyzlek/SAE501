@@ -8,6 +8,9 @@ namespace SAE
     // - « Modele » : le modèle 3D du type de singe (s'il existe) ;
     // - « Aura » : les flammes de la couleur de la rareté.
     // Les autres scripts passent par ici pour griser, teinter ou cacher le singe, quel que soit son rendu.
+    // Optimisation : un singe qui ne bouge pas (bibliothèque, plateau, fiche, coffre) est « figé » au lancement :
+    // son modèle à squelette (SkinnedMeshRenderer, recalculé à chaque image par le processeur) devient un simple mesh.
+    // Seuls les singes animés en code gardent leur squelette : ceux de la carte (TowerAnimator) et les récolteurs.
     public class MonkeyView : MonoBehaviour
     {
         public Monkey monkey;
@@ -19,6 +22,39 @@ namespace SAE
         MaterialPropertyBlock block;
         Renderer[] modelRenderers;   // gardés en mémoire : Tint est appelé à chaque frame par l'aperçu de pose
         Color modelColor = Color.white;
+
+        // Un mesh figé par modèle (et non par singe) : 200 singes du même type partagent le même, le casque les dessine d'un coup
+        static readonly System.Collections.Generic.Dictionary<Mesh, Mesh> frozenMeshes = new System.Collections.Generic.Dictionary<Mesh, Mesh>();
+
+        void Start()
+        {
+            bool animated = GetComponent<TowerAnimator>() || GetComponentInParent<HarvesterMonkey>();
+            if (model && !animated) Freeze();
+        }
+
+        // Remplace chaque SkinnedMeshRenderer du modèle par un MeshRenderer, dans la pose actuelle (bras baissés, Visuals.RestPose).
+        void Freeze()
+        {
+            foreach (var skinned in model.GetComponentsInChildren<SkinnedMeshRenderer>())
+            {
+                if (!skinned.sharedMesh) continue;
+                if (!frozenMeshes.TryGetValue(skinned.sharedMesh, out var mesh))
+                {
+                    mesh = new Mesh { name = skinned.sharedMesh.name + " (figé)" };
+                    skinned.BakeMesh(mesh);   // sans l'échelle de l'objet : le transform la rajoute, quelle que soit la taille du singe
+                    frozenMeshes[skinned.sharedMesh] = mesh;
+                }
+                var go = skinned.gameObject;
+                var materials = skinned.sharedMaterials;
+                DestroyImmediate(skinned);   // tout de suite : un objet ne peut pas avoir deux renderers
+                go.AddComponent<MeshFilter>().sharedMesh = mesh;
+                go.AddComponent<MeshRenderer>().sharedMaterials = materials;
+            }
+            var animator = model.GetComponentInChildren<Animator>();
+            if (animator) animator.enabled = false;
+            modelRenderers = null;   // les renderers ont changé : TintModel les recherchera
+            if (modelColor != Color.white) TintModel(modelColor);   // on remet la teinte déjà posée (case vide, aperçu)
+        }
 
         // Case vide de la bibliothèque : un singe sombre, sans aura (on voit ce qu'on pourrait avoir).
         public void SetEmpty(bool empty, Color emptyColor, Monkey monkey)
