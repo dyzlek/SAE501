@@ -13,6 +13,7 @@ namespace SAE
         public const string Pref = "SAE.ModeAdmin";
 
         public static bool Open { get; private set; }
+        public static bool Active { get; private set; }   // le mode admin est lancé (panneau ouvert ou non)
 
         bool unlimitedMoney;
         int monkeyCount = 50;
@@ -36,6 +37,7 @@ namespace SAE
             var go = new GameObject("Admin");
             DontDestroyOnLoad(go);
             go.AddComponent<AdminPanel>();
+            Active = true;
         }
 #endif
 
@@ -43,6 +45,7 @@ namespace SAE
         {
             // On remet le jeu normal : ces réglages sont statiques et resteraient au prochain Play
             Open = false;
+            Active = false;
             Time.timeScale = 1f;
             AdminCheats.ResetWaves();
         }

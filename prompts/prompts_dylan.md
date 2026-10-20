@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 20 oct. 2026
 
+### Clic impossible sur le tutoriel
+> Je ne peux pas cliquer sur le tutoriel.
+
 ### Boutons de test en VR
 > Mets un bouton en VR pour poser 200 singes, et un pour la vague cheatée.
 

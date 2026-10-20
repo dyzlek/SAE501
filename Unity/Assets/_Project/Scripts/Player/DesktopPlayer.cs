@@ -42,10 +42,12 @@ namespace SAE
             if (AdminPanel.Open) { LockCursor(false); return; }   // panneau admin ouvert : la souris sert au panneau
 
             if (kb.escapeKey.wasPressedThisFrame) LockCursor(false);
+            // Souris libre (Échap, panneau admin refermé, fenêtre Game qui a perdu le focus) : le clic la reprend
+            // ET agit tout de suite (avant, le premier clic ne faisait que reprendre la souris : un bouton semblait ne pas marcher)
             if (Cursor.lockState != CursorLockMode.Locked)
             {
-                if (mouse.leftButton.wasPressedThisFrame) LockCursor(true);
-                return;
+                if (!mouse.leftButton.wasPressedThisFrame) return;
+                LockCursor(true);
             }
 
             Look(mouse.delta.ReadValue() * mouseSensitivity);
@@ -106,6 +108,7 @@ namespace SAE
             }
             var pressable = hit.collider.GetComponentInParent<IPressable>();
             if (pressable != null) Tutorial.TryPress(pressable);   // pendant le tutoriel, seul ce qu'il demande est permis
+            else if (AdminPanel.Active) Debug.Log($"Clic sur « {hit.collider.name} » : rien à enfoncer", hit.collider);   // mode admin : aide à trouver ce qui bloque
         }
 
         void Carry(Transform held)
