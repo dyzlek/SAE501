@@ -2,6 +2,12 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Mar. 20 oct. 2026
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | Mode PC admin (#151) : SAE → Mode de jeu → PC admin ; `AdminPanel` (IMGUI, F1, éditeur seulement) : FPS et nombre de ballons/singes en haut à droite, argent illimité, tout débloquer, poser jusqu'à 300 singes (type, rareté), aller à la vague N, ballons × N et + couches, vies infinies, bouton « vague 100 ultra cheatée », vitesse du jeu, finir le tuto. `WaveSpawner` : `SetWave`, `CheatCount`, `CheatLayers`, `Invincible`. Compilé, pas testé dans Unity | Gardé (à tester) |
+
 ## Lun. 19 oct. 2026
 
 | Outil | Pour quoi | Gardé / jeté |
