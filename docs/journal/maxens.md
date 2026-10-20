@@ -8,13 +8,13 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
   - la hauteur de chaque tic varie un peu (±6 %), pour que ça ne sonne pas robotique ; un seul tic par image au début, sinon les tics se collent en bourdonnement ;
   - le son est en 3D et vient de la roulette : en VR, on l'entend du côté du coffre ;
   - code : `RouletteView.TickIfNewCase()` et `MakeTick()`.
-  - Vérifié : le projet compile. **Pas encore écouté en Play** (Unity fermé).
+  - Vérifié : le projet compile, et testé en jeu en ouvrant un coffre : le tic me plaît, gardé tel quel.
 - **Suivi GitHub :** nouvelle issue [#152 « Sons d'ambiance »](https://github.com/dyzlek/SAE501/issues/152) (S2, `prio: POURRAIT`), ajoutée au tableau en « À faire ».
 
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
-| Claude Code | Tic de la roulette du coffre fabriqué par le code, vérification de la compilation | Gardé (à écouter en jeu) |
+| Claude Code | Tic de la roulette du coffre fabriqué par le code, vérification de la compilation | Gardé (testé en jeu) |
 | Claude Code | Création de l'issue #152 et ajout au tableau | Gardé |
 
 ## Lun. 19 oct. 2026
