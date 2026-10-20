@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 20 oct. 2026
 
+### Boutons de test en VR
+> Mets un bouton en VR pour poser 200 singes, et un pour la vague cheatée.
+
 ### Instancing des ballons
 > Pour que ça lague moins avec les ballons, tu ne peux pas faire un système d'instances ?
 

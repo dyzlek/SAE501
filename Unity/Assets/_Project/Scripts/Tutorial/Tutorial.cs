@@ -162,7 +162,7 @@ namespace SAE
         // Les boutons du tableau du tutoriel (SUIVANT, PASSER) marchent toujours.
         public static bool TryPress(IPressable p)
         {
-            if (p is TutorialButton || Allows(ActionOf(p))) { p.Press(); return true; }
+            if (p is TutorialButton || p is AdminButton || Allows(ActionOf(p)))   // les boutons de test marchent toujours { p.Press(); return true; }
             Refuse();
             return false;
         }

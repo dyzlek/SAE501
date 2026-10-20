@@ -44,9 +44,7 @@ namespace SAE
             // On remet le jeu normal : ces réglages sont statiques et resteraient au prochain Play
             Open = false;
             Time.timeScale = 1f;
-            WaveSpawner.CheatCount = 1;
-            WaveSpawner.CheatLayers = 0;
-            WaveSpawner.Invincible = false;
+            AdminCheats.ResetWaves();
         }
 
         void Update()
@@ -92,7 +90,7 @@ namespace SAE
             GUILayout.Label($"Nombre : {monkeyCount}");
             monkeyCount = Mathf.RoundToInt(GUILayout.HorizontalSlider(monkeyCount, 1, 300));
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Poser sur la carte")) FillMap();
+            if (GUILayout.Button("Poser sur la carte")) AdminCheats.FillMap(monkeyCount, monkeyType < 0 ? null : (MonkeyType?)(MonkeyType)monkeyType, monkeyLevel);
             if (GUILayout.Button("Vider la carte")) { GameState.Placed.Clear(); GameState.NotifyChanged(); }
             GUILayout.EndHorizontal();
 
@@ -113,14 +111,7 @@ namespace SAE
             WaveSpawner.CheatCount = Mathf.RoundToInt(GUILayout.HorizontalSlider(WaveSpawner.CheatCount, 1, 20));
             WaveSpawner.CheatLayers = Mathf.RoundToInt(GUILayout.HorizontalSlider(WaveSpawner.CheatLayers, 0, 50));
             WaveSpawner.Invincible = GUILayout.Toggle(WaveSpawner.Invincible, " Vies infinies");
-            if (spawner && GUILayout.Button("VAGUE 100 ULTRA CHEATÉE (× 10, + 20 couches)"))
-            {
-                WaveSpawner.CheatCount = 10;
-                WaveSpawner.CheatLayers = 20;
-                WaveSpawner.Invincible = true;
-                spawner.SetWave(100);
-                WaveSpawner.Launch();
-            }
+            if (GUILayout.Button("VAGUE 100 ULTRA CHEATÉE (× 10, + 20 couches)")) AdminCheats.UltraWave();
 
             GUILayout.Label("<b>Jeu</b>", rich);
             GUILayout.Label($"Vitesse : × {Time.timeScale:0.#}");
@@ -131,22 +122,6 @@ namespace SAE
             if (Tutorial.Active && GUILayout.Button("Finir le tutoriel")) Tutorial.Finish();
 
             GUI.DragWindow();
-        }
-
-        // Pose monkeyCount singes à des places libres tirées au hasard (mêmes règles que la pose à la main)
-        void FillMap()
-        {
-            int placed = 0;
-            for (int tries = 0; tries < monkeyCount * 50 && placed < monkeyCount; tries++)
-            {
-                var pos = new Vector2(Random.Range(-MapLayout.HalfExtent, MapLayout.HalfExtent), Random.Range(-MapLayout.HalfExtent, MapLayout.HalfExtent));
-                if (!MapLayout.CanPlace(pos, Placement.PathMargin) || GameState.Nearest(pos, Placement.Spacing) != null) continue;
-                var type = monkeyType < 0 ? (MonkeyType)Random.Range(0, MonkeyData.TypeCount) : (MonkeyType)monkeyType;
-                GameState.Placed.Add(new PlacedMonkey(new Monkey(type, monkeyLevel), pos));
-                placed++;
-            }
-            GameState.NotifyChanged();
-            Debug.Log($"Admin : {placed} singes posés (plus de place libre au-delà).");
         }
     }
 }
