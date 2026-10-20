@@ -2,6 +2,12 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Mar. 20 oct. 2026
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | Ballon normal remplacé par mon modèle optimisé (`bal opti.fbx`) : copié à la place de `Ballon_Normal.fbx`, le `.meta` est gardé (même GUID, donc rien à rebrancher). Le ballon rapide utilise le même modèle. Branche `art/ballon-normal`. Pas vérifié dans Unity (taille, UV de la texture) | Gardé (à tester) |
+
 ## Lun. 19 oct. 2026
 
 | Outil | Pour quoi | Gardé / jeté |

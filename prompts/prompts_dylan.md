@@ -2,6 +2,11 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Mar. 20 oct. 2026
+
+### Nouveau modèle du ballon normal
+> Remplace le ballon normal par ce modèle : `bal opti.fbx`.
+
 ## Lun. 19 oct. 2026
 
 ### Objectifs de la semaine 2
