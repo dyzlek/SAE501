@@ -130,7 +130,7 @@ namespace SAE
         {
             var landed = RouletteRules.ColorOf(result);
             int won = landed == color ? bet * (RouletteRules.Payout(color) + 1) : 0;   // gain + mise rendue
-            Economy.Earn(won, wheel.transform.position + Vector3.up * 0.3f);
+            Economy.Earn(won, wheel.transform.position + Vector3.up * 0.3f, stakeBack: won > 0 ? bet : 0);   // les trophées ne comptent que le gain, pas la mise rendue
 
             history.Insert(0, landed);
             if (history.Count > HistorySize) history.RemoveAt(HistorySize);

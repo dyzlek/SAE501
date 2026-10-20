@@ -28,4 +28,12 @@ MonoBehaviour:
   - 0
   - 180
   - 180
+  projectiles:
+  - {fileID: 919132149155446097, guid: 17f645376c8088842adc13d0613f9e10, type: 3}
+  - {fileID: 919132149155446097, guid: f80f3df3371475a45b59fa232b00008c, type: 3}
+  - {fileID: 919132149155446097, guid: fe6bed3e168c9ab46b29fb61d7cd881b, type: 3}
+  - {fileID: 919132149155446097, guid: 2cd1ff70c6f127d40bd6e8b3051b64ae, type: 3}
+  - {fileID: 919132149155446097, guid: c0319064b665c124a9436f8454c3351e, type: 3}
+  - {fileID: 919132149155446097, guid: aee23e05a8c0a484d81fa0a13a292114, type: 3}
+  - {fileID: 919132149155446097, guid: 55ab65273993edb4eb2960fe23e94625, type: 3}
   auraPrefab: {fileID: 1706562574611815889, guid: 7196d759ddf70d84aae526f2eb26fc95, type: 3}

@@ -27,6 +27,10 @@ namespace SAE
         // Vagues vaincues : rendent le coffre plus cher, mais meilleur (raretés, nombre de singes).
         public static int WavesWon;
 
+        // Bananes gagnées depuis le début (panier, vagues, roulette) : ne baisse jamais, même quand on dépense.
+        // C'est ce que comptent les trophées des bananes (Trophy). Rempli par Economy.Earn.
+        public static int BananasEarned;
+
         public static event Action Changed;
         public static void NotifyChanged() => Changed?.Invoke();
 

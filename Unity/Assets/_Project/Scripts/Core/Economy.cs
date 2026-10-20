@@ -16,10 +16,13 @@ namespace SAE
 
         public static bool CanAfford(int amount) => GameState.Money >= amount;
 
-        public static void Earn(int amount, Vector3? where = null)
+        // stakeBack : la part de amount qui n'est que la mise rendue (roulette gagnée). Elle revient dans la bourse,
+        // mais ne compte pas pour les trophées : ce ne sont pas des bananes en plus, juste les nôtres qui reviennent.
+        public static void Earn(int amount, Vector3? where = null, int stakeBack = 0)
         {
             if (amount <= 0) return;
             GameState.Money += amount;
+            GameState.BananasEarned += amount - stakeBack;   // avant l'événement : les trophées se mettent à jour dessus
             MoneyChanged?.Invoke(amount, where);
         }
 
