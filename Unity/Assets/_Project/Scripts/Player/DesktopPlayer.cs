@@ -107,8 +107,11 @@ namespace SAE
                 return;
             }
             var pressable = hit.collider.GetComponentInParent<IPressable>();
-            if (pressable != null) Tutorial.TryPress(pressable);   // pendant le tutoriel, seul ce qu'il demande est permis
-            else if (AdminPanel.Active) Debug.Log($"Clic sur « {hit.collider.name} » : rien à enfoncer", hit.collider);   // mode admin : aide à trouver ce qui bloque
+            bool pressed = pressable != null && Tutorial.TryPress(pressable);   // pendant le tutoriel, seul ce qu'il demande est permis
+            // Mode admin : la console dit ce que chaque clic a touché, pour trouver ce qui bloque
+            if (AdminPanel.Active)
+                Debug.Log($"Clic sur « {hit.collider.name} » à {hit.distance:0.0} m : " +
+                          (pressable == null ? "rien à enfoncer" : pressed ? $"{pressable.GetType().Name} enfoncé" : $"{pressable.GetType().Name} refusé par le tutoriel"), hit.collider);
         }
 
         void Carry(Transform held)
