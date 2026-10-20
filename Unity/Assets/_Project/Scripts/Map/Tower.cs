@@ -17,6 +17,11 @@ namespace SAE
         TowerAnimator animator;
         float cooldown;
 
+        // Optimisation : quand aucun ballon n'est à portée, on ne recherche que 10 fois par seconde au lieu de chaque image
+        // (200 singes × 500 ballons = 100 000 tests par image), et sans LINQ (qui crée des listes à chaque appel).
+        const float SearchDelay = 0.1f;
+        static readonly List<Balloon> found = new List<Balloon>();
+
         public void Init(Monkey m)
         {
             monkey = m;
@@ -29,11 +34,12 @@ namespace SAE
             if (cooldown > 0f) return;
 
             float range = MonkeyData.Range(monkey);
-            var inRange = Balloon.All
-                .Where(b => Flat(b.transform.position - transform.position).sqrMagnitude <= range * range)
-                .OrderByDescending(b => b.Progress)
-                .ToList();
-            if (inRange.Count == 0) return;
+            found.Clear();
+            foreach (var b in Balloon.All)
+                if (Flat(b.transform.position - transform.position).sqrMagnitude <= range * range) found.Add(b);
+            if (found.Count == 0) { cooldown = SearchDelay; return; }
+            found.Sort((a, b) => b.Progress.CompareTo(a.Progress));   // le plus avancé d'abord
+            var inRange = new List<Balloon>(found);                   // copie : le tir l'utilise plus tard (coroutine)
 
             cooldown = MonkeyData.FireDelay(monkey);
             if (animator) animator.Attack(inRange[0].transform.position);

@@ -14,6 +14,8 @@ namespace SAE
 
         readonly Dictionary<PlacedMonkey, GameObject> pieces = new Dictionary<PlacedMonkey, GameObject>();
         readonly Dictionary<Balloon, GameObject> balloons = new Dictionary<Balloon, GameObject>();
+        // La teinte de chaque miniature et celle de son ballon, gardées pour ne pas les rechercher à chaque image
+        readonly Dictionary<Balloon, (ColorTint mini, ColorTint source)> tints = new Dictionary<Balloon, (ColorTint, ColorTint)>();
         readonly List<Balloon> gone = new List<Balloon>();
 
         void OnEnable()
@@ -61,13 +63,15 @@ namespace SAE
                 {
                     mini = Miniature(balloon);
                     balloons.Add(balloon, mini);
+                    tints[balloon] = (mini.GetComponentInChildren<ColorTint>(), balloon.GetComponent<ColorTint>());
                 }
                 // Même place sur le plateau que sur la carte, en petit (et la même orientation, pour les dirigeables)
                 mini.transform.position = transform.TransformPoint(map.InverseTransformPoint(balloon.transform.position) * scale);
                 mini.transform.rotation = transform.rotation * (Quaternion.Inverse(map.rotation) * balloon.transform.rotation);
                 mini.transform.localScale = balloon.transform.lossyScale * scale;
-                var color = balloon.GetComponent<ColorTint>().color;   // la couleur de sa couche
-                foreach (var tint in mini.GetComponentsInChildren<ColorTint>()) tint.Set(color);
+                // La couleur de sa couche, seulement quand elle change (Set change de matériau)
+                var (miniTint, sourceTint) = tints[balloon];
+                if (miniTint && sourceTint && miniTint.color != sourceTint.color) miniTint.Set(sourceTint.color);
             }
 
             // Ballons éclatés ou sortis : on retire leur miniature
@@ -78,6 +82,7 @@ namespace SAE
             {
                 Destroy(balloons[balloon]);
                 balloons.Remove(balloon);
+                tints.Remove(balloon);
             }
         }
 

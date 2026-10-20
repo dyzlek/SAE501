@@ -30,6 +30,12 @@ namespace SAE
         float seed;
         Renderer seen;                             // pour savoir si une caméra voit le singe
 
+        // De loin, un singe ne respire pas : on ne l'anime que quand il tire. Au-delà de 6 m, la respiration ne se voit plus.
+        const float IdleDistance = 6f;
+        static Transform eye;                      // la caméra du joueur (VR ou PC)
+        const float BusyTime = 0.6f;               // après un tir, on l'anime encore un peu : le temps de finir de se tourner
+        float busyUntil;
+
         // Optimisation : 2 os par sommet au lieu de 4 pour tous les modèles à squelette (singes, mains).
         // Le processeur calcule moitié moins par sommet, et à la taille des singes on ne voit pas la différence.
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -83,13 +89,20 @@ namespace SAE
             aimPoint = target;
             hasAim = true;
             attackAge = 0f;
+            busyUntil = Time.time + BusyTime;
         }
 
         void LateUpdate()
         {
-            // Optimisation : un singe que personne ne voit (dans le dos, ou la carte vue du hub) ne respire pas.
-            // Il reste animé quand il tire, pour que le geste et le projectile restent synchronisés.
-            if (attackAge < 0f && seen && !seen.isVisible) return;
+            // Optimisation : au repos, un singe que personne ne voit (dans le dos, ou la carte vue du hub) ou qui est loin
+            // (au-delà de IdleDistance) ne bouge pas. Il est toujours animé quand il tire, puis le temps de se tourner.
+            if (Time.time > busyUntil)
+            {
+                if (seen && !seen.isVisible) return;
+                if (!eye && Camera.main) eye = Camera.main.transform;
+                if (eye && (eye.position - transform.position).sqrMagnitude > IdleDistance * IdleDistance) return;
+            }
+
             if (attackAge >= 0f) attackAge += Time.deltaTime;
             if (attackAge > AttackDuration) attackAge = -1f;
             float k = attackAge >= 0f ? attackAge / AttackDuration : -1f;   // avancement du geste (0 → 1), -1 au repos

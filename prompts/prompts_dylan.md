@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 20 oct. 2026
 
+### Lag avec les ballons
+> De loin, pas d'animation pour les singes, sauf quand ils doivent tirer sur les ballons. Et comment optimiser quand il y a des ballons ? Je lague dès qu'il y en a (par exemple, réduire les particules autour des singes quand il y en a beaucoup).
+
 ### Occlusion, matériaux, ombres et pool de ballons
 > Ajoute aussi de l'occlusion, et fais les optimisations suivantes : matériaux communs et GPU Instancing pour réduire les SetPass, décor fixe en Static, une seule lumière à ombres avec une distance courte (environ 15 m) et pas d'ombres pour les petits objets, et un pool de ballons réutilisés. Suite : les singes ont disparu de la bibliothèque, et je n'ai pas le mode PC admin.
 

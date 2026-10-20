@@ -12,6 +12,44 @@ namespace SAE
         public ParticleSystem flames;
         public ParticleSystem glow;
 
+        // Optimisation : chaque aura fait ~70 flammes par seconde ; avec 200 singes, ça fait 16 000 particules.
+        //  - au-delà de FullCount auras, chacune émet moins (le total reste à peu près celui de FullCount auras) ;
+        //  - loin du joueur (au-delà de FarDistance), l'aura s'éteint : de loin, on voit la couleur du singe, pas les flammes.
+        // Vérifié 2 fois par seconde seulement (pas besoin de plus pour un réglage qui change rarement).
+        const int FullCount = 25;
+        const float MinShare = 0.15f;      // jamais moins de 15 % des flammes (l'aura reste visible de près)
+        const float FarDistance = 12f;     // en mètres
+        const float CheckDelay = 0.5f;
+        static readonly System.Collections.Generic.List<Aura> all = new System.Collections.Generic.List<Aura>();
+        static Transform eye;              // la caméra du joueur
+        float flamesRate, glowRate;        // émission d'origine du prefab
+        float nextCheck;
+
+        void Awake()
+        {
+            flamesRate = flames.emission.rateOverTimeMultiplier;
+            glowRate = glow.emission.rateOverTimeMultiplier;
+            nextCheck = Random.value * CheckDelay;   // étalé : les auras ne font pas toutes le calcul à la même image
+        }
+
+        void OnEnable() => all.Add(this);
+        void OnDisable() => all.Remove(this);
+
+        void Update()
+        {
+            if (Time.time < nextCheck) return;
+            nextCheck = Time.time + CheckDelay;
+
+            float share = all.Count <= FullCount ? 1f : Mathf.Max(MinShare, FullCount / (float)all.Count);
+            if (!eye && Camera.main) eye = Camera.main.transform;
+            if (eye && (eye.position - transform.position).sqrMagnitude > FarDistance * FarDistance) share = 0f;
+
+            var flamesEmission = flames.emission;
+            flamesEmission.rateOverTimeMultiplier = flamesRate * share;
+            var glowEmission = glow.emission;
+            glowEmission.rateOverTimeMultiplier = glowRate * share;
+        }
+
         // Rayon minimum du cercle de flammes, en part de la hauteur du singe (un singe fin garde une aura serrée).
         public const float MinRadius = 0.38f;
 
