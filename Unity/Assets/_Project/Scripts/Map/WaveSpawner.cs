@@ -24,6 +24,10 @@ namespace SAE
 
         List<Vector3> path;
 
+        // Pool de ballons, rangé par sorte : un ballon éclaté est désactivé puis réutilisé (Balloon.Release),
+        // au lieu d'être détruit puis recréé. Il garde son modèle 3D, qui dépend de sa sorte.
+        readonly Dictionary<BalloonKind, Stack<Balloon>> pool = new Dictionary<BalloonKind, Stack<Balloon>>();
+
         public int Wave { get; private set; } = 1;   // la vague en cours, ou la prochaine à lancer
         public int Lives { get; private set; }
         public bool Running { get; private set; }
@@ -101,7 +105,7 @@ namespace SAE
             if (Lives <= 0)
             {
                 // Perdu : on efface les ballons et on remet la vague à zéro (même numéro, toutes les vies)
-                foreach (var b in new List<Balloon>(Balloon.All)) Destroy(b.gameObject);
+                foreach (var b in new List<Balloon>(Balloon.All)) Recycle(b);
                 Lives = startLives;
                 Status = $"Vague {Wave} perdue : relance-la";
                 Tutorial.WaveLost();   // le tableau du tutoriel dit de la relancer
@@ -125,6 +129,13 @@ namespace SAE
 
         void Spawn(BalloonKind kind, int layers)
         {
+            if (pool.TryGetValue(kind, out var stack) && stack.Count > 0)
+            {
+                var recycled = stack.Pop();
+                recycled.Init(this, path, layers, kind);
+                recycled.gameObject.SetActive(true);   // OnEnable le remet dans Balloon.All
+                return;
+            }
             // Avec un modèle 3D, le ballon est un objet vide : Balloon.Init y pose le modèle et son collider.
             // Sans modèle, on garde l'ancienne sphère (capsule pour le dirigeable).
             var go = BalloonVisuals.Model(kind) ? new GameObject()
@@ -134,6 +145,14 @@ namespace SAE
             go.AddComponent<ColorTint>();
             go.AddComponent<Balloon>().Init(this, path, layers, kind);
             PlayerRig.IgnoreCollisions(go);   // le joueur traverse les ballons et les boss ; les flèches les touchent toujours
+        }
+
+        // Un ballon éclaté, sorti ou effacé : caché et rangé pour la prochaine fois
+        public void Recycle(Balloon balloon)
+        {
+            balloon.gameObject.SetActive(false);   // OnDisable le retire de Balloon.All
+            if (!pool.TryGetValue(balloon.Kind, out var stack)) pool[balloon.Kind] = stack = new Stack<Balloon>();
+            stack.Push(balloon);
         }
 
         // Un ballon est passé. Vague 1 du tutoriel : aucun ne doit passer, elle est ratée tout de suite.

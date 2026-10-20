@@ -14,7 +14,7 @@ namespace SAE
     // S'il atteint la sortie, il retire autant de vies qu'il lui reste de couches.
     public class Balloon : MonoBehaviour
     {
-        public static readonly List<Balloon> All = new List<Balloon>();
+        public static readonly List<Balloon> All = new List<Balloon>();   // les ballons en jeu (pas ceux rangés dans le pool)
 
         static readonly Color[] layerColors =
         {
@@ -59,6 +59,13 @@ namespace SAE
         {
             spawner = owner;
             path = points;
+            // Un ballon peut sortir du pool (WaveSpawner) : on remet tout à zéro
+            nextPoint = 1;
+            Progress = 0f;
+            slowFactor = 1f;
+            slowUntil = 0f;
+            facingSet = false;
+            transform.rotation = Quaternion.identity;
             layers = layerCount;
             maxLayers = layerCount;
             nextRegen = Time.time + RegenDelay;
@@ -82,7 +89,7 @@ namespace SAE
                 // Les dirigeables (MOAB, BFB) sont longs : leur taille est leur longueur, on les grandit un peu.
                 if (IsBlimp) size *= 1.5f;
                 transform.localScale = Vector3.one * size;
-                AddModel(modelAsset);
+                if (!Model) AddModel(modelAsset);   // ballon recyclé : il a déjà son modèle (le pool est rangé par sorte)
             }
             else
                 transform.localScale = kind == BalloonKind.Dirigeable ? new Vector3(size, size * 1.6f, size) : Vector3.one * size;
@@ -139,18 +146,26 @@ namespace SAE
         void OnEnable() => All.Add(this);
         void OnDisable() => All.Remove(this);
 
+        // Éclaté ou sorti : il retourne dans le pool du WaveSpawner au lieu d'être détruit
+        // (créer et détruire des centaines d'objets par vague provoque des à-coups).
+        void Release()
+        {
+            if (spawner) spawner.Recycle(this);
+            else Destroy(gameObject);
+        }
+
 
         // Un tir qui peut percer 'pierce' couches touche ce ballon. Renvoie la perforation dépensée :
         // 1 par couche, 2 par couche blindée. Un tir trop faible pour une couche blindée s'y arrête (tout est dépensé).
         public int Pop(int pierce)
         {
-            if (pierce <= 0 || layers <= 0) return 0;
+            if (pierce <= 0 || layers <= 0 || !isActiveAndEnabled) return 0;   // déjà rangé dans le pool
             int cost = Armored ? 2 : 1;
             int popped = Mathf.Min(layers, pierce / cost);
             if (popped == 0) return pierce;
 
             layers -= popped;
-            if (layers <= 0) Destroy(gameObject);
+            if (layers <= 0) Release();
             else UpdateColor();
             return popped * cost;
         }
@@ -196,7 +211,7 @@ namespace SAE
                 if (nextPoint >= path.Count)
                 {
                     spawner.BalloonEscaped(layers);
-                    Destroy(gameObject);
+                    Release();
                 }
             }
         }

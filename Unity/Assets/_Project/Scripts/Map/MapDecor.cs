@@ -244,7 +244,7 @@ namespace SAE
                 if (FreeSpot(random, 0.6f, out var p)) Pebbles(batch, p, scale, random);
             for (int i = 0; i < 6; i++)
                 if (FreeSpot(random, 0.5f, out var p)) Mushroom(batch, p, scale, random);
-            batch.Build(parent, "Décor du terrain");
+            batch.Build(parent, "Décor du terrain", castShadows: false);
         }
 
         // Un point au hasard dans la carte, à au moins margin mètres du bord du chemin.

@@ -893,11 +893,14 @@ namespace SAE.EditorTools
                 Dart.Create(env, board.TransformPoint(new Vector3((i - 1) * 0.12f, -0.65f, -0.05f)), Quaternion.LookRotation(board.right));
         }
 
-        // Rien ici ne bouge : Unity regroupe les maillages (moins d'appels de dessin, plus de fps dans le casque)
+        // Rien ici ne bouge : Unity regroupe les maillages (moins d'appels de dessin, plus de fps dans le casque).
+        // Occluder + Occludee : les murs de la cabane cachent ce qui est derrière, et ce qui est caché n'est pas dessiné
+        // (occlusion, calculée par SAE → Calculer l'occlusion).
         static void MakeStatic(GameObject model)
         {
             foreach (var t in model.GetComponentsInChildren<Transform>())
-                GameObjectUtility.SetStaticEditorFlags(t.gameObject, StaticEditorFlags.BatchingStatic);
+                GameObjectUtility.SetStaticEditorFlags(t.gameObject,
+                    StaticEditorFlags.BatchingStatic | StaticEditorFlags.OccluderStatic | StaticEditorFlags.OccludeeStatic);
         }
 
         // Le paysage autour de la carte (Blender/cabane.py → Art/Cabane/Paysage.glb) : prairie, herbes hautes, fleurs,

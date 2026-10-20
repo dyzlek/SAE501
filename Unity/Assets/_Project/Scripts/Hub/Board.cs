@@ -41,7 +41,10 @@ namespace SAE
             {
                 if (pieces.ContainsKey(p)) continue;
                 var pos = new Vector3(p.pos.x, TowerManager.TowerSize / 2f, p.pos.y) * scale;
-                pieces.Add(p, Visuals.MonkeyPiece(p.monkey, transform, pos, size, withLabel: false));
+                var piece = Visuals.MonkeyPiece(p.monkey, transform, pos, size, withLabel: false);
+                foreach (var r in piece.GetComponentsInChildren<Renderer>())   // singe de 5 cm : son ombre ne se voit pas
+                    r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                pieces.Add(p, piece);
             }
         }
 
@@ -70,7 +73,7 @@ namespace SAE
             // Ballons éclatés ou sortis : on retire leur miniature
             gone.Clear();
             foreach (var pair in balloons)
-                if (!pair.Key) gone.Add(pair.Key);
+                if (!pair.Key || !pair.Key.isActiveAndEnabled) gone.Add(pair.Key);   // éclaté = rangé dans le pool (désactivé)
             foreach (var balloon in gone)
             {
                 Destroy(balloons[balloon]);

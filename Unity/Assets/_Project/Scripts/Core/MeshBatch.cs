@@ -17,7 +17,8 @@ namespace SAE
         }
 
         // Crée les objets sous parent : un par couleur, avec le matériau du jeu (Visuals.Box) et le maillage fusionné.
-        public void Build(Transform parent, string name)
+        // castShadows = false pour les petites choses (fleurs, herbes) : leur ombre ne se voit pas et coûte cher sur le casque.
+        public void Build(Transform parent, string name, bool castShadows = true)
         {
             foreach (var pair in parts)
             {
@@ -26,7 +27,15 @@ namespace SAE
                 mesh.CombineMeshes(pair.Value.ToArray(), true, true);
                 mesh.RecalculateBounds();
                 go.GetComponent<MeshFilter>().sharedMesh = mesh;
+                if (!castShadows) go.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+#if UNITY_EDITOR
+                // Regroupé par Unity (static batching) et caché quand un mur le masque (occlusion). Pas « occluder » :
+                // des fleurs ou des dalles ne cachent rien derrière elles.
+                UnityEditor.GameObjectUtility.SetStaticEditorFlags(go,
+                    UnityEditor.StaticEditorFlags.BatchingStatic | UnityEditor.StaticEditorFlags.OccludeeStatic);
+#else
                 go.isStatic = true;
+#endif
             }
         }
 

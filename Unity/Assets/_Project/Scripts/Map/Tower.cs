@@ -44,7 +44,7 @@ namespace SAE
         IEnumerator Fire(List<Balloon> targets)
         {
             if (animator) yield return new WaitForSeconds(TowerAnimator.ReleaseDelay);
-            targets.RemoveAll(b => !b);   // éclatés pendant le geste
+            targets.RemoveAll(b => !b || !b.isActiveAndEnabled);   // éclatés pendant le geste (rangés dans le pool)
             if (targets.Count == 0) yield break;
 
             if (monkey.type == MonkeyType.Glace)

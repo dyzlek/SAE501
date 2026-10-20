@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 20 oct. 2026
 
+### Occlusion, matériaux, ombres et pool de ballons
+> Ajoute aussi de l'occlusion, et fais les optimisations suivantes : matériaux communs et GPU Instancing pour réduire les SetPass, décor fixe en Static, une seule lumière à ombres avec une distance courte (environ 15 m) et pas d'ombres pour les petits objets, et un pool de ballons réutilisés. Suite : les singes ont disparu de la bibliothèque, et je n'ai pas le mode PC admin.
+
 ### Optimisation des singes et du plateau
 > Fais les optimisations proposées : sur le plateau, remplacer les singes par des copies non animées ; sur la carte, n'animer que quand le singe tire, couper l'animation des singes qu'on ne voit pas et passer à 2 os par sommet ; alléger le décor du plateau (sans herbe ni buissons) ; remplacer les miniatures des ballons par une simple sphère teintée.
 
