@@ -4,12 +4,6 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Mar. 20 oct. 2026
 
-### Ranger les sons à trouver
-> Dans le dossier `sound-effect` de mon bureau, j'ai commencé à mettre des sons. Crée-moi un dossier pour chaque endroit du jeu où il faudrait un son (boss 1, boss 2, bouton…).
-
-### Une issue pour les sons d'ambiance
-> Ajoute au tableau GitHub une ligne « Sons d'ambiance » dans S2.
-
 ### Le son de la roulette du coffre
 > Il me manque le son de la roulette du coffre, et je ne trouve rien qui me plaise en ligne : fabrique-le dans le code.
 

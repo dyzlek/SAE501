@@ -9,14 +9,13 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
   - le son est en 3D et vient de la roulette : en VR, on l'entend du côté du coffre ;
   - code : `RouletteView.TickIfNewCase()` et `MakeTick()`.
   - Vérifié : le projet compile. **Pas encore écouté en Play** (Unity fermé).
-- **Sons : préparation.** Sur mon bureau, un dossier `sound-effect` rangé en 11 catégories et 47 sous-dossiers, un par son à trouver (boss, vagues, ballons, arc, singes, coffre, bananes, interface, déplacement, casino, ambiance), pour remplir la #34 petit à petit.
 - **Suivi GitHub :** nouvelle issue [#152 « Sons d'ambiance »](https://github.com/dyzlek/SAE501/issues/152) (S2, `prio: POURRAIT`), ajoutée au tableau en « À faire ».
 
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
 | Claude Code | Tic de la roulette du coffre fabriqué par le code, vérification de la compilation | Gardé (à écouter en jeu) |
-| Claude Code | Dossiers de sons sur mon bureau, idées de recherche de sons, création de l'issue #152 et ajout au tableau | Gardé |
+| Claude Code | Création de l'issue #152 et ajout au tableau | Gardé |
 
 ## Lun. 19 oct. 2026
 - **Tri de la liste d'idées de l'équipe** (vagues, gestes VR, économie, hub, classements, multijoueur). J'ai regardé dans le code ce qui existait déjà pour garder ce qui se fait vite, sans toucher à l'architecture :
