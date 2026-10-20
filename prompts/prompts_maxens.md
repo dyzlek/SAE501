@@ -2,6 +2,17 @@
 
 _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (orthographe, clarté, structure : contexte, objectif, contraintes). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/maxens.md)._
 
+## Mar. 20 oct. 2026
+
+### Ranger les sons à trouver
+> Dans le dossier `sound-effect` de mon bureau, j'ai commencé à mettre des sons. Crée-moi un dossier pour chaque endroit du jeu où il faudrait un son (boss 1, boss 2, bouton…).
+
+### Une issue pour les sons d'ambiance
+> Ajoute au tableau GitHub une ligne « Sons d'ambiance » dans S2.
+
+### Le son de la roulette du coffre
+> Il me manque le son de la roulette du coffre, et je ne trouve rien qui me plaise en ligne : fabrique-le dans le code.
+
 ## Lun. 19 oct. 2026
 
 ### Trier la liste d'idées
