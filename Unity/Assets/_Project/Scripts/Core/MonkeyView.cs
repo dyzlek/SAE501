@@ -27,6 +27,10 @@ namespace SAE
         // Un mesh figé par modèle (et non par singe) : 200 singes du même type partagent le même, le casque les dessine d'un coup
         static readonly System.Collections.Generic.Dictionary<Mesh, Mesh> frozenMeshes = new System.Collections.Generic.Dictionary<Mesh, Mesh>();
 
+        // Pas de rechargement du code au Play : on vide le cache, ses meshes ont été détruits à la fin du Play précédent
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetCache() => frozenMeshes.Clear();
+
         void Start()
         {
             bool animated = GetComponent<TowerAnimator>() || GetComponentInParent<HarvesterMonkey>();
@@ -42,7 +46,7 @@ namespace SAE
             foreach (var skinned in model.GetComponentsInChildren<SkinnedMeshRenderer>())
             {
                 if (!skinned.sharedMesh) continue;
-                if (!frozenMeshes.TryGetValue(skinned.sharedMesh, out var mesh))
+                if (!frozenMeshes.TryGetValue(skinned.sharedMesh, out var mesh) || !mesh)
                 {
                     mesh = new Mesh { name = skinned.sharedMesh.name + " (figé)" };
                     // useScale = true : le mesh est ramené dans le repère de l'objet, échelle comprise. Sans ça, l'échelle du FBX
