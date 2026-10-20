@@ -143,6 +143,11 @@ namespace SAE
             go.name = kind.ToString();
             go.tag = Tags.Ballon;
             go.AddComponent<ColorTint>();
+            // Un collider qui bouge sans Rigidbody est traité comme un mur « statique » : la physique reconstruit
+            // sa structure à chaque déplacement (des centaines de ballons = très cher). Kinematic = on le déplace nous-mêmes.
+            var body = go.AddComponent<Rigidbody>();
+            body.isKinematic = true;
+            body.useGravity = false;
             go.AddComponent<Balloon>().Init(this, path, layers, kind);
             PlayerRig.IgnoreCollisions(go);   // le joueur traverse les ballons et les boss ; les flèches les touchent toujours
         }

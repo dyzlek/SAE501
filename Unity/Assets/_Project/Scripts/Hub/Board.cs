@@ -5,18 +5,21 @@ namespace SAE
 {
     // Le plateau du hub = la carte en miniature, en direct :
     //   - les singes posés (GameState.Placed), chacun à sa place ;
-    //   - les ballons de la vague en cours : la carte (scène Labyrinthe) tourne en arrière-plan, on recopie leur position
-    //     (miniature du modèle 3D, comme l'avait fait Maxens, teinte de la couche comprise).
+    //   - les ballons de la vague en cours : la carte (scène Labyrinthe) tourne en arrière-plan, on recopie leur position.
+    //     Optimisation (GPU instancing) : les miniatures ne sont plus des objets. À chaque image, on dessine toutes
+    //     les boules d'une même couleur en UN appel (Graphics.RenderMeshInstanced) : 500 ballons = quelques appels.
     // La pose des singes est gérée par PlacementSurface, sur le même objet.
     public class Board : MonoBehaviour
     {
         public float scale = 0.05f;        // taille du plateau / taille de la carte
 
         readonly Dictionary<PlacedMonkey, GameObject> pieces = new Dictionary<PlacedMonkey, GameObject>();
-        readonly Dictionary<Balloon, GameObject> balloons = new Dictionary<Balloon, GameObject>();
-        // La teinte de chaque miniature et celle de son ballon, gardées pour ne pas les rechercher à chaque image
-        readonly Dictionary<Balloon, (ColorTint mini, ColorTint source)> tints = new Dictionary<Balloon, (ColorTint, ColorTint)>();
-        readonly List<Balloon> gone = new List<Balloon>();
+        // Pour chaque ballon déjà vu : sa boîte dans son propre repère (centre, taille) et sa teinte. Un ballon recyclé
+        // par le pool garde sa sorte, donc sa boîte : on la calcule une seule fois.
+        readonly Dictionary<Balloon, (Vector3 center, Vector3 size, ColorTint tint)> shapes = new Dictionary<Balloon, (Vector3, Vector3, ColorTint)>();
+        // Les miniatures à dessiner cette image, rangées par couleur (une couleur = un matériau = un appel de dessin)
+        readonly Dictionary<Color, List<Matrix4x4>> batches = new Dictionary<Color, List<Matrix4x4>>();
+        static Material baseMaterial;   // le matériau des cubes du jeu, qu'on teinte (ColorTint.Shared)
 
         void OnEnable()
         {
@@ -50,51 +53,45 @@ namespace SAE
             }
         }
 
-        // Les ballons bougent sans arrêt : on les suit à chaque image
+        // Les ballons bougent sans arrêt : on les redessine à chaque image
         void LateUpdate()
         {
             var spawner = WaveSpawner.Instance;
             if (!spawner) return;   // la carte n'est pas encore chargée
             var map = spawner.transform;
 
+            foreach (var list in batches.Values) list.Clear();
             foreach (var balloon in Balloon.All)
             {
-                if (!balloons.TryGetValue(balloon, out var mini))
-                {
-                    mini = Miniature(balloon);
-                    balloons.Add(balloon, mini);
-                    tints[balloon] = (mini.GetComponentInChildren<ColorTint>(), balloon.GetComponent<ColorTint>());
-                }
+                if (!shapes.TryGetValue(balloon, out var shape)) shapes[balloon] = shape = Shape(balloon);
                 // Même place sur le plateau que sur la carte, en petit (et la même orientation, pour les dirigeables)
-                mini.transform.position = transform.TransformPoint(map.InverseTransformPoint(balloon.transform.position) * scale);
-                mini.transform.rotation = transform.rotation * (Quaternion.Inverse(map.rotation) * balloon.transform.rotation);
-                mini.transform.localScale = balloon.transform.lossyScale * scale;
-                // La couleur de sa couche, seulement quand elle change (Set change de matériau)
-                var (miniTint, sourceTint) = tints[balloon];
-                if (miniTint && sourceTint && miniTint.color != sourceTint.color) miniTint.Set(sourceTint.color);
+                var pos = transform.TransformPoint(map.InverseTransformPoint(balloon.transform.position) * scale);
+                var rot = transform.rotation * (Quaternion.Inverse(map.rotation) * balloon.transform.rotation);
+                var size = Vector3.Scale(transform.lossyScale, balloon.transform.lossyScale * scale);
+                var matrix = Matrix4x4.TRS(pos, rot, size) * Matrix4x4.TRS(shape.center, Quaternion.identity, shape.size);
+
+                var color = shape.tint ? shape.tint.color : Color.white;   // la couleur de sa couche
+                if (!batches.TryGetValue(color, out var group)) batches[color] = group = new List<Matrix4x4>();
+                group.Add(matrix);
             }
 
-            // Ballons éclatés ou sortis : on retire leur miniature
-            gone.Clear();
-            foreach (var pair in balloons)
-                if (!pair.Key || !pair.Key.isActiveAndEnabled) gone.Add(pair.Key);   // éclaté = rangé dans le pool (désactivé)
-            foreach (var balloon in gone)
+            if (!baseMaterial) baseMaterial = BaseMaterial();
+            foreach (var pair in batches)
             {
-                Destroy(balloons[balloon]);
-                balloons.Remove(balloon);
-                tints.Remove(balloon);
+                if (pair.Value.Count == 0) continue;
+                var rp = new RenderParams(ColorTint.Shared(baseMaterial, pair.Key))
+                {
+                    layer = gameObject.layer,
+                    shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off,   // ombre invisible à cette taille
+                    receiveShadows = false,
+                };
+                Graphics.RenderMeshInstanced(rp, MeshBatch.SmallBall, 0, pair.Value);   // boule de 80 faces
             }
         }
 
-        // La miniature d'un ballon : une simple boule de 80 faces, à la taille et à la couleur du ballon.
-        // Avant, c'était une copie de son modèle 3D : des centaines de modèles complets pour des ballons de 2 cm.
-        // Les dirigeables gardent leur forme allongée (la boule est étirée comme leur boîte).
-        GameObject Miniature(Balloon balloon)
+        // La boîte d'un ballon dans son propre repère (sans son échelle ni sa rotation, ajoutées à chaque image)
+        static (Vector3, Vector3, ColorTint) Shape(Balloon balloon)
         {
-            var mini = new GameObject($"Miniature {balloon.name}");
-            mini.transform.SetParent(transform, false);
-
-            // Boîte du ballon dans son propre repère (sans son échelle ni sa rotation, que LateUpdate recopie à chaque image)
             var bounds = new Bounds();
             bool first = true;
             foreach (var r in balloon.GetComponentsInChildren<Renderer>())
@@ -108,13 +105,16 @@ namespace SAE
                     else bounds.Encapsulate(p);
                 }
             }
-            var size = bounds.size;
-            var offset = bounds.center;
+            return (bounds.center, bounds.size, balloon.GetComponent<ColorTint>());
+        }
 
-            var ball = Visuals.Box("Boule", mini.transform, offset, size, balloon.GetComponent<ColorTint>().color);
-            ball.GetComponent<MeshFilter>().sharedMesh = MeshBatch.SmallBall;
-            ball.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;   // ombre invisible à cette taille
-            return mini;
+        // Le matériau par défaut des cubes (celui de Visuals.Box), lu une fois sur un cube temporaire
+        static Material BaseMaterial()
+        {
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var material = cube.GetComponent<Renderer>().sharedMaterial;
+            Destroy(cube);
+            return material;
         }
     }
 }

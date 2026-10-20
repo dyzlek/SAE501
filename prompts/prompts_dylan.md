@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 20 oct. 2026
 
+### Instancing des ballons
+> Pour que ça lague moins avec les ballons, tu ne peux pas faire un système d'instances ?
+
 ### Lag avec les ballons
 > De loin, pas d'animation pour les singes, sauf quand ils doivent tirer sur les ballons. Et comment optimiser quand il y a des ballons ? Je lague dès qu'il y en a (par exemple, réduire les particules autour des singes quand il y en a beaucoup).
 
