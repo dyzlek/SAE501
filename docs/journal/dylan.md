@@ -7,6 +7,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
 | Claude (Claude Code) | Optimisation (#153), d'après les stats (41 fps, CPU limitant, 231 skinned meshes, 626k triangles) : singes immobiles figés en mesh partagé (`MonkeyView.Freeze`, BakeMesh), singes de la carte à 2 os par sommet et sans animation de repos hors champ (`TowerAnimator`), fleurs en boules de 20 faces et cailloux/champignons en 80 (`MeshBatch.TinyBall/SmallBall`), plus de fleurs ni d'herbes sur le plateau du hub, miniatures des ballons = une boule de 80 faces (`Board`). Compilé, scènes à régénérer, pas mesuré dans Unity | Gardé (à tester) |
+| Claude (Claude Code) | Mode PC admin (#151) : SAE → Mode de jeu → PC admin ; `AdminPanel` (IMGUI, F1, éditeur seulement) : FPS et nombre de ballons/singes en haut à droite, argent illimité, tout débloquer, poser jusqu'à 300 singes (type, rareté), aller à la vague N, ballons × N et + couches, vies infinies, bouton « vague 100 ultra cheatée », vitesse du jeu, finir le tuto. `WaveSpawner` : `SetWave`, `CheatCount`, `CheatLayers`, `Invincible`. Compilé, pas testé dans Unity | Gardé (à tester) |
 
 ## Lun. 19 oct. 2026
 

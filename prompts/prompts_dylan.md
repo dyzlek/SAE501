@@ -7,6 +7,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 ### Optimisation des singes et du plateau
 > Fais les optimisations proposées : sur le plateau, remplacer les singes par des copies non animées ; sur la carte, n'animer que quand le singe tire, couper l'animation des singes qu'on ne voit pas et passer à 2 os par sommet ; alléger le décor du plateau (sans herbe ni buissons) ; remplacer les miniatures des ballons par une simple sphère teintée.
 
+### Mode PC admin pour tester les perfs
+> Je voudrais un mode de jeu non VR normal et un mode non VR admin, avec un panneau facile à utiliser (argent illimité, beaucoup de singes déjà posés, vague 100 ultra cheatée, etc.), pour voir si ça lag.
+
 ## Lun. 19 oct. 2026
 
 ### Objectifs de la semaine 2

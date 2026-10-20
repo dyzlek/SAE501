@@ -15,21 +15,34 @@ namespace SAE.EditorTools
         const string Key = "SAE.ModeVR";
         const string VrItem = "SAE/Mode de jeu/VR (casque)";
         const string PcItem = "SAE/Mode de jeu/PC (clavier-souris)";
+        const string AdminItem = "SAE/Mode de jeu/PC admin (triche, tests de perfs)";
 
         public static bool IsVR => EditorPrefs.GetBool(Key, true);
+        static bool IsAdmin => EditorPrefs.GetBool(SAE.AdminPanel.Pref, false);
 
-        [MenuItem(VrItem)] static void SetVR() => Set(true);
-        [MenuItem(PcItem)] static void SetPC() => Set(false);
+        [MenuItem(VrItem)] static void SetVR() => Set(true, false);
+        [MenuItem(PcItem)] static void SetPC() => Set(false, false);
+        [MenuItem(AdminItem)] static void SetAdmin() => Set(false, true);   // PC + panneau admin (F1)
 
         // Coche le mode actif dans le menu
-        [MenuItem(VrItem, true)] static bool CheckVR() { Menu.SetChecked(VrItem, IsVR); Menu.SetChecked(PcItem, !IsVR); return !EditorApplication.isPlaying; }
-        [MenuItem(PcItem, true)] static bool CheckPC() { Menu.SetChecked(VrItem, IsVR); Menu.SetChecked(PcItem, !IsVR); return !EditorApplication.isPlaying; }
+        [MenuItem(VrItem, true)] static bool CheckVR() => Check();
+        [MenuItem(PcItem, true)] static bool CheckPC() => Check();
+        [MenuItem(AdminItem, true)] static bool CheckAdmin() => Check();
 
-        static void Set(bool vr)
+        static bool Check()
+        {
+            Menu.SetChecked(VrItem, IsVR);
+            Menu.SetChecked(PcItem, !IsVR && !IsAdmin);
+            Menu.SetChecked(AdminItem, !IsVR && IsAdmin);
+            return !EditorApplication.isPlaying;
+        }
+
+        static void Set(bool vr, bool admin)
         {
             EditorPrefs.SetBool(Key, vr);
+            EditorPrefs.SetBool(SAE.AdminPanel.Pref, admin);
             if (!Apply()) Debug.LogWarning("Mode de jeu : pas de joueur à choisir dans cette scène. Lance SAE → Générer le prototype.");
-            else Debug.Log(vr ? "Mode de jeu : VR (casque)." : "Mode de jeu : PC (clavier-souris).");
+            else Debug.Log(vr ? "Mode de jeu : VR (casque)." : admin ? "Mode de jeu : PC admin (F1 = panneau)." : "Mode de jeu : PC (clavier-souris).");
         }
 
         // Applique le mode retenu à la scène ouverte. false si elle n'a pas de PlayerMode (scène à régénérer).

@@ -39,6 +39,7 @@ namespace SAE
             var kb = Keyboard.current;
             var mouse = Mouse.current;
             if (kb == null || mouse == null) return;
+            if (AdminPanel.Open) { LockCursor(false); return; }   // panneau admin ouvert : la souris sert au panneau
 
             if (kb.escapeKey.wasPressedThisFrame) LockCursor(false);
             if (Cursor.lockState != CursorLockMode.Locked)

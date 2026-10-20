@@ -34,6 +34,19 @@ namespace SAE
         public WaveData Current => Wave <= waves.Count ? waves[Wave - 1] : WaveBook.Endless(Wave);
         public int BossCount => Current.BossCount;
 
+        // Mode admin (AdminPanel, éditeur seulement) : plus de ballons, plus solides, et vies infinies pour tester les perfs
+        public static int CheatCount = 1;      // chaque groupe a CheatCount fois plus de ballons
+        public static int CheatLayers;         // couches ajoutées à chaque ballon
+        public static bool Invincible;         // les ballons qui passent ne coûtent pas de vie
+
+        // Mode admin : sauter directement à la vague n (pas pendant une attaque)
+        public void SetWave(int n)
+        {
+            if (Running) return;
+            Wave = Mathf.Max(1, n);
+            Status = $"Admin : vague {Wave}";
+        }
+
         void Awake() => Instance = this;
         void OnDestroy() { if (Instance == this) Instance = null; }
 
@@ -75,9 +88,9 @@ namespace SAE
             foreach (var group in wave.groups)
             {
                 yield return new WaitForSeconds(group.pause);
-                for (int i = 0; i < group.count && Lives > 0; i++)
+                for (int i = 0; i < group.count * CheatCount && Lives > 0; i++)
                 {
-                    Spawn(group.kind, group.layers);
+                    Spawn(group.kind, group.layers + CheatLayers);
                     yield return new WaitForSeconds(group.interval);
                 }
                 if (Lives <= 0) break;
@@ -124,6 +137,10 @@ namespace SAE
         }
 
         // Un ballon est passé. Vague 1 du tutoriel : aucun ne doit passer, elle est ratée tout de suite.
-        public void BalloonEscaped(int layers) => Lives = Tutorial.StrictWave ? 0 : Mathf.Max(0, Lives - layers);
+        public void BalloonEscaped(int layers)
+        {
+            if (Invincible) return;
+            Lives = Tutorial.StrictWave ? 0 : Mathf.Max(0, Lives - layers);
+        }
     }
 }
