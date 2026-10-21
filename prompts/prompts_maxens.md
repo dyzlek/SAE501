@@ -24,6 +24,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 >
 > Suite : mets Primal One pour la musique des vagues, et Onslaught pour celle des vagues de boss.
 
+### Les sons du casino
+> Ajoute des sons au casino, avec des sons qu'on a déjà : un tic à chaque case qui passe sous la bille, comme pour la roulette du coffre, un son quand on gagne (plus fort pour le vert) et un son plus doux quand on perd.
+
 ## Mar. 20 oct. 2026
 
 ### Le son de la roulette du coffre

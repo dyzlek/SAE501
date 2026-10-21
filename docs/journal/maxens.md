@@ -37,6 +37,10 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
   - **singe posé** sur le plateau (la fusion garde son propre son) ;
   - **musiques** : **Primal One** pendant les vagues, **Onslaught** (converti du `.brstm`) pendant les boss, Party Time pendant la préparation.
   - Testé en Play via Unity MCP : 10 ballons éclatés d'un coup donnent bien 3 sons ; préparation → Party Time, vague lancée → Primal One, boss sur la piste → Onslaught, en fondu. Aucune erreur.
+- **Fait : les sons du casino** (la roulette de la bananeraie n'avait que le clic des boutons), sans nouveau fichier :
+  - **un tic à chaque case qui passe sous la bille**, rapide au début puis de plus en plus espacé : le même tic que la roulette du coffre, joué plus grave (une bille sur du bois). Le tic est maintenant fabriqué à un seul endroit (`Sounds.Tick`) pour les deux roulettes ;
+  - **mise gagnée** : le son du singe obtenu, ou le jingle de vague gagnée pour le vert (×35) ; **mise perdue** : le son de vie perdue, plus doux.
+  - Testé en Play via Unity MCP : la roue tourne avec ses tics, et au noir gagnant (+22 bananes) le son se joue à l'arrêt de la bille. Aucune erreur.
 
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
@@ -44,6 +48,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude Code | Conversion des musiques `.brstm` en `.wav` (petit convertisseur Python), lecteur de sons et de musique, branchement de tous les sons dans le jeu | Gardé |
 | Claude Code | Corrections après mon test : silence de début sauté, téléportation moins forte, même son pour toutes les bananes, musique de vague prévue | Gardé |
 | Claude Code | Derniers sons rangés et branchés (ballons, tir coupé au premier tir, tension, singe posé), musiques des vagues et des boss | Gardé |
+| Claude Code | Sons du casino : tic de la roue (partagé avec le coffre), gain et perte | Gardé |
 
 ## Mar. 20 oct. 2026
 - **Fait : le son de la roulette du coffre.** Je ne trouvais pas de bon son en ligne, donc il est fabriqué par le code, comme les cloches des vagues de boss :

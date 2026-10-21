@@ -103,6 +103,30 @@ namespace SAE
             return start;
         }
 
+        // Le « tic » des roulettes (coffre et casino) : fabriqué par le code, une seule fois
+        static AudioClip tick;
+        public static AudioClip Tick => tick ? tick : tick = MakeTick();
+
+        // Le tic : 30 ms d'un son aigu mêlé d'un peu de souffle, qui s'éteint très vite (comme un clic en plastique)
+        static AudioClip MakeTick()
+        {
+            const int rate = 44100;
+            int length = (int)(0.03f * rate);
+            var data = new float[length];
+            var noise = new System.Random(7);
+            for (int i = 0; i < length; i++)
+            {
+                float t = i / (float)rate;
+                float fade = Mathf.Exp(-t * 180f);
+                float tone = 0.5f * Mathf.Sin(2f * Mathf.PI * 2400f * t) + 0.25f * Mathf.Sin(2f * Mathf.PI * 900f * t);
+                float breath = 0.35f * (float)(noise.NextDouble() * 2.0 - 1.0);
+                data[i] = (tone + breath) * fade * 0.8f;
+            }
+            var clip = AudioClip.Create("Tic", length, 1, rate, false);
+            clip.SetData(data, 0);
+            return clip;
+        }
+
         // Un ballon éclate. Quand les singes en éclatent toute une file, des dizaines de sons partiraient en même temps :
         // au plus 3 par image. La hauteur varie un peu à chaque fois, pour que ça ne sonne pas répétitif.
         const int MaxPopsPerFrame = 3;

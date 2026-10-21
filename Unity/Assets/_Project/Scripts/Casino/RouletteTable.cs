@@ -131,6 +131,10 @@ namespace SAE
             var landed = RouletteRules.ColorOf(result);
             int won = landed == color ? bet * (RouletteRules.Payout(color) + 1) : 0;   // gain + mise rendue
             Economy.Earn(won, wheel.transform.position + Vector3.up * 0.3f, stakeBack: won > 0 ? bet : 0);   // les trophées ne comptent que le gain, pas la mise rendue
+            // Gagné : le son du singe obtenu, ou le jingle de victoire pour le vert (×35) ; perdu : un son plus doux
+            var at = wheel.transform.position;
+            if (won == 0) Sounds.Play(Sounds.ViePerdue, at, 0.6f, 0.9f);
+            else Sounds.Play(color == RouletteColor.Vert ? Sounds.VagueGagnee : Sounds.SingeObtenu, at);
 
             history.Insert(0, landed);
             if (history.Count > HistorySize) history.RemoveAt(HistorySize);
