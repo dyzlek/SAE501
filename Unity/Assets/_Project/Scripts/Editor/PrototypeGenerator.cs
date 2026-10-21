@@ -1601,11 +1601,13 @@ namespace SAE.EditorTools
             }
             BuildGroveMoneyBoard(env, new Vector3(3.6f, 0f, 1.7f));
 
-            // Le grand panneau du classement, dehors : derrière la roulette, au-delà de la barrière du fond, face à la terrasse.
+            // Le grand panneau du classement, dehors : dans le pré, juste après la barrière de droite (côté roulette et panier),
+            // tourné vers la terrasse : on le voit en face en regardant vers la prairie.
             // LeaderboardBoard se construit seul ; +Z local = dos au joueur (comme la caisse).
             var ranking = new GameObject("Classement").transform;
             ranking.SetParent(env, false);
-            ranking.localPosition = new Vector3(RouletteSpot.x, 0f, GroveZ1 + 1.2f);
+            ranking.localPosition = new Vector3(GroveX1 + 1.6f, 0f, 0f);
+            ranking.localRotation = Quaternion.LookRotation(Vector3.right);   // son dos vers le pré, l'ardoise vers la terrasse
             ranking.gameObject.AddComponent<LeaderboardBoard>();
 
             // La roulette de Nicolas (bêta-test), dans la partie agrandie à droite, tournée vers le joueur

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace SAE
 {
-    // Le grand panneau du classement, DEHORS, dans la bananeraie : derrière la roulette, face à la terrasse
+    // Le grand panneau du classement, DEHORS, dans la bananeraie : dans le pré après la barrière de droite, face à la terrasse
     // (posé par PrototypeGenerator.BuildGrove). Un panneau d'affichage en bois sur deux poteaux, avec un petit toit :
     //   l'ardoise : CLASSEMENT en grand, deux colonnes ICI (les 10 meilleures parties de ce casque) et MONDE (le serveur),
     //   médailles or / argent / bronze sur les 3 premiers, la partie en cours en vert ;
