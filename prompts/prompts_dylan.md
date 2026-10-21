@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 21 oct. 2026
 
+### Volume de la musique sans effet
+> Que j’augmente ou que je baisse la musique, ça ne change rien.
+
 ### Menu : options et décor
 > Les options ne marchent pas. Rends le menu plus joli : des mains qui bougent, Quincy, etc., et pas de vide autour.
 

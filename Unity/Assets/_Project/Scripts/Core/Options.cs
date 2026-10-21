@@ -15,8 +15,10 @@ namespace SAE
         public static int Sound { get => PlayerPrefs.GetInt(SoundKey, 10); set => Set(SoundKey, Mathf.Clamp(value, 0, Steps)); }
         public static bool Vibrations { get => PlayerPrefs.GetInt(HapticsKey, 1) == 1; set => Set(HapticsKey, value ? 1 : 0); }
 
-        public static float MusicVolume => Music / (float)Steps;   // 0 à 1
-        public static float SoundVolume => Sound / (float)Steps;
+        // 0 à 1, au carré : l'oreille entend en « décibels », un volume linéaire semblait ne presque pas changer entre 10 et 5
+        public static float MusicVolume => Curve(Music);
+        public static float SoundVolume => Curve(Sound);
+        static float Curve(int step) { float v = step / (float)Steps; return v * v; }
 
         static void Set(string key, int value)
         {

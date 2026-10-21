@@ -42,7 +42,8 @@ namespace SAE
             if (spawner && spawner.Running && wave.clip) wanted = wave;
             if (BossAlive() && boss.clip) wanted = boss;
 
-            float step = Volume / FadeTime * Time.unscaledDeltaTime;
+            // Le pas du fondu ne dépend pas du réglage : sinon, à MUSIQUE 0, il valait 0 et la musique restait au volume d'avant
+            float step = BaseVolume / FadeTime * Time.unscaledDeltaTime;
             Fade(ambiance, ambiance == wanted, step, restart: false);   // l'ambiance reprend où elle en était
             Fade(wave, wave == wanted, step, restart: true);
             Fade(boss, boss == wanted, step, restart: true);
