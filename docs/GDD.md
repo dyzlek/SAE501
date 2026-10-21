@@ -403,6 +403,7 @@ _Chaque action a maintenant sa vibration, avec un motif différent pour la recon
 | Écran de victoire / défaite clair ⏳ | Équilibrage testé | | |
 | | Boss qui se divise, ballons camouflés, combo de vagues parfaites, annonce des vagues spéciales ⏳ | Brouillard, nuit, pluie sur certaines vagues | |
 | | Sauvegarde automatique de la partie sur le casque (reprendre où on en était) ⏳ | Classement en ligne (bonus : serveur PHP + MySQL de l’IUT, sans multijoueur) ⏳ | |
+| | Menu principal : une scène vivante (singes animés, ballons), CONTINUER / NOUVELLE PARTIE / OPTIONS, retour au menu en jeu (bouton Menu, Échap) ⏳ (#158) | | |
 | | Bombes à lancer, pluie de flèches de Quincy, vibrations par action ⏳ | Classement gardé entre deux lancements | Coop (deux casques, ou casque + PC) |
 | | Bananes dorées, nouvelles améliorations de l'arc, mur des records, trophées, classement local ⏳ | | |
 

@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 21 oct. 2026
 
+### Idée : un menu principal
+> Ajoute l’idée d’un menu principal sous forme de scène (avec des singes animés qui bougent, des ballons, etc.), avec NOUVELLE PARTIE, CONTINUER et OPTIONS. En jeu, un bouton (comme Échap) doit permettre de revenir au menu, comme dans un vrai jeu. Crée aussi l’issue.
+
 ### Journal et fusion des sons de Maxens
 > Mets à jour mon journal (avec ces captures) et fusionne avec ce que Maxens a fait (#152).
 
