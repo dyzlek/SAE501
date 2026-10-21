@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 21 oct. 2026
 
+### README et captures dans le journal
+> Mets à jour le README et ajoute ces captures dans mon journal, en expliquant que la pluie ne tombe pas dans la cabane.
+
 ### Annonce d’un trophée gagné
 > Quand on gagne une coupe, j’aimerais qu’elle apparaisse devant nous avec la façon dont on a obtenu le succès (1 000 bananes récoltées, etc.). Je te laisse faire.
 

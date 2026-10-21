@@ -3,6 +3,18 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Mer. 21 oct. 2026
+**Ce que j'ai fait :** la météo des vagues de boss, et l'annonce des trophées (sur l'armoire de Nicolas). Testé dans Unity (captures ci-dessous).
+- **Orage pendant les vagues de boss** (#131) : nuages, pluie, brume, éclairs et tonnerre, avec une vibration dans les manettes à chaque coup de tonnerre.
+- **Il ne pleut pas dans la cabane.** Au début, la pluie traversait le toit : les gouttes n'ont pas de physique, parce que des collisions pour 1 000 gouttes coûteraient trop cher sur le Quest. On a posé sur la cabane une forme invisible : un cylindre de la taille des murs, coiffé d'un dôme qui passe au-dessus du toit. Toute goutte qui y entre disparaît. Comme c'est un *trigger*, le joueur la traverse et elle ne gêne pas la téléportation. Dehors, il pleut ; dedans, on voit la pluie par la fenêtre.
+- **Trophée gagné** : la coupe apparaît devant le joueur, avec une ardoise « SUCCÈS ! » qui dit comment on l'a eue (« 5 000 bananes récoltées »), une fanfare et une vibration, pendant 5 s. Elle est posée dans le décor et ne suit pas la tête (confort).
+- Fusion de la branche de Nicolas (armoire à trophées), PR [#155](https://github.com/dyzlek/SAE501/pull/155).
+
+| | |
+|---|---|
+| ![Orage pendant une vague de boss](../captures/meteo-pluie-carte.png) | ![Les nuages au-dessus du joueur](../captures/meteo-nuages.png) |
+| ![Dans la cabane : la pluie reste dehors, on la voit par la fenêtre](../captures/meteo-cabane-seche.webp) | ![L'armoire à trophées de Nicolas](../captures/trophees-armoire.webp) |
+
+![Un trophée gagné apparaît devant le joueur](../captures/trophee-succes.webp)
 
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
@@ -11,6 +23,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude (Claude Code) | Fusion dans `feat/meteo` : météo commitée, puis `main` (avec #154 de Maxens) et `feat/paliers-trophy` de Nicolas (armoire à trophées). Un seul conflit (`PrototypeGenerator.BuildHub`) : gardé le tutoriel ET l’armoire. Mes réglages Unity locaux mis de côté dans un stash (« dylan-unity-avant-merge-trophees-1 »). Compilé (jeu et éditeur), scènes à régénérer | Gardé (à tester) |
 | Claude (Claude Code) | Trophées (armoire de Nicolas) : quand on en gagne un, il apparaît devant le joueur (`Hub/TrophyPopup.cs`) : copie de la coupe qui surgit et tourne, ardoise « SUCCÈS ! » avec comment on l’a eu (« 1 000 bananes récoltées », « 50 vagues vaincues ») et le palier (bronze… diamant), fanfare + vibration, 5 s. Posée une fois à 1,4 m devant les yeux, ne suit pas la tête ; plusieurs trophées passent l’un après l’autre. Appel ajouté dans `Trophy.Refresh` + menu clic droit de test. Compilé, pas testé | Gardé (à tester) |
 | Claude (Claude Code) | PR de `feat/meteo` vers main (155, ferme #131) : météo, armoire à trophées de Nicolas, annonce des trophées ; ajoutée au tableau, cartes en relecture. Recoupe les PR #147 à #150 (à trancher) | Gardé |
+| Claude (Claude Code) | README mis à jour (le jeu : orage, trophées, bananes dorées, boss qui se divisent ; état du 21 oct., PR en cours, priorités ; 5 captures) à partir de la version du 9 oct. ; 5 captures de Dylan ajoutées dans `docs/captures/` et dans ce journal, avec l’explication de la pluie arrêtée par le toit | Gardé |
 
 ## Mar. 20 oct. 2026
 
