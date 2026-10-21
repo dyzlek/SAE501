@@ -19,6 +19,8 @@ BUT MMI 3, IUT de Béziers. Jeu en réalité virtuelle réalisé sous Unity (C#)
 Encadrement : Antoine Chollet (game design), Davide Di Pierro (technique), Nicolas Maurin (gestion de projet), Ilyasse Lojdi (3D et optimisation).
 
 ## Le jeu
+- **Le menu principal :** une scène à part, avec le titre BLOONS VR, Quincy et des singes qui dansent et font coucou, et des ballons à éclater. On y trouve CONTINUER, NOUVELLE PARTIE et OPTIONS (volume de la musique, volume des sons, vibrations). En jeu, le bouton Menu de la manette gauche, ou Échap, ouvre la **pause** (REPRENDRE, OPTIONS, MENU PRINCIPAL).
+- **Sauvegarde automatique :** on reprend sa partie au lancement suivant.
 - **Le hub (la cabane) :**
   - on prend ses singes dans une bibliothèque (7 types × 8 raretés) ;
   - on les pose sur une maquette de la carte qui montre la vague en direct ;
@@ -36,27 +38,29 @@ Encadrement : Antoine Chollet (game design), Davide Di Pierro (technique), Nicol
 - **Vagues de boss annoncées :** cloches et cor, puis un orage pendant toute la vague : nuages, pluie, brume, éclairs, et un tonnerre qu'on sent dans les manettes. La pluie s'arrête sur le toit : il ne pleut pas dans la cabane.
 - **Trophées :** quand on gagne une coupe, elle apparaît devant le joueur, avec une ardoise « SUCCÈS ! » qui dit comment on l'a eue (« 5 000 bananes récoltées »), une fanfare et une vibration.
 - **Bananes dorées :** rares, elles valent bien plus qu'une banane normale.
+- **Classement local et en ligne :** un grand panneau dans la bananeraie, avec deux colonnes. ICI garde les parties du casque, MONDE affiche une base MySQL sur le serveur de l'IUT (`server/classement/`). Un nom appartient au premier casque qui le prend, et on le change avec un clavier en cubes.
 - **Tutoriel intégré** en 17 étapes, sur des tableaux du décor, avec une flèche dorée. Il comprend la vague 1 à l'arc seul, puis le premier singe offert. On peut le PASSER après confirmation.
 - **Confort :**
   - téléportation et snap turn, voile noir à chaque téléportation ;
   - tout le texte est écrit dans le décor ;
   - tout est à portée de bras.
 
-## État du projet : mer. 21 oct. 2026 (semaine 2 : CONSTRUIRE)
-- **Dans `main` :** la boucle complète, le tutoriel, les 100 vagues, et les bonus de Maxens (PR [#154](https://github.com/dyzlek/SAE501/pull/154) : boss qui se divisent, bananes dorées, vagues spéciales, vibrations).
-- **En relecture :** PR [#155](https://github.com/dyzlek/SAE501/pull/155), avec la météo des vagues de boss, l'armoire à trophées de Nicolas et l'annonce des trophées gagnés.
-- **À trancher :** les PR [#147](https://github.com/dyzlek/SAE501/pull/147) à [#150](https://github.com/dyzlek/SAE501/pull/150) (sons, bombes à lancer, pluie de flèches de Quincy, mur des records, arc à rebond). Elles recoupent #155.
+## État du projet : jeu. 22 oct. 2026 (semaine 2 : CONSTRUIRE)
+- **Dans `main` :** la boucle complète, le tutoriel, les 100 vagues, les bonus de Maxens (#154), la météo et les trophées (#155), l'aura des singes optimisée et la limite de 60 singes (#156).
+- **À merger, dans l'ordre :**
+  1. PR [#157](https://github.com/dyzlek/SAE501/pull/157) : le classement local et en ligne, la sauvegarde, et les sons de Maxens (#152) ;
+  2. PR [#159](https://github.com/dyzlek/SAE501/pull/159) : le menu principal, la pause et les options.
+- **À trancher :** les PR [#147](https://github.com/dyzlek/SAE501/pull/147) à [#150](https://github.com/dyzlek/SAE501/pull/150). Elles recoupent ce qui est déjà fait.
 - **Priorités :**
-  - 72 fps sur le Quest, surtout pendant l'orage ([#35](https://github.com/dyzlek/SAE501/issues/35)) ;
+  - 72 fps sur le Quest ([#35](https://github.com/dyzlek/SAE501/issues/35), suivi dans [opti.md](docs/opti.md)) ;
   - build casque de la semaine ([#37](https://github.com/dyzlek/SAE501/issues/37)) ;
   - test par un autre groupe le 23 oct. ([#36](https://github.com/dyzlek/SAE501/issues/36)).
 
 | | |
 |---|---|
-| ![Un orage pendant une vague de boss](docs/captures/meteo-pluie-carte.png) | ![Les nuages au-dessus du joueur](docs/captures/meteo-nuages.png) |
-| ![Dans la cabane, il ne pleut pas](docs/captures/meteo-cabane-seche.webp) | ![L'armoire à trophées](docs/captures/trophees-armoire.webp) |
-
-![Un trophée gagné apparaît devant le joueur](docs/captures/trophee-succes.webp)
+| ![Le menu principal](docs/captures/menu-principal.webp) | ![Les options](docs/captures/menu-options.webp) |
+| ![Le panneau du classement](docs/captures/classement-panneau.png) | ![Le clavier du nom](docs/captures/classement-clavier.webp) |
+| ![Un orage pendant une vague de boss](docs/captures/meteo-pluie-carte.png) | ![Un trophée gagné](docs/captures/trophee-succes.webp) |
 
 Journaux : [général](docs/journal/GENERAL.md) · [Dylan](docs/journal/dylan.md) · [Maxens](docs/journal/maxens.md) · [Nicolas](docs/journal/nicolas.md)
 

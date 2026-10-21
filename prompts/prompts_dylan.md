@@ -2,6 +2,11 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Jeu. 22 oct. 2026
+
+### Mise à jour avant le merge
+> Mets à jour (README, journal, avec ces captures du menu), après je merge.
+
 ## Mer. 21 oct. 2026
 
 ### Volume de la musique sans effet

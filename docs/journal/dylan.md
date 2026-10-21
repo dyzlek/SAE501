@@ -2,6 +2,25 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Jeu. 22 oct. 2026
+**Ce que j'ai fait :** le menu principal, testé dans Unity.
+- Une scène à part : le titre, Quincy et les singes qui font coucou, des ballons à éclater, le paysage autour. Les boutons sont CONTINUER, NOUVELLE PARTIE (il faut appuyer deux fois) et OPTIONS.
+- Pause avec le bouton Menu de la manette ou Échap.
+- Les options (musique, sons, vibrations) marchent maintenant :
+  - elles étaient bloquées pendant le tutoriel ;
+  - la musique ne baissait pas jusqu'à 0 ;
+  - la courbe du volume était trop plate.
+
+| | |
+|---|---|
+| ![Le menu principal](../captures/menu-principal.webp) | ![Les options](../captures/menu-options.webp) |
+
+![NOUVELLE PARTIE demande une confirmation](../captures/menu-confirmation.webp)
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | README mis à jour (menu, pause, sauvegarde, classement ; état du 22 oct. : PR #157 puis #159 à merger ; 6 captures) et ce journal avec 3 captures du menu, avant le merge | Gardé |
+
 ## Mer. 21 oct. 2026
 **Ce que j'ai fait :** la météo des vagues de boss, et l'annonce des trophées (sur l'armoire de Nicolas). Testé dans Unity (captures ci-dessous).
 - **Orage pendant les vagues de boss** (#131) : nuages, pluie, brume, éclairs et tonnerre, avec une vibration dans les manettes à chaque coup de tonnerre.
