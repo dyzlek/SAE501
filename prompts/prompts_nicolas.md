@@ -2,6 +2,14 @@
 
 _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/nicolas.md)._
 
+## Lun. 19 oct. 2026
+
+**Banane dorée retirée.** Retire les bananes dorées, puis pousse sur une nouvelle branche.
+
+**Armoire à trophées.** Dans le hub, ajoute une armoire à trophées, avec des trophées de plus en plus prestigieux : pour le nombre de vagues (10, 50, 100, etc.) et pour le nombre de bananes (1 000, 5 000, 15 000, 50 000).
+
+Suite : les trophées ne prennent en compte que les bananes mises dans le panier, pas celles remportées au casino, alors qu'on peut y gagner une énorme somme. Ils doivent compter toutes les bananes gagnées.
+
 ## Jeu. 8 oct. 2026
 
 **Roulette de casino.** Crée un système de roulette qui reprend le fonctionnement et les multiplicateurs de la roulette d'un casino classique.

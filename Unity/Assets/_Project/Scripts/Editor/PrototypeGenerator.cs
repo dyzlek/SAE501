@@ -714,6 +714,7 @@ namespace SAE.EditorTools
         //   gauche (-82°)      : LA bibliothèque, un seul meuble courbe (7 types × 8 raretés)
         //   derrière (180°)    : la grande porte, fermée : on l'ouvre pour aller à la bananeraie (BuildGrove)
         //   arrière-gauche     : la caisse (l'argent), accrochée au mur
+        //   arrière-droite     : l'armoire à trophées (150°), sous la fenêtre
         //   droite             : le coffre (100°) et ses chances
         const float Ring = HubLayout.Ring;   // rayon du cercle (2,8 m) : tout est posé dessus, le centre reste libre pour circuler
         const float SlotSize = 0.2f;      // une seule bibliothèque compacte (7 types × 8 raretés), tout à portée de bras
@@ -759,6 +760,9 @@ namespace SAE.EditorTools
             Target(env, Around(-82f, Ring, 2.5f), TutorialSpot.Library, Level.Hub, 0f);
             Target(env, Around(0f, Ring - 0.9f, 1.0f), TutorialSpot.Board, Level.Hub, 0.45f);
             Target(env, Around(97f, Ring - 0.2f, 1.4f), TutorialSpot.Chest, Level.Hub, 0.4f);
+
+            // Derrière à droite, sous la fenêtre : l'armoire à trophées (vagues et bananes)
+            BuildTrophyCabinet(env, HubLayout.TrophyCabinetAngle);
 
             BuildDecor(env);
             UseWoodTexture(env);
@@ -1229,6 +1233,124 @@ namespace SAE.EditorTools
             board.panel = panel;
             board.frame = panel.Find("Cadre").GetComponent<ColorTint>();
             return board;
+        }
+
+        // L'armoire à trophées : un meuble bas en bois au fond de velours rouge, contre le mur, sous la fenêtre
+        // (il s'arrête à 1,38 m, sous l'appui). Deux étagères de 4 trophées, du bronze au diamant : en haut les vagues
+        // vaincues, en bas les bananes gagnées. Sous chaque trophée, une plaque gravée au bord de l'étagère
+        // (l'objectif et où on en est, voir Trophy). +Z local = vers le mur, comme les autres meubles.
+        static readonly Color Velvet = new Color(0.38f, 0.07f, 0.10f);
+        static readonly Color TrophyBase = new Color(0.10f, 0.09f, 0.08f);   // le socle noir des trophées
+        const float CabinetW = 1.5f, CabinetD = 0.36f, CabinetH = 1.38f;
+        const float LowShelfY = 0.42f, HighShelfY = 0.93f;                   // le dessus de chaque étagère
+        const float TrophyStep = CabinetW / Trophy.TierCount;                // une colonne par palier
+
+        static void BuildTrophyCabinet(Transform env, float angle)
+        {
+            var root = new GameObject("Armoire à trophées").transform;
+            root.SetParent(env, false);
+            // Le dos à 3,25 m du centre, juste devant les rondins (leur face intérieure est à 3,28 m)
+            root.SetPositionAndRotation(Around(angle, HubLayout.CabinRadius - 0.15f - CabinetD / 2f), Quaternion.Euler(0, angle, 0));
+
+            float halfW = CabinetW / 2f, halfD = CabinetD / 2f;
+            Visuals.Box("Plinthe", root, new Vector3(0, 0.04f, 0), new Vector3(CabinetW + 0.04f, 0.08f, CabinetD + 0.04f), DarkWood);
+            Visuals.Solid("Bas fermé", root, new Vector3(0, (0.08f + LowShelfY) / 2f, 0), new Vector3(CabinetW, LowShelfY - 0.08f, CabinetD), Wood);
+            for (int side = -1; side <= 1; side += 2)
+            {
+                // les portes du bas s'arrêtent sous les plaques des trophées des bananes
+                Visuals.Box("Porte", root, new Vector3(side * halfW / 2f, 0.23f, -halfD - 0.01f), new Vector3(halfW - 0.06f, 0.22f, 0.02f), DarkWood);
+                Visuals.Box("Bouton de porte", root, new Vector3(side * 0.06f, 0.23f, -halfD - 0.03f), new Vector3(0.025f, 0.025f, 0.02f), Brass);
+                Visuals.Solid("Côté", root, new Vector3(side * (halfW + 0.025f), CabinetH / 2f, 0), new Vector3(0.05f, CabinetH, CabinetD + 0.02f), Wood);
+            }
+            Visuals.Box("Fond", root, new Vector3(0, (LowShelfY + CabinetH) / 2f, halfD - 0.015f), new Vector3(CabinetW, CabinetH - LowShelfY, 0.03f), Velvet);
+            Visuals.Solid("Etagère du haut", root, new Vector3(0, HighShelfY - 0.02f, 0), new Vector3(CabinetW, 0.04f, CabinetD), DarkWood);
+            Visuals.Solid("Dessus", root, new Vector3(0, CabinetH - 0.025f, -0.02f), new Vector3(CabinetW + 0.14f, 0.05f, CabinetD + 0.04f), DarkWood);
+
+            // L'enseigne, debout sur le meuble, contre le mur sous la fenêtre
+            Visuals.Box("Enseigne", root, new Vector3(0, CabinetH + 0.09f, halfD - 0.05f), new Vector3(0.9f, 0.16f, 0.03f), DarkWood);
+            Visuals.Text(root, "TROPHÉES", new Vector3(0, CabinetH + 0.09f, halfD - 0.07f), 0.11f, TitleGold, title: true);
+
+            var sphere = PrimitiveMesh(PrimitiveType.Sphere);
+            var capsule = PrimitiveMesh(PrimitiveType.Capsule);
+            for (int tier = 0; tier < Trophy.TierCount; tier++)
+            {
+                float x = (tier - (Trophy.TierCount - 1) / 2f) * TrophyStep;
+                BuildTrophy(root, new Vector3(x, HighShelfY, 0f), TrophyGoal.Vagues, tier, Trophy.WaveGoals[tier], sphere, capsule);
+                BuildTrophy(root, new Vector3(x, LowShelfY, 0f), TrophyGoal.Bananes, tier, Trophy.BananaGoals[tier], sphere, capsule);
+            }
+        }
+
+        // Un trophée posé sur l'étagère (pos = le milieu de son socle) et sa plaque au bord de l'étagère.
+        // Plus il est prestigieux, plus il est grand (12 % par palier) et orné : des anses dès l'argent,
+        // une marche de plus et un couvercle dès l'or. Au sommet, ce qu'il récompense : un ballon (vagues) ou une banane.
+        // Le cylindre de Unity fait 2 m de haut à l'échelle 1 : sa hauteur est donc divisée par 2.
+        static void BuildTrophy(Transform cabinet, Vector3 pos, TrophyGoal goal, int tier, int target, Mesh sphere, Mesh capsule)
+        {
+            var root = new GameObject($"Trophée {goal} {target}").transform;
+            root.SetParent(cabinet, false);
+            root.localPosition = pos;
+            float s = 1f + 0.12f * tier;
+            var metal = new List<ColorTint>();
+            GameObject Metal(string name, Vector3 p, Vector3 size, Mesh mesh)
+            {
+                var go = Visuals.Box(name, root, p, size, Trophy.TierColors[tier]);
+                if (mesh) go.GetComponent<MeshFilter>().sharedMesh = mesh;
+                metal.Add(go.GetComponent<ColorTint>());
+                return go;
+            }
+
+            float baseW = 0.13f * s;
+            Visuals.Box("Socle", root, new Vector3(0, 0.02f, 0), new Vector3(baseW, 0.04f, baseW), TrophyBase);
+            float y = 0.04f;
+            if (tier >= 2)
+            {
+                Visuals.Box("Marche", root, new Vector3(0, y + 0.015f, 0), new Vector3(baseW * 0.75f, 0.03f, baseW * 0.75f), TrophyBase);
+                y += 0.03f;
+            }
+
+            float stemH = 0.06f * s, bowlH = 0.03f * s, cupH = 0.10f * s, cupD = 0.12f * s;
+            Metal("Pied", new Vector3(0, y + stemH / 2f, 0), new Vector3(0.03f * s, stemH / 2f, 0.03f * s), Cylinder);
+            y += stemH;
+            Metal("Fond de coupe", new Vector3(0, y + bowlH / 2f, 0), new Vector3(cupD * 0.6f, bowlH / 2f, cupD * 0.6f), Cylinder);
+            y += bowlH;
+            Metal("Coupe", new Vector3(0, y + cupH / 2f, 0), new Vector3(cupD, cupH / 2f, cupD), Cylinder);
+            if (tier >= 1)
+                for (int side = -1; side <= 1; side += 2)
+                    Metal("Anse", new Vector3(side * (cupD / 2f + 0.012f), y + cupH * 0.55f, 0), new Vector3(0.02f, cupH * 0.7f, 0.015f), null);
+            y += cupH;
+            if (tier >= 2)
+            {
+                Metal("Couvercle", new Vector3(0, y + 0.006f, 0), new Vector3(cupD * 1.08f, 0.006f, cupD * 1.08f), Cylinder);
+                y += 0.012f;
+            }
+
+            float topH = 0.06f * s;
+            if (goal == TrophyGoal.Vagues)
+                Metal("Ballon", new Vector3(0, y + topH / 2f, 0), new Vector3(topH * 0.85f, topH, topH * 0.85f), sphere);
+            else
+                Metal("Banane", new Vector3(0, y + topH / 2f, 0), new Vector3(0.025f * s, topH * 0.7f, 0.025f * s), capsule)
+                    .transform.localRotation = Quaternion.Euler(0, 0, 60f);   // penchée, pour qu'on la reconnaisse
+
+            // La plaque, au bord de l'étagère devant le trophée (hors du trophée : elle ne tourne pas avec lui)
+            float front = -CabinetD / 2f;
+            Visuals.Box("Plaque", cabinet, new Vector3(pos.x, pos.y - 0.01f, front - 0.006f), new Vector3(TrophyStep - 0.06f, 0.075f, 0.012f), DarkWood);
+            var plaque = Visuals.Text(cabinet, "", new Vector3(pos.x, pos.y - 0.01f, front - 0.014f), 0.026f, TitleGold);
+
+            var trophy = root.gameObject.AddComponent<Trophy>();
+            trophy.goal = goal;
+            trophy.target = target;
+            trophy.tier = tier;
+            trophy.metal = metal.ToArray();
+            trophy.plaque = plaque;
+        }
+
+        // Le maillage d'une forme de base de Unity (sphère, capsule), pris sur une copie aussitôt détruite, comme Cylinder
+        static Mesh PrimitiveMesh(PrimitiveType type)
+        {
+            var tmp = GameObject.CreatePrimitive(type);
+            var mesh = tmp.GetComponent<MeshFilter>().sharedMesh;
+            Object.DestroyImmediate(tmp);
+            return mesh;
         }
 
         // Comptoir d'amélioration (bananier, récolteur) : un meuble bas en bois avec un bouton rond par amélioration
