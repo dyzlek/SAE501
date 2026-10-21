@@ -28,6 +28,7 @@ namespace SAE
         {
             origin = GetComponent<XROrigin>();       // null en mode PC
             body = GetComponent<CharacterController>();
+            if (!GetComponent<Music>()) gameObject.AddComponent<Music>();   // la musique de fond suit le joueur actif
         }
 
         // Le joueur actif (VR ou PC, selon PlayerMode)

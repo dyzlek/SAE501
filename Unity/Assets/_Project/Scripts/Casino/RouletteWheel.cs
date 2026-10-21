@@ -7,6 +7,8 @@ namespace SAE
     // La roue de la roulette : le plateau à cases tourne, la bille tourne dans l'autre sens, puis les deux ralentissent
     // et la bille s'arrête dans la case tirée, juste sous le repère doré (côté joueur, -Z local de la roue).
     // Le tirage est fait AVANT (RouletteTable) : la roue ne fait que le montrer.
+    // Un « tic » à chaque case qui passe sous la bille (le même que la roulette du coffre, un peu plus grave) :
+    // rapide au début, de plus en plus espacé jusqu'à l'arrêt.
     public class RouletteWheel : MonoBehaviour
     {
         public Transform rotor;          // le plateau à cases qui tourne (case i à l'angle i × 360/37, voir RouletteRules.WheelOrder)
@@ -23,8 +25,18 @@ namespace SAE
         public bool Spinning { get; private set; }
 
         float rotorAngle;
+        AudioSource tickSource;
+        int lastPocket;
 
-        void Start() => PlaceBall(PointerAngle, rimRadius);
+        void Start()
+        {
+            PlaceBall(PointerAngle, rimRadius);
+            tickSource = gameObject.AddComponent<AudioSource>();
+            tickSource.playOnAwake = false;
+            tickSource.spatialBlend = 1f;   // le son vient de la roue
+            tickSource.minDistance = 1.5f;
+            tickSource.volume = 0.5f;
+        }
 
         public void Spin(int result, Action onDone)
         {
@@ -46,7 +58,9 @@ namespace SAE
                 rotor.localRotation = Quaternion.Euler(0f, rotorAngle, 0f);
                 // La bille tourne à l'envers et descend vers les cases dans le dernier tiers du lancer
                 float drop = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.65f, 0.95f, t));
-                PlaceBall(PointerAngle + 360f * ballTurns * (1f - ease), Mathf.Lerp(rimRadius, pocketRadius, drop));
+                float ballAngle = PointerAngle + 360f * ballTurns * (1f - ease);
+                PlaceBall(ballAngle, Mathf.Lerp(rimRadius, pocketRadius, drop));
+                TickIfNewPocket(ballAngle);
                 yield return null;
             }
             rotorAngle = Mathf.Repeat(end, 360f);
@@ -54,6 +68,16 @@ namespace SAE
             PlaceBall(PointerAngle, pocketRadius);
             Spinning = false;
             onDone?.Invoke();
+        }
+
+        // La case du plateau sous la bille a changé : un tic (un seul par image, sinon ça bourdonne au début)
+        void TickIfNewPocket(float ballAngle)
+        {
+            int pocket = Mathf.FloorToInt(Mathf.Repeat(ballAngle - rotorAngle, 360f) / (360f / RouletteRules.Numbers));
+            if (pocket == lastPocket) return;
+            lastPocket = pocket;
+            tickSource.pitch = UnityEngine.Random.Range(0.8f, 0.9f);   // plus grave que le coffre : une bille sur du bois
+            tickSource.PlayOneShot(Sounds.Tick);
         }
 
         void PlaceBall(float angle, float radius)

@@ -109,6 +109,7 @@ namespace Sae501.Coffres
             PlayChestAnimation();
             yield return new WaitForSeconds(spinDelay);
             yield return roulette.Spin(result, odds, spinDuration, LastTypes[best], rollType);
+            SAE.Sounds.Play(SAE.Sounds.SingeObtenu, transform.position);
 
             OpenedCount++;
             // Le nom du singe gagné et sa rareté, dans la couleur de la rareté (ex. « CANON VIOLET ! »)
@@ -131,6 +132,7 @@ namespace Sae501.Coffres
         // Ouvre le coffre (animation normale) ou le referme (même animation à l'envers).
         void PlayChestAnimation(bool reverse = false)
         {
+            SAE.Sounds.Play(reverse ? SAE.Sounds.CoffreFermeture : SAE.Sounds.CoffreOuverture, transform.position);
             if (lid) { if (reverse) lid.Close(); else lid.Open(); return; }
             if (anim == null || string.IsNullOrEmpty(clipName)) return;
             var state = anim[clipName];

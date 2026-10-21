@@ -32,6 +32,7 @@ namespace SAE
 
             if (thrown == DartsPerRound) { System.Array.Clear(round, 0, round.Length); thrown = 0; }   // nouvelle manche
             round[thrown++] = points;
+            if (points == ringPoints[0]) Sounds.Play(Sounds.FlecheCentre, point);   // en plein dans le mille : le petit bonus caché
             int total = round[0] + round[1] + round[2];
             if (thrown == DartsPerRound && total > best) best = total;
 
