@@ -20,6 +20,7 @@ namespace SAE
         Monkey? ghostMonkey;
         GameObject halo;
         LineRenderer rangeRing;
+        TextMesh fullLabel;                 // « PLATEAU PLEIN » au-dessus du fantôme rouge, quand les 60 singes sont posés
 
         Vector2 ToMap(Vector3 worldPoint)
         {
@@ -85,6 +86,20 @@ namespace SAE
                 float lift = fuse ? 1.5f + 0.15f * Mathf.Sin(Time.time * 6f) : 0.5f;   // le singe obtenu flotte et danse au-dessus
                 ghost.transform.localPosition = ToLocal(fuse ? target.pos : pos, TowerManager.TowerSize * lift);
                 ghost.GetComponent<MonkeyView>().Tint(fuse ? Fusion : action == PlacementAction.Place ? Ok : No);
+            }
+
+            // Pourquoi c'est rouge, quand c’est parce que le plateau est plein
+            bool full = action == PlacementAction.Blocked && Placement.IsFull;
+            if (full && !fullLabel)
+                fullLabel = Visuals.Label(transform, "", Vector3.zero, TowerManager.TowerSize * scale * 0.35f, No, title: true);
+            if (fullLabel)
+            {
+                fullLabel.gameObject.SetActive(full);
+                if (full)
+                {
+                    fullLabel.text = $"PLATEAU PLEIN ({Placement.MaxPlaced})\nFusionne tes singes !";
+                    fullLabel.transform.localPosition = ToLocal(pos, TowerManager.TowerSize * 2.2f);
+                }
             }
 
             // La portée du singe qu'on va poser (ou obtenir) : on voit ce qu'il couvrira avant de le lâcher

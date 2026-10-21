@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 21 oct. 2026
 
+### Limite de 60 singes posés
+> Ensuite, limite le nombre de singes posés à 60 au maximum, pour éviter de surcharger le jeu.
+
 ### Aura : il en manque, et plus belle
 > Il manque des auras : je n’en vois que sur une colonne. J’aimerais aussi qu’elles soient un peu plus belles, mais toujours optimisées.
 

@@ -16,6 +16,12 @@ namespace SAE
         public const float Spacing = 0.95f;      // distance minimale entre deux singes posés, en mètres
         public const float PathMargin = 0.45f;   // distance minimale entre le centre du singe et le bord des dalles
 
+        // Au plus 60 singes posés (performances du Quest : chaque singe a son modèle animé, son aura et ses tirs).
+        // Plein, on ne peut plus en poser de nouveau, mais on peut toujours FUSIONNER (ça ne fait pas un singe de plus)
+        // ou reprendre un singe posé. Voir docs/opti.md.
+        public const int MaxPlaced = 60;
+        public static bool IsFull => GameState.Placed.Count >= MaxPlaced;
+
         public static PlacementAction Evaluate(Vector2 pos, out PlacedMonkey target)
         {
             var held = GameState.Held;
@@ -24,6 +30,7 @@ namespace SAE
             if (held == null) return target != null ? PlacementAction.PickUp : PlacementAction.None;
             if (target != null && target.monkey.CanFuseWith(held.Value)) return PlacementAction.Fuse;
             if (Tutorial.FusionOnly) return PlacementAction.Blocked;   // tutoriel : il faut le poser SUR le premier singe
+            if (IsFull) return PlacementAction.Blocked;                // plateau plein : fusionner reste possible (ci-dessus)
             if (GameState.Nearest(pos, Spacing) != null) return PlacementAction.Blocked;   // trop collé à un autre singe
             return MapLayout.CanPlace(pos, PathMargin) ? PlacementAction.Place : PlacementAction.Blocked;
         }

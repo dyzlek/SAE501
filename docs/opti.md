@@ -18,6 +18,28 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 
 ---
 
+## Limite de 60 singes posés
+**Mer. 21 oct. 2026** · Dylan (avec Claude) · branche `feat/opti-aura`
+
+**Le problème.** On pouvait poser autant de singes qu'on voulait, et chaque singe coûte à chaque image : son modèle animé, son aura, la recherche d'une cible et ses projectiles. Il existe en plus **en double**, parce qu'il est visible sur la carte et en miniature sur le plateau du hub. En fin de partie, le nombre de singes pouvait grimper sans limite et faire tomber les fps.
+
+**Ce qui a été fait.** `Placement.MaxPlaced = 60` dans `Core/Placement.cs`. Plateau plein, le fantôme devient rouge et un texte « PLATEAU PLEIN (60) · Fusionne tes singes ! » s'affiche au-dessus (`Core/PlacementSurface.cs`). On peut toujours **fusionner**, puisque ça ne fait pas un singe de plus, et reprendre un singe posé. La limite devient un choix de jeu : il vaut mieux fusionner que d'empiler.
+
+**Avant / après.** *À mesurer.* Il faudra noter les fps au casque, sur la carte pendant une vague, avec 60 singes posés (en bac à sable). C'est le pire cas maintenant garanti.
+
+| Mesure | Avant | Après |
+|---|---|---|
+| Singes posés au maximum | illimité | 60 |
+| fps au casque, 60 singes, vague en cours | ? | ? |
+
+**Est-ce que ça a vraiment marché ?** *Pas encore mesuré.* Ça ne rend pas le jeu plus rapide avec peu de singes. Ça fixe un **plafond** : le pire cas est connu et peut être testé.
+
+**Suggestions.**
+- Mesurer avec 60 singes. Si on est sous 72 fps, baisser la limite (40 ?) ou alléger chaque singe : animation coupée hors du champ de vision, cible cherchée moins souvent (toutes les 0,1 s au lieu de chaque image).
+- Afficher le compteur « 42 / 60 » près du plateau, pour qu'on voie la limite avant de l'atteindre.
+
+---
+
 ## Aura des singes : un maillage au lieu des particules
 **Mer. 21 oct. 2026** · Dylan (avec Claude) · branche `feat/opti-aura`
 
