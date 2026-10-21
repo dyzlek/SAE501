@@ -2,7 +2,25 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Jeu. 22 oct. 2026
+
+### Tout est rose dans le build
+> Le tableau des scores, la scène du menu, etc. : quand je fais Build and Run, ça bugue vraiment, tout est en rose, donc je ne peux ni voir ni vraiment interagir.
+
+### Mise à jour avant le merge
+> Mets à jour (README, journal, avec ces captures du menu), après je merge.
+
 ## Mer. 21 oct. 2026
+
+### Volume de la musique sans effet
+> Que j’augmente ou que je baisse la musique, ça ne change rien.
+
+### Menu : options et décor
+> Les options ne marchent pas. Rends le menu plus joli : des mains qui bougent, Quincy, etc., et pas de vide autour.
+
+### Idée : un menu principal
+> Ajoute l’idée d’un menu principal sous forme de scène (avec des singes animés qui bougent, des ballons, etc.), avec NOUVELLE PARTIE, CONTINUER et OPTIONS. En jeu, un bouton (comme Échap) doit permettre de revenir au menu, comme dans un vrai jeu. Crée aussi l’issue.
+> Suite : fais-le.
 
 ### Journal et fusion des sons de Maxens
 > Mets à jour mon journal (avec ces captures) et fusionne avec ce que Maxens a fait (#152).

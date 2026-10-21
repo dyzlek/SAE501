@@ -10,10 +10,23 @@ namespace SAE
             else Object.DestroyImmediate(o);
         }
 
+        // Les formes de base (cube, sphère…) créées PENDANT le jeu reçoivent ce matériau URP (Art/Resources/Couleur.mat,
+        // blanc, teinté par ColorTint). Sans lui, Unity leur donne son vieux matériau « Standard », absent d'un build URP :
+        // dans le build, tout ce qui était construit au lancement (menu, classement…) s'affichait en ROSE.
+        static Material primitiveMaterial;
+        public static Material PrimitiveMaterial => primitiveMaterial ? primitiveMaterial : primitiveMaterial = Resources.Load<Material>("Couleur");
+
+        public static GameObject Primitive(PrimitiveType type)
+        {
+            var go = GameObject.CreatePrimitive(type);
+            if (PrimitiveMaterial) go.GetComponent<Renderer>().sharedMaterial = PrimitiveMaterial;
+            return go;
+        }
+
         // Cube coloré sans collider (le collider est porté par le parent cliquable).
         public static GameObject Box(string name, Transform parent, Vector3 localPos, Vector3 size, Color color)
         {
-            var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var go = Primitive(PrimitiveType.Cube);
             go.name = name;
             Kill(go.GetComponent<Collider>());
             go.transform.SetParent(parent, false);
@@ -26,7 +39,7 @@ namespace SAE
         // Cube avec collider, pour le sol, les murs, les meubles.
         public static GameObject Solid(string name, Transform parent, Vector3 pos, Vector3 size, Color color)
         {
-            var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var go = Primitive(PrimitiveType.Cube);
             go.name = name;
             go.transform.SetParent(parent, false);
             go.transform.localPosition = pos;
@@ -137,7 +150,7 @@ namespace SAE
         // Les modèles sont exportés en pose en T (bras écartés à l'horizontale) : on baisse les bras le long du corps,
         // un peu écartés et un peu en avant, pour une pose naturelle au hub (bibliothèque, plateau, fiche, coffre).
         // Les singes animés (carte, récolteurs) partent de cette pose. Le Canon et le Tireur n'ont pas de bras : rien ne change.
-        static void RestPose(Transform model, Transform root)
+        public static void RestPose(Transform model, Transform root)
         {
             foreach (var (armName, foreArmName) in new[] { ("LeftArm", "LeftForeArm"), ("RightArm", "RightForeArm") })
             {

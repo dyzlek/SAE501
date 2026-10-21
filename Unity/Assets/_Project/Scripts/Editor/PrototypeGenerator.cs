@@ -30,6 +30,7 @@ namespace SAE.EditorTools
         const string Folder = "Assets/_Project/Scenes";
         const string HubScenePath = Folder + "/Hub.unity";
         const string MapScenePath = Folder + "/Labyrinthe.unity";   // même nom que Levels.MapScene
+        const string MenuScenePath = Folder + "/Menu.unity";         // même nom que Levels.MenuScene
         const string OldGroveScenePath = Folder + "/Bananeraie.unity";   // l'ancienne scène de la bananeraie, supprimée
         const string OldScenePath = Folder + "/Jeu.unity";          // l'ancienne scène unique, supprimée à la génération
         const float BoardTile = 0.2f;    // plateau de 1,6 m : l'élément principal du hub
@@ -41,6 +42,7 @@ namespace SAE.EditorTools
         static readonly Vector3 HandOffset = new Vector3(0f, -0.01f, -0.06f);   // la paume, un peu derrière l'avant de la manette
         static readonly Vector3 BowInHand = new Vector3(0.07f, 0f, 0.02f);      // la poignée de l'arc, sur le côté intérieur de la main : la flèche passe à côté
         const float HandTilt = 35f;   // les mains tournées pouce vers le haut, comme quand on tient les manettes (pas paume à plat)
+        static readonly Vector3 MenuCenter = new Vector3(0f, 0f, -1000f);   // le menu principal, loin derrière le hub
         static readonly Vector3 MapCenter = new Vector3(0f, 0f, 1000f);   // les deux scènes sont chargées ensemble : la carte est loin, hors de vue du hub
 
         static readonly Color Floor = new Color(0.35f, 0.35f, 0.38f);
@@ -79,7 +81,14 @@ namespace SAE.EditorTools
             BuildPresence(Level.Carte, mapSpawn);   // pas de joueur ici : c'est celui du hub qui vient
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), MapScenePath);
 
-            // 2. Le hub, et la bananeraie derrière sa porte
+            // 2. Le menu principal (#158) : une prairie, le décor de la carte autour, et MainMenu qui construit le reste au lancement
+            NewLevelScene();
+            var menuSpawn = Spawn("Spawn Menu", MenuCenter, Level.Menu);   // regard vers +Z, vers les boutons et l'estrade
+            BuildMenu();
+            BuildPresence(Level.Menu, menuSpawn);
+            EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), MenuScenePath);
+
+            // 3. Le hub, et la bananeraie derrière sa porte
             NewLevelScene();
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(OldGroveScenePath)) AssetDatabase.DeleteAsset(OldGroveScenePath);
             var hubSpawn = Spawn("Spawn Hub", Vector3.zero, Level.Hub);
@@ -95,9 +104,41 @@ namespace SAE.EditorTools
 
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), HubScenePath);
             // Le hub en premier : c'est la scène de départ du jeu
-            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(HubScenePath, true), new EditorBuildSettingsScene(MapScenePath, true) };
+            EditorBuildSettings.scenes = new[]
+            {
+                new EditorBuildSettingsScene(HubScenePath, true),
+                new EditorBuildSettingsScene(MapScenePath, true),
+                new EditorBuildSettingsScene(MenuScenePath, true),
+            };
             PlayerModeMenu.Apply();   // VR ou PC, selon le menu SAE → Mode de jeu
-            Debug.Log("Prototype généré : " + HubScenePath + " et " + MapScenePath);
+            Debug.Log("Prototype généré : " + HubScenePath + ", " + MapScenePath + " et " + MenuScenePath);
+        }
+
+        // La scène du menu : le même paysage que la carte (Paysage.glb : prairie, palmiers, montagnes tout autour),
+        // un sol invisible (on ne tombe pas), le décor de la carte (herbes, champignons, buissons), Quincy qui fait coucou,
+        // et MainMenu, qui pose au lancement le titre, l'estrade des singes, les ballons et les boutons.
+        const string QuincyModel = "Assets/_Project/Art/Quincy/FBX/QuincyLvl7_Rigged.fbx";
+
+        static void BuildMenu()
+        {
+            var root = new GameObject("Menu").transform;
+            root.position = MenuCenter;
+            var ground = Visuals.Solid("Sol", root, new Vector3(0f, -0.1f, 4f), new Vector3(40f, 0.2f, 40f), Grass1);
+            BuildScenery(root, 0f);
+            if (root.Find("Paysage")) ground.GetComponent<Renderer>().enabled = false;   // on voit l'herbe du paysage
+            MapDecor.BuildScenery(root, 1f);
+
+            // Quincy, à gauche des boutons : il regarde le joueur (vers -Z) et fait coucou (MenuMonkey, ajouté par MainMenu)
+            var quincy = AssetDatabase.LoadAssetAtPath<GameObject>(QuincyModel);
+            if (quincy)
+            {
+                var holder = new GameObject("Quincy").transform;
+                holder.SetParent(root, false);
+                holder.localPosition = new Vector3(-2.2f, 0.9f, 3.8f);   // centre du modèle : 1,8 m de haut, pieds au sol
+                Visuals.FitModel(quincy, 180f, holder, 1.8f, out _);
+            }
+            else Debug.LogWarning("Menu : modèle de Quincy introuvable (" + QuincyModel + ").");
+            root.gameObject.AddComponent<MainMenu>();
         }
 
         // La « présence » d'un niveau : ce qui n'est allumé que quand on y est (le soleil, les réglages d'image),

@@ -157,7 +157,7 @@ namespace SAE
 
         GameObject CreateHalo()
         {
-            var go = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            var go = Visuals.Primitive(PrimitiveType.Cylinder);
             go.name = "Halo fusion";
             Visuals.Kill(go.GetComponent<Collider>());
             go.transform.SetParent(transform, false);

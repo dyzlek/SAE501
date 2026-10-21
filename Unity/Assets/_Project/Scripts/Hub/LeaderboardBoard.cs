@@ -9,8 +9,7 @@ namespace SAE
     //   l'ardoise : CLASSEMENT en grand, deux colonnes ICI (les 10 meilleures parties de ce casque) et MONDE (le serveur),
     //   médailles or / argent / bronze sur les 3 premiers, la partie en cours en vert ;
     //   en dessous, la planche du nom : « TON NOM : SINGE-4821 », son état (RÉSERVÉ, PRIS, hors ligne) et un bouton MODIFIER
-    //   qui ouvre un clavier (lettres, chiffres, « - », EFFACER, OK) à viser au rayon, et NOUVELLE PARTIE (à confirmer :
-    //   la partie est sauvegardée toute seule, voir SaveGame ; ce bouton efface tout et recommence).
+    //   qui ouvre un clavier (lettres, chiffres, « - », EFFACER, OK) à viser au rayon. NOUVELLE PARTIE est dans le menu principal (MainMenu).
     // Un nom n'est gardé que si le serveur le réserve pour ce casque (Leaderboard.TryRename) : personne ne peut prendre le tien.
     // Le texte n'est réécrit que quand quelque chose change (Leaderboard.Changed, une touche). Que des cubes : rien de coûteux.
     // +Z local = dos au joueur, le texte se lit côté -Z.
@@ -32,9 +31,7 @@ namespace SAE
         static readonly string[] Medals = { "#FFD45A", "#D9DEE8", "#D08A4A" };   // or, argent, bronze
         static readonly string[] Rows = { "ABCDEFGHIJ", "KLMNOPQRST", "UVWXYZ0123", "456789-" };
 
-        TextMesh here, world, nameText, stateText, editLabel, newGameLabel;
-        float confirmUntil;           // NOUVELLE PARTIE : il faut appuyer une 2e fois avant cette heure pour confirmer
-        const float ConfirmSeconds = 4f;
+        TextMesh here, world, nameText, stateText, editLabel;
         GameObject keyboard;
         string draft;                 // le nom en train d'être tapé (null = clavier fermé)
         string message;               // un message du clavier (« 3 à 12 caractères »), à la place de l'état
@@ -80,8 +77,6 @@ namespace SAE
             nameText = Visuals.Text(root, "", new Vector3(0.15f, nameY, -0.06f), 0.13f, Color.white, title: true);
             stateText = Visuals.Text(root, "", new Vector3(0.15f, nameY - 0.15f, -0.06f), 0.06f, Color.white);
             editLabel = Key(root, "MODIFIER", new Vector3(-1.25f, nameY - 0.05f, -0.07f), 0.5f, Green, ToggleKeyboard);
-            // La partie est sauvegardée toute seule (SaveGame) ; ce bouton efface tout et recommence, après confirmation
-            newGameLabel = Key(root, "NOUVELLE PARTIE", new Vector3(-1.25f, nameY - 0.62f, -0.07f), 0.55f, Red, NewGame);
 
             // Le clavier, caché tant qu'on n'appuie pas sur MODIFIER : 4 rangées sous le nom, puis EFFACER et OK
             keyboard = new GameObject("Clavier");
@@ -105,24 +100,6 @@ namespace SAE
                 }
             }
             keyboard.SetActive(false);
-        }
-
-        // ---------------- Nouvelle partie ----------------
-        void NewGame()
-        {
-            if (Time.time < confirmUntil) { SaveGame.NewGame(); return; }   // 2e appui : on efface et on recommence
-            confirmUntil = Time.time + ConfirmSeconds;
-            newGameLabel.text = "SÛR ? APPUIE ENCORE";
-        }
-
-        void Update()
-        {
-            // Pas confirmé à temps : le bouton redevient normal
-            if (confirmUntil > 0f && Time.time >= confirmUntil)
-            {
-                confirmUntil = 0f;
-                newGameLabel.text = "NOUVELLE PARTIE";
-            }
         }
 
         // ---------------- Le clavier ----------------
@@ -217,19 +194,7 @@ namespace SAE
 
         // Une touche : un cube qu'on vise au rayon (RayPress) ou qu'on touche (HandPress), son texte posé devant
         // (pas dans le cube étiré : il serait déformé). Renvoie le texte, pour pouvoir le changer (MODIFIER / ANNULER).
-        static TextMesh Key(Transform parent, string label, Vector3 pos, float width, Color color, Action action)
-        {
-            var go = Visuals.Solid("Touche " + label, parent, pos, new Vector3(width, KeySize, 0.04f), color);
-            go.AddComponent<KeyButton>().action = action;
-            go.AddComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRSimpleInteractable>();   // après le collider (Solid)
-            go.AddComponent<RayPress>();
-            return Visuals.Text(parent, label, pos + new Vector3(0f, 0f, -0.03f), label.Length > 1 ? 0.055f : 0.08f, Color.white, title: true);
-        }
-
-        class KeyButton : MonoBehaviour, IPressable
-        {
-            public Action action;
-            public void Press() => action?.Invoke();
-        }
+        static TextMesh Key(Transform parent, string label, Vector3 pos, float width, Color color, Action action) =>
+            WorldButton.Create(parent, label, pos, new Vector2(width, KeySize), color, action, label.Length > 1 ? 0.055f : 0.08f);
     }
 }

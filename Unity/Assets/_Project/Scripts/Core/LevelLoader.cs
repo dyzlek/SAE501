@@ -11,6 +11,8 @@ namespace SAE
         {
             if (!SceneManager.GetSceneByName(Levels.MapScene).isLoaded)
                 SceneManager.LoadScene(Levels.MapScene, LoadSceneMode.Additive);
+            PauseMenu.Ensure();                  // Échap / bouton Menu de la manette, partout
+            GameMenu.OpenAtLaunch();             // le jeu commence dans le menu principal (sauf après NOUVELLE PARTIE)
         }
     }
 }
