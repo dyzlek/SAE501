@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 21 oct. 2026
 
+### Journal et fusion des sons de Maxens
+> Mets à jour mon journal (avec ces captures) et fusionne avec ce que Maxens a fait (#152).
+
 ### Sauvegarde de la partie
 > Autre problème : chaque lancement recrée une nouvelle partie (une nouvelle ligne au classement). J’aimerais reprendre ma partie : fais une sauvegarde.
 
