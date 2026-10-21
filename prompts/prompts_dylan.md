@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 21 oct. 2026
 
+### Compteur de singes sur le tableau de la vague
+> Il est trop petit, et je ne veux pas de pancarte : mets-le plutôt en dessous, sur ce tableau (celui de la vague).
+
 ### Plus de boss à chaque vague, compteur de singes
 > Enlève les boss à chaque vague. Mets, près de l’endroit où l’on pose les singes, la limite et le nombre actuel, de façon jolie.
 

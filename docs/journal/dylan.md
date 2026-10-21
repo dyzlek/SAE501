@@ -28,6 +28,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude (Claude Code) | Aura v2 après le test de Dylan : seule l’arc-en-ciel s’affichait (cache statique de maillages détruits entre deux parties sans rechargement du domaine ; corrigé : cache vidé au lancement, maillage détruit refait). Plus belle, toujours 1 maillage : langues de flamme irrégulières, cœur presque blanc, disque au sol, rotation lente + battement (120 triangles). `opti.md` complété. Compilé, à retester | Gardé (à tester) |
 | Claude (Claude Code) | Optimisation : au plus 60 singes posés (`Placement.MaxPlaced`) ; plateau plein = fantôme rouge + « PLATEAU PLEIN (60) · Fusionne tes singes ! », la fusion et la reprise restent possibles. Entrée dans `docs/opti.md`. Compilé, pas testé | Gardé (à tester) |
 | Claude (Claude Code) | Compteur de singes posés (`Core/PlacedCounter.cs`, ajouté par `PlacementSurface.Start`) : plaque en bois « SINGES n / 60 » au bord du plateau du hub (petite) et de la carte (à hauteur de main), côté joueur ; dorée, orange dès 50, rouge et qui bat quand c’est plein. `TestBossEveryWave` remis à false (modif locale annulée). Compilé, pas testé | Gardé (à tester) |
+| Claude (Claude Code) | Compteur de singes déplacé après le test de Dylan (plaque trop petite) : `PlacedCounter` supprimé ; ligne « Singes : n / 60 » sur le tableau de la vague (`WaveBoard`, hub et carte), orange dès 50, rouge « PLEIN ». Compilé | Gardé (à tester) ; plaque jetée |
 
 ## Mar. 20 oct. 2026
 
