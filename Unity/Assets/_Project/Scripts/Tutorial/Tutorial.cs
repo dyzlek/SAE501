@@ -262,6 +262,16 @@ namespace SAE
             else { Confirming = true; Changed?.Invoke(); }
         }
 
+        // Sauvegarde : le tutoriel était fini (le premier singe a déjà été donné, il est dans la bibliothèque sauvegardée)
+        public static void RestoreDone()
+        {
+            Current = Step.Done;
+            monkeyGiven = true;
+        }
+
+        // Nouvelle partie : le tutoriel recommence
+        public static void Restart() => ResetState();
+
         // Fin du tutoriel, avec le premier singe
         public static void Finish() => GoTo(Step.Done);
 

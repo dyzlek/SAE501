@@ -129,6 +129,13 @@ namespace SAE
         // Une nouvelle partie : un nouvel identifiant tiré au hasard (32 caractères hexadécimaux, comme l'attend le serveur)
         public static void NewGame() => GameId = Guid.NewGuid().ToString("N");
 
+        // Partie reprise (SaveGame) : on garde son identifiant, le classement continue la même ligne
+        public static void ContinueGame(string id)
+        {
+            if (!string.IsNullOrEmpty(id) && id.Length == 32) GameId = id;
+            else NewGame();
+        }
+
         // Une vague vient d'être gagnée : on enregistre la partie sur le casque, puis on l'envoie au serveur
         public static void WaveWon()
         {

@@ -27,6 +27,7 @@ namespace SAE
         // Sans rechargement du domaine (Enter Play Mode rapide), les statiques survivent d'une partie à l'autre : on repart de zéro
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetState() { Started = false; LaunchOnArrival = false; }
+        public static void Restart() => ResetState();   // nouvelle partie (SaveGame.NewGame)
 
         // Appelé par la première scène qui démarre : c'est le niveau où l'on commence
         public static void StartIn(Level level)

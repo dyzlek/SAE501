@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 21 oct. 2026
 
+### Sauvegarde de la partie
+> Autre problème : chaque lancement recrée une nouvelle partie (une nouvelle ligne au classement). J’aimerais reprendre ma partie : fais une sauvegarde.
+
 ### Scores qui n’arrivent pas en base
 > Pourquoi mon nouveau score ne s’enregistre-t-il pas dans la base de données ?
 

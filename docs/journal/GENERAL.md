@@ -36,6 +36,7 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 | 2026-10-19 | **Bonus rapides** : les boss se divisent (boss → 4 normaux, dirigeable → 2 boss), 4 % de bananes dorées (×10), vagues spéciales annoncées (tableau, cloches, cor), une vibration différente par action | Plus de surprise et de lisibilité pour peu de code ; le feedback vibration demandé par le cours (Maxens) |
 | 2026-10-21 | **Journal des optimisations** ([opti.md](../opti.md)) : chaque modification de performance y est notée avec avant / après mesurés. Première : l’aura des singes passe de 2 systèmes de particules à un seul maillage | 72 fps sur le Quest (#35) ; preuves pour l’oral technique et la note d’optimisation |
 | 2026-10-21 | **Classement en ligne** en bonus (POURRAIT) : un serveur PHP + MySQL sur l’espace web de l’IUT de Dylan, le jeu y envoie ses scores ; le classement local reste sur le casque et marche hors ligne. Ce n’est pas du multijoueur (qui reste NE FERA PAS) | Demande de Dylan ; présentable à l’oral comme volet technique |
+| 2026-10-21 | **Sauvegarde automatique** de la partie sur le casque (on reprend où on en était), bouton NOUVELLE PARTIE pour recommencer. Le GDD disait « pas de sauvegarde » : changé en DEVRAIT. Reste interdit : la méta-progression (des bonus qui rendent la partie suivante plus facile) | Demande de Dylan : sans sauvegarde, chaque lancement créait une nouvelle partie au classement |
 
 ## Jalons
 - [ ] Ven. 9 oct. — GDD v1 + prototype gris jouable

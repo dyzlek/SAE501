@@ -25,6 +25,23 @@ namespace SAE
             get { for (int i = 0; i < Count; i++) yield return trees[i]; }
         }
 
+        // Sauvegarde : les arbres plantés repoussent tout de suite, au niveau des améliorations gardées
+        void Start()
+        {
+            var save = SaveGame.Pending;
+            if (save == null) return;
+            while (Count < Mathf.Min(save.trees, trees.Length)) spots[Count++].SetActive(true);
+            if (save.treeLevels != null && save.treeLevels.Length == 3)
+                foreach (var tree in trees)
+                {
+                    tree.frequence.niveau = save.treeLevels[0];
+                    tree.pourriture.niveau = save.treeLevels[1];
+                    tree.valeur.niveau = save.treeLevels[2];
+                }
+        }
+
+        public int[] Levels() => new[] { First.frequence.niveau, First.pourriture.niveau, First.valeur.niveau };
+
         // Planter l'arbre suivant, si on peut le payer
         public bool Buy(Vector3 at)
         {

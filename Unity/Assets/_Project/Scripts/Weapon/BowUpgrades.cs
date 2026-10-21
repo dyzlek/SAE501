@@ -38,6 +38,16 @@ namespace SAE
         static void ResetLevels() => System.Array.Clear(levels, 0, levels.Length);
 
         public static int Level(BowUpgrade u) => levels[(int)u];
+
+        // Sauvegarde (SaveGame) : les paliers, et la remise à zéro d'une nouvelle partie
+        public static int[] Levels() => (int[])levels.Clone();
+        public static void Restore(int[] saved)
+        {
+            ResetLevels();
+            if (saved == null) return;
+            for (int i = 0; i < Mathf.Min(saved.Length, levels.Length); i++) levels[i] = saved[i];
+        }
+        public static void Reset() => ResetLevels();
         public static int MaxLevel(BowUpgrade u) => Prices(u).Length;
         public static bool IsMax(BowUpgrade u) => Level(u) >= MaxLevel(u);
 

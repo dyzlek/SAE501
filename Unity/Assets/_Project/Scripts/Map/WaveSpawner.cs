@@ -50,6 +50,8 @@ namespace SAE
             foreach (var p in MapLayout.PathPoints())
                 path.Add(transform.position + p + Vector3.up * balloonHeight);
             Lives = startLives;
+            Wave = GameState.WavesWon + 1;            // partie reprise (SaveGame) : on repart de la vague suivante
+            Won = GameState.WavesWon >= LastWrittenWave;
             if (Levels.LaunchOnArrival)
             {
                 Levels.LaunchOnArrival = false;
@@ -119,6 +121,7 @@ namespace SAE
                 int reward = 20 + Wave * 10;   // à équilibrer avec la banane (5) et le coffre (25 + 20 par vague vaincue)
                 Economy.Earn(reward);
                 Leaderboard.WaveWon();   // classement local (casque) et en ligne (serveur de l'IUT)
+                SaveGame.Save();         // la partie est gardée sur le casque
                 if (Wave == LastWrittenWave)
                 {
                     Won = true;
