@@ -401,7 +401,8 @@ _Chaque action a maintenant sa vibration, avec un motif différent pour la recon
 | Tutoriel intégré (niveau 1) ✅ | Animations des singes ✅ | 2e et 3e bananiers ✅ | Scénario, monde ouvert |
 | Confort : téléportation, snap turn, 72 fps | Sons ⏳ et **vibrations à chaque action** ✅ | Musique d'ambiance | Déplacement continu |
 | Écran de victoire / défaite clair ⏳ | Équilibrage testé | | |
-| | Boss qui se divise, ballons camouflés, combo de vagues parfaites, annonce des vagues spéciales ⏳ | Brouillard, nuit, pluie sur certaines vagues | Classement en ligne |
+| | Boss qui se divise, ballons camouflés, combo de vagues parfaites, annonce des vagues spéciales ⏳ | Brouillard, nuit, pluie sur certaines vagues | |
+| | | Classement en ligne (bonus : serveur PHP + MySQL de l’IUT, sans multijoueur) ⏳ | |
 | | Bombes à lancer, pluie de flèches de Quincy, vibrations par action ⏳ | Classement gardé entre deux lancements | Coop (deux casques, ou casque + PC) |
 | | Bananes dorées, nouvelles améliorations de l'arc, mur des records, trophées, classement local ⏳ | | |
 

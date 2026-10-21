@@ -12,5 +12,6 @@ namespace SAE
 
         public const float MoneyBoardAngle = -136f;  // la caisse (l'argent), accrochée au mur
         public const float TrophyCabinetAngle = 150f; // l'armoire à trophées, sous la fenêtre de ce mur (WINDOWS dans cabane.py)
+        public const float LeaderboardAngle = 122f;   // le tableau du classement, entre le coffre et l'armoire à trophées
     }
 }

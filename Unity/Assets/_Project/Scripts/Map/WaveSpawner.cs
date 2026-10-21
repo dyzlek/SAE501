@@ -118,6 +118,7 @@ namespace SAE
                 GameState.WavesWon++;
                 int reward = 20 + Wave * 10;   // à équilibrer avec la banane (5) et le coffre (25 + 20 par vague vaincue)
                 Economy.Earn(reward);
+                Leaderboard.WaveWon();   // classement local (casque) et en ligne (serveur de l'IUT)
                 if (Wave == LastWrittenWave)
                 {
                     Won = true;

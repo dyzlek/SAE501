@@ -764,6 +764,12 @@ namespace SAE.EditorTools
             // Derrière à droite, sous la fenêtre : l'armoire à trophées (vagues et bananes)
             BuildTrophyCabinet(env, HubLayout.TrophyCabinetAngle);
 
+            // À côté, au mur : le classement (ICI et MONDE) et le nom du joueur en 3 lettres (LeaderboardBoard se construit seul)
+            var ranking = new GameObject("Classement").transform;
+            ranking.SetParent(env, false);
+            ranking.SetPositionAndRotation(Around(HubLayout.LeaderboardAngle, HubLayout.CabinRadius - 0.3f), Quaternion.Euler(0, HubLayout.LeaderboardAngle, 0));   // +Z = vers le mur
+            ranking.gameObject.AddComponent<LeaderboardBoard>();
+
             BuildDecor(env);
             UseWoodTexture(env);
             return env;
