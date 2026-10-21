@@ -9,6 +9,16 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 - **Trophée gagné** : la coupe apparaît devant le joueur, avec une ardoise « SUCCÈS ! » qui dit comment on l'a eue (« 5 000 bananes récoltées »), une fanfare et une vibration, pendant 5 s. Elle est posée dans le décor et ne suit pas la tête (confort).
 - Fusion de la branche de Nicolas (armoire à trophées), PR [#155](https://github.com/dyzlek/SAE501/pull/155).
 
+- **Classement local et en ligne** (PR [#157](https://github.com/dyzlek/SAE501/pull/157)) : un grand panneau dehors, dans la bananeraie, avec deux colonnes, ICI (sur le casque) et MONDE (base MySQL sur mon espace de l'IUT, `server/classement/`). Testé : les scores arrivent bien dans la base. Il a fallu lancer `migration-noms.sql`, parce que la table venait de la première version.
+- **Noms uniques** : le premier casque qui prend un nom le garde. Le nom se change avec un clavier en cubes, visé au rayon (MODIFIER, puis OK). Le serveur répond RÉSERVÉ ou PRIS.
+- **Sauvegarde automatique** : on reprend sa partie au lancement suivant, et le classement continue la même ligne. Le bouton NOUVELLE PARTIE efface tout, après confirmation.
+
+| | |
+|---|---|
+| ![Le panneau du classement, dehors : ICI et MONDE](../captures/classement-panneau.png) | ![Le clavier pour changer de nom](../captures/classement-clavier.webp) |
+
+![La réponse de l'API en ligne : le score est bien dans la base](../captures/classement-api-json.png)
+
 | | |
 |---|---|
 | ![Orage pendant une vague de boss](../captures/meteo-pluie-carte.png) | ![Les nuages au-dessus du joueur](../captures/meteo-nuages.png) |
