@@ -57,8 +57,8 @@ namespace SAE
     {
         public const int Count = 100;   // la victoire
 
-        // TEST (météo) : un boss à CHAQUE vague pour voir l'orage tout de suite. À remettre à false avant le rendu.
-        const bool TestBossEveryWave = true;
+        // TEST (météo) : un boss à CHAQUE vague pour voir l'orage tout de suite. Remis à false (21 oct.) ; à passer à true pour retester la météo.
+        const bool TestBossEveryWave = false;
 
         static BalloonGroup N(int count, int layers, float interval) => new BalloonGroup(BalloonKind.Normal, count, layers, interval);
         static BalloonGroup R(int count, int layers) => new BalloonGroup(BalloonKind.Rapide, count, layers, 0.5f);
