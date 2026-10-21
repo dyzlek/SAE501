@@ -30,6 +30,11 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 ### Défaite au casino et refus du tutoriel
 > Mets le son de défaite de la roulette plus fort. Et pendant le tutoriel, quand on clique sur quelque chose qui ne suit pas le tutoriel, joue le son d'alerte de l'interface.
 
+### Les singes récolteurs qui se bloquent
+> Sur une nouvelle branche : quand il y a beaucoup de singes récolteurs, ils se bloquent un peu, et avec les 3 bananiers ils vont presque tout le temps au milieu. Il faudrait des zones invisibles devant chaque arbre, où ils vont. Pose-moi des questions. Pour les tests et les captures, mets temporairement les bananiers et les singes au maximum, et confirme-moi que les singes peuvent prendre les bananes dorées.
+>
+> Mes réponses : chaque singe va là où il y a le plus de bananes, avec des points de passage (une zone devant chaque étal, des places autour du panier) au lieu du détour par le milieu, et les bananes dorées en premier. Pour qu'ils suivent la production, entre porter 2 bananes et passer à 6 singes, choisis le mieux.
+
 ## Mar. 20 oct. 2026
 
 ### Le son de la roulette du coffre
