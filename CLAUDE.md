@@ -87,6 +87,9 @@ Le planning vit sur GitHub : [tableau Project](https://github.com/users/dyzlek/p
 - Commandes utiles : `gh project item-add 2 --owner dyzlek --url <url>` puis `gh project item-edit` (champ Status). Si `gh` refuse faute de droit, dire à la personne de lancer `gh auth refresh -s project`.
 - Noter ces actions dans la ligne IA du journal, comme le reste.
 
+## Optimisations (règle n°4)
+Toute modification faite pour les performances (fps, particules, lumières, maillages, textures, appels de dessin…) est notée dans [docs/opti.md](docs/opti.md), **dans le même commit** : le problème, ce qui a été fait, avant / après (chiffres mesurés, sinon « à mesurer »), est-ce que ça a vraiment marché, suggestions. Quand une mesure arrive (test au casque), on complète l'entrée.
+
 ## Workflow Git (GitHub flow)
 - `main` = toujours stable (compile, tourne au casque). **Jamais de commit direct sur main.**
 - Une branche courte par tâche : `feat/<sujet>`, `fix/<sujet>`, `docs/<sujet>`, `art/<sujet>` (1-2 jours max).
