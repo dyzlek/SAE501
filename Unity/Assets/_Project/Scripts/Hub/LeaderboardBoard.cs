@@ -194,19 +194,7 @@ namespace SAE
 
         // Une touche : un cube qu'on vise au rayon (RayPress) ou qu'on touche (HandPress), son texte posé devant
         // (pas dans le cube étiré : il serait déformé). Renvoie le texte, pour pouvoir le changer (MODIFIER / ANNULER).
-        static TextMesh Key(Transform parent, string label, Vector3 pos, float width, Color color, Action action)
-        {
-            var go = Visuals.Solid("Touche " + label, parent, pos, new Vector3(width, KeySize, 0.04f), color);
-            go.AddComponent<KeyButton>().action = action;
-            go.AddComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRSimpleInteractable>();   // après le collider (Solid)
-            go.AddComponent<RayPress>();
-            return Visuals.Text(parent, label, pos + new Vector3(0f, 0f, -0.03f), label.Length > 1 ? 0.055f : 0.08f, Color.white, title: true);
-        }
-
-        class KeyButton : MonoBehaviour, IPressable
-        {
-            public Action action;
-            public void Press() => action?.Invoke();
-        }
+        static TextMesh Key(Transform parent, string label, Vector3 pos, float width, Color color, Action action) =>
+            WorldButton.Create(parent, label, pos, new Vector2(width, KeySize), color, action, label.Length > 1 ? 0.055f : 0.08f);
     }
 }

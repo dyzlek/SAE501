@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 21 oct. 2026
 
+### Menu : options et décor
+> Les options ne marchent pas. Rends le menu plus joli : des mains qui bougent, Quincy, etc., et pas de vide autour.
+
 ### Idée : un menu principal
 > Ajoute l’idée d’un menu principal sous forme de scène (avec des singes animés qui bougent, des ballons, etc.), avec NOUVELLE PARTIE, CONTINUER et OPTIONS. En jeu, un bouton (comme Échap) doit permettre de revenir au menu, comme dans un vrai jeu. Crée aussi l’issue.
 > Suite : fais-le.

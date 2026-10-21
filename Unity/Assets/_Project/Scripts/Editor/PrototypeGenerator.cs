@@ -114,14 +114,30 @@ namespace SAE.EditorTools
             Debug.Log("Prototype généré : " + HubScenePath + ", " + MapScenePath + " et " + MenuScenePath);
         }
 
-        // La scène du menu : une prairie (avec son collider : on ne tombe pas), le décor de la carte autour (palmiers,
-        // champignons, buissons), et MainMenu, qui pose au lancement le titre, l'estrade des singes, les ballons et les boutons.
+        // La scène du menu : le même paysage que la carte (Paysage.glb : prairie, palmiers, montagnes tout autour),
+        // un sol invisible (on ne tombe pas), le décor de la carte (herbes, champignons, buissons), Quincy qui fait coucou,
+        // et MainMenu, qui pose au lancement le titre, l'estrade des singes, les ballons et les boutons.
+        const string QuincyModel = "Assets/_Project/Art/Quincy/FBX/QuincyLvl7_Rigged.fbx";
+
         static void BuildMenu()
         {
             var root = new GameObject("Menu").transform;
             root.position = MenuCenter;
-            Visuals.Solid("Prairie", root, new Vector3(0f, -0.1f, 4f), new Vector3(40f, 0.2f, 40f), Grass1);
+            var ground = Visuals.Solid("Sol", root, new Vector3(0f, -0.1f, 4f), new Vector3(40f, 0.2f, 40f), Grass1);
+            BuildScenery(root, 0f);
+            if (root.Find("Paysage")) ground.GetComponent<Renderer>().enabled = false;   // on voit l'herbe du paysage
             MapDecor.BuildScenery(root, 1f);
+
+            // Quincy, à gauche des boutons : il regarde le joueur (vers -Z) et fait coucou (MenuMonkey, ajouté par MainMenu)
+            var quincy = AssetDatabase.LoadAssetAtPath<GameObject>(QuincyModel);
+            if (quincy)
+            {
+                var holder = new GameObject("Quincy").transform;
+                holder.SetParent(root, false);
+                holder.localPosition = new Vector3(-2.2f, 0.9f, 3.8f);   // centre du modèle : 1,8 m de haut, pieds au sol
+                Visuals.FitModel(quincy, 180f, holder, 1.8f, out _);
+            }
+            else Debug.LogWarning("Menu : modèle de Quincy introuvable (" + QuincyModel + ").");
             root.gameObject.AddComponent<MainMenu>();
         }
 

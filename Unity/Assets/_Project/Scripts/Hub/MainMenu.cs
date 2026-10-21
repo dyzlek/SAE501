@@ -39,6 +39,8 @@ namespace SAE
         {
             BuildTitle();
             BuildStage();
+            BuildQuincy();
+            BuildBalloonBunches();
             for (int i = 0; i < BalloonCount; i++) MenuBalloon.Create(transform, BalloonColors[i % BalloonColors.Length], i);
             BuildButtons();
             options = OptionsPanel.Build(transform, new Vector3(0f, 1.35f, ButtonsZ), CloseOptions);
@@ -67,8 +69,39 @@ namespace SAE
                 float x = (i - (types - 1) / 2f) * 0.95f;
                 var monkey = new Monkey((MonkeyType)i, (Rarity)(i % MonkeyData.LevelCount));
                 var piece = Visuals.MonkeyPiece(monkey, t, new Vector3(x, 0.75f, StageZ - 0.2f + (i % 2) * 0.5f), 0.8f, withLabel: false);
-                piece.AddComponent<MenuMonkey>().phase = i * 0.7f;
+                var dancer = piece.AddComponent<MenuMonkey>();
+                dancer.phase = i * 0.7f;
+                dancer.wave = i % 2 == 0;   // un sur deux fait coucou, les autres dansent les bras le long du corps
             }
+        }
+
+        // Quincy (posé par le générateur, à gauche des boutons) : bras baissés, puis il sautille un peu et fait coucou
+        void BuildQuincy()
+        {
+            var quincy = transform.Find("Quincy");
+            if (!quincy || quincy.childCount == 0) return;
+            Visuals.RestPose(quincy.GetChild(0), quincy);
+            var anim = quincy.gameObject.AddComponent<MenuMonkey>();
+            anim.hopHeight = 0.05f;   // il est grand : il sautille à peine
+            anim.phase = 1.3f;
+        }
+
+        // Deux grappes de ballons de toutes les couleurs, accrochées aux poteaux de l'enseigne (fixes : rien à calculer)
+        void BuildBalloonBunches()
+        {
+            var random = new System.Random(158);
+            for (int side = -1; side <= 1; side += 2)
+                for (int i = 0; i < 9; i++)
+                {
+                    var b = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    Destroy(b.GetComponent<Collider>());
+                    b.name = "Grappe";
+                    b.transform.SetParent(transform, false);
+                    var offset = new Vector3((float)random.NextDouble() - 0.5f, (float)random.NextDouble() * 0.9f, (float)random.NextDouble() * 0.4f);
+                    b.transform.localPosition = new Vector3(side * 2.45f, 3.9f, StageZ + 1.4f) + offset * 0.8f;
+                    b.transform.localScale = new Vector3(0.38f, 0.46f, 0.38f);
+                    b.AddComponent<ColorTint>().Set(BalloonColors[i % BalloonColors.Length]);
+                }
         }
 
         void BuildButtons()
