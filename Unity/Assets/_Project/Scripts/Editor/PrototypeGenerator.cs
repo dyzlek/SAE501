@@ -764,11 +764,6 @@ namespace SAE.EditorTools
             // Derrière à droite, sous la fenêtre : l'armoire à trophées (vagues et bananes)
             BuildTrophyCabinet(env, HubLayout.TrophyCabinetAngle);
 
-            // À côté, au mur : le classement (ICI et MONDE) et le nom du joueur en 3 lettres (LeaderboardBoard se construit seul)
-            var ranking = new GameObject("Classement").transform;
-            ranking.SetParent(env, false);
-            ranking.SetPositionAndRotation(Around(HubLayout.LeaderboardAngle, HubLayout.CabinRadius - 0.3f), Quaternion.Euler(0, HubLayout.LeaderboardAngle, 0));   // +Z = vers le mur
-            ranking.gameObject.AddComponent<LeaderboardBoard>();
 
             BuildDecor(env);
             UseWoodTexture(env);
@@ -1605,6 +1600,13 @@ namespace SAE.EditorTools
                 orchard.spots[i] = spot.gameObject;
             }
             BuildGroveMoneyBoard(env, new Vector3(3.6f, 0f, 1.7f));
+
+            // Le grand panneau du classement, dehors : derrière la roulette, au-delà de la barrière du fond, face à la terrasse.
+            // LeaderboardBoard se construit seul ; +Z local = dos au joueur (comme la caisse).
+            var ranking = new GameObject("Classement").transform;
+            ranking.SetParent(env, false);
+            ranking.localPosition = new Vector3(RouletteSpot.x, 0f, GroveZ1 + 1.2f);
+            ranking.gameObject.AddComponent<LeaderboardBoard>();
 
             // La roulette de Nicolas (bêta-test), dans la partie agrandie à droite, tournée vers le joueur
             BuildRoulette(env, RouletteSpot, 0f);

@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 21 oct. 2026
 
+### Classement dehors, en grand
+> Mets le tableau du classement dehors, en grand, et fais en sorte qu’il soit joli.
+
 ### Classement local et en ligne
 > J’aimerais faire un classement local et en ligne (donc une base de données, etc.). J’ai une base MySQL sur le serveur de l’IUT (configuration de mon projet Carnet, mot de passe non recopié ici).
 > Suite : le site est https://web-mmi2.iutbeziers.fr/~dylan.belledent/ et phpMyAdmin http://web-mmi2.iutbeziers.fr/my/.
