@@ -32,7 +32,7 @@ namespace SAE
             Busy = true;
             Sounds.Play(Sounds.Teleportation, volume: 0.35f);   // le fichier est très fort : on le baisse
             if (!coverStarted) yield return Slide(true, Duration);
-            yield return new WaitForSeconds(0.15f);
+            yield return new WaitForSecondsRealtime(0.15f);   // temps réel : le voile marche aussi jeu en pause (menu)
             move();
             yield return null;                    // le joueur est bien arrivé
             yield return Slide(false, Duration);
@@ -46,7 +46,7 @@ namespace SAE
             var c = Get();
             if (!c) yield break;
             c.gameObject.SetActive(true);
-            for (float t = 0f; t < 1f; t += Time.deltaTime / duration)
+            for (float t = 0f; t < 1f; t += Time.unscaledDeltaTime / duration)
             {
                 Place(c, cover ? t : 1f - t);
                 yield return null;

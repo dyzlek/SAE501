@@ -30,6 +30,7 @@ namespace SAE.EditorTools
         const string Folder = "Assets/_Project/Scenes";
         const string HubScenePath = Folder + "/Hub.unity";
         const string MapScenePath = Folder + "/Labyrinthe.unity";   // même nom que Levels.MapScene
+        const string MenuScenePath = Folder + "/Menu.unity";         // même nom que Levels.MenuScene
         const string OldGroveScenePath = Folder + "/Bananeraie.unity";   // l'ancienne scène de la bananeraie, supprimée
         const string OldScenePath = Folder + "/Jeu.unity";          // l'ancienne scène unique, supprimée à la génération
         const float BoardTile = 0.2f;    // plateau de 1,6 m : l'élément principal du hub
@@ -41,6 +42,7 @@ namespace SAE.EditorTools
         static readonly Vector3 HandOffset = new Vector3(0f, -0.01f, -0.06f);   // la paume, un peu derrière l'avant de la manette
         static readonly Vector3 BowInHand = new Vector3(0.07f, 0f, 0.02f);      // la poignée de l'arc, sur le côté intérieur de la main : la flèche passe à côté
         const float HandTilt = 35f;   // les mains tournées pouce vers le haut, comme quand on tient les manettes (pas paume à plat)
+        static readonly Vector3 MenuCenter = new Vector3(0f, 0f, -1000f);   // le menu principal, loin derrière le hub
         static readonly Vector3 MapCenter = new Vector3(0f, 0f, 1000f);   // les deux scènes sont chargées ensemble : la carte est loin, hors de vue du hub
 
         static readonly Color Floor = new Color(0.35f, 0.35f, 0.38f);
@@ -79,7 +81,14 @@ namespace SAE.EditorTools
             BuildPresence(Level.Carte, mapSpawn);   // pas de joueur ici : c'est celui du hub qui vient
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), MapScenePath);
 
-            // 2. Le hub, et la bananeraie derrière sa porte
+            // 2. Le menu principal (#158) : une prairie, le décor de la carte autour, et MainMenu qui construit le reste au lancement
+            NewLevelScene();
+            var menuSpawn = Spawn("Spawn Menu", MenuCenter, Level.Menu);   // regard vers +Z, vers les boutons et l'estrade
+            BuildMenu();
+            BuildPresence(Level.Menu, menuSpawn);
+            EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), MenuScenePath);
+
+            // 3. Le hub, et la bananeraie derrière sa porte
             NewLevelScene();
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(OldGroveScenePath)) AssetDatabase.DeleteAsset(OldGroveScenePath);
             var hubSpawn = Spawn("Spawn Hub", Vector3.zero, Level.Hub);
@@ -95,9 +104,25 @@ namespace SAE.EditorTools
 
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), HubScenePath);
             // Le hub en premier : c'est la scène de départ du jeu
-            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(HubScenePath, true), new EditorBuildSettingsScene(MapScenePath, true) };
+            EditorBuildSettings.scenes = new[]
+            {
+                new EditorBuildSettingsScene(HubScenePath, true),
+                new EditorBuildSettingsScene(MapScenePath, true),
+                new EditorBuildSettingsScene(MenuScenePath, true),
+            };
             PlayerModeMenu.Apply();   // VR ou PC, selon le menu SAE → Mode de jeu
-            Debug.Log("Prototype généré : " + HubScenePath + " et " + MapScenePath);
+            Debug.Log("Prototype généré : " + HubScenePath + ", " + MapScenePath + " et " + MenuScenePath);
+        }
+
+        // La scène du menu : une prairie (avec son collider : on ne tombe pas), le décor de la carte autour (palmiers,
+        // champignons, buissons), et MainMenu, qui pose au lancement le titre, l'estrade des singes, les ballons et les boutons.
+        static void BuildMenu()
+        {
+            var root = new GameObject("Menu").transform;
+            root.position = MenuCenter;
+            Visuals.Solid("Prairie", root, new Vector3(0f, -0.1f, 4f), new Vector3(40f, 0.2f, 40f), Grass1);
+            MapDecor.BuildScenery(root, 1f);
+            root.gameObject.AddComponent<MainMenu>();
         }
 
         // La « présence » d'un niveau : ce qui n'est allumé que quand on y est (le soleil, les réglages d'image),

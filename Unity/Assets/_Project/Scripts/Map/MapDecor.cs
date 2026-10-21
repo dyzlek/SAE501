@@ -39,6 +39,14 @@ namespace SAE
             if (withBushes) BuildBushes(parent, scale, random);
         }
 
+        // Le décor seul, sans chemin ni portails (le menu principal) : herbes, fleurs, champignons, buissons
+        public static void BuildScenery(Transform parent, float scale)
+        {
+            var random = new System.Random(501);
+            BuildGrassDecor(parent, scale, random);
+            BuildBushes(parent, scale, random);
+        }
+
         // Le chemin : une bande de gravier, et dessus des dalles un peu de travers, de trois gris.
         static void BuildPath(Transform parent, float scale, System.Random random)
         {

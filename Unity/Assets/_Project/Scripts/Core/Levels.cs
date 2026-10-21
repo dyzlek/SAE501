@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 
 namespace SAE
 {
-    public enum Level { Hub, Carte }
+    public enum Level { Hub, Carte, Menu }   // Menu ajouté à la fin : les niveaux déjà enregistrés dans les scènes gardent leur numéro
 
     // Les deux niveaux du jeu, chacun dans sa scène : Hub (la cabane, et la bananeraie derrière sa porte) et Labyrinthe
     // (la carte), loin l'un de l'autre. Les deux scènes restent chargées (la seconde est chargée EN PLUS de la première, chargement additif) : le monde
@@ -16,6 +16,7 @@ namespace SAE
     {
         public const string HubScene = "Hub";
         public const string MapScene = "Labyrinthe";
+        public const string MenuScene = "Menu";        // le menu principal (#158), chargé lui aussi en plus du hub
 
         public static Level Current { get; private set; }
         public static event System.Action<Level> Changed;   // on vient d'arriver dans ce niveau
@@ -37,7 +38,7 @@ namespace SAE
             Current = level;
         }
 
-        public static string SceneOf(Level level) => level == Level.Hub ? HubScene : MapScene;
+        public static string SceneOf(Level level) => level switch { Level.Hub => HubScene, Level.Carte => MapScene, _ => MenuScene };
 
         // Aller dans un niveau : sa scène est chargée si elle ne l'est pas encore (elle s'allumera toute seule),
         // sinon on éteint la présence de l'autre et on allume la sienne (le joueur y est déplacé).

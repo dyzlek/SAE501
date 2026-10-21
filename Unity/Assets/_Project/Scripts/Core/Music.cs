@@ -9,7 +9,8 @@ namespace SAE
     // Les morceaux sont dans Resources/Sons/Musique (voir Sounds) ; s'il en manque un, la musique d'avant continue.
     public class Music : MonoBehaviour
     {
-        const float Volume = 0.25f;     // bas : la musique ne doit pas couvrir les sons du jeu
+        const float BaseVolume = 0.25f; // bas : la musique ne doit pas couvrir les sons du jeu
+        static float Volume => BaseVolume * Options.MusicVolume;   // × le réglage MUSIQUE du menu OPTIONS
         const float FadeTime = 2f;      // secondes pour passer d'une musique à l'autre
 
         AudioSource ambiance, wave, boss;

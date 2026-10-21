@@ -83,6 +83,7 @@ namespace SAE
         // Petite vibration dans la manette qui contient 'hand' : le retour « c'est fait » de chaque action.
         public static void Buzz(Transform hand, float strength = 0.5f, float duration = 0.08f)
         {
+            if (!Options.Vibrations) return;   // coupées dans le menu OPTIONS
             var haptics = hand ? hand.GetComponentInParent<HapticImpulsePlayer>() : null;
             if (haptics) haptics.SendHapticImpulse(strength, duration);
         }
