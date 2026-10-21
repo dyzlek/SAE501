@@ -12,6 +12,8 @@ namespace SAE
     //   transperçante (BowUpgrades.PassThrough) : le nombre de ballons qu'elle traverse (tir collatéral).
     // Sans amélioration : 1 couche sur 1 ballon, puis elle disparaît. Si elle touche autre chose qu'un ballon, elle s'y plante.
     // Explosive (BowUpgrades.Explosive) : à chaque ballon touché, une onde perce aussi les ballons voisins.
+    // Rebond (BowUpgrades.Bounces) : au lieu de disparaître après son dernier ballon, elle file tout droit vers le ballon
+    // le plus proche, autant de fois que de rebonds. Givrante (BowUpgrades.Frost) : chaque ballon touché est ralenti.
     [RequireComponent(typeof(Rigidbody))]
     public class Arrow : MonoBehaviour
     {
@@ -23,6 +25,9 @@ namespace SAE
         TrailRenderer trail;
         bool flying;
         int balloonsLeft;
+        int bouncesLeft;
+        Balloon bounceTarget;        // après un rebond : le ballon visé, suivi jusqu'au contact
+        float bounceSpeed;
         readonly HashSet<Balloon> touched = new HashSet<Balloon>();   // un ballon n'est touché qu'une fois par flèche
 
         void Awake()
@@ -46,6 +51,8 @@ namespace SAE
         {
             flying = true;
             balloonsLeft = BowUpgrades.PassThrough;   // lu au tir : une amélioration achetée compte dès la flèche suivante
+            bouncesLeft = BowUpgrades.Bounces;
+            bounceTarget = null;
             body.isKinematic = false;
             body.useGravity = true;
             body.linearVelocity = velocity;
@@ -56,6 +63,9 @@ namespace SAE
 
         void FixedUpdate()
         {
+            // Après un rebond, elle file droit sur le centre du ballon visé, même s'il a avancé (sinon elle passait à côté)
+            if (flying && bounceTarget)
+                body.linearVelocity = (Center(bounceTarget) - transform.position).normalized * bounceSpeed;
             // La flèche regarde toujours dans le sens où elle va : elle suit sa courbe
             if (flying && body.linearVelocity.sqrMagnitude > 0.5f)
                 body.MoveRotation(Quaternion.LookRotation(body.linearVelocity));
@@ -76,8 +86,45 @@ namespace SAE
                 if (shooterHand) Sounds.Quincy();   // de temps en temps, Quincy parle (flèches du joueur seulement)
             }
             balloon.Pop(BowUpgrades.Pierce);
+            if (BowUpgrades.Frost) balloon.Slow(BowUpgrades.FrostFactor, BowUpgrades.FrostSeconds);
             if (BowUpgrades.Explosive) Explode(center, balloon);
-            if (--balloonsLeft <= 0) Destroy(gameObject);   // plus de ballon à traverser : la flèche est détruite
+            balloonsLeft--;
+            // Le rebond passe AVANT la traversée : avec TRANSPERÇANTE, la flèche ne rebondissait qu'après son dernier ballon
+            // traversé (8 au max) et finissait plantée dans l'herbe. Maintenant, chaque ballon touché la renvoie vers le suivant.
+            if (bouncesLeft > 0 && Bounce(center)) { bouncesLeft--; balloonsLeft = Mathf.Max(balloonsLeft, 1); return; }
+            if (balloonsLeft > 0) return;   // TRANSPERÇANTE : elle continue tout droit
+            Destroy(gameObject);   // plus de ballon à traverser ni de rebond : la flèche est détruite
+        }
+
+        // Rebond : vers le ballon pas encore touché le plus proche, en ligne droite (sans gravité : elle ne rate pas sa cible)
+        bool Bounce(Vector3 from)
+        {
+            Balloon next = null;
+            float best = BowUpgrades.BounceRange * BowUpgrades.BounceRange;
+            foreach (var b in Balloon.All)
+            {
+                if (touched.Contains(b)) continue;
+                float d = (b.transform.position - from).sqrMagnitude;
+                if (d < best) { best = d; next = b; }
+            }
+            if (!next) return false;
+            bounceTarget = next;
+            bounceSpeed = Mathf.Max(body.linearVelocity.magnitude, 15f);
+            body.useGravity = false;
+            body.linearVelocity = (Center(next) - transform.position).normalized * bounceSpeed;
+            // On voit le rebond : un petit anneau doré, une traînée plus longue et bleu glacier, un « tic » aigu
+            Shockwave.Spawn(from, 0.5f, new Color(1f, 0.85f, 0.3f), false);
+            trail.time = 0.35f;
+            trail.startColor = new Color(0.5f, 0.9f, 1f, 0.9f);
+            Sounds.Play(Sounds.Bouton, transform.position, 0.5f, 1.6f);
+            return true;
+        }
+
+        // Le centre d'un ballon : celui de son collider (le point d'ancrage du modèle peut être en bas)
+        static Vector3 Center(Balloon b)
+        {
+            var col = b.GetComponentInChildren<Collider>();
+            return col ? col.bounds.center : b.transform.position;
         }
 
         // L'onde de l'explosion : les ballons les plus proches de celui touché, dans le rayon, perdent des couches.

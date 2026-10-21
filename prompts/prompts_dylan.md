@@ -4,6 +4,11 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Jeu. 22 oct. 2026
 
+### Améliorations de l’arc (#138)
+> Maintenant, fais l’issue #138 (nouvelles améliorations de l’arc, comme les flèches qui rebondissent).
+> Suite : avec le tir triple, etc., ça ne marche pas : le rebond ne se voit pas.
+> Suite : ça ne marche toujours pas ; je tire mes trois flèches, mais quand elles touchent un ballon, il n’y a pas de rebond (capture de la Console envoyée).
+
 ### Tout est rose dans le build
 > Le tableau des scores, la scène du menu, etc. : quand je fais Build and Run, ça bugue vraiment, tout est en rose, donc je ne peux ni voir ni vraiment interagir.
 

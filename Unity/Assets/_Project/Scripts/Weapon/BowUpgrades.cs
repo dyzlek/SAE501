@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace SAE
 {
-    public enum BowUpgrade { Perforation, Transpercante, TirTriple, Explosion }
+    public enum BowUpgrade { Perforation, Transpercante, TirTriple, Explosion, Rebond, Givrante }
 
     // Les améliorations de l'arc, toutes les valeurs au même endroit (comme MonkeyData) pour équilibrer facilement.
     // Elles valent pour l'arc VR comme pour l'arc PC : c'est le joueur qui progresse, pas un objet.
@@ -30,6 +30,16 @@ namespace SAE
         static readonly float[] explosionRadius = { 0f, 1f, 1.5f, 2f, 2.5f, 3f };  // rayon de l'onde, en mètres
         static readonly int[] explosionLayers = { 0, 1, 1, 2, 2, 3 };              // couches percées sur chaque ballon de l'onde
         static readonly int[] explosionPrices = { 150, 300, 500, 800, 1300 };
+
+        // Rebond (#138) : après son dernier ballon, la flèche file vers le ballon le plus proche (dans BounceRange m)
+        static readonly int[] bounces = { 0, 1, 2, 3, 5 };
+        static readonly int[] bouncePrices = { 200, 400, 700, 1100 };
+        public const float BounceRange = 6f;
+
+        // Givrante (#138) : chaque ballon touché est ralenti (× vitesse) pendant quelques secondes (pas les blindés)
+        static readonly float[] frostFactor = { 1f, 0.7f, 0.55f, 0.4f };
+        static readonly float[] frostSeconds = { 0f, 1.5f, 2f, 3f };
+        static readonly int[] frostPrices = { 150, 350, 650 };
 
         static readonly int[] levels = new int[System.Enum.GetValues(typeof(BowUpgrade)).Length];
 
@@ -71,13 +81,19 @@ namespace SAE
         public static int ExplosionBalloons => explosionBalloons[Level(BowUpgrade.Explosion)];
         public static float ExplosionRadius => explosionRadius[Level(BowUpgrade.Explosion)];
         public static int ExplosionLayers => explosionLayers[Level(BowUpgrade.Explosion)];
+        public static int Bounces => bounces[Level(BowUpgrade.Rebond)];
+        public static bool Frost => Level(BowUpgrade.Givrante) > 0;
+        public static float FrostFactor => frostFactor[Level(BowUpgrade.Givrante)];
+        public static float FrostSeconds => frostSeconds[Level(BowUpgrade.Givrante)];
 
         static int[] Prices(BowUpgrade u) => u switch
         {
             BowUpgrade.Perforation => piercePrices,
             BowUpgrade.Transpercante => passPrices,
             BowUpgrade.TirTriple => triplePrices,
-            _ => explosionPrices,
+            BowUpgrade.Explosion => explosionPrices,
+            BowUpgrade.Rebond => bouncePrices,
+            _ => frostPrices,
         };
     }
 }
