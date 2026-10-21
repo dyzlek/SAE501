@@ -88,8 +88,11 @@ namespace SAE
             balloon.Pop(BowUpgrades.Pierce);
             if (BowUpgrades.Frost) balloon.Slow(BowUpgrades.FrostFactor, BowUpgrades.FrostSeconds);
             if (BowUpgrades.Explosive) Explode(center, balloon);
-            if (--balloonsLeft > 0) return;
-            if (bouncesLeft > 0 && Bounce(center)) { bouncesLeft--; balloonsLeft = 1; return; }
+            balloonsLeft--;
+            // Le rebond passe AVANT la traversée : avec TRANSPERÇANTE, la flèche ne rebondissait qu'après son dernier ballon
+            // traversé (8 au max) et finissait plantée dans l'herbe. Maintenant, chaque ballon touché la renvoie vers le suivant.
+            if (bouncesLeft > 0 && Bounce(center)) { bouncesLeft--; balloonsLeft = Mathf.Max(balloonsLeft, 1); return; }
+            if (balloonsLeft > 0) return;   // TRANSPERÇANTE : elle continue tout droit
             Destroy(gameObject);   // plus de ballon à traverser ni de rebond : la flèche est détruite
         }
 
