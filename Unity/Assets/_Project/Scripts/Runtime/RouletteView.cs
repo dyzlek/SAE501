@@ -11,7 +11,7 @@ namespace Sae501.Coffres
     // Le canvas est en World Space (dans le décor) : utilisable à l'écran comme en VR.
     // Même habillage que les ardoises du hub : cadre en bois, fond ardoise, barre et titre dorés, polices du jeu.
     // Un « tic » à chaque case qui passe sous la barre : très rapide au début, de plus en plus espacé à la fin (le suspense).
-    // Le son est fabriqué par le code (un clic sec très court), sans fichier audio.
+    // Le son est fabriqué par le code (un clic sec très court, Sounds.Tick), le même que la roue du casino.
     public class RouletteView : MonoBehaviour
     {
         [Header("Taille (en pixels de canvas, 1 px = 2 mm)")]
@@ -35,7 +35,6 @@ namespace Sae501.Coffres
         Text message;
         Sprite rainbow;
         AudioSource tickSource;
-        static AudioClip tick;
         int lastTickIndex;             // la case qui était sous la barre au dernier tic
 
         float Pitch => itemWidth + gap;
@@ -159,29 +158,8 @@ namespace Sae501.Coffres
             int index = IndexUnderBar();
             if (index == lastTickIndex) return;
             lastTickIndex = index;
-            if (!tick) tick = MakeTick();
             tickSource.pitch = Random.Range(0.94f, 1.06f);
-            tickSource.PlayOneShot(tick);
-        }
-
-        // Le tic : 30 ms d'un son aigu mêlé d'un peu de souffle, qui s'éteint très vite (comme un clic en plastique)
-        static AudioClip MakeTick()
-        {
-            const int rate = 44100;
-            int length = (int)(0.03f * rate);
-            var data = new float[length];
-            var noise = new System.Random(7);
-            for (int i = 0; i < length; i++)
-            {
-                float t = i / (float)rate;
-                float fade = Mathf.Exp(-t * 180f);
-                float tone = 0.5f * Mathf.Sin(2f * Mathf.PI * 2400f * t) + 0.25f * Mathf.Sin(2f * Mathf.PI * 900f * t);
-                float breath = 0.35f * (float)(noise.NextDouble() * 2.0 - 1.0);
-                data[i] = (tone + breath) * fade * 0.8f;
-            }
-            var clip = AudioClip.Create("Tic", length, 1, rate, false);
-            clip.SetData(data, 0);
-            return clip;
+            tickSource.PlayOneShot(SAE.Sounds.Tick);
         }
 
         // Position X de la bande pour que la case 'index' (décalée de 'offset') soit sous la barre.

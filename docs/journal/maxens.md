@@ -2,6 +2,57 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Mer. 21 oct. 2026
+- **Fait : les sons du jeu** (issue #34). J'ai rassemblé les sons, surtout tirés de Bloons TD6 (on assume de reprendre l'univers : le jeu ne sera pas présenté aux Pégases), et ils sont branchés dans le jeu :
+
+  | Moment | Son |
+  |---|---|
+  | Vague de boss lancée | `TiletypeBattleStandard` (remplace les cloches) |
+  | Le boss entre / le dirigeable entre | `TiletypeBattleMiniBoss` / `TiletypeBattleBoss` (remplace le cor) |
+  | Vague gagnée / victoire à la 100e | `LegendsVictoryJingle` / `UIVictoryOdyssey` |
+  | Vague perdue / vie perdue | `UIDefeat` / `LegendsLifeLost` |
+  | Amélioration de l'arc / dernier palier | une des 3 phrases de Quincy / `UpgradeQuincyMaxLevel` |
+  | Flèche qui touche un ballon | la voix de Quincy, **pas à chaque fois** : 1 chance sur 8, jamais deux fois en moins de 10 s ; à coup sûr quand un boss éclate |
+  | Fusion de deux singes | `TowerLevelUp` |
+  | Coffre : ouverture, fermeture, singe obtenu | `UIChestOpen`, `UIChestClose`, `LegendsArtifactExtract` |
+  | Banane vendue (dans le panier) | `LegendsItemCollected`, plus aigu et plus fort pour une dorée |
+  | Achat refusé (pas assez d'argent) | `UIAlert`, pour tous les achats du jeu |
+  | Bouton appuyé (VR et PC) | un des deux clics, au hasard |
+  | Téléportation (portes, SE TP, HUB) | un « whoosh » |
+  | Fléchette en plein centre de la cible de la cabane | un klaxon : le **petit easter egg** |
+
+  - **musique** : `Party Time` en fond tout le temps, remplacée en fondu par `Primal One` tant qu'un boss ou un dirigeable est en vie. Les deux morceaux étaient au format de la Wii (`.brstm`) : convertis en `.wav` (on ne garde que la partie qui boucle, pour qu'ils tournent sans coupure), lus en streaming, volume bas ;
+  - **comment c'est rangé** : `Resources/Sons/<Catégorie>/<Son>/`, un dossier = un son (plusieurs fichiers = un tiré au hasard). Nouveau script `Core/Sounds.cs` (tous les noms de sons au même endroit, `Sounds.Play(son, endroit)` : 3D s'il y a un endroit, 2D sinon) et `Core/Music.cs`. Un son qui manque ne fait rien : on pourra ajouter les derniers sans toucher au code.
+  - **Reste à trouver** : musique des vagues, ballon qui éclate, tir de l'arc, LANCER, pose d'un singe (et la tension de l'arc, facultatif).
+- **Corrigé après mon test en jeu :**
+  - **les sons arrivaient avec un léger retard** (surtout la téléportation et la fusion) : beaucoup de fichiers commencent par un silence, jusqu'à 180 ms (111 ms pour le whoosh). Ce silence est maintenant **sauté automatiquement** à la lecture (`Sounds.Start`), pour tous les sons, même ceux qu'on ajoutera ;
+  - **la téléportation était trop forte** : jouée à 35 % ;
+  - **un seul son pour toutes les bananes vendues** (celui de la dorée), joué plus aigu et plus fort pour une banane dorée ; le dossier s'appelle maintenant `Bananes/Vendue` ;
+  - **trois musiques selon le moment** : l'ambiance pendant la préparation, une **musique de vague** pendant l'attaque (dossier `Musique/Vague`, encore vide : tant qu'il l'est, l'ambiance continue), la musique du boss tant qu'un boss est en vie. Fondu de 2 s entre elles.
+  - Testé en Play via Unity MCP : téléportation lue à partir de 111 ms, fusion à partir de 38 ms, banane plus aiguë, musique d'ambiance qui tourne. Aucune erreur.
+- **Fait : les derniers sons.**
+  - **ballon qui éclate** : deux sons (`Ballon_Pop`, `Ballon_Eclatement`), un au hasard à chaque ballon, avec une hauteur qui varie un peu. **Au plus 3 par image** : quand les singes éclatent toute une file d'un coup, ça évite la cacophonie. Un boss qui éclate joue le même son, plus grave et plus fort ;
+  - **tir de l'arc** : mon fichier contenait **deux tirs** : on ne garde que le premier (de 0,12 à 0,50 s, avec un petit fondu), enregistré en `Arc_Tir.wav`. Joué au lâcher de la corde, hauteur légèrement variable ;
+  - **tension de l'arc** : quand la flèche s'encoche (à voir si on le garde) ;
+  - **singe posé** sur le plateau (la fusion garde son propre son) ;
+  - **musiques** : **Primal One** pendant les vagues, **Onslaught** (converti du `.brstm`) pendant les boss, Party Time pendant la préparation.
+  - Testé en Play via Unity MCP : 10 ballons éclatés d'un coup donnent bien 3 sons ; préparation → Party Time, vague lancée → Primal One, boss sur la piste → Onslaught, en fondu. Aucune erreur.
+- **Fait : les sons du casino** (la roulette de la bananeraie n'avait que le clic des boutons), sans nouveau fichier :
+  - **un tic à chaque case qui passe sous la bille**, rapide au début puis de plus en plus espacé : le même tic que la roulette du coffre, joué plus grave (une bille sur du bois). Le tic est maintenant fabriqué à un seul endroit (`Sounds.Tick`) pour les deux roulettes ;
+  - **mise gagnée** : le son du singe obtenu, ou le jingle de vague gagnée pour le vert (×35) ; **mise perdue** : le son de vie perdue (d'abord à 60 %, trop discret : remis à 100 % après mon test).
+  - Testé en Play via Unity MCP : la roue tourne avec ses tics, et au noir gagnant (+22 bananes) le son se joue à l'arrêt de la bille. Aucune erreur.
+- **Fait : le son d'alerte dans le tutoriel.** Quand on fait quelque chose que le tutoriel ne demande pas encore (ouvrir le coffre trop tôt, appuyer sur un autre bouton…), le tableau tremblait sans bruit : maintenant le son d'alerte (`UIAlert`) retentit aussi. Branché à un seul endroit (`Tutorial.Refuse`), il vaut pour tous les refus.
+  - Testé en Play via Unity MCP : au début du tutoriel, toucher le coffre est refusé et joue l'alerte.
+
+### IA
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude Code | Conversion des musiques `.brstm` en `.wav` (petit convertisseur Python), lecteur de sons et de musique, branchement de tous les sons dans le jeu | Gardé |
+| Claude Code | Corrections après mon test : silence de début sauté, téléportation moins forte, même son pour toutes les bananes, musique de vague prévue | Gardé |
+| Claude Code | Derniers sons rangés et branchés (ballons, tir coupé au premier tir, tension, singe posé), musiques des vagues et des boss | Gardé |
+| Claude Code | Sons du casino : tic de la roue (partagé avec le coffre), gain et perte | Gardé |
+| Claude Code | Son de perte du casino plus fort, son d'alerte quand le tutoriel refuse une action | Gardé |
+
 ## Mar. 20 oct. 2026
 - **Fait : le son de la roulette du coffre.** Je ne trouvais pas de bon son en ligne, donc il est fabriqué par le code, comme les cloches des vagues de boss :
   - un **petit « tic »** (30 ms, un clic sec et aigu) **à chaque case qui passe sous la barre dorée**. Comme la roulette démarre très vite puis ralentit, les tics suivent : une rafale au début, puis de plus en plus espacés jusqu'au singe tiré. C'est ce qui fait monter le suspense, comme les caisses de CS ;

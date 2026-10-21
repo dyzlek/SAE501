@@ -764,6 +764,7 @@ namespace SAE.EditorTools
             // Derrière à droite, sous la fenêtre : l'armoire à trophées (vagues et bananes)
             BuildTrophyCabinet(env, HubLayout.TrophyCabinetAngle);
 
+
             BuildDecor(env);
             UseWoodTexture(env);
             return env;
@@ -1599,6 +1600,15 @@ namespace SAE.EditorTools
                 orchard.spots[i] = spot.gameObject;
             }
             BuildGroveMoneyBoard(env, new Vector3(3.6f, 0f, 1.7f));
+
+            // Le grand panneau du classement, dehors : dans le pré, juste après la barrière de droite (côté roulette et panier),
+            // tourné vers la terrasse : on le voit en face en regardant vers la prairie.
+            // LeaderboardBoard se construit seul ; +Z local = dos au joueur (comme la caisse).
+            var ranking = new GameObject("Classement").transform;
+            ranking.SetParent(env, false);
+            ranking.localPosition = new Vector3(GroveX1 + 1.6f, 0f, 0f);
+            ranking.localRotation = Quaternion.LookRotation(Vector3.right);   // son dos vers le pré, l'ardoise vers la terrasse
+            ranking.gameObject.AddComponent<LeaderboardBoard>();
 
             // La roulette de Nicolas (bêta-test), dans la partie agrandie à droite, tournée vers le joueur
             BuildRoulette(env, RouletteSpot, 0f);

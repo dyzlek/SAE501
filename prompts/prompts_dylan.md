@@ -4,6 +4,27 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 21 oct. 2026
 
+### Journal et fusion des sons de Maxens
+> Mets à jour mon journal (avec ces captures) et fusionne avec ce que Maxens a fait (#152).
+
+### Sauvegarde de la partie
+> Autre problème : chaque lancement recrée une nouvelle partie (une nouvelle ligne au classement). J’aimerais reprendre ma partie : fais une sauvegarde.
+
+### Scores qui n’arrivent pas en base
+> Pourquoi mon nouveau score ne s’enregistre-t-il pas dans la base de données ?
+
+### Noms uniques au classement
+> Comment faire pour que personne ne puisse reprendre le même nom ? Pourquoi ne pas prendre simplement le nom de l’appareil, et le changer avec un clavier virtuel si la personne le veut ?
+> Suite : oui (nom réservé par casque, nom par défaut, clavier virtuel).
+
+### Classement dehors, en grand
+> Mets le tableau du classement dehors, en grand, et fais en sorte qu’il soit joli.
+> Suite : mets le panneau là (dans le pré, après la barrière de la terrasse, capture à l’appui).
+
+### Classement local et en ligne
+> J’aimerais faire un classement local et en ligne (donc une base de données, etc.). J’ai une base MySQL sur le serveur de l’IUT (configuration de mon projet Carnet, mot de passe non recopié ici).
+> Suite : le site est https://web-mmi2.iutbeziers.fr/~dylan.belledent/ et phpMyAdmin http://web-mmi2.iutbeziers.fr/my/.
+
 ### Compteur de singes sur le tableau de la vague
 > Il est trop petit, et je ne veux pas de pancarte : mets-le plutôt en dessous, sur ce tableau (celui de la vague).
 

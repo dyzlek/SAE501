@@ -152,7 +152,7 @@ namespace SAE
             if (popped == 0) return pierce;
 
             layers -= popped;
-            if (layers <= 0) { Split(); Destroy(gameObject); }
+            if (layers <= 0) { Sounds.Pop(transform.position); Split(); Destroy(gameObject); }
             else UpdateColor();
             return popped * cost;
         }
@@ -173,7 +173,9 @@ namespace SAE
             if (count == 0 || !spawner) return;
             for (int i = 0; i < count; i++) spawner.SpawnSplit(kind, childLayers, this, i * SplitSpacing);
             Shockwave.Spawn(transform.position, transform.localScale.x * 1.5f);
+            Sounds.Play(Sounds.BallonEclate, transform.position, 1f, 0.6f);   // le même « pop », plus grave et plus fort
             Haptics.PlayBoth(Haptics.BossPop);
+            Sounds.Quincy(sure: true);   // Quincy salue le boss abattu
         }
 
         // Un petit ballon né d'un boss : il reprend la piste là où le boss a éclaté, 'back' mètres en arrière.

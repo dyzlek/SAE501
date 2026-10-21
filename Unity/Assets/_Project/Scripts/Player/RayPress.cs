@@ -69,6 +69,7 @@ namespace SAE
             if (target == null) return;
             bool done = Tutorial.TryPress(target);   // pendant le tutoriel, seul ce qu'il demande est permis
             PlayerRig.Buzz(hand, done ? 0.6f : 0.15f);
+            if (done) Sounds.Play(Sounds.Bouton, transform.position);
         }
     }
 }

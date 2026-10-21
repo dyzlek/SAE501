@@ -38,6 +38,7 @@ namespace SAE
             var action = Placement.Evaluate(pos, out _);
             if (action != PlacementAction.Place && action != PlacementAction.Fuse) return false;
             Placement.Apply(pos);
+            if (action == PlacementAction.Place) Sounds.Play(Sounds.SingePose, point, 0.7f);   // la fusion a son propre son
             return true;
         }
 

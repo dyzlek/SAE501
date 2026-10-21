@@ -167,7 +167,12 @@ namespace SAE
             return false;
         }
 
-        public static void Refuse() => Refused?.Invoke();
+        // Une action qui ne suit pas le tutoriel : le tableau tremble (Refused) et le son d'alerte retentit
+        public static void Refuse()
+        {
+            Sounds.Play(Sounds.AchatRefuse);
+            Refused?.Invoke();
+        }
 
         // --- Les événements du jeu qui comptent pour le tutoriel ---
 
@@ -261,6 +266,16 @@ namespace SAE
             if (Confirming) Finish();
             else { Confirming = true; Changed?.Invoke(); }
         }
+
+        // Sauvegarde : le tutoriel était fini (le premier singe a déjà été donné, il est dans la bibliothèque sauvegardée)
+        public static void RestoreDone()
+        {
+            Current = Step.Done;
+            monkeyGiven = true;
+        }
+
+        // Nouvelle partie : le tutoriel recommence
+        public static void Restart() => ResetState();
 
         // Fin du tutoriel, avec le premier singe
         public static void Finish() => GoTo(Step.Done);

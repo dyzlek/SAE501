@@ -99,6 +99,43 @@ namespace SAE
             NotifyChanged();
         }
 
+        // --- Sauvegarde (SaveGame) ---
+        public static int Index(Monkey m) => (int)m.type * MonkeyData.LevelCount + (int)m.level;
+
+        public static int[] OwnedFlat()
+        {
+            var flat = new int[owned.Length];
+            for (int t = 0; t < MonkeyData.TypeCount; t++)
+                for (int l = 0; l < MonkeyData.LevelCount; l++) flat[t * MonkeyData.LevelCount + l] = owned[t, l];
+            return flat;
+        }
+
+        public static bool[] UnlockedCopy() => (bool[])unlocked.Clone();
+
+        // Remet l'état lu dans la sauvegarde (les tableaux trop courts d'une vieille version sont ignorés)
+        public static void Restore(int money, int wavesWon, int bananasEarned, int[] ownedFlat, bool[] unlockedTypes)
+        {
+            ResetAll();
+            Money = money;
+            WavesWon = wavesWon;
+            BananasEarned = bananasEarned;
+            if (ownedFlat != null && ownedFlat.Length == owned.Length)
+                for (int i = 0; i < ownedFlat.Length; i++) owned[i / MonkeyData.LevelCount, i % MonkeyData.LevelCount] = ownedFlat[i];
+            if (unlockedTypes != null && unlockedTypes.Length == unlocked.Length) unlockedTypes.CopyTo(unlocked, 0);
+            unlocked[(int)MonkeyType.Classique] = true;
+        }
+
+        // Nouvelle partie : tout repart de zéro, comme au premier lancement
+        public static void ResetAll()
+        {
+            Placed.Clear();
+            Held = null;
+            Money = WavesWon = BananasEarned = 0;
+            Array.Clear(owned, 0, owned.Length);
+            Array.Clear(unlocked, 0, unlocked.Length);
+            unlocked[(int)MonkeyType.Classique] = true;
+        }
+
         // Singe posé le plus proche de pos, à moins de maxDistance.
         public static PlacedMonkey Nearest(Vector2 pos, float maxDistance)
         {

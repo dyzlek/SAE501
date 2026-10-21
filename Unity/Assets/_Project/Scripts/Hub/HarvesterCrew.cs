@@ -32,6 +32,17 @@ namespace SAE
         public float Pause => 3f - 0.6f * (Level(HarvesterStat.Cadence) - 1);           // s entre deux trajets : 3 → 0,6
         public float Share => 0.6f + 0.1f * (Level(HarvesterStat.Rendement) - 1);       // part payée : 60 % → 100 %
 
+        // Sauvegarde : les singes achetés se remettent au travail, avec leurs améliorations
+        void Start()
+        {
+            var save = SaveGame.Pending;
+            if (save == null) return;
+            if (save.harvesterLevels != null && save.harvesterLevels.Length == levels.Length) save.harvesterLevels.CopyTo(levels, 0);
+            while (Count < Mathf.Min(save.harvesters, monkeys.Length)) monkeys[Count++].StartWork();
+        }
+
+        public int[] Levels() => (int[])levels.Clone();
+
         public bool Buy()
         {
             if (Full || !Economy.TrySpend(PriceToBuy, transform.position)) return false;

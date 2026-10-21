@@ -70,7 +70,11 @@ namespace SAE
             if (!touched.Add(balloon)) return;   // déjà percé (un ballon peut avoir plusieurs colliders)
 
             var center = balloon.transform.position;
-            if (touched.Count == 1) Haptics.Play(shooterHand, Haptics.Hit);   // touché ! (une fois par flèche)
+            if (touched.Count == 1)   // touché ! (une fois par flèche)
+            {
+                Haptics.Play(shooterHand, Haptics.Hit);
+                if (shooterHand) Sounds.Quincy();   // de temps en temps, Quincy parle (flèches du joueur seulement)
+            }
             balloon.Pop(BowUpgrades.Pierce);
             if (BowUpgrades.Explosive) Explode(center, balloon);
             if (--balloonsLeft <= 0) Destroy(gameObject);   // plus de ballon à traverser : la flèche est détruite
