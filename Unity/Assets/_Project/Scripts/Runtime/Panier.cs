@@ -65,7 +65,8 @@ public class Panier : MonoBehaviour
         if (son != null) AudioSource.PlayClipAtPoint(son, transform.position);
         // La main qui l'a lancée vibre : deux tics pour une banane, trois qui montent pour une dorée
         if (main != null && gain > 0) SAE.Haptics.Play(main, doree ? SAE.Haptics.Golden : SAE.Haptics.Coins);
-        if (doree) SAE.Sounds.Play(SAE.Sounds.BananeDoree, transform.position);
+        // Le même son pour toutes les bananes vendues ; la dorée le joue plus aigu (et plus fort)
+        if (gain > 0) SAE.Sounds.Play(SAE.Sounds.BananeVendue, transform.position, doree ? 1f : 0.7f, doree ? 1.35f : 1f);
         onDepot.Invoke(gain, Total);
         OnDepotCode?.Invoke(gain, Total);
         return gain;

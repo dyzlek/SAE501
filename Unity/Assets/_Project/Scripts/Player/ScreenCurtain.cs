@@ -30,7 +30,7 @@ namespace SAE
         public static IEnumerator Teleport(System.Action move, bool coverStarted = false)
         {
             Busy = true;
-            Sounds.Play(Sounds.Teleportation);
+            Sounds.Play(Sounds.Teleportation, volume: 0.35f);   // le fichier est très fort : on le baisse
             if (!coverStarted) yield return Slide(true, Duration);
             yield return new WaitForSeconds(0.15f);
             move();

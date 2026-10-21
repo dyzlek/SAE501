@@ -9,6 +9,8 @@ namespace SAE
     // on peut brancher le code avant d'avoir trouvé le son.
     //   Play(son, endroit) : son 3D, qui vient de cet endroit (en VR, on l'entend du bon côté) ;
     //   Play(son)          : son 2D, entendu partout pareil (annonces, voix de Quincy).
+    // Beaucoup de fichiers commencent par un petit silence (jusqu'à 180 ms) : le son semblait arriver en retard.
+    // On le saute automatiquement, pour que le son parte pile au moment de l'action.
     public static class Sounds
     {
         // Les noms des sons (= leurs dossiers), au même endroit pour ne jamais recopier une chaîne
@@ -26,19 +28,22 @@ namespace SAE
         public const string CoffreOuverture = "Coffre/Ouverture";
         public const string CoffreFermeture = "Coffre/Fermeture";
         public const string SingeObtenu = "Coffre/Singe_Obtenu";
-        public const string BananeDoree = "Bananes/Banane_Doree";
+        public const string BananeVendue = "Bananes/Vendue";
         public const string AchatRefuse = "Interface/Achat_Refuse";
         public const string Bouton = "Interface/Bouton";
         public const string Teleportation = "Deplacement/Teleportation";
         public const string FlecheCentre = "Bonus/Fleche_Centre";
         public const string MusiqueAmbiance = "Musique/Ambiance";
+        public const string MusiqueVague = "Musique/Vague";
         public const string MusiqueBoss = "Musique/Boss";
 
         static readonly Dictionary<string, AudioClip[]> clips = new Dictionary<string, AudioClip[]>();
+        static readonly Dictionary<AudioClip, int> starts = new Dictionary<AudioClip, int>();   // où commence vraiment le son
+        const float SilenceLevel = 0.02f;   // en dessous, on considère que c'est du silence
 
         // Sans rechargement du domaine (Enter Play Mode rapide), les statiques survivent d'une partie à l'autre
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetState() { clips.Clear(); nextQuincy = 0f; }
+        static void ResetState() { clips.Clear(); starts.Clear(); nextQuincy = 0f; }
 
         public static bool Has(string sound) => Clips(sound).Length > 0;
 
@@ -73,8 +78,25 @@ namespace SAE
             source.pitch = pitch;
             source.spatialBlend = where.HasValue ? 1f : 0f;
             source.minDistance = 2f;   // pleine puissance jusqu'à 2 m, puis il baisse avec la distance
+            source.timeSamples = Start(clip);
             source.Play();
             Object.Destroy(go, clip.length / Mathf.Max(0.1f, pitch) + 0.1f);
+        }
+
+        // Le premier échantillon qui n'est plus du silence (calculé une fois par fichier)
+        static int Start(AudioClip clip)
+        {
+            if (starts.TryGetValue(clip, out int start)) return start;
+            start = 0;
+            if (clip.loadType != AudioClipLoadType.Streaming)   // un son lu en streaming ne donne pas ses échantillons
+            {
+                var data = new float[clip.samples * clip.channels];
+                if (clip.GetData(data, 0))
+                    for (int i = 0; i < data.Length; i++)
+                        if (Mathf.Abs(data[i]) > SilenceLevel) { start = i / clip.channels; break; }
+            }
+            starts[clip] = start;
+            return start;
         }
 
         // La voix de Quincy quand une flèche touche : pas à chaque fois (ce serait vite pénible), une chance sur 8,

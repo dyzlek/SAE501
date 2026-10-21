@@ -12,6 +12,13 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 > - le mini-boss est le boss violet (MOAB), le gros boss le dirigeable rouge ;
 > - les deux musiques (ambiance et vague de boss) sont en `.brstm` : convertis-les.
 
+### Corrections des sons après mon test
+> Mes notes après avoir testé :
+> - il manque encore une musique pour les vagues, le son des ballons qui éclatent, le tir de l'arc et la pose d'un singe ;
+> - garde le même son pour la banane normale et la dorée, mais plus aigu pour la dorée ;
+> - le son de la téléportation arrive à peine en retard, et il est trop fort ;
+> - le son de la fusion des singes a la bonne tonalité, mais il arrive lui aussi à peine en retard.
+
 ## Mar. 20 oct. 2026
 
 ### Le son de la roulette du coffre

@@ -15,7 +15,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
   | Flèche qui touche un ballon | la voix de Quincy, **pas à chaque fois** : 1 chance sur 8, jamais deux fois en moins de 10 s ; à coup sûr quand un boss éclate |
   | Fusion de deux singes | `TowerLevelUp` |
   | Coffre : ouverture, fermeture, singe obtenu | `UIChestOpen`, `UIChestClose`, `LegendsArtifactExtract` |
-  | Banane dorée vendue (dans le panier) | `LegendsItemCollected` |
+  | Banane vendue (dans le panier) | `LegendsItemCollected`, plus aigu et plus fort pour une dorée |
   | Achat refusé (pas assez d'argent) | `UIAlert`, pour tous les achats du jeu |
   | Bouton appuyé (VR et PC) | un des deux clics, au hasard |
   | Téléportation (portes, SE TP, HUB) | un « whoosh » |
@@ -23,13 +23,19 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
   - **musique** : `Party Time` en fond tout le temps, remplacée en fondu par `Primal One` tant qu'un boss ou un dirigeable est en vie. Les deux morceaux étaient au format de la Wii (`.brstm`) : convertis en `.wav` (on ne garde que la partie qui boucle, pour qu'ils tournent sans coupure), lus en streaming, volume bas ;
   - **comment c'est rangé** : `Resources/Sons/<Catégorie>/<Son>/`, un dossier = un son (plusieurs fichiers = un tiré au hasard). Nouveau script `Core/Sounds.cs` (tous les noms de sons au même endroit, `Sounds.Play(son, endroit)` : 3D s'il y a un endroit, 2D sinon) et `Core/Music.cs`. Un son qui manque ne fait rien : on pourra ajouter les derniers sans toucher au code.
-  - **Reste à trouver** : ballon qui éclate, tir de l'arc, banane vendue, LANCER, pose d'un singe (et la tension de l'arc, facultatif).
-  - Vérifié : le projet compile. **Pas encore écouté en jeu.**
+  - **Reste à trouver** : musique des vagues, ballon qui éclate, tir de l'arc, LANCER, pose d'un singe (et la tension de l'arc, facultatif).
+- **Corrigé après mon test en jeu :**
+  - **les sons arrivaient avec un léger retard** (surtout la téléportation et la fusion) : beaucoup de fichiers commencent par un silence, jusqu'à 180 ms (111 ms pour le whoosh). Ce silence est maintenant **sauté automatiquement** à la lecture (`Sounds.Start`), pour tous les sons, même ceux qu'on ajoutera ;
+  - **la téléportation était trop forte** : jouée à 35 % ;
+  - **un seul son pour toutes les bananes vendues** (celui de la dorée), joué plus aigu et plus fort pour une banane dorée ; le dossier s'appelle maintenant `Bananes/Vendue` ;
+  - **trois musiques selon le moment** : l'ambiance pendant la préparation, une **musique de vague** pendant l'attaque (dossier `Musique/Vague`, encore vide : tant qu'il l'est, l'ambiance continue), la musique du boss tant qu'un boss est en vie. Fondu de 2 s entre elles.
+  - Testé en Play via Unity MCP : téléportation lue à partir de 111 ms, fusion à partir de 38 ms, banane plus aiguë, musique d'ambiance qui tourne. Aucune erreur.
 
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
-| Claude Code | Tri des sons à garder ou à couper, conversion des musiques `.brstm` en `.wav` (petit convertisseur Python), lecteur de sons et de musique, branchement de tous les sons dans le jeu | Gardé (à écouter en jeu) |
+| Claude Code | Conversion des musiques `.brstm` en `.wav` (petit convertisseur Python), lecteur de sons et de musique, branchement de tous les sons dans le jeu | Gardé |
+| Claude Code | Corrections après mon test : silence de début sauté, téléportation moins forte, même son pour toutes les bananes, musique de vague prévue | Gardé |
 
 ## Mar. 20 oct. 2026
 - **Fait : le son de la roulette du coffre.** Je ne trouvais pas de bon son en ligne, donc il est fabriqué par le code, comme les cloches des vagues de boss :
