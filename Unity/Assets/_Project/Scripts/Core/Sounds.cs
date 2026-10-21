@@ -24,6 +24,10 @@ namespace SAE
         public const string ArcAmelioration = "Arc/Amelioration";
         public const string ArcAmeliorationMax = "Arc/Amelioration_Max";
         public const string QuincyTouche = "Arc/Quincy_Touche";
+        public const string ArcTendre = "Arc/Tendre";
+        public const string ArcTir = "Arc/Tir";
+        public const string BallonEclate = "Ballons/Eclate";
+        public const string SingePose = "Singes/Pose";
         public const string Fusion = "Singes/Fusion";
         public const string CoffreOuverture = "Coffre/Ouverture";
         public const string CoffreFermeture = "Coffre/Fermeture";
@@ -43,7 +47,7 @@ namespace SAE
 
         // Sans rechargement du domaine (Enter Play Mode rapide), les statiques survivent d'une partie à l'autre
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetState() { clips.Clear(); starts.Clear(); nextQuincy = 0f; }
+        static void ResetState() { clips.Clear(); starts.Clear(); nextQuincy = 0f; popFrame = -1; popsThisFrame = 0; }
 
         public static bool Has(string sound) => Clips(sound).Length > 0;
 
@@ -97,6 +101,18 @@ namespace SAE
             }
             starts[clip] = start;
             return start;
+        }
+
+        // Un ballon éclate. Quand les singes en éclatent toute une file, des dizaines de sons partiraient en même temps :
+        // au plus 3 par image. La hauteur varie un peu à chaque fois, pour que ça ne sonne pas répétitif.
+        const int MaxPopsPerFrame = 3;
+        static int popFrame = -1, popsThisFrame;
+
+        public static void Pop(Vector3 where)
+        {
+            if (Time.frameCount != popFrame) { popFrame = Time.frameCount; popsThisFrame = 0; }
+            if (++popsThisFrame > MaxPopsPerFrame) return;
+            Play(BallonEclate, where, 0.6f, Random.Range(0.9f, 1.15f));
         }
 
         // La voix de Quincy quand une flèche touche : pas à chaque fois (ce serait vite pénible), une chance sur 8,

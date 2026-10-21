@@ -19,6 +19,11 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 > - le son de la téléportation arrive à peine en retard, et il est trop fort ;
 > - le son de la fusion des singes a la bonne tonalité, mais il arrive lui aussi à peine en retard.
 
+### Les derniers sons
+> Voici les derniers sons : deux pour les ballons qui éclatent, un pour le tir de l'arc (le fichier contient deux tirs, coupe-le), un pour la tension de l'arc (je ne sais pas encore si je le garde) et un pour la pose d'un singe. Range-les en les renommant si besoin.
+>
+> Suite : mets Primal One pour la musique des vagues, et Onslaught pour celle des vagues de boss.
+
 ## Mar. 20 oct. 2026
 
 ### Le son de la roulette du coffre

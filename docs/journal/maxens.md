@@ -30,12 +30,20 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
   - **un seul son pour toutes les bananes vendues** (celui de la dorée), joué plus aigu et plus fort pour une banane dorée ; le dossier s'appelle maintenant `Bananes/Vendue` ;
   - **trois musiques selon le moment** : l'ambiance pendant la préparation, une **musique de vague** pendant l'attaque (dossier `Musique/Vague`, encore vide : tant qu'il l'est, l'ambiance continue), la musique du boss tant qu'un boss est en vie. Fondu de 2 s entre elles.
   - Testé en Play via Unity MCP : téléportation lue à partir de 111 ms, fusion à partir de 38 ms, banane plus aiguë, musique d'ambiance qui tourne. Aucune erreur.
+- **Fait : les derniers sons.**
+  - **ballon qui éclate** : deux sons (`Ballon_Pop`, `Ballon_Eclatement`), un au hasard à chaque ballon, avec une hauteur qui varie un peu. **Au plus 3 par image** : quand les singes éclatent toute une file d'un coup, ça évite la cacophonie. Un boss qui éclate joue le même son, plus grave et plus fort ;
+  - **tir de l'arc** : mon fichier contenait **deux tirs** : on ne garde que le premier (de 0,12 à 0,50 s, avec un petit fondu), enregistré en `Arc_Tir.wav`. Joué au lâcher de la corde, hauteur légèrement variable ;
+  - **tension de l'arc** : quand la flèche s'encoche (à voir si on le garde) ;
+  - **singe posé** sur le plateau (la fusion garde son propre son) ;
+  - **musiques** : **Primal One** pendant les vagues, **Onslaught** (converti du `.brstm`) pendant les boss, Party Time pendant la préparation.
+  - Testé en Play via Unity MCP : 10 ballons éclatés d'un coup donnent bien 3 sons ; préparation → Party Time, vague lancée → Primal One, boss sur la piste → Onslaught, en fondu. Aucune erreur.
 
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
 | Claude Code | Conversion des musiques `.brstm` en `.wav` (petit convertisseur Python), lecteur de sons et de musique, branchement de tous les sons dans le jeu | Gardé |
 | Claude Code | Corrections après mon test : silence de début sauté, téléportation moins forte, même son pour toutes les bananes, musique de vague prévue | Gardé |
+| Claude Code | Derniers sons rangés et branchés (ballons, tir coupé au premier tir, tension, singe posé), musiques des vagues et des boss | Gardé |
 
 ## Mar. 20 oct. 2026
 - **Fait : le son de la roulette du coffre.** Je ne trouvais pas de bon son en ligne, donc il est fabriqué par le code, comme les cloches des vagues de boss :

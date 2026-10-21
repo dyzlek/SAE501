@@ -84,6 +84,7 @@ namespace SAE
             if (!CanNock || !arrowPrefab) return;
             nocked = Instantiate(arrowPrefab, NockPoint, Quaternion.LookRotation(ShootDirection), transform);
             nocked.Hold();
+            Sounds.Play(Sounds.ArcTendre, transform.position, 0.6f);   // la corde se tend
         }
 
         // Tension (0 à 1) quand la main qui tire est en handPosition : de combien elle a reculé
@@ -119,6 +120,7 @@ namespace SAE
                     nocked.shooterHand = transform.parent;   // la main qui tient l'arc vibre quand la flèche touche
                     nocked.transform.SetParent(null, true);
                     nocked.Launch(velocity);
+                    Sounds.Play(Sounds.ArcTir, transform.position, 0.8f, Random.Range(0.95f, 1.05f));
                     nextNock = Time.time + reloadTime;   // on recharge : pas de nouvelle flèche avant reloadTime
                     if (BowUpgrades.TripleShot)
                     {
