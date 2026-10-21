@@ -11,7 +11,7 @@ namespace SAE
 
         public static void Create(Transform parent, Color color, int index)
         {
-            var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);   // garde son collider : on peut le viser
+            var go = Visuals.Primitive(PrimitiveType.Sphere);   // garde son collider : on peut le viser
             go.name = "Ballon";
             go.transform.SetParent(parent, false);
             go.transform.localScale = new Vector3(0.45f, 0.55f, 0.45f);

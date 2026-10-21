@@ -93,7 +93,7 @@ namespace SAE
             for (int side = -1; side <= 1; side += 2)
                 for (int i = 0; i < 9; i++)
                 {
-                    var b = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    var b = Visuals.Primitive(PrimitiveType.Sphere);
                     Destroy(b.GetComponent<Collider>());
                     b.name = "Grappe";
                     b.transform.SetParent(transform, false);

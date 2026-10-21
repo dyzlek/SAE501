@@ -39,7 +39,7 @@ namespace SAE
             get
             {
                 if (cube) return cube;
-                var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                var go = Visuals.Primitive(PrimitiveType.Cube);
                 cube = go.GetComponent<MeshFilter>().sharedMesh;
                 Visuals.Kill(go);
                 return cube;
