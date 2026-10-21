@@ -2,6 +2,14 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Mer. 21 oct. 2026
+
+### Pluie à travers le toit
+> Par contre, la pluie traverse les toits, donc la cabane.
+
+### Système de météo
+> J'aimerais faire un système de météo : quand il y a un boss, les nuages arrivent, il pleut, on voit moins loin, etc. Je te laisse faire.
+
 ## Mar. 20 oct. 2026
 
 ### Valider la branche de Maxens

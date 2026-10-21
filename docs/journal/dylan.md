@@ -2,6 +2,13 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Mer. 21 oct. 2026
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | Météo des vagues de boss (#131), branche `feat/meteo` (partie de `feat/bonus-maxens`) : nouveau `Weather.cs`, ajouté tout seul par `WaveSpawner` (rien à poser dans la scène). Vague spéciale lancée → les nuages arrivent et le ciel s'assombrit ; le boss entre → pluie, brume qui se resserre (on voit à 45 m au lieu de 230 m), éclairs doux et tonnerre (son fabriqué par le code + vibration `Haptics.Thunder`) ; vague finie → le ciel se dégage. Casque : ≈ 400 gouttes, 10 nuages d'un seul maillage. Clic droit sur `Weather` → « Tempête » pour tester sans attendre un boss. dotnet OK (0 erreur). Carte #131 passée de « En relecture » à « En cours ». Pas testé dans Unity ni au casque | Gardé (à tester) |
+| Claude (Claude Code) | Météo : la pluie traversait le toit de la cabane. Les gouttes n’ont pas de physique : `Weather.BuildRoof` pose un « dôme » invisible en trigger (capsule de 3,4 m de rayon, jusqu’à ~6,4 m) sur la cabane, et le module Trigger de la pluie tue les gouttes qui y entrent. Ignoré par la téléportation et le joueur. Compilé, à tester au hub | Gardé (à tester) |
+
 ## Mar. 20 oct. 2026
 
 | Outil | Pour quoi | Gardé / jeté |

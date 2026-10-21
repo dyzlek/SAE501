@@ -12,6 +12,7 @@ namespace SAE
     // Victoire après la vague 100 (la finale aux 4 dirigeables rouges), puis mode infini pour qui veut continuer.
     // Règle du GDD : éclater un ballon ne rapporte rien, finir une vague rapporte de l'argent.
     // Rien n'est affiché à l'écran (nausée en VR) : les tableaux WaveBoard du décor lisent Wave, Lives et Status.
+    // Météo (Weather) : l'orage monte dès le lancement d'une vague spéciale (nuages, puis pluie), le ciel se dégage à la fin.
     // Vagues spéciales (boss, dirigeable) : annoncées sur le tableau dès la préparation, cloches au lancement,
     // cor quand le boss entre (WaveAnnouncer). Les manettes vibrent aussi : vies perdues, vague gagnée ou perdue (Haptics).
     public class WaveSpawner : MonoBehaviour
@@ -36,7 +37,11 @@ namespace SAE
         public WaveData Current => Wave <= waves.Count ? waves[Wave - 1] : WaveBook.Endless(Wave);
         public int BossCount => Current.BossCount;
 
-        void Awake() => Instance = this;
+        void Awake()
+        {
+            Instance = this;
+            if (!GetComponent<Weather>()) gameObject.AddComponent<Weather>();   // la météo des vagues de boss, rien à poser dans la scène
+        }
         void OnDestroy() { if (Instance == this) Instance = null; }
 
         void Start()
@@ -73,7 +78,11 @@ namespace SAE
             Lives = startLives;   // les vies repartent au maximum à chaque vague
             bool special = WaveAnnouncer.IsSpecial(wave);
             Status = special ? WaveAnnouncer.Title(wave) : "Attaque en cours !";
-            if (special) WaveAnnouncer.WaveStarts();
+            if (special)
+            {
+                WaveAnnouncer.WaveStarts();
+                Weather.Storm();   // l'orage monte dès le lancement de la vague de boss (nuages, puis pluie et brume)
+            }
 
             // Les groupes, dans l'ordre
             foreach (var group in wave.groups)
@@ -93,6 +102,7 @@ namespace SAE
             }
 
             while (Balloon.All.Count > 0 && Lives > 0) yield return null;
+            Weather.Clear();   // vague finie (gagnée ou perdue) : le ciel se dégage
 
             if (Lives <= 0)
             {

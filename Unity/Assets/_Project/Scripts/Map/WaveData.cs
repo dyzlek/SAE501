@@ -57,6 +57,9 @@ namespace SAE
     {
         public const int Count = 100;   // la victoire
 
+        // TEST (météo) : un boss à CHAQUE vague pour voir l'orage tout de suite. À remettre à false avant le rendu.
+        const bool TestBossEveryWave = true;
+
         static BalloonGroup N(int count, int layers, float interval) => new BalloonGroup(BalloonKind.Normal, count, layers, interval);
         static BalloonGroup R(int count, int layers) => new BalloonGroup(BalloonKind.Rapide, count, layers, 0.5f);
         static BalloonGroup B(int count, int layers) => new BalloonGroup(BalloonKind.Blinde, count, layers, 1f);
@@ -89,7 +92,7 @@ namespace SAE
             if (w >= 12 && w % 2 == 0) groups.Add(C(1 + (w - 12) / 6, 2 + (w - 12) / 8));   // cœurs, une vague sur deux
 
             // Boss : toutes les 5 vagues à partir de la 15, puis à chaque vague dès la 50
-            if (w >= 15 && (w % 5 == 0 || w >= 50)) groups.Add(Boss(1 + (w - 15) / 20, 10 + w / 2));
+            if (TestBossEveryWave || (w >= 15 && (w % 5 == 0 || w >= 50))) groups.Add(Boss(1 + Mathf.Max(0, w - 15) / 20, 10 + w / 2));
 
             // Dirigeables rouges : aux vagues 25, 50, 75, et 4 pour la finale (100) ; en infini, toutes les 25 vagues
             if (w % 25 == 0) groups.Add(Blimp(w / 25, 60 + w));

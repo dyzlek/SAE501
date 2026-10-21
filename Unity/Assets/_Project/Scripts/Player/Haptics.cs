@@ -12,6 +12,7 @@ namespace SAE
     //   BossPop  : un boss éclate et se divise (grosse secousse longue)
     //   Damage   : un ballon est passé, on perd des vies (grondement)
     //   Alarm    : vague spéciale annoncée (deux battements de cœur lents)
+    //   Thunder  : le tonnerre gronde pendant l'orage du boss (une secousse sourde, puis un écho)
     //   Victory  : vague gagnée (trois tics rapides)   Defeat : vague perdue (long et sourd)
     // Les petites vibrations ponctuelles existantes (boutons, arc) passent toujours par PlayerRig.Buzz.
     // En mode PC il n'y a pas de manette : rien ne vibre, sans erreur.
@@ -30,6 +31,7 @@ namespace SAE
         public static readonly Pulse[] BossPop = { new Pulse(1f, 0.3f, 0.05f), new Pulse(0.5f, 0.2f) };
         public static readonly Pulse[] Damage = { new Pulse(0.5f, 0.06f, 0.04f), new Pulse(0.5f, 0.06f, 0.04f), new Pulse(0.5f, 0.06f) };
         public static readonly Pulse[] Alarm = { new Pulse(0.7f, 0.12f, 0.12f), new Pulse(0.5f, 0.12f, 0.5f), new Pulse(0.7f, 0.12f, 0.12f), new Pulse(0.5f, 0.12f) };
+        public static readonly Pulse[] Thunder = { new Pulse(0.8f, 0.35f, 0.1f), new Pulse(0.35f, 0.4f) };
         public static readonly Pulse[] Victory = { new Pulse(0.5f, 0.05f, 0.06f), new Pulse(0.6f, 0.05f, 0.06f), new Pulse(0.9f, 0.15f) };
         public static readonly Pulse[] Defeat = { new Pulse(0.35f, 0.6f) };
 
