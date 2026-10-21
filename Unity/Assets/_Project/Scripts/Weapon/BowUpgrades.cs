@@ -49,6 +49,7 @@ namespace SAE
         {
             if (IsMax(u) || !Economy.TrySpend(Price(u), where)) return false;
             levels[(int)u]++;
+            Sounds.Play(IsMax(u) ? Sounds.ArcAmeliorationMax : Sounds.ArcAmelioration, where);
             return true;
         }
 

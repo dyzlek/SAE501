@@ -104,7 +104,8 @@ namespace SAE
                 return;
             }
             var pressable = hit.collider.GetComponentInParent<IPressable>();
-            if (pressable != null) Tutorial.TryPress(pressable);   // pendant le tutoriel, seul ce qu'il demande est permis
+            if (pressable != null && Tutorial.TryPress(pressable))   // pendant le tutoriel, seul ce qu'il demande est permis
+                Sounds.Play(Sounds.Bouton, hit.point);
         }
 
         void Carry(Transform held)

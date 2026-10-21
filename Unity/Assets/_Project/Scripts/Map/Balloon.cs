@@ -174,6 +174,7 @@ namespace SAE
             for (int i = 0; i < count; i++) spawner.SpawnSplit(kind, childLayers, this, i * SplitSpacing);
             Shockwave.Spawn(transform.position, transform.localScale.x * 1.5f);
             Haptics.PlayBoth(Haptics.BossPop);
+            Sounds.Quincy(sure: true);   // Quincy salue le boss abattu
         }
 
         // Un petit ballon né d'un boss : il reprend la piste là où le boss a éclaté, 'back' mètres en arrière.

@@ -48,6 +48,7 @@ namespace SAE
                     GameState.Placed.Remove(target);
                     GameState.Placed.Add(new PlacedMonkey(target.monkey.Upgraded(), target.pos));
                     GameState.Held = null;
+                    Sounds.Play(Sounds.Fusion);
                     break;
                 case PlacementAction.Place:
                     GameState.Placed.Add(new PlacedMonkey(GameState.Held.Value, pos));

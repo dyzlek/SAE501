@@ -2,6 +2,35 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Mer. 21 oct. 2026
+- **Fait : les sons du jeu** (issue #34). J'ai rassemblé les sons, surtout tirés de Bloons TD6 (on assume de reprendre l'univers : le jeu ne sera pas présenté aux Pégases), et ils sont branchés dans le jeu :
+
+  | Moment | Son |
+  |---|---|
+  | Vague de boss lancée | `TiletypeBattleStandard` (remplace les cloches) |
+  | Le boss entre / le dirigeable entre | `TiletypeBattleMiniBoss` / `TiletypeBattleBoss` (remplace le cor) |
+  | Vague gagnée / victoire à la 100e | `LegendsVictoryJingle` / `UIVictoryOdyssey` |
+  | Vague perdue / vie perdue | `UIDefeat` / `LegendsLifeLost` |
+  | Amélioration de l'arc / dernier palier | une des 3 phrases de Quincy / `UpgradeQuincyMaxLevel` |
+  | Flèche qui touche un ballon | la voix de Quincy, **pas à chaque fois** : 1 chance sur 8, jamais deux fois en moins de 10 s ; à coup sûr quand un boss éclate |
+  | Fusion de deux singes | `TowerLevelUp` |
+  | Coffre : ouverture, fermeture, singe obtenu | `UIChestOpen`, `UIChestClose`, `LegendsArtifactExtract` |
+  | Banane dorée vendue (dans le panier) | `LegendsItemCollected` |
+  | Achat refusé (pas assez d'argent) | `UIAlert`, pour tous les achats du jeu |
+  | Bouton appuyé (VR et PC) | un des deux clics, au hasard |
+  | Téléportation (portes, SE TP, HUB) | un « whoosh » |
+  | Fléchette en plein centre de la cible de la cabane | un klaxon : le **petit easter egg** |
+
+  - **musique** : `Party Time` en fond tout le temps, remplacée en fondu par `Primal One` tant qu'un boss ou un dirigeable est en vie. Les deux morceaux étaient au format de la Wii (`.brstm`) : convertis en `.wav` (on ne garde que la partie qui boucle, pour qu'ils tournent sans coupure), lus en streaming, volume bas ;
+  - **comment c'est rangé** : `Resources/Sons/<Catégorie>/<Son>/`, un dossier = un son (plusieurs fichiers = un tiré au hasard). Nouveau script `Core/Sounds.cs` (tous les noms de sons au même endroit, `Sounds.Play(son, endroit)` : 3D s'il y a un endroit, 2D sinon) et `Core/Music.cs`. Un son qui manque ne fait rien : on pourra ajouter les derniers sans toucher au code.
+  - **Reste à trouver** : ballon qui éclate, tir de l'arc, banane vendue, LANCER, pose d'un singe (et la tension de l'arc, facultatif).
+  - Vérifié : le projet compile. **Pas encore écouté en jeu.**
+
+### IA
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude Code | Tri des sons à garder ou à couper, conversion des musiques `.brstm` en `.wav` (petit convertisseur Python), lecteur de sons et de musique, branchement de tous les sons dans le jeu | Gardé (à écouter en jeu) |
+
 ## Mar. 20 oct. 2026
 - **Fait : le son de la roulette du coffre.** Je ne trouvais pas de bon son en ligne, donc il est fabriqué par le code, comme les cloches des vagues de boss :
   - un **petit « tic »** (30 ms, un clic sec et aigu) **à chaque case qui passe sous la barre dorée**. Comme la roulette démarre très vite puis ralentit, les tics suivent : une rafale au début, puis de plus en plus espacés jusqu'au singe tiré. C'est ce qui fait monter le suspense, comme les caisses de CS ;

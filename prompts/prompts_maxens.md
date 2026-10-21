@@ -2,6 +2,16 @@
 
 _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (orthographe, clarté, structure : contexte, objectif, contraintes). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/maxens.md)._
 
+## Mer. 21 oct. 2026
+
+### Mettre les sons dans le jeu
+> Mets dans le jeu tous les sons que j'ai rangés dans le dossier `sound-effect`, je veux voir ce que ça donne. Précisions :
+> - la voix de Quincy quand une flèche touche un ballon ne doit pas se déclencher à chaque fois, seulement de temps en temps ;
+> - le son « flèche au milieu » est pour la cible de fléchettes de la cabane, quand on touche le centre : c'est un petit easter egg ;
+> - le son de la banane dorée se joue quand on la vend, dans le panier ;
+> - le mini-boss est le boss violet (MOAB), le gros boss le dirigeable rouge ;
+> - les deux musiques (ambiance et vague de boss) sont en `.brstm` : convertis-les.
+
 ## Mar. 20 oct. 2026
 
 ### Le son de la roulette du coffre

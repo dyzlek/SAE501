@@ -30,6 +30,7 @@ namespace SAE
             nextPress = Time.time + cooldown;
             bool done = Tutorial.TryPress(target);   // pendant le tutoriel, seul ce qu'il demande est permis
             PlayerRig.Buzz(transform, done ? 0.6f : 0.15f);
+            if (done) Sounds.Play(Sounds.Bouton, other.transform.position);
         }
     }
 }

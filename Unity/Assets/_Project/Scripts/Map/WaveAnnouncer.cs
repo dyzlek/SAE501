@@ -4,7 +4,8 @@ namespace SAE
 {
     // L'annonce des vagues spéciales (boss et dirigeable rouge) : des cloches, puis un cor grave quand le boss entre sur la piste,
     // avec deux battements de cœur dans les manettes. Le son est en 2D : on l'entend du hub comme de la carte.
-    // Pas de fichier audio : les sons sont fabriqués au lancement (somme de sinus qui s'éteignent, comme une vraie cloche).
+    // Les sons viennent de Resources/Sons/Boss (voir Sounds). S'ils manquent, on garde ceux fabriqués par le code
+    // (somme de sinus qui s'éteignent, comme une vraie cloche).
     public static class WaveAnnouncer
     {
         const int Rate = 44100;
@@ -25,16 +26,17 @@ namespace SAE
         // Au lancement d'une vague spéciale : trois coups de cloche
         public static void WaveStarts()
         {
-            if (!bells) bells = MakeBells();
-            Play(bells);
+            if (Sounds.Has(Sounds.BossAnnonce)) Sounds.Play(Sounds.BossAnnonce);
+            else { if (!bells) bells = MakeBells(); Play(bells); }
             Haptics.PlayBoth(Haptics.Alarm);
         }
 
-        // Le groupe du boss commence : un cor grave
-        public static void BossEnters()
+        // Le groupe du boss commence : son entrée (une pour le boss, une plus grosse pour le dirigeable), sinon un cor grave
+        public static void BossEnters(BalloonKind kind)
         {
-            if (!horn) horn = MakeHorn();
-            Play(horn);
+            string sound = kind == BalloonKind.Dirigeable ? Sounds.DirigeableEntree : Sounds.BossEntree;
+            if (Sounds.Has(sound)) Sounds.Play(sound);
+            else { if (!horn) horn = MakeHorn(); Play(horn); }
             Haptics.PlayBoth(Haptics.Alarm);
         }
 

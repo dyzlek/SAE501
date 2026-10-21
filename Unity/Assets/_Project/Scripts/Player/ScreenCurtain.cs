@@ -30,6 +30,7 @@ namespace SAE
         public static IEnumerator Teleport(System.Action move, bool coverStarted = false)
         {
             Busy = true;
+            Sounds.Play(Sounds.Teleportation);
             if (!coverStarted) yield return Slide(true, Duration);
             yield return new WaitForSeconds(0.15f);
             move();

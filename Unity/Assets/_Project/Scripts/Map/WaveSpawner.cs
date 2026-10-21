@@ -90,7 +90,7 @@ namespace SAE
                 yield return new WaitForSeconds(group.pause);
                 if (group.kind == BalloonKind.Boss || group.kind == BalloonKind.Dirigeable)
                 {
-                    WaveAnnouncer.BossEnters();
+                    WaveAnnouncer.BossEnters(group.kind);
                     Status = group.kind == BalloonKind.Dirigeable ? "<color=#FF5555>LE DIRIGEABLE ARRIVE !</color>" : "<color=#C77DFF>LE BOSS ARRIVE !</color>";
                 }
                 for (int i = 0; i < group.count && Lives > 0; i++)
@@ -112,6 +112,7 @@ namespace SAE
                 Status = $"Vague {Wave} perdue : relance-la";
                 Tutorial.WaveLost();   // le tableau du tutoriel dit de la relancer
                 Haptics.PlayBoth(Haptics.Defeat);
+                Sounds.Play(Sounds.VaguePerdue);
             }
             else
             {
@@ -128,6 +129,7 @@ namespace SAE
                 // La prochaine est spéciale : on prévient pendant la préparation
                 if (!Won && WaveAnnouncer.IsSpecial(Current)) Status += $"\n{WaveAnnouncer.Title(Current)}";
                 Haptics.PlayBoth(Haptics.Victory);
+                Sounds.Play(Won && Wave == LastWrittenWave + 1 ? Sounds.VictoireFinale : Sounds.VagueGagnee);
                 Lives = startLives;   // la vague suivante repart avec toutes les vies (affiché pendant la préparation)
             }
             Running = false;
@@ -161,6 +163,7 @@ namespace SAE
             {
                 nextDamageBuzz = Time.time + 0.5f;
                 Haptics.PlayBoth(Haptics.Damage);
+                Sounds.Play(Sounds.ViePerdue);
             }
         }
 

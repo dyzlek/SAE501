@@ -28,7 +28,8 @@ namespace SAE
 
         public static bool TrySpend(int amount, Vector3? where = null)
         {
-            if (amount < 0 || GameState.Money < amount) return false;
+            if (amount < 0) return false;
+            if (GameState.Money < amount) { Sounds.Play(Sounds.AchatRefuse, where); return false; }   // pas assez d'argent : un son d'alerte
             GameState.Money -= amount;
             MoneyChanged?.Invoke(-amount, where);
             return true;
