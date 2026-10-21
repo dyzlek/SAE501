@@ -11,6 +11,7 @@ using UnityEngine;
 /// Branchement XR (dans l'Inspector du XR Grab Interactable de la banane) :
 ///   Select Entered -> Banane.Prise()     Select Exited -> Banane.Lachee()
 /// Test sans casque : script TestSouris sur la caméra (clic sur une banane = dans le panier).
+/// Banane dorée (rare, voir Bananier.chanceDoree) : toute dorée et brillante, avec une aura légère ; elle vaut beaucoup plus et pourrit moins vite.
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
 public class Banane : MonoBehaviour
@@ -27,6 +28,9 @@ public class Banane : MonoBehaviour
     public int Valeur { get; private set; }
     public bool EstPourrie { get; private set; }
     public bool EnMain { get; private set; }
+    public bool EstDoree { get; private set; }
+    /// La dernière main du joueur qui l'a tenue (pour la faire vibrer au dépôt). Vide si c'est un singe qui l'a reprise.
+    public Transform DerniereMain { get; private set; }
     public bool Deposee => deposee;
     public bool Posee => posee;      // arrivée au sol (fin de la chute depuis l'arbre)
     /// 0 = fraîche, 1 = pourrie
@@ -46,6 +50,10 @@ public class Banane : MonoBehaviour
     MaterialPropertyBlock mpb;
     static readonly int ColorId = Shader.PropertyToID("_Color");
     static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+    static readonly int BaseMapId = Shader.PropertyToID("_BaseMap");
+    static readonly int MetallicId = Shader.PropertyToID("_Metallic");
+    static readonly int SmoothnessId = Shader.PropertyToID("_Smoothness");
+    static readonly Color Doree = new Color(1f, 0.68f, 0.05f);
 
     Vector3 tailleFraiche;          // sa taille d'origine (elle se ratatine en pourrissant)
 
@@ -61,12 +69,38 @@ public class Banane : MonoBehaviour
         rends = GetComponentsInChildren<Renderer>();
         mpb = new MaterialPropertyBlock();
         SAE.PlayerRig.IgnoreCollisions(gameObject);   // on ne peut pas monter sur une banane tenue et s'envoler
+        grab = GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
+    }
+
+    // La main qui l'attrape vibre doucement, et on la retient pour la faire vibrer au dépôt dans le panier
+    UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable grab;
+    void OnEnable() { if (grab) grab.selectEntered.AddListener(AttrapeeParLeJoueur); }
+    void OnDisable() { if (grab) grab.selectEntered.RemoveListener(AttrapeeParLeJoueur); }
+
+    void AttrapeeParLeJoueur(UnityEngine.XR.Interaction.Toolkit.SelectEnterEventArgs args)
+    {
+        DerniereMain = args.interactorObject.transform;
+        SAE.Haptics.Play(DerniereMain, SAE.Haptics.Grab);
     }
 
     public void Initialiser(Bananier bananier, int valeur, float pourriture, Vector3 cible)
     {
         source = bananier; Valeur = valeur; dureePourriture = pourriture;
         StartCoroutine(Tomber(transform.position, cible));
+    }
+
+    /// Fait de cette banane une banane dorée : sa valeur est multipliée, elle pourrit 'pourritureX' fois moins vite.
+    public void RendreDoree(int multiplicateur, float pourritureX)
+    {
+        if (EstDoree) return;
+        EstDoree = true;
+        Valeur *= multiplicateur;
+        dureePourriture *= pourritureX;
+        couleurFraiche = Doree;
+        AppliquerCouleur(couleurFraiche);
+        // Une aura légère (celle des raretés des singes), à la taille de la banane seule
+        var corps = GetComponent<MeshRenderer>();
+        if (corps) SAE.Aura.Add(gameObject, new ParticleSystem.MinMaxGradient(new Color(1f, 0.85f, 0.3f, 0.35f)), corps.bounds.size);
     }
 
     IEnumerator Tomber(Vector3 de, Vector3 a)
@@ -152,6 +186,13 @@ public class Banane : MonoBehaviour
             r.GetPropertyBlock(mpb);
             mpb.SetColor(ColorId, c);
             mpb.SetColor(BaseColorId, c);
+            if (EstDoree)
+            {
+                // Dorée : la texture jaune est remplacée par du blanc teinté en or, en métal brillant
+                mpb.SetTexture(BaseMapId, Texture2D.whiteTexture);
+                mpb.SetFloat(MetallicId, 0.5f);
+                mpb.SetFloat(SmoothnessId, 0.85f);
+            }
             r.SetPropertyBlock(mpb);
         }
     }
@@ -162,6 +203,13 @@ public class Banane : MonoBehaviour
         EnMain = true; posee = true; lachee = false;
         vitesseMain.Clear();
         StopAllCoroutines();
+    }
+
+    /// Un singe récolteur la prend : comme Prise(), mais ce n'est plus le joueur qui la déposera.
+    public void PriseParSinge()
+    {
+        DerniereMain = null;
+        Prise();
     }
 
     /// Un singe récolteur l'a laissée par terre (lancer raté) : elle n'est plus tenue, elle se remet à pourrir.

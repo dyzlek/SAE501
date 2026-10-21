@@ -2,6 +2,31 @@
 
 _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (orthographe, clarté, structure : contexte, objectif, contraintes). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/maxens.md)._
 
+## Mar. 20 oct. 2026
+
+### Le son de la roulette du coffre
+> Il me manque le son de la roulette du coffre, et je ne trouve rien qui me plaise en ligne : fabrique-le dans le code.
+
+## Lun. 19 oct. 2026
+
+### Trier la liste d'idées
+> Voici notre liste d'idées pour la suite : vagues (boss qui se divise, ballons camouflés, brouillard ou nuit, combos, annonce des vagues spéciales), gestes VR (bombes à lancer, pluie de flèches, vibrations), singes et économie (bananes dorées, nouvelles améliorations de l'arc), hub (mur des records, trophées), classements et multijoueur. Regarde ce qui existe déjà dans le code et dis-moi lesquelles on peut faire sans y passer trop de temps.
+
+### Les quatre bonus rapides
+> Fais les quatre idées les plus rapides, sur une branche à moi partie de `main` :
+> 1. **Boss qui se divise** : quand un boss éclate, il lâche des ballons plus petits, comme dans Bloons TD. Le boss violet lâche 4 ballons normaux, le dirigeable rouge lâche 2 boss, qui se divisent à leur tour. Les petits repartent de l'endroit où le boss a éclaté, un peu espacés sur la piste, et leurs couches dépendent de la solidité du boss. Ajoute une onde de choc pour qu'on voie l'éclatement.
+> 2. **Bananes dorées** : une banane sur 25 environ tombe dorée et scintille pour qu'on la repère de loin. Elle vaut 10 fois plus et pourrit 2 fois moins vite. Mets ces trois réglages sur le bananier, dans l'Inspector.
+> 3. **Annonce des vagues spéciales** (boss et dirigeable) : le tableau prévient dès la préparation (« VAGUE DE BOSS ! », « DIRIGEABLE ROUGE EN APPROCHE ! »). Au lancement, trois coups de cloche. Quand le boss entre sur la piste, un cor grave et « LE BOSS ARRIVE ! ». On n'a pas de sons : fabrique-les dans le code, et il faut les entendre au hub comme sur la carte.
+> 4. **Des vibrations différentes selon l'action** : douce quand on attrape une banane, deux tics quand elle tombe dans le panier, trois qui montent pour une dorée, un tic sec dans la main de l'arc quand la flèche touche, une grosse secousse quand un boss éclate, un grondement quand on perd des vies (pas en continu), deux battements de cœur pour une vague spéciale, et un motif pour la vague gagnée et un autre pour la vague perdue. Quand c'est un singe récolteur qui dépose la banane, ma main ne doit pas vibrer.
+>
+> Vérifie que tout compile, puis mets à jour le journal, les prompts et le GDD.
+
+### Le journal du jour, avec captures
+> Remplis mon journal du jour comme les autres jours : ce qui a été fait, expliqué en détail, avec des captures d'écran quand elles sont utiles.
+
+### La banane dorée
+> On ne voit pas assez la banane dorée. Ne peut-on pas simplement la mettre d'une couleur dorée, et au pire ajouter une aura légère ?
+
 ## Jeu. 8 oct. 2026
 
 ### Une porte commune

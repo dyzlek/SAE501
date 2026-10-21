@@ -32,6 +32,7 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 | 2026-10-07 | **Suivi de projet sur GitHub** : une issue par tâche (responsable, label `prio:` = périmètre du GDD), un jalon par semaine (S1/S2/S3), tableau [Project](https://github.com/users/dyzlek/projects/2) À faire / En cours / En relecture / Fait, PR avec `Ferme #N`. Mode d'emploi : [ORGANISATION.md](../ORGANISATION.md) | Outil de suivi demandé (note de gestion de projet) ; tout au même endroit que le code (Dylan) |
 | 2026-10-19 | **Objectifs de la semaine 2** : 17 objectifs (vagues, gestes VR, économie, hub/records, classements) en issues #129 à #145, détail dans [OBJECTIFS_S2.md](../OBJECTIFS_S2.md) et dans le périmètre du GDD. Classement en ligne et coop = hors périmètre (sans jalon) | Liste de Dylan ; multijoueur = NE FERA PAS dans le support de lancement |
 | _à trancher_ | Nom du jeu · assets Bloons ou maison · périmètre définitif | Avant le GDD v1 (ven. 9 oct.) |
+| 2026-10-19 | **Bonus rapides** : les boss se divisent (boss → 4 normaux, dirigeable → 2 boss), 4 % de bananes dorées (×10), vagues spéciales annoncées (tableau, cloches, cor), une vibration différente par action | Plus de surprise et de lisibilité pour peu de code ; le feedback vibration demandé par le cours (Maxens) |
 
 ## Jalons
 - [ ] Ven. 9 oct. — GDD v1 + prototype gris jouable

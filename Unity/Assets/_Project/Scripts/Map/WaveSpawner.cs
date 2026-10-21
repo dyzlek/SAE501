@@ -12,6 +12,8 @@ namespace SAE
     // Victoire après la vague 100 (la finale aux 4 dirigeables rouges), puis mode infini pour qui veut continuer.
     // Règle du GDD : éclater un ballon ne rapporte rien, finir une vague rapporte de l'argent.
     // Rien n'est affiché à l'écran (nausée en VR) : les tableaux WaveBoard du décor lisent Wave, Lives et Status.
+    // Vagues spéciales (boss, dirigeable) : annoncées sur le tableau dès la préparation, cloches au lancement,
+    // cor quand le boss entre (WaveAnnouncer). Les manettes vibrent aussi : vies perdues, vague gagnée ou perdue (Haptics).
     public class WaveSpawner : MonoBehaviour
     {
         // Les vagues de la scène Labyrinthe (null quand on est au hub)
@@ -69,12 +71,19 @@ namespace SAE
         {
             Running = true;
             Lives = startLives;   // les vies repartent au maximum à chaque vague
-            Status = "Attaque en cours !";
+            bool special = WaveAnnouncer.IsSpecial(wave);
+            Status = special ? WaveAnnouncer.Title(wave) : "Attaque en cours !";
+            if (special) WaveAnnouncer.WaveStarts();
 
             // Les groupes, dans l'ordre
             foreach (var group in wave.groups)
             {
                 yield return new WaitForSeconds(group.pause);
+                if (group.kind == BalloonKind.Boss || group.kind == BalloonKind.Dirigeable)
+                {
+                    WaveAnnouncer.BossEnters();
+                    Status = group.kind == BalloonKind.Dirigeable ? "<color=#FF5555>LE DIRIGEABLE ARRIVE !</color>" : "<color=#C77DFF>LE BOSS ARRIVE !</color>";
+                }
                 for (int i = 0; i < group.count && Lives > 0; i++)
                 {
                     Spawn(group.kind, group.layers);
@@ -92,6 +101,7 @@ namespace SAE
                 Lives = startLives;
                 Status = $"Vague {Wave} perdue : relance-la";
                 Tutorial.WaveLost();   // le tableau du tutoriel dit de la relancer
+                Haptics.PlayBoth(Haptics.Defeat);
             }
             else
             {
@@ -105,12 +115,15 @@ namespace SAE
                 }
                 else Status = $"Vague {Wave} gagnée : +{reward}";
                 Wave++;
+                // La prochaine est spéciale : on prévient pendant la préparation
+                if (!Won && WaveAnnouncer.IsSpecial(Current)) Status += $"\n{WaveAnnouncer.Title(Current)}";
+                Haptics.PlayBoth(Haptics.Victory);
                 Lives = startLives;   // la vague suivante repart avec toutes les vies (affiché pendant la préparation)
             }
             Running = false;
         }
 
-        void Spawn(BalloonKind kind, int layers)
+        Balloon Spawn(BalloonKind kind, int layers)
         {
             // Avec un modèle 3D, le ballon est un objet vide : Balloon.Init y pose le modèle et son collider.
             // Sans modèle, on garde l'ancienne sphère (capsule pour le dirigeable).
@@ -119,11 +132,28 @@ namespace SAE
             go.name = kind.ToString();
             go.tag = Tags.Ballon;
             go.AddComponent<ColorTint>();
-            go.AddComponent<Balloon>().Init(this, path, layers, kind);
+            var balloon = go.AddComponent<Balloon>();
+            balloon.Init(this, path, layers, kind);
             PlayerRig.IgnoreCollisions(go);   // le joueur traverse les ballons et les boss ; les flèches les touchent toujours
+            return balloon;
         }
 
+        // Un boss éclaté lâche des ballons plus petits, là où il était (voir Balloon.Split)
+        public void SpawnSplit(BalloonKind kind, int layers, Balloon parent, float back) =>
+            Spawn(kind, layers).ContinueFrom(parent, back);
+
         // Un ballon est passé. Vague 1 du tutoriel : aucun ne doit passer, elle est ratée tout de suite.
-        public void BalloonEscaped(int layers) => Lives = Tutorial.StrictWave ? 0 : Mathf.Max(0, Lives - layers);
+        public void BalloonEscaped(int layers)
+        {
+            Lives = Tutorial.StrictWave ? 0 : Mathf.Max(0, Lives - layers);
+            // Les manettes grondent quand on perd des vies (au plus deux fois par seconde, sinon ça vibre sans arrêt)
+            if (Time.time >= nextDamageBuzz)
+            {
+                nextDamageBuzz = Time.time + 0.5f;
+                Haptics.PlayBoth(Haptics.Damage);
+            }
+        }
+
+        float nextDamageBuzz;
     }
 }

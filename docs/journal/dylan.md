@@ -2,6 +2,12 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Mar. 20 oct. 2026
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | Mes modifs locales sur `feat/arc-rebond` mises de côté (stash), passage sur `feat/bonus-maxens` pour la valider : fusion de `main` sans conflit, relecture du code (division des boss, bananes dorées, annonce des vagues, `Haptics`), compilation dotnet OK. Pas de bug bloquant trouvé (double division évitée par le test `layers <= 0`, listes copiées avant de faire éclater). Pas testé au casque | Gardé (à tester) |
+
 ## Lun. 19 oct. 2026
 
 | Outil | Pour quoi | Gardé / jeté |

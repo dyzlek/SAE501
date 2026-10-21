@@ -2,6 +2,95 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Mar. 20 oct. 2026
+- **Fait : le son de la roulette du coffre.** Je ne trouvais pas de bon son en ligne, donc il est fabriqué par le code, comme les cloches des vagues de boss :
+  - un **petit « tic »** (30 ms, un clic sec et aigu) **à chaque case qui passe sous la barre dorée**. Comme la roulette démarre très vite puis ralentit, les tics suivent : une rafale au début, puis de plus en plus espacés jusqu'au singe tiré. C'est ce qui fait monter le suspense, comme les caisses de CS ;
+  - la hauteur de chaque tic varie un peu (±6 %), pour que ça ne sonne pas robotique ; un seul tic par image au début, sinon les tics se collent en bourdonnement ;
+  - le son est en 3D et vient de la roulette : en VR, on l'entend du côté du coffre ;
+  - code : `RouletteView.TickIfNewCase()` et `MakeTick()`.
+  - Vérifié : le projet compile, et testé en jeu en ouvrant un coffre : le tic me plaît, gardé tel quel.
+- **Suivi GitHub :** nouvelle issue [#152 « Sons d'ambiance »](https://github.com/dyzlek/SAE501/issues/152) (S2, `prio: POURRAIT`), ajoutée au tableau en « À faire ».
+
+### IA
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude Code | Tic de la roulette du coffre fabriqué par le code, vérification de la compilation | Gardé (testé en jeu) |
+| Claude Code | Création de l'issue #152 et ajout au tableau | Gardé |
+
+## Lun. 19 oct. 2026
+- **Tri de la liste d'idées de l'équipe** (vagues, gestes VR, économie, hub, classements, multijoueur). J'ai regardé dans le code ce qui existait déjà pour garder ce qui se fait vite, sans toucher à l'architecture :
+  - **rapides** (le code est déjà là, il suffit de le brancher) : boss qui se divise, bananes dorées, annonce des vagues spéciales, vibrations différentes ;
+  - **moyennes** : ballons camouflés (il faut que les singes sachent les voir), bombes à lancer à la main, nouvelles améliorations de l'arc, mur des records et trophées (il faut une sauvegarde) ;
+  - **trop longues pour la SAÉ** : brouillard, nuit et pluie, classement en ligne, coop à deux casques ou casque + PC (le multijoueur est dans le « NE FERA PAS » du GDD).
+
+- **Fait : les boss se divisent en éclatant**, comme dans Bloons TD (branche `feat/bonus-maxens`, partie du `main` à jour). Avant, un boss éclaté disparaissait, et c'était fini : maintenant, éclater le boss n'est pas la fin du danger.
+  - **le boss violet (MOAB) lâche 4 ballons normaux**, et **le dirigeable rouge (BFB) lâche 2 boss**, qui se divisent à leur tour. À la finale (vague 100), les 4 dirigeables donnent donc 8 boss, puis 32 ballons ;
+  - les petits **repartent de l'endroit où le boss a éclaté**, espacés de 60 cm en arrière sur la piste, avec une **onde de choc** pour qu'on voie l'éclatement ;
+  - **leurs couches suivent la solidité du boss** : un boss à 17 couches (vague 15) lâche des ballons à 3 couches, jusqu'à 6 couches au plus ; le dirigeable lâche des boss au quart de ses couches ;
+  - un boss qui **sort de la carte** ne se divise pas (il a déjà coûté ses vies), et une vague perdue efface tout sans rien diviser ;
+  - code : `Balloon.Split()` choisit quoi lâcher, `WaveSpawner.SpawnSplit()` les fait apparaître, `Balloon.ContinueFrom()` les pose sur la piste.
+  - Testé en Play via Unity MCP : un boss à 17 couches éclaté d'un coup laisse bien 4 ballons verts (3 couches) à sa place, qui continuent la piste.
+
+  Le boss (MOAB) sur la piste, puis juste après l'avoir éclaté : 4 ballons verts à sa place.
+
+  ![Le boss sur la piste, avant d'éclater](../captures/maxens-boss-avant.png)
+
+  ![Juste après : 4 ballons normaux à 3 couches repartent de l'endroit du boss](../captures/maxens-boss-divise.png)
+
+- **Fait : les bananes dorées.** Une banane sur 25 (4 %) tombe **dorée** :
+  - **toute dorée et brillante** : la texture jaune est remplacée par un doré métallique (sur cette banane seulement, le matériau du bananier n'est pas touché), avec une **aura légère**, celle des raretés des singes, à la taille de la banane ;
+  - elle vaut **10 fois plus** (50 au lieu de 5 sans amélioration) et pourrit **2 fois moins vite** ;
+  - les trois réglages sont sur chaque bananier, dans l'Inspector : `chanceDoree`, `multiplicateurDore`, `pourritureDoree` ;
+  - c'est une petite surprise qui fait courir au pied de l'arbre, et une raison de ramasser soi-même plutôt que de tout laisser aux singes (eux n'en gardent qu'une part).
+- **Corrigé après mes captures** : la première version teintait la texture en doré, mais la banane étant déjà jaune, **on ne voyait presque pas la différence**, et les étincelles n'étaient que de petits carrés. Un essai avec la grande aura des singes mettait des flammes dans toute la prairie (sa taille comptait la traînée du lancer). Je voulais juste une couleur dorée et, au pire, une aura légère : c'est la version gardée.
+  - Testé en Play via Unity MCP : la banane dorée vaut 50 (les autres 5) et se distingue bien.
+
+  À gauche une banane normale, à droite une dorée, avec son aura légère.
+
+  ![Une banane normale et une banane dorée sur l'étal](../captures/maxens-banane-doree.png)
+
+- **Fait : l'annonce des vagues spéciales** (celles avec un boss ou un dirigeable). Avant, rien ne prévenait : le boss arrivait comme un ballon normal.
+  - **pendant la préparation**, le tableau de la vague prévient : « VAGUE DE BOSS ! » en violet, ou « DIRIGEABLE ROUGE EN APPROCHE ! » en rouge ;
+  - **au lancement**, trois coups de cloche ;
+  - **quand le boss entre sur la piste**, un cor grave, et le tableau affiche « LE BOSS ARRIVE ! » ;
+  - les sons sont **fabriqués par le code** (une somme de sinus qui s'éteignent, comme une vraie cloche), sans fichier audio à ajouter, et en 2D : **on les entend du hub comme de la carte**, donc on sait qu'il faut y retourner. Nouveau script `Map/WaveAnnouncer.cs`.
+  - Testé en Play via Unity MCP : vague 14 gagnée → le tableau annonce la vague de boss ; vague 15 lancée → « VAGUE DE BOSS ! », puis « LE BOSS ARRIVE ! » quand le MOAB entre. Aucune erreur dans la console.
+
+  Au hub, pendant la préparation : la vague 15 est annoncée.
+
+  ![Le tableau du hub : vague 14 gagnée, VAGUE DE BOSS !](../captures/maxens-tableau-vague-boss.png)
+
+  Sur la carte, pendant la vague : le tableau prévient, et le boss entre derrière.
+
+  ![Le tableau de la carte : LE BOSS ARRIVE !, le MOAB derrière](../captures/maxens-tableau-boss-arrive.png)
+
+- **Fait : une vibration différente selon l'action.** Avant, quelques boutons et l'arc vibraient tous de la même façon, une seule petite impulsion. Maintenant, chaque action a son **motif** (plusieurs impulsions d'affilée), pour la reconnaître sans regarder (nouveau script `Player/Haptics.cs`) :
+
+  | Action | Vibration | Main |
+  |---|---|---|
+  | Attraper une banane | douce et brève | celle qui attrape |
+  | Banane dans le panier | deux petits tics | celle qui l'a lancée |
+  | Banane dorée dans le panier | trois tics qui montent | celle qui l'a lancée |
+  | Flèche qui touche un ballon | un tic sec | celle de l'arc |
+  | Boss qui éclate | grosse secousse longue | les deux |
+  | Ballon qui passe (vies perdues) | grondement, deux fois par seconde au plus | les deux |
+  | Vague spéciale | deux battements de cœur | les deux |
+  | Vague gagnée / perdue | trois tics qui montent / un long et sourd | les deux |
+
+  Quand c'est un **singe récolteur** qui dépose la banane, ma main ne vibre pas : les singes la prennent maintenant avec `PriseParSinge()`, qui oublie la main du joueur. En mode PC, il n'y a pas de manette : rien ne vibre, sans erreur.
+
+- **Vérifié** : le projet compile, sans erreur ni avertissement dans les scripts modifiés. En relisant la check-list du guide du code, j'ai corrigé un point : l'abonnement de la banane à la prise en main est maintenant retiré dans `OnDisable`.
+- **GDD mis à jour** (`.md` et `.docx`) : boss qui se divisent (7.6), vagues spéciales (7.7), bananes dorées (7.8 et affordances), tableau du feedback avec toutes les vibrations (10.3), périmètre (13). Décision ajoutée au journal général.
+- **Reste à faire** : tester les vibrations au casque, et l'équilibrage (les boss qui se divisent rendent les vagues 15 et plus un peu plus dures).
+
+### IA
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude Code | Tri de la liste d'idées selon ce qui existe déjà dans le code (rapide, moyen, trop long) | Gardé |
+| Claude Code | Code des quatre bonus : division des boss, bananes dorées, annonce des vagues spéciales (sons fabriqués par le code), motifs de vibration ; vérification de la compilation | Gardé |
+| Claude Code | Mise à jour du GDD (.md et .docx), du journal général, des prompts et de ce journal | Gardé |
+| Claude Code | Tests en Play et captures via Unity MCP (boss qui se divise, banane dorée, tableaux) ; banane dorée revue : toute dorée avec une aura légère | Gardé (1re version de la banane dorée jetée : pas assez visible) |
+
 ## Jeu. 8 oct. 2026
 - **Fait : la bananeraie, un nouvel endroit pour tout ce qui concerne la récolte des bananes** (branche `feat/bananeraie-maxens`, partie du `main` à jour, PR #99). Avant, le bananier, l'étal, le panier, le comptoir du bananier et celui des récolteurs étaient tous dans la cabane, autour du joueur : ça faisait beaucoup de choses au même endroit.
 

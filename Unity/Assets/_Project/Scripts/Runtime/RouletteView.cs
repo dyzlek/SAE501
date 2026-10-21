@@ -10,6 +10,8 @@ namespace Sae501.Coffres
     // dans la fenêtre sont allumés (environ 7 sur 48).
     // Le canvas est en World Space (dans le décor) : utilisable à l'écran comme en VR.
     // Même habillage que les ardoises du hub : cadre en bois, fond ardoise, barre et titre dorés, polices du jeu.
+    // Un « tic » à chaque case qui passe sous la barre : très rapide au début, de plus en plus espacé à la fin (le suspense).
+    // Le son est fabriqué par le code (un clic sec très court), sans fichier audio.
     public class RouletteView : MonoBehaviour
     {
         [Header("Taille (en pixels de canvas, 1 px = 2 mm)")]
@@ -32,6 +34,9 @@ namespace Sae501.Coffres
         RectTransform viewportRt;
         Text message;
         Sprite rainbow;
+        AudioSource tickSource;
+        static AudioClip tick;
+        int lastTickIndex;             // la case qui était sous la barre au dernier tic
 
         float Pitch => itemWidth + gap;
 
@@ -98,6 +103,13 @@ namespace Sae501.Coffres
 
             canvasRoot = canvasGo;
             canvasRoot.SetActive(false); // invisible tant qu'on n'ouvre pas de coffre
+
+            // Le tic vient de la roulette elle-même (son 3D : en VR, on l'entend du bon côté)
+            tickSource = gameObject.AddComponent<AudioSource>();
+            tickSource.playOnAwake = false;
+            tickSource.spatialBlend = 1f;
+            tickSource.minDistance = 1.5f;
+            tickSource.volume = 0.5f;
         }
 
         // ---------- API ----------
@@ -121,11 +133,14 @@ namespace Sae501.Coffres
             // Arrêt à un endroit aléatoire à l'intérieur de la case gagnante (pas toujours pile au milieu).
             float to = CenteredX(winnerIndex, Random.Range(-0.4f, 0.4f) * itemWidth);
 
+            SetStripX(from);
+            lastTickIndex = IndexUnderBar();
             for (float t = 0f; t < duration; t += Time.deltaTime)
             {
                 float k = t / duration;
                 float eased = 1f - Mathf.Pow(1f - k, 4f); // démarre vite, ralentit à la fin
                 SetStripX(Mathf.Lerp(from, to, eased));
+                TickIfNewCase();
                 yield return null;
             }
             SetStripX(to);
@@ -133,6 +148,41 @@ namespace Sae501.Coffres
         }
 
         // ---------- Interne ----------
+
+        // La case qui est sous la barre en ce moment
+        int IndexUnderBar() => Mathf.FloorToInt((viewportWidth * 0.5f - strip.anchoredPosition.x) / Pitch);
+
+        // Une nouvelle case passe sous la barre : un tic, un peu plus aigu ou plus grave à chaque fois.
+        // Au tout début, plusieurs cases peuvent passer en une image : un seul tic par image, sinon c'est un bourdonnement.
+        void TickIfNewCase()
+        {
+            int index = IndexUnderBar();
+            if (index == lastTickIndex) return;
+            lastTickIndex = index;
+            if (!tick) tick = MakeTick();
+            tickSource.pitch = Random.Range(0.94f, 1.06f);
+            tickSource.PlayOneShot(tick);
+        }
+
+        // Le tic : 30 ms d'un son aigu mêlé d'un peu de souffle, qui s'éteint très vite (comme un clic en plastique)
+        static AudioClip MakeTick()
+        {
+            const int rate = 44100;
+            int length = (int)(0.03f * rate);
+            var data = new float[length];
+            var noise = new System.Random(7);
+            for (int i = 0; i < length; i++)
+            {
+                float t = i / (float)rate;
+                float fade = Mathf.Exp(-t * 180f);
+                float tone = 0.5f * Mathf.Sin(2f * Mathf.PI * 2400f * t) + 0.25f * Mathf.Sin(2f * Mathf.PI * 900f * t);
+                float breath = 0.35f * (float)(noise.NextDouble() * 2.0 - 1.0);
+                data[i] = (tone + breath) * fade * 0.8f;
+            }
+            var clip = AudioClip.Create("Tic", length, 1, rate, false);
+            clip.SetData(data, 0);
+            return clip;
+        }
 
         // Position X de la bande pour que la case 'index' (décalée de 'offset') soit sous la barre.
         float CenteredX(int index, float offset) =>

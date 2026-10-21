@@ -2,6 +2,11 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Mar. 20 oct. 2026
+
+### Valider la branche de Maxens
+> Annule ce que j'ai fait actuellement. Reprends ce que Maxens a fait (feat/bonus-maxens) pour le valider et corriger tous les bugs.
+
 ## Lun. 19 oct. 2026
 
 ### Objectifs de la semaine 2

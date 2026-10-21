@@ -116,6 +116,7 @@ namespace SAE
                 if (Draw > MinDraw)
                 {
                     var velocity = direction.normalized * ShotSpeed;
+                    nocked.shooterHand = transform.parent;   // la main qui tient l'arc vibre quand la flèche touche
                     nocked.transform.SetParent(null, true);
                     nocked.Launch(velocity);
                     nextNock = Time.time + reloadTime;   // on recharge : pas de nouvelle flèche avant reloadTime

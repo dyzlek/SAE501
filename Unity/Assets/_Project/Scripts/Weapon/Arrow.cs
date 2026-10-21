@@ -17,6 +17,7 @@ namespace SAE
     {
         public float lifetime = 4f;      // secondes avant de disparaître une fois tirée (comme les balles du cours)
         public float stuckTime = 2f;     // secondes avant de disparaître une fois plantée
+        [System.NonSerialized] public Transform shooterHand;   // la main qui tient l'arc (vide pour les flèches du tir triple)
 
         Rigidbody body;
         TrailRenderer trail;
@@ -69,6 +70,7 @@ namespace SAE
             if (!touched.Add(balloon)) return;   // déjà percé (un ballon peut avoir plusieurs colliders)
 
             var center = balloon.transform.position;
+            if (touched.Count == 1) Haptics.Play(shooterHand, Haptics.Hit);   // touché ! (une fois par flèche)
             balloon.Pop(BowUpgrades.Pierce);
             if (BowUpgrades.Explosive) Explode(center, balloon);
             if (--balloonsLeft <= 0) Destroy(gameObject);   // plus de ballon à traverser : la flèche est détruite
