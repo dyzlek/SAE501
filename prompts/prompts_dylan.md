@@ -6,6 +6,8 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ### Journal des optimisations et aura des singes
 > Crée un fichier `opti.md` pour noter chaque modification d’optimisation : ce que j’ai fait, si ça a vraiment marché, des suggestions, etc. Fais la première optimisation : les effets autour des singes ont beaucoup de particules. Pourquoi pas plutôt un effet en dessous qui les englobe, comme une transformation en super saiyan ?
+### README et captures dans le journal
+> Mets à jour le README et ajoute ces captures dans mon journal, en expliquant que la pluie ne tombe pas dans la cabane.
 
 ### Annonce d’un trophée gagné
 > Quand on gagne une coupe, j’aimerais qu’elle apparaisse devant nous avec la façon dont on a obtenu le succès (1 000 bananes récoltées, etc.). Je te laisse faire.
