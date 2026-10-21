@@ -3,6 +3,18 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Mer. 21 oct. 2026
+**Ce que j'ai fait :** la météo des vagues de boss, et l'annonce des trophées (sur l'armoire de Nicolas). Testé dans Unity (captures ci-dessous).
+- **Orage pendant les vagues de boss** (#131) : nuages, pluie, brume, éclairs et tonnerre, avec une vibration dans les manettes à chaque coup de tonnerre.
+- **Il ne pleut pas dans la cabane.** Au début, la pluie traversait le toit : les gouttes n'ont pas de physique, parce que des collisions pour 1 000 gouttes coûteraient trop cher sur le Quest. On a posé sur la cabane une forme invisible : un cylindre de la taille des murs, coiffé d'un dôme qui passe au-dessus du toit. Toute goutte qui y entre disparaît. Comme c'est un *trigger*, le joueur la traverse et elle ne gêne pas la téléportation. Dehors, il pleut ; dedans, on voit la pluie par la fenêtre.
+- **Trophée gagné** : la coupe apparaît devant le joueur, avec une ardoise « SUCCÈS ! » qui dit comment on l'a eue (« 5 000 bananes récoltées »), une fanfare et une vibration, pendant 5 s. Elle est posée dans le décor et ne suit pas la tête (confort).
+- Fusion de la branche de Nicolas (armoire à trophées), PR [#155](https://github.com/dyzlek/SAE501/pull/155).
+
+| | |
+|---|---|
+| ![Orage pendant une vague de boss](../captures/meteo-pluie-carte.png) | ![Les nuages au-dessus du joueur](../captures/meteo-nuages.png) |
+| ![Dans la cabane : la pluie reste dehors, on la voit par la fenêtre](../captures/meteo-cabane-seche.webp) | ![L'armoire à trophées de Nicolas](../captures/trophees-armoire.webp) |
+
+![Un trophée gagné apparaît devant le joueur](../captures/trophee-succes.webp)
 
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
@@ -11,6 +23,12 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude (Claude Code) | Fusion dans `feat/meteo` : météo commitée, puis `main` (avec #154 de Maxens) et `feat/paliers-trophy` de Nicolas (armoire à trophées). Un seul conflit (`PrototypeGenerator.BuildHub`) : gardé le tutoriel ET l’armoire. Mes réglages Unity locaux mis de côté dans un stash (« dylan-unity-avant-merge-trophees-1 »). Compilé (jeu et éditeur), scènes à régénérer | Gardé (à tester) |
 | Claude (Claude Code) | Trophées (armoire de Nicolas) : quand on en gagne un, il apparaît devant le joueur (`Hub/TrophyPopup.cs`) : copie de la coupe qui surgit et tourne, ardoise « SUCCÈS ! » avec comment on l’a eu (« 1 000 bananes récoltées », « 50 vagues vaincues ») et le palier (bronze… diamant), fanfare + vibration, 5 s. Posée une fois à 1,4 m devant les yeux, ne suit pas la tête ; plusieurs trophées passent l’un après l’autre. Appel ajouté dans `Trophy.Refresh` + menu clic droit de test. Compilé, pas testé | Gardé (à tester) |
 | Claude (Claude Code) | PR de `feat/meteo` vers main (155, ferme #131) : météo, armoire à trophées de Nicolas, annonce des trophées ; ajoutée au tableau, cartes en relecture. Recoupe les PR #147 à #150 (à trancher) | Gardé |
+| Claude (Claude Code) | README mis à jour (le jeu : orage, trophées, bananes dorées, boss qui se divisent ; état du 21 oct., PR en cours, priorités ; 5 captures) à partir de la version du 9 oct. ; 5 captures de Dylan ajoutées dans `docs/captures/` et dans ce journal, avec l’explication de la pluie arrêtée par le toit | Gardé |
+| Claude (Claude Code) | Optimisation, branche `feat/opti-aura` : nouveau `docs/opti.md` (journal des optimisations : problème, ce qui a été fait, avant / après, est-ce que ça a marché, suggestions, et comment mesurer) + règle n°4 dans `CLAUDE.md`. Première optimisation : l’aura des singes n’a plus de particules (avant : 2 systèmes, jusqu’à 86 particules par singe, ~56 singes dans la bibliothèque) ; `Core/Aura.cs` réécrit en un seul maillage partagé « super saiyan » (tube de flamme dégradé + disque au sol, petit battement), même interface. Compilé, pas mesuré au casque | Gardé (à mesurer) |
+| Claude (Claude Code) | Aura v2 après le test de Dylan : seule l’arc-en-ciel s’affichait (cache statique de maillages détruits entre deux parties sans rechargement du domaine ; corrigé : cache vidé au lancement, maillage détruit refait). Plus belle, toujours 1 maillage : langues de flamme irrégulières, cœur presque blanc, disque au sol, rotation lente + battement (120 triangles). `opti.md` complété. Compilé, à retester | Gardé (à tester) |
+| Claude (Claude Code) | Optimisation : au plus 60 singes posés (`Placement.MaxPlaced`) ; plateau plein = fantôme rouge + « PLATEAU PLEIN (60) · Fusionne tes singes ! », la fusion et la reprise restent possibles. Entrée dans `docs/opti.md`. Compilé, pas testé | Gardé (à tester) |
+| Claude (Claude Code) | Compteur de singes posés (`Core/PlacedCounter.cs`, ajouté par `PlacementSurface.Start`) : plaque en bois « SINGES n / 60 » au bord du plateau du hub (petite) et de la carte (à hauteur de main), côté joueur ; dorée, orange dès 50, rouge et qui bat quand c’est plein. `TestBossEveryWave` remis à false (modif locale annulée). Compilé, pas testé | Gardé (à tester) |
+| Claude (Claude Code) | Compteur de singes déplacé après le test de Dylan (plaque trop petite) : `PlacedCounter` supprimé ; ligne « Singes : n / 60 » sur le tableau de la vague (`WaveBoard`, hub et carte), orange dès 50, rouge « PLEIN ». Compilé | Gardé (à tester) ; plaque jetée |
 
 ## Mar. 20 oct. 2026
 

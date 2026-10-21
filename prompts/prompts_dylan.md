@@ -4,6 +4,23 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 21 oct. 2026
 
+### Compteur de singes sur le tableau de la vague
+> Il est trop petit, et je ne veux pas de pancarte : mets-le plutôt en dessous, sur ce tableau (celui de la vague).
+
+### Plus de boss à chaque vague, compteur de singes
+> Enlève les boss à chaque vague. Mets, près de l’endroit où l’on pose les singes, la limite et le nombre actuel, de façon jolie.
+
+### Limite de 60 singes posés
+> Ensuite, limite le nombre de singes posés à 60 au maximum, pour éviter de surcharger le jeu.
+
+### Aura : il en manque, et plus belle
+> Il manque des auras : je n’en vois que sur une colonne. J’aimerais aussi qu’elles soient un peu plus belles, mais toujours optimisées.
+
+### Journal des optimisations et aura des singes
+> Crée un fichier `opti.md` pour noter chaque modification d’optimisation : ce que j’ai fait, si ça a vraiment marché, des suggestions, etc. Fais la première optimisation : les effets autour des singes ont beaucoup de particules. Pourquoi pas plutôt un effet en dessous qui les englobe, comme une transformation en super saiyan ?
+### README et captures dans le journal
+> Mets à jour le README et ajoute ces captures dans mon journal, en expliquant que la pluie ne tombe pas dans la cabane.
+
 ### Annonce d’un trophée gagné
 > Quand on gagne une coupe, j’aimerais qu’elle apparaisse devant nous avec la façon dont on a obtenu le succès (1 000 bananes récoltées, etc.). Je te laisse faire.
 

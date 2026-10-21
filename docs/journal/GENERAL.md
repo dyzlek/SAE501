@@ -34,6 +34,7 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 | 2026-10-21 | **Météo des vagues de boss** (`Weather.cs`) : nuages au lancement d'une vague spéciale, pluie + brume (visibilité 45 m) + éclairs doux + tonnerre quand le boss entre, ciel dégagé à la fin. Seulement sur la carte (au hub : le son de la pluie, étouffé). Nuit pas faite | Ambiance et lisibilité des boss (#131) ; tout fabriqué par le code et léger pour tenir 72 fps (Dylan) |
 | _à trancher_ | Nom du jeu · assets Bloons ou maison · périmètre définitif | Avant le GDD v1 (ven. 9 oct.) |
 | 2026-10-19 | **Bonus rapides** : les boss se divisent (boss → 4 normaux, dirigeable → 2 boss), 4 % de bananes dorées (×10), vagues spéciales annoncées (tableau, cloches, cor), une vibration différente par action | Plus de surprise et de lisibilité pour peu de code ; le feedback vibration demandé par le cours (Maxens) |
+| 2026-10-21 | **Journal des optimisations** ([opti.md](../opti.md)) : chaque modification de performance y est notée avec avant / après mesurés. Première : l’aura des singes passe de 2 systèmes de particules à un seul maillage | 72 fps sur le Quest (#35) ; preuves pour l’oral technique et la note d’optimisation |
 
 ## Jalons
 - [ ] Ven. 9 oct. — GDD v1 + prototype gris jouable
