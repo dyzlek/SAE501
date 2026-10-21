@@ -28,7 +28,9 @@ namespace SAE
         public int PriceToBuy => Free ? 0 : FirstPrice * (Count + 1);
 
         // Les trois améliorations, niveau 1 à 5
-        public float Speed => 0.25f + 0.2f * (Level(HarvesterStat.Vitesse) - 1);       // m/s : 0,25 (il flâne) → 1,05
+        // Au maximum, ils ramènent environ 75 % de ce que donnent les 3 bananiers au maximum (~1,15 banane/s) : 4 singes,
+        // 2 bananes par trajet, ~10 m d'aller-retour. Pas tout : le joueur doit encore ramasser lui-même.
+        public float Speed => 0.25f + 0.35f * (Level(HarvesterStat.Vitesse) - 1);      // m/s : 0,25 (il flâne) → 1,65 (il trottine)
         public float Pause => 3f - 0.6f * (Level(HarvesterStat.Cadence) - 1);           // s entre deux trajets : 3 → 0,6
         public float Share => 0.6f + 0.1f * (Level(HarvesterStat.Rendement) - 1);       // part payée : 60 % → 100 %
 

@@ -34,7 +34,9 @@ namespace SAE
             body = gameObject.AddComponent<Rigidbody>();
             body.isKinematic = true;      // il marche tout seul : pas de physique hors des lancers
             body.useGravity = false;
-            body.interpolation = RigidbodyInterpolation.Interpolate;
+            // Pas d'interpolation quand il marche : elle remettait le singe à sa position physique à chaque image,
+            // et il n'avançait qu'à un tiers de sa vitesse. Elle ne sert que pendant le vol (voir FixedUpdate et Land).
+            body.interpolation = RigidbodyInterpolation.None;
             grab = gameObject.AddComponent<XRGrabInteractable>();
             grab.throwOnDetach = false;   // c'est nous qui le lançons (ThrowVelocity : XRI perd l'élan d'un objet cinématique)
             grab.farAttachMode = UnityEngine.XR.Interaction.Toolkit.Attachment.InteractableFarAttachMode.Near;   // pris de loin, il vient dans la main
@@ -87,6 +89,7 @@ namespace SAE
             // Juste après le lâcher (XRI l'a remis cinématique) : la physique prend le relais, avec l'élan de la main et une vrille
             body.isKinematic = false;
             body.useGravity = true;
+            body.interpolation = RigidbodyInterpolation.Interpolate;   // un vol fluide, même entre deux pas de physique
             body.linearVelocity = throwVelocity;
             body.angularVelocity = Random.onUnitSphere * 8f;
         }
@@ -106,6 +109,7 @@ namespace SAE
             flying = false;
             body.isKinematic = true;
             body.useGravity = false;
+            body.interpolation = RigidbodyInterpolation.None;   // de nouveau à pied : c'est HarvesterMonkey qui le déplace
             var center = monkey.areaCenter;
             var flat = new Vector3(transform.position.x - center.x, 0f, transform.position.z - center.z);
             flat = Vector3.ClampMagnitude(flat, monkey.areaRadius);   // le point de la terrasse le plus proche, au sol
