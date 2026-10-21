@@ -13,11 +13,19 @@ L'adresse est écrite dans `Leaderboard.Url`. Si le dossier change, il faut la c
 ## Ce que fait l'API (`api.php`)
 | Appel | Effet |
 |---|---|
-| `GET api.php` | Renvoie les 10 meilleures parties en JSON : nom (3 lettres), vague, bananes. |
-| `POST api.php` (`key`, `game_id`, `name`, `wave`, `bananas`) | Ajoute la partie, ou la met à jour. Une partie ne peut que monter. |
+| `GET api.php` | Renvoie les 10 meilleures parties en JSON : nom, vague, bananes. |
+| `GET api.php?check=NOM&device=ID` | Dit si le nom est `free` (libre), `mine` (déjà à ce casque) ou `taken` (pris par un autre casque). |
+| `POST` `action=claim` (`key`, `device`, `name`) | Réserve le nom pour ce casque. Répond 409 s'il est déjà pris. |
+| `POST` `action=score` (`key`, `device`, `game_id`, `name`, `wave`, `bananas`) | Ajoute la partie, ou la met à jour. Refusé si le nom n'appartient pas à ce casque. Une partie ne peut que monter. |
 
-**Sécurité :**
-- Toutes les valeurs sont vérifiées : 3 lettres, nombres bornés, identifiant de 32 caractères.
-- Les requêtes sont préparées, donc pas d'injection SQL.
+## Noms uniques
+- Au premier lancement, le jeu tire au hasard un **identifiant caché** pour le casque, et le garde sur le casque.
+- Le joueur reçoit un nom par défaut, `SINGE-` suivi de 4 chiffres.
+- Le **premier casque** qui prend un nom le garde (table `bloons_names`). Un autre casque ne peut ni le réserver, ni envoyer un score sous ce nom.
+- Un nom fait de 3 à 12 caractères : lettres, chiffres et « - ».
+- **Limite :** si on désinstalle le jeu, le casque perd son identifiant, et donc son nom. Sur les casques partagés de l'IUT, un nom est réservé **par casque**, pas par personne.
+
+## Sécurité
+- Toutes les valeurs sont vérifiées, et les requêtes sont préparées : pas d'injection SQL.
 - Le mot de passe n'est que dans `config.php`, sur le serveur.
 - La « clé du jeu » filtre seulement les envois au hasard. Elle est dans le build, donc un tricheur motivé pourrait envoyer un faux score : pour un projet étudiant, c'est accepté.

@@ -7,7 +7,10 @@ using UnityEngine.Networking;
 namespace SAE
 {
     // Le classement : LOCAL (gardé sur le casque) et EN LIGNE (une base MySQL sur le serveur de l'IUT, server/classement/).
-    // Une ligne par partie : 3 lettres façon borne d'arcade, la plus haute vague gagnée, les bananes gagnées.
+    // Une ligne par partie : le nom du joueur, la plus haute vague gagnée, les bananes gagnées.
+    // NOMS UNIQUES : au premier lancement, le casque tire un identifiant caché (gardé sur le casque) et un nom par défaut
+    // (SINGE-4821). Le serveur réserve un nom pour le premier casque qui le prend : personne d'autre ne peut l'utiliser.
+    // On change de nom au clavier du panneau : le nom n'est gardé que si le serveur dit qu'il est libre (TryRename).
     //   - À chaque vague gagnée (WaveSpawner), la partie en cours est enregistrée sur le casque (PlayerPrefs) et envoyée
     //     au serveur. Le serveur ne la fait jamais baisser.
     //   - Le tableau du hub (LeaderboardBoard) affiche les deux colonnes : ICI et MONDE.
@@ -20,7 +23,11 @@ namespace SAE
         const string Key = "bloons-vr-sae501";   // même valeur que GAME_KEY dans config.php
         public const int Size = 10;
         const string BoardKey = "SAE.ClassementLocal";
-        const string NameKey = "SAE.Initiales";
+        const string NameKey = "SAE.Nom";
+        const string DeviceKey = "SAE.Casque";
+
+        // L'état du nom, affiché sur le panneau
+        public enum NameState { Unknown, Checking, Mine, Taken, Offline }
 
         [Serializable]
         public class Entry
@@ -39,6 +46,7 @@ namespace SAE
         public static bool OnlineReady { get; private set; }      // la liste en ligne a été reçue au moins une fois
         public static bool OnlineFailed { get; private set; }     // le dernier appel au serveur a échoué
         public static string GameId { get; private set; }
+        public static NameState State { get; private set; }
 
         public static event Action Changed;
 
@@ -46,13 +54,76 @@ namespace SAE
         static List<Entry> online = new List<Entry>();
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetState() { local = null; online = new List<Entry>(); OnlineReady = OnlineFailed = false; GameId = null; }
+        static void ResetState() { local = null; online = new List<Entry>(); OnlineReady = OnlineFailed = false; GameId = null; State = NameState.Unknown; }
 
-        // Les initiales choisies sur le tableau (gardées sur le casque d'une partie à l'autre)
-        public static string Initials
+        // L'identifiant caché du casque : tiré au hasard la première fois, puis toujours le même (jamais affiché)
+        public static string Device
         {
-            get => PlayerPrefs.GetString(NameKey, "AAA");
-            set { PlayerPrefs.SetString(NameKey, value); PlayerPrefs.Save(); Changed?.Invoke(); }
+            get
+            {
+                var id = PlayerPrefs.GetString(DeviceKey, "");
+                if (id.Length == 32) return id;
+                id = Guid.NewGuid().ToString("N");
+                PlayerPrefs.SetString(DeviceKey, id);
+                PlayerPrefs.Save();
+                return id;
+            }
+        }
+
+        // Le nom du joueur (gardé sur le casque). Par défaut « SINGE- » et 4 chiffres, pour être presque sûr qu'il est libre.
+        public static string Name
+        {
+            get
+            {
+                var name = PlayerPrefs.GetString(NameKey, "");
+                if (IsValidName(name)) return name;
+                name = "SINGE-" + UnityEngine.Random.Range(1000, 10000);
+                PlayerPrefs.SetString(NameKey, name);
+                PlayerPrefs.Save();
+                return name;
+            }
+        }
+
+        // Les mêmes règles que le serveur : 3 à 12 caractères, A-Z, 0-9 et « - »
+        public const int MinName = 3, MaxName = 12;
+        public static bool IsValidName(string name)
+        {
+            if (name == null || name.Length < MinName || name.Length > MaxName) return false;
+            foreach (char c in name) if (!(c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '-')) return false;
+            return true;
+        }
+
+        // Au lancement : réserve le nom actuel (il l'est sans doute déjà : le serveur répond « ok » pour son propriétaire)
+        public static void ClaimCurrent() => Runner.Instance.StartCoroutine(Claim(Name, null));
+
+        // Le clavier propose un nouveau nom : on le réserve sur le serveur ; s'il est libre, il devient le nom du joueur.
+        // done(true) = gardé, done(false) = pris par un autre casque ou pas de réseau (State dit lequel).
+        public static void TryRename(string name, Action<bool> done) => Runner.Instance.StartCoroutine(Claim(name, done));
+
+        static IEnumerator Claim(string name, Action<bool> done)
+        {
+            State = NameState.Checking;
+            Changed?.Invoke();
+            var form = new WWWForm();
+            form.AddField("key", Key);
+            form.AddField("action", "claim");
+            form.AddField("device", Device);
+            form.AddField("name", name);
+            using (var request = UnityWebRequest.Post(Url, form))
+            {
+                request.timeout = 5;
+                yield return request.SendWebRequest();
+                if (request.result == UnityWebRequest.Result.Success) State = NameState.Mine;
+                else State = request.responseCode == 409 ? NameState.Taken : NameState.Offline;
+            }
+            bool kept = State == NameState.Mine;
+            if (kept)
+            {
+                PlayerPrefs.SetString(NameKey, name);
+                PlayerPrefs.Save();
+            }
+            done?.Invoke(kept);
+            Changed?.Invoke();
         }
 
         // Une nouvelle partie : un nouvel identifiant tiré au hasard (32 caractères hexadécimaux, comme l'attend le serveur)
@@ -63,7 +134,7 @@ namespace SAE
         {
             if (GameId == null) NewGame();
             Load();
-            var entry = new Entry { name = Initials, wave = GameState.WavesWon, bananas = GameState.BananasEarned, game = GameId };
+            var entry = new Entry { name = Name, wave = GameState.WavesWon, bananas = GameState.BananasEarned, game = GameId };
             local.RemoveAll(e => e.game == GameId);
             local.Add(entry);
             Sort(local);
@@ -89,6 +160,8 @@ namespace SAE
         {
             var form = new WWWForm();
             form.AddField("key", Key);
+            form.AddField("action", "score");
+            form.AddField("device", Device);
             form.AddField("game_id", e.game);
             form.AddField("name", e.name);
             form.AddField("wave", e.wave);

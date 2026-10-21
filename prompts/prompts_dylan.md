@@ -4,6 +4,10 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 21 oct. 2026
 
+### Noms uniques au classement
+> Comment faire pour que personne ne puisse reprendre le même nom ? Pourquoi ne pas prendre simplement le nom de l’appareil, et le changer avec un clavier virtuel si la personne le veut ?
+> Suite : oui (nom réservé par casque, nom par défaut, clavier virtuel).
+
 ### Classement dehors, en grand
 > Mets le tableau du classement dehors, en grand, et fais en sorte qu’il soit joli.
 > Suite : mets le panneau là (dans le pré, après la barrière de la terrasse, capture à l’appui).
