@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 21 oct. 2026
 
+### Annonce d’un trophée gagné
+> Quand on gagne une coupe, j’aimerais qu’elle apparaisse devant nous avec la façon dont on a obtenu le succès (1 000 bananes récoltées, etc.). Je te laisse faire.
+
 ### Fusion de la météo et des trophées de Nicolas
 > Fusionne la météo avec les trophées que Nicolas a faits, et tout ce qu’il y a sur sa branche.
 

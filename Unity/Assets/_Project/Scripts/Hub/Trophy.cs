@@ -47,6 +47,9 @@ namespace SAE
 
         void Awake() => baseScale = transform.localScale;
 
+        // Pour voir l'annonce sans jouer : en mode Play, clic droit sur le composant d'un trophée
+        [ContextMenu("Tester l'annonce du trophée")] void TestPopup() => TrophyPopup.Show(this);
+
         // Une vague gagnée ou une banane déposée font toujours bouger l'argent : on se met à jour à ce moment-là
         void OnEnable()
         {
@@ -61,7 +64,8 @@ namespace SAE
         void Refresh(bool celebrate)
         {
             bool nowWon = Progress >= target;
-            if (nowWon && !won && celebrate) punch = 1f;
+            bool justWon = nowWon && !won && celebrate;
+            if (justWon) punch = 1f;
             won = nowWon;
 
             var color = won ? TierColors[tier] : Unpolished;
@@ -72,6 +76,7 @@ namespace SAE
                 plaque.text = won ? $"{Format(target)} {Unit}" : $"{Format(target)} {Unit}\n{Format(Mathf.Min(Progress, target))} / {Format(target)}";
                 plaque.color = won ? PlaqueGold : PlaqueDim;
             }
+            if (justWon) TrophyPopup.Show(this);   // il apparaît devant le joueur, avec comment on l'a eu
         }
 
         void Update()
