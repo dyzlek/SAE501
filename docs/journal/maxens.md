@@ -39,8 +39,10 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
   - Testé en Play via Unity MCP : 10 ballons éclatés d'un coup donnent bien 3 sons ; préparation → Party Time, vague lancée → Primal One, boss sur la piste → Onslaught, en fondu. Aucune erreur.
 - **Fait : les sons du casino** (la roulette de la bananeraie n'avait que le clic des boutons), sans nouveau fichier :
   - **un tic à chaque case qui passe sous la bille**, rapide au début puis de plus en plus espacé : le même tic que la roulette du coffre, joué plus grave (une bille sur du bois). Le tic est maintenant fabriqué à un seul endroit (`Sounds.Tick`) pour les deux roulettes ;
-  - **mise gagnée** : le son du singe obtenu, ou le jingle de vague gagnée pour le vert (×35) ; **mise perdue** : le son de vie perdue, plus doux.
+  - **mise gagnée** : le son du singe obtenu, ou le jingle de vague gagnée pour le vert (×35) ; **mise perdue** : le son de vie perdue (d'abord à 60 %, trop discret : remis à 100 % après mon test).
   - Testé en Play via Unity MCP : la roue tourne avec ses tics, et au noir gagnant (+22 bananes) le son se joue à l'arrêt de la bille. Aucune erreur.
+- **Fait : le son d'alerte dans le tutoriel.** Quand on fait quelque chose que le tutoriel ne demande pas encore (ouvrir le coffre trop tôt, appuyer sur un autre bouton…), le tableau tremblait sans bruit : maintenant le son d'alerte (`UIAlert`) retentit aussi. Branché à un seul endroit (`Tutorial.Refuse`), il vaut pour tous les refus.
+  - Testé en Play via Unity MCP : au début du tutoriel, toucher le coffre est refusé et joue l'alerte.
 
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
@@ -49,6 +51,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude Code | Corrections après mon test : silence de début sauté, téléportation moins forte, même son pour toutes les bananes, musique de vague prévue | Gardé |
 | Claude Code | Derniers sons rangés et branchés (ballons, tir coupé au premier tir, tension, singe posé), musiques des vagues et des boss | Gardé |
 | Claude Code | Sons du casino : tic de la roue (partagé avec le coffre), gain et perte | Gardé |
+| Claude Code | Son de perte du casino plus fort, son d'alerte quand le tutoriel refuse une action | Gardé |
 
 ## Mar. 20 oct. 2026
 - **Fait : le son de la roulette du coffre.** Je ne trouvais pas de bon son en ligne, donc il est fabriqué par le code, comme les cloches des vagues de boss :

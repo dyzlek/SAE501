@@ -27,6 +27,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 ### Les sons du casino
 > Ajoute des sons au casino, avec des sons qu'on a déjà : un tic à chaque case qui passe sous la bille, comme pour la roulette du coffre, un son quand on gagne (plus fort pour le vert) et un son plus doux quand on perd.
 
+### Défaite au casino et refus du tutoriel
+> Mets le son de défaite de la roulette plus fort. Et pendant le tutoriel, quand on clique sur quelque chose qui ne suit pas le tutoriel, joue le son d'alerte de l'interface.
+
 ## Mar. 20 oct. 2026
 
 ### Le son de la roulette du coffre
