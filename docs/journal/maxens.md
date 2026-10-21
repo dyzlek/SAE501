@@ -62,6 +62,10 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
   ![La nouvelle roue, modèle Blender](../captures/maxens-roulette-blender.png)
 
+  Dans le jeu : la roue inclinée vers le joueur, le tapis à 3 zones, les jetons et l'ardoise des 3 étapes (la première en doré).
+
+  ![La nouvelle roulette dans le jeu](../captures/maxens-roulette-en-jeu.png)
+
   - Le texte du tutoriel sur le casino est mis à jour (« touche une couleur, mise avec les jetons, puis fais tourner la roue à la main »).
   - Vérifié : le projet compile, le modèle s'importe. Testé en jeu après **SAE → Générer le prototype** (la table est construite par le générateur) : le nouveau design de la roue est gardé.
 
