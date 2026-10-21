@@ -105,5 +105,10 @@ $sql = 'INSERT INTO bloons_scores (game_id, device, name, wave, bananas) VALUES 
         ON DUPLICATE KEY UPDATE name = IF(device = VALUES(device), VALUES(name), name),
                                 wave = IF(device = VALUES(device), GREATEST(wave, VALUES(wave)), wave),
                                 bananas = IF(device = VALUES(device), GREATEST(bananas, VALUES(bananas)), bananas)';
-$db->prepare($sql)->execute([':g' => $gameId, ':d' => $device, ':n' => $name, ':w' => $wave, ':b' => $bananas]);
+try {
+    $db->prepare($sql)->execute([':g' => $gameId, ':d' => $device, ':n' => $name, ':w' => $wave, ':b' => $bananas]);
+} catch (PDOException $e) {
+    // Le plus souvent : la table date de la première version (pas de colonne device) -> lancer migration-noms.sql
+    fail(500, 'enregistrement refusé par la base (table à mettre à jour : migration-noms.sql)');
+}
 exit(json_encode(['ok' => true]));

@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 21 oct. 2026
 
+### Scores qui n’arrivent pas en base
+> Pourquoi mon nouveau score ne s’enregistre-t-il pas dans la base de données ?
+
 ### Noms uniques au classement
 > Comment faire pour que personne ne puisse reprendre le même nom ? Pourquoi ne pas prendre simplement le nom de l’appareil, et le changer avec un clavier virtuel si la personne le veut ?
 > Suite : oui (nom réservé par casque, nom par défaut, clavier virtuel).

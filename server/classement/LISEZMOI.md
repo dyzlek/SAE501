@@ -8,6 +8,8 @@ Un petit serveur PHP + MySQL qui garde les 10 meilleures parties de tous les cas
 3. **La configuration :** sur le serveur, renommer `config.example.php` en `config.php` et remplir la base, l'identifiant et le mot de passe MySQL. **Ce fichier ne va jamais sur GitHub** (il est dans le `.gitignore`).
 4. **Vérifier :** ouvrir [web-mmi2.iutbeziers.fr/~dylan.belledent/bloons/api.php](https://web-mmi2.iutbeziers.fr/~dylan.belledent/bloons/api.php) dans un navigateur. On doit voir `{"scores":[]}`.
 
+**Table créée avec la première version ?** Si `bloons_scores` existait déjà avant les noms uniques (des noms en 3 lettres), il faut lancer **une fois** `migration-noms.sql` dans phpMyAdmin. `schema.sql` ne modifie pas une table qui existe déjà, et sans cette mise à jour, chaque nouveau score est refusé.
+
 L'adresse est écrite dans `Leaderboard.Url`. Si le dossier change, il faut la changer aussi. Le casque n'accepte que le **HTTPS**.
 
 ## Ce que fait l'API (`api.php`)
