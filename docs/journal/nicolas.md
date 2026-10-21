@@ -2,6 +2,22 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Lun. 19 oct. 2026
+**Banane dorée retirée**
+- **Fait :** la banane dorée (1 chance sur 10, 50 d'un coup, effets or et paillettes) est retirée : `Banane.cs` et `Bananier.cs` sont revenus à la version de `main`, et `chanceDoree` / `valeurDoree` sont enlevés de `Hub.unity`. Elle n'avait jamais été committée.
+
+**Armoire à trophées** _(branche `feat/armoire-trophees`)_
+- **Fait :** dans la cabane, derrière à droite sous la fenêtre (150°), une armoire basse au fond de velours rouge avec 8 trophées : en haut les vagues vaincues (10, 50, 100, 200), en bas les bananes récoltées (1 000, 5 000, 15 000, 50 000). Bronze, argent, or, diamant : plus le trophée est prestigieux, plus il est grand et orné (anses dès l'argent, marche et couvercle dès l'or, diamant arc-en-ciel). Un ballon en haut des trophées des vagues, une banane sur ceux des bananes. Pas encore gagné : silhouette sombre, la plaque montre la progression (« 37 / 50 ») ; gagné : il prend sa couleur, tourne lentement et « saute » une fois.
+- **Après mon test :** les trophées ne comptaient que les bananes du panier, pas celles gagnées au casino. Ils comptent maintenant toutes les bananes gagnées depuis le début (`GameState.BananasEarned`, rempli par `Economy.Earn`, qui ne baisse jamais) : panier, fins de vague et roulette. À la roulette, seul le gain compte, pas la mise rendue (sinon miser 100 et gagner 200 compterait 200 au lieu de 100). Pas de sauvegarde : tout repart de zéro à chaque partie.
+- **À faire :** régénérer la scène (*SAE → Générer le prototype*), vérifier la place de l'armoire sous la fenêtre, tester au casque.
+
+### IA
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude Code | Banane dorée (tirage dans `Bananier`, or et paillettes dans `Banane`), puis retrait complet à ma demande | Jeté |
+| Claude Code | Armoire à trophées : `Trophy` (nouveau, `Scripts/Hub`), compteur `GameState.BananasHarvested` (rempli par `Panier`), armoire et trophées dans `PrototypeGenerator` (`BuildTrophyCabinet`, `BuildTrophy`) ; compilation vérifiée hors Unity | Gardé, corrigé ensuite (comptait seulement le panier) |
+| Claude Code | Trophées des bananes : toutes les bananes gagnées comptent (`Economy.Earn` remplit `GameState.BananasEarned`), la roulette compte son gain sans la mise rendue (`stakeBack`) | À valider (test) |
+
 ## Jeu. 8 oct. 2026
 **Roulette de casino (bêta-test)** _(branche `feat/roulette-casino`)_
 - **Fait :** une roulette européenne (0 à 36) sur l'estrade de la carte, à l'opposé du pupitre ARC (derrière le point d'arrivée, à droite). On choisit sa case en cliquant dessus, directement sur une grande roue posée à côté du pupitre : une lueur dorée l'entoure, cliquer une autre case la remplace, et la lueur reste jusqu'au lancer. Un numéro paie 35 contre 1, comme au casino. Le pupitre n'a que 4 boutons : `MISE -`, `MISE +` (1 banane par appui, dès 1 banane, à tout moment), `LANCER` et `100 %` (la bille tombe forcément sur la case choisie, pour vérifier les gains).

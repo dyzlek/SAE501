@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 21 oct. 2026
 
+### Fusion de la météo et des trophées de Nicolas
+> Fusionne la météo avec les trophées que Nicolas a faits, et tout ce qu’il y a sur sa branche.
+
 ### Pluie à travers le toit
 > Par contre, la pluie traverse les toits, donc la cabane.
 
