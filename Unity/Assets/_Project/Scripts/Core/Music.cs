@@ -9,7 +9,8 @@ namespace SAE
     // Les morceaux sont dans Resources/Sons/Musique (voir Sounds) ; s'il en manque un, la musique d'avant continue.
     public class Music : MonoBehaviour
     {
-        const float Volume = 0.25f;     // bas : la musique ne doit pas couvrir les sons du jeu
+        const float BaseVolume = 0.25f; // bas : la musique ne doit pas couvrir les sons du jeu
+        static float Volume => BaseVolume * Options.MusicVolume;   // × le réglage MUSIQUE du menu OPTIONS
         const float FadeTime = 2f;      // secondes pour passer d'une musique à l'autre
 
         AudioSource ambiance, wave, boss;
@@ -41,7 +42,8 @@ namespace SAE
             if (spawner && spawner.Running && wave.clip) wanted = wave;
             if (BossAlive() && boss.clip) wanted = boss;
 
-            float step = Volume / FadeTime * Time.unscaledDeltaTime;
+            // Le pas du fondu ne dépend pas du réglage : sinon, à MUSIQUE 0, il valait 0 et la musique restait au volume d'avant
+            float step = BaseVolume / FadeTime * Time.unscaledDeltaTime;
             Fade(ambiance, ambiance == wanted, step, restart: false);   // l'ambiance reprend où elle en était
             Fade(wave, wave == wanted, step, restart: true);
             Fade(boss, boss == wanted, step, restart: true);

@@ -137,7 +137,7 @@ namespace SAE
         // Les modèles sont exportés en pose en T (bras écartés à l'horizontale) : on baisse les bras le long du corps,
         // un peu écartés et un peu en avant, pour une pose naturelle au hub (bibliothèque, plateau, fiche, coffre).
         // Les singes animés (carte, récolteurs) partent de cette pose. Le Canon et le Tireur n'ont pas de bras : rien ne change.
-        static void RestPose(Transform model, Transform root)
+        public static void RestPose(Transform model, Transform root)
         {
             foreach (var (armName, foreArmName) in new[] { ("LeftArm", "LeftForeArm"), ("RightArm", "RightForeArm") })
             {

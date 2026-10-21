@@ -2,6 +2,25 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Jeu. 22 oct. 2026
+**Ce que j'ai fait :** le menu principal, testé dans Unity.
+- Une scène à part : le titre, Quincy et les singes qui font coucou, des ballons à éclater, le paysage autour. Les boutons sont CONTINUER, NOUVELLE PARTIE (il faut appuyer deux fois) et OPTIONS.
+- Pause avec le bouton Menu de la manette ou Échap.
+- Les options (musique, sons, vibrations) marchent maintenant :
+  - elles étaient bloquées pendant le tutoriel ;
+  - la musique ne baissait pas jusqu'à 0 ;
+  - la courbe du volume était trop plate.
+
+| | |
+|---|---|
+| ![Le menu principal](../captures/menu-principal.webp) | ![Les options](../captures/menu-options.webp) |
+
+![NOUVELLE PARTIE demande une confirmation](../captures/menu-confirmation.webp)
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | README mis à jour (menu, pause, sauvegarde, classement ; état du 22 oct. : PR #157 puis #159 à merger ; 6 captures) et ce journal avec 3 captures du menu, avant le merge | Gardé |
+
 ## Mer. 21 oct. 2026
 **Ce que j'ai fait :** la météo des vagues de boss, et l'annonce des trophées (sur l'armoire de Nicolas). Testé dans Unity (captures ci-dessous).
 - **Orage pendant les vagues de boss** (#131) : nuages, pluie, brume, éclairs et tonnerre, avec une vibration dans les manettes à chaque coup de tonnerre.
@@ -47,6 +66,9 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude (Claude Code) | Sauvegarde de la partie (`Core/SaveGame.cs`) : chaque lancement créait une nouvelle partie (nouvelle ligne au classement). Maintenant tout est gardé sur le casque en JSON (PlayerPrefs) : argent, vagues, bananes gagnées, bibliothèque, types débloqués, singes posés, arc, arbres et leurs améliorations, récolteurs, tutoriel, identifiant de partie (le classement continue la même ligne). Lecture avant les scènes, sauvegarde à chaque vague gagnée, toutes les 30 s et à la pause / fermeture du casque. Bouton NOUVELLE PARTIE (à confirmer) sur le panneau du classement. Petites méthodes Restore / Reset ajoutées dans GameState, BowUpgrades, Tutorial, Levels, Leaderboard, BananaOrchard, HarvesterCrew, WaveSpawner. GDD : sauvegarde passée de NE FERA PAS à DEVRAIT. Compilé, pas testé | Gardé (à tester) |
 | Claude (Claude Code) | Journal du 21 oct. complété (classement, noms uniques, sauvegarde, 3 captures dans `docs/captures/classement-*`). Fusion de `feat/sons-maxens` (sons de Maxens, #152 : `Core/Sounds.cs`, `Core/Music.cs`, 125 fichiers dont les sons) dans `feat/classement` : aucun conflit. Compilé (jeu et éditeur), pas testé | Gardé (à tester) |
 | Claude (Claude Code) | Idée notée, rien codé : menu principal (#158, créée, ajoutée au tableau, S2, DEVRAIT) : une scène avec singes animés et ballons, CONTINUER / NOUVELLE PARTIE / OPTIONS, retour au menu en jeu (bouton Menu de la manette, Échap en PC) avec un panneau de pause dans le décor. Ligne ajoutée au périmètre du GDD | Gardé |
+| Claude (Claude Code) | Menu principal (#158), branche `feat/menu` : 3e scène `Menu` (générée : prairie + décor de la carte, `MapDecor.BuildScenery`), chargée comme la carte (un seul joueur, téléporté). `Hub/MainMenu.cs` construit au lancement le titre BLOONS VR, une estrade de 7 singes qui dansent (`MenuMonkey`, avec leur aura), 14 ballons qui montent et qu’on éclate au rayon (`MenuBalloon`), les boutons CONTINUER / JOUER, NOUVELLE PARTIE (à confirmer, déplacé depuis le panneau du classement), OPTIONS. `Core/GameMenu.cs` : le jeu est arrêté (timeScale 0) dans le menu et en pause, on y part au lancement. `Player/PauseMenu.cs` : bouton Menu de la manette gauche ou Échap → panneau REPRENDRE / OPTIONS / MENU PRINCIPAL à 1,5 m, posé dans le décor (sauvegarde avant d’aller au menu). `Core/Options.cs` + `OptionsPanel.cs` : volume musique, volume sons, vibrations (gardés sur le casque, branchés dans Music, Sounds, PlayerRig.Buzz). `Core/WorldButton.cs` : bouton du décor réutilisable. `ScreenCurtain` en temps réel (marche jeu en pause). Compilé (jeu et éditeur), scènes à régénérer, pas testé | Gardé (à tester) |
+| Claude (Claude Code) | Menu, retours de Dylan : (1) les OPTIONS ne marchaient pas : pendant le tutoriel, `Tutorial.TryPress` refusait tout bouton qui n’était pas la consigne ; les boutons des menus (`WorldButton`, utilisé aussi par le clavier du classement) et les ballons du menu passent toujours. (2) Plus joli : le vrai paysage autour (`Paysage.glb` : prairie, palmiers, montagnes) au lieu du vide ; Quincy (`QuincyLvl7_Rigged.fbx`) à gauche des boutons ; `MenuMonkey` anime les bras des modèles riggés (main droite qui fait coucou, bras gauche qui se balance) pour Quincy et un singe sur deux ; deux grappes de ballons aux poteaux de l’enseigne. Compilé, scènes à régénérer, pas testé (sens de Quincy à vérifier) | Gardé (à tester) |
+| Claude (Claude Code) | Option MUSIQUE sans effet : dans `Music.Update`, le pas du fondu était calculé avec le volume réglé, donc à 0 il valait 0 et la musique restait au volume d’avant ; maintenant il dépend du volume de base. Et les volumes suivent une courbe au carré (`Options.Curve`) : en linéaire, passer de 10 à 5 s’entendait à peine. Compilé, à retester | Gardé (à tester) |
 
 ## Mar. 20 oct. 2026
 

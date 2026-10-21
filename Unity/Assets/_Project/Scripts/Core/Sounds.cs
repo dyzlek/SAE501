@@ -78,7 +78,7 @@ namespace SAE
             if (where.HasValue) go.transform.position = where.Value;
             var source = go.AddComponent<AudioSource>();
             source.clip = clip;
-            source.volume = volume;
+            source.volume = volume * Options.SoundVolume;   // × le réglage SONS du menu OPTIONS
             source.pitch = pitch;
             source.spatialBlend = where.HasValue ? 1f : 0f;
             source.minDistance = 2f;   // pleine puissance jusqu'à 2 m, puis il baisse avec la distance
