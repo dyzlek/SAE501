@@ -26,6 +26,8 @@ namespace SAE
         bool flying;
         int balloonsLeft;
         int bouncesLeft;
+        Balloon bounceTarget;        // après un rebond : le ballon visé, suivi jusqu'au contact
+        float bounceSpeed;
         readonly HashSet<Balloon> touched = new HashSet<Balloon>();   // un ballon n'est touché qu'une fois par flèche
 
         void Awake()
@@ -50,6 +52,7 @@ namespace SAE
             flying = true;
             balloonsLeft = BowUpgrades.PassThrough;   // lu au tir : une amélioration achetée compte dès la flèche suivante
             bouncesLeft = BowUpgrades.Bounces;
+            bounceTarget = null;
             body.isKinematic = false;
             body.useGravity = true;
             body.linearVelocity = velocity;
@@ -60,6 +63,9 @@ namespace SAE
 
         void FixedUpdate()
         {
+            // Après un rebond, elle file droit sur le centre du ballon visé, même s'il a avancé (sinon elle passait à côté)
+            if (flying && bounceTarget)
+                body.linearVelocity = (Center(bounceTarget) - transform.position).normalized * bounceSpeed;
             // La flèche regarde toujours dans le sens où elle va : elle suit sa courbe
             if (flying && body.linearVelocity.sqrMagnitude > 0.5f)
                 body.MoveRotation(Quaternion.LookRotation(body.linearVelocity));
@@ -99,11 +105,23 @@ namespace SAE
                 if (d < best) { best = d; next = b; }
             }
             if (!next) return false;
-            float speed = Mathf.Max(body.linearVelocity.magnitude, 15f);
+            bounceTarget = next;
+            bounceSpeed = Mathf.Max(body.linearVelocity.magnitude, 15f);
             body.useGravity = false;
-            body.linearVelocity = (next.transform.position - transform.position).normalized * speed;
-            Sounds.Play(Sounds.Bouton, transform.position, 0.5f, 1.6f);   // un petit « tic » aigu : elle a rebondi
+            body.linearVelocity = (Center(next) - transform.position).normalized * bounceSpeed;
+            // On voit le rebond : un petit anneau doré, une traînée plus longue et bleu glacier, un « tic » aigu
+            Shockwave.Spawn(from, 0.5f, new Color(1f, 0.85f, 0.3f), false);
+            trail.time = 0.35f;
+            trail.startColor = new Color(0.5f, 0.9f, 1f, 0.9f);
+            Sounds.Play(Sounds.Bouton, transform.position, 0.5f, 1.6f);
             return true;
+        }
+
+        // Le centre d'un ballon : celui de son collider (le point d'ancrage du modèle peut être en bas)
+        static Vector3 Center(Balloon b)
+        {
+            var col = b.GetComponentInChildren<Collider>();
+            return col ? col.bounds.center : b.transform.position;
         }
 
         // L'onde de l'explosion : les ballons les plus proches de celui touché, dans le rayon, perdent des couches.
