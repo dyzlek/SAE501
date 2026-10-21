@@ -36,7 +36,7 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 
 **Suggestions.**
 - Mesurer avec 60 singes. Si on est sous 72 fps, baisser la limite (40 ?) ou alléger chaque singe : animation coupée hors du champ de vision, cible cherchée moins souvent (toutes les 0,1 s au lieu de chaque image).
-- Afficher le compteur « 42 / 60 » près du plateau, pour qu'on voie la limite avant de l'atteindre.
+- ~~Afficher le compteur « 42 / 60 » près du plateau~~ : fait (`Core/PlacedCounter.cs`). Une plaque « SINGES n / 60 » au bord du plateau du hub et de la carte, dorée, orange dès 50, rouge et qui bat quand c'est plein. Son texte n'est réécrit que quand le nombre change.
 
 ---
 

@@ -22,6 +22,13 @@ namespace SAE
         LineRenderer rangeRing;
         TextMesh fullLabel;                 // « PLATEAU PLEIN » au-dessus du fantôme rouge, quand les 60 singes sont posés
 
+        // Le compteur « SINGES 42 / 60 » au bord, côté joueur : petit sur le plateau du hub, à hauteur de main sur la carte
+        void Start()
+        {
+            if (scale < 1f) PlacedCounter.Build(this, 0.24f, 0.06f);
+            else PlacedCounter.Build(this, 0.9f, 1.1f);
+        }
+
         Vector2 ToMap(Vector3 worldPoint)
         {
             var local = transform.InverseTransformPoint(worldPoint) / scale;

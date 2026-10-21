@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 21 oct. 2026
 
+### Plus de boss à chaque vague, compteur de singes
+> Enlève les boss à chaque vague. Mets, près de l’endroit où l’on pose les singes, la limite et le nombre actuel, de façon jolie.
+
 ### Limite de 60 singes posés
 > Ensuite, limite le nombre de singes posés à 60 au maximum, pour éviter de surcharger le jeu.
 
