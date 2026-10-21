@@ -63,7 +63,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
   ![La nouvelle roue, modèle Blender](../captures/maxens-roulette-blender.png)
 
   - Le texte du tutoriel sur le casino est mis à jour (« touche une couleur, mise avec les jetons, puis fais tourner la roue à la main »).
-  - Vérifié : le projet compile, le modèle s'importe. **À tester en jeu** : il faut relancer **SAE → Générer le prototype** (la table est construite par le générateur).
+  - Vérifié : le projet compile, le modèle s'importe. Testé en jeu après **SAE → Générer le prototype** (la table est construite par le générateur) : le nouveau design de la roue est gardé.
 
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
@@ -73,7 +73,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude Code | Derniers sons rangés et branchés (ballons, tir coupé au premier tir, tension, singe posé), musiques des vagues et des boss | Gardé |
 | Claude Code | Sons du casino : tic de la roue (partagé avec le coffre), gain et perte | Gardé |
 | Claude Code | Son de perte du casino plus fort, son d'alerte quand le tutoriel refuse une action | Gardé |
-| Claude Code | Questions et pistes pour la roulette, puis la refonte : tapis à 3 zones, jetons, roue lancée à la main, ardoise en 3 étapes, case gagnante qui clignote ; modèle de la roue en script Blender | Gardé (à tester en jeu) |
+| Claude Code | Questions et pistes pour la roulette, puis la refonte : tapis à 3 zones, jetons, roue lancée à la main, ardoise en 3 étapes, case gagnante qui clignote ; modèle de la roue en script Blender | Gardé (design validé en jeu) |
 
 ## Mar. 20 oct. 2026
 - **Fait : le son de la roulette du coffre.** Je ne trouvais pas de bon son en ligne, donc il est fabriqué par le code, comme les cloches des vagues de boss :
