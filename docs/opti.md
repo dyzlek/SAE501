@@ -7,7 +7,7 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 
 1. **Le problème** : ce qui coûtait cher, et comment on l'a vu (fps, Profiler, Frame Debugger, intuition).
 2. **Ce qui a été fait** : le changement, les fichiers, la branche ou la PR.
-3. **Avant / après** : des chiffres mesurés de la même façon (même scène, même endroit, même vague). Sans mesure, écrire « à mesurer » et ne pas conclure.
+3. **Avant / après** : des chiffres mesurés de la même façon (même scène, même endroit, même vague). Sans mesure, écrire « à mesurer » et ne pas conclure : pas de ligne de tableau vide avec des « ? », on ajoute la ligne quand le chiffre existe.
 4. **Est-ce que ça a vraiment marché ?** Oui, non ou partiellement, avec le gain réel, et ce qu'on a perdu en visuel ou en jeu.
 5. **Suggestions** : ce qu'on pourrait faire ensuite sur le même sujet.
 
@@ -30,7 +30,6 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 | Mesure | Avant | Après |
 |---|---|---|
 | Singes posés au maximum | illimité | 60 |
-| fps au casque, 60 singes, vague en cours | ? | ? |
 
 **Est-ce que ça a vraiment marché ?** *Pas encore mesuré.* Ça ne rend pas le jeu plus rapide avec peu de singes. Ça fixe un **plafond** : le pire cas est connu et peut être testé.
 
@@ -65,9 +64,6 @@ Une aura = 120 triangles, 1 objet, 1 appel de dessin, 0 particule (avant : jusqu
 
 | Mesure | Avant | Après |
 |---|---|---|
-| fps au casque, face à la bibliothèque | ? | ? |
-| fps au casque, carte pendant une vague | ? | ? |
-| Batches (Profiler, hub) | ? | ? |
 | Particules vivantes (hub) | ~ 56 × 80 | 0 |
 
 **Premier test dans Unity (Dylan, 21 oct.).** Seule la colonne arc-en-ciel avait son aura. C'était un bug de cache : les maillages sont gardés dans un dictionnaire statique, et sans rechargement du domaine (*Enter Play Mode* rapide), ceux de la partie d'avant étaient détruits mais toujours renvoyés. L'arc-en-ciel était reconstruit, parce que son test vérifiait le maillage détruit. Corrigé : le cache est vidé au lancement, et un maillage détruit est refait. Dylan trouvait aussi l'aura trop simple (un cône plat) : v2 avec des langues de flamme irrégulières, un cœur blanc et une rotation lente, toujours en un seul maillage.
