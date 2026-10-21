@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mer. 21 oct. 2026
 
+### Aura : il en manque, et plus belle
+> Il manque des auras : je n’en vois que sur une colonne. J’aimerais aussi qu’elles soient un peu plus belles, mais toujours optimisées.
+
 ### Journal des optimisations et aura des singes
 > Crée un fichier `opti.md` pour noter chaque modification d’optimisation : ce que j’ai fait, si ça a vraiment marché, des suggestions, etc. Fais la première optimisation : les effets autour des singes ont beaucoup de particules. Pourquoi pas plutôt un effet en dessous qui les englobe, comme une transformation en super saiyan ?
 ### README et captures dans le journal

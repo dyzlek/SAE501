@@ -32,11 +32,12 @@ La bibliothèque montre jusqu'à 56 singes (7 types × 8 raretés), plus ceux du
 
 **Ce qui a été fait.** `Core/Aura.cs` est réécrit, avec la même interface (`Aura.Add`) : le reste du code n'a pas changé. Une aura est maintenant **un seul maillage fixe**, façon transformation « super saiyan » :
 - un **tube de flamme** autour du singe, plus étroit en haut, au bord dentelé, coloré en bas et transparent en haut (dégradé dans les couleurs des sommets) ;
+- un **cœur** plus serré et presque blanc, l'éclat « super saiyan » (v2, après le premier test) ;
 - un **disque lumineux au sol**, sous les pieds ;
-- un petit **battement** de hauteur (une ligne de calcul par image, pas de simulation) ;
+- un petit **battement** de hauteur et une **rotation lente**, qui font bouger les langues de flamme (deux lignes de calcul par image, pas de simulation) ;
 - le maillage est **partagé** entre toutes les auras de même couleur, et il utilise le matériau des lignes du jeu (aucun nouveau shader).
 
-Une aura = 60 triangles, 1 objet, 0 particule (avant : jusqu'à 86 particules et 2 systèmes).
+Une aura = 120 triangles, 1 objet, 1 appel de dessin, 0 particule (avant : jusqu'à 86 particules et 2 systèmes).
 
 **Avant / après.** *À mesurer.* Au casque : fps face à la bibliothèque, avant (`main` du 21 oct.) et après (cette branche). Dans le Profiler : *Batches* et temps CPU de `ParticleSystem.Update`.
 
@@ -47,7 +48,9 @@ Une aura = 60 triangles, 1 objet, 0 particule (avant : jusqu'à 86 particules et
 | Batches (Profiler, hub) | ? | ? |
 | Particules vivantes (hub) | ~ 56 × 80 | 0 |
 
-**Est-ce que ça a vraiment marché ?** *Pas encore vérifié.* On s'attend à un vrai gain au hub. À vérifier aussi : que l'aura reste lisible (la rareté se reconnaît toujours à sa couleur), et que l'arc-en-ciel, en dégradé de teintes autour du tube, se distingue bien.
+**Premier test dans Unity (Dylan, 21 oct.).** Seule la colonne arc-en-ciel avait son aura. C'était un bug de cache : les maillages sont gardés dans un dictionnaire statique, et sans rechargement du domaine (*Enter Play Mode* rapide), ceux de la partie d'avant étaient détruits mais toujours renvoyés. L'arc-en-ciel était reconstruit, parce que son test vérifiait le maillage détruit. Corrigé : le cache est vidé au lancement, et un maillage détruit est refait. Dylan trouvait aussi l'aura trop simple (un cône plat) : v2 avec des langues de flamme irrégulières, un cœur blanc et une rotation lente, toujours en un seul maillage.
+
+**Est-ce que ça a vraiment marché ?** *Pas encore mesuré.* On s'attend à un vrai gain au hub. À vérifier aussi : que l'aura reste lisible (la rareté se reconnaît toujours à sa couleur), et que l'arc-en-ciel, en dégradé de teintes autour du tube, se distingue bien.
 
 **Suggestions.**
 - Si les *Batches* restent hauts : activer le **GPU Instancing** sur le matériau, ou fusionner les auras de la bibliothèque (elles ne bougent pas).
