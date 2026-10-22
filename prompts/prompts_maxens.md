@@ -30,6 +30,13 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 ### Défaite au casino et refus du tutoriel
 > Mets le son de défaite de la roulette plus fort. Et pendant le tutoriel, quand on clique sur quelque chose qui ne suit pas le tutoriel, joue le son d'alerte de l'interface.
 
+### Une roulette plus intuitive et plus belle
+> Sur une nouvelle branche : la roulette actuelle n'est pas assez intuitive ni assez belle. Pose-moi des questions et donne-moi des pistes.
+>
+> Mes réponses : ce qui ne va pas, c'est choisir la couleur, régler la mise, et ce n'est pas beau. On parie sur un tapis à trois zones (ROUGE ×2, NOIR ×2, VERT ×36). Pour la mise, des jetons +1, +10, +100, TOUT et RETIRER. On retire le bouton « 100 % ». Pour lancer, je veux un geste : on attrape la roue, on la fait tourner à la main, puis le code prend le relais (il l'accélère si besoin) jusqu'au numéro tiré.
+>
+> Suite : la roue est moche. Inspire-toi de celle de How to Fish (cuvette en bois, cases en parts de gâteau, tourelle à 4 branches) et fais-la bien propre, dans Blender s'il le faut. Ne teste pas dans Unity par MCP : c'est moi qui teste.
+
 ## Mar. 20 oct. 2026
 
 ### Le son de la roulette du coffre
