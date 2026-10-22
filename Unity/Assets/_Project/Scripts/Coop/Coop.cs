@@ -8,7 +8,9 @@ namespace SAE
 {
     public enum CoopRole { Solo, Host, Guest }
 
-    // Le coop en réseau local (même Wi-Fi) : un joueur HÉBERGE (casque ou PC), jusqu'à 3 autres REJOIGNENT (casque ou PC).
+    // Le coop en réseau local (même Wi-Fi) : en pleine partie, un joueur l'OUVRE EN COOP depuis la pause (casque ou PC) ;
+    // elle reçoit un code, il choisit un mot de passe. Jusqu'à 3 autres la REJOIGNENT depuis le menu principal en tapant
+    // le code et le mot de passe (casque ou PC).
     // L'hôte fait tourner la vraie partie : vagues, ballons, tirs des singes, bourse, bibliothèque, singes posés.
     // Un invité affiche ce que l'hôte lui envoie, et lui demande d'agir à sa place : « j'ai touché le ballon 42 »,
     // « j'ai vendu une banane », « je pose ce singe ici ». Chacun garde son arc, sa bananeraie et sa sauvegarde.
@@ -28,6 +30,7 @@ namespace SAE
         const float HelloInterval = 1f;
         const float ResendInterval = 0.15f;    // une demande sans réponse repart au bout de 0,15 s
         const float Timeout = 5f;              // plus rien reçu depuis 5 s : le joueur est parti
+        const float SearchTime = 10f;          // invité : on cherche la partie pendant 10 s, puis on abandonne
 
         public static CoopRole Role { get; private set; }
         public static bool IsHost => Role == CoopRole.Host;
@@ -35,7 +38,8 @@ namespace SAE
         public static bool Connected { get; private set; }   // invité : l'hôte a répondu
         public static byte LocalId { get; private set; }     // 0 = l'hôte, 1 à 3 = les invités
         public static string Status { get; private set; } = "";
-
+        public static int Code { get; private set; }            // le code de la partie (4 chiffres)
+        public static string Password { get; private set; } = "";
         // Invité : le numéro de sa dernière demande qui change l'état (bourse, bibliothèque, singes posés).
         // Tant que l'hôte ne l'a pas faite, on n'écoute pas son état : il nous ferait revenir en arrière une seconde.
         public static int LastStateRequest { get; private set; }
@@ -59,7 +63,7 @@ namespace SAE
 
         int nextRequest = 1;
         readonly List<(int number, byte[] packet)> pending = new List<(int, byte[])>();   // demandes pas encore reçues
-        float nextResend, nextPose, nextState, nextBalloons, nextHello;
+        float nextResend, nextPose, nextState, nextBalloons, nextHello, searchUntil;
 
         readonly Dictionary<byte, CoopAvatar> avatars = new Dictionary<byte, CoopAvatar>();
         Arrow arrowPrefab;   // pour montrer les flèches des autres
@@ -76,20 +80,28 @@ namespace SAE
 
         // --- Démarrer et arrêter ---
 
-        public static void Host()
+        // OUVRIR EN COOP (menu pause, en pleine partie) : la partie reçoit un code à 4 chiffres, tiré au hasard,
+        // et garde le mot de passe choisi. Les autres joueurs tapent les deux dans le menu principal (REJOINDRE).
+        public static void Host(string password)
         {
             if (Role != CoopRole.Solo || !Open(Port)) return;
             Role = CoopRole.Host;
             LocalId = 0;
+            Code = Random.Range(1000, 10000);
+            Password = password;
             instance.address = LocalAddress();   // lue une fois : elle sert au texte du panneau (Update)
         }
 
-        public static void Join()
+        // REJOINDRE (menu principal) : on cherche sur le Wi-Fi la partie qui a ce code, et on donne le mot de passe
+        public static void Join(int code, string password)
         {
             if (Role != CoopRole.Solo || !Open(0)) return;   // 0 : le système choisit un port libre
             Role = CoopRole.Guest;
             Connected = false;
-            Status = "Recherche d'une partie sur le Wi-Fi…";
+            Code = code;
+            Password = password;
+            instance.searchUntil = Time.unscaledTime + SearchTime;
+            Status = $"Recherche de la partie {code}…";
         }
 
         public static void Leave() => Leave("");
@@ -175,15 +187,18 @@ namespace SAE
                     foreach (var p in peers)
                         foreach (var packet in CoopBalloons.Packets(p.lastRequest)) Send(packet, p.endPoint);
                 }
-                Status = peers.Count == 0 ? $"Tu héberges · {address}\nEn attente d'un joueur…"
-                    : $"Tu héberges · {peers.Count + 1} joueurs";
+                Status = peers.Count == 0 ? $"En attente d'un joueur… ({address})" : $"{peers.Count + 1} joueurs dans la partie";
             }
             else
             {
+                if (!Connected && now > searchUntil) { Leave($"Aucune partie {Code} sur ce Wi-Fi"); return; }
                 if (!Connected && now >= nextHello)
                 {
                     nextHello = now + HelloInterval;
-                    Send(CoopPacket.Bytes(CoopPacket.Begin(CoopMsg.Hello)), new IPEndPoint(IPAddress.Broadcast, Port));
+                    var hello = CoopPacket.Begin(CoopMsg.Hello);
+                    hello.Write(Code);
+                    hello.Write(Password);
+                    Send(CoopPacket.Bytes(hello), new IPEndPoint(IPAddress.Broadcast, Port));
                 }
                 if (Connected && now - hostLastHeard > Timeout) { Leave("Connexion perdue avec l'hôte"); return; }
                 if (pending.Count > 0 && now >= nextResend)
@@ -220,9 +235,11 @@ namespace SAE
             var peer = peers.Find(p => p.endPoint.Equals(from));
             if (type == CoopMsg.Hello)
             {
+                if (r.ReadInt32() != Code) return;   // il cherche une autre partie (un autre groupe sur le même Wi-Fi)
+                if (r.ReadString() != Password) { Refuse(from, "Mot de passe incorrect"); return; }
                 if (peer == null)
                 {
-                    if (peers.Count >= MaxGuests) return;   // partie pleine
+                    if (peers.Count >= MaxGuests) { Refuse(from, "La partie est pleine (4 joueurs)"); return; }
                     peer = new Peer { endPoint = from, id = FreeId() };
                     peers.Add(peer);
                     Sounds.Play(Sounds.Bouton);
@@ -262,6 +279,13 @@ namespace SAE
             }
         }
 
+        void Refuse(IPEndPoint to, string reason)
+        {
+            var w = CoopPacket.Begin(CoopMsg.Refused);
+            w.Write(reason);
+            Send(CoopPacket.Bytes(w), to);
+        }
+
         byte FreeId()
         {
             for (byte id = 1; ; id++)
@@ -283,6 +307,7 @@ namespace SAE
 
         void HandleAsGuest(CoopMsg type, BinaryReader r, IPEndPoint from)
         {
+            if (type == CoopMsg.Refused && !Connected) { Leave(r.ReadString()); return; }
             if (type == CoopMsg.Welcome && !Connected)
             {
                 host = from;

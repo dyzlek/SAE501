@@ -8,6 +8,8 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 > Dans une nouvelle branche, fais un système coop : entre deux casques, et entre un PC et un casque.
 >
 > Suite (le coop est dans NE FERA PAS du GDD) : fais le coop complet quand même.
+>
+> Suite : le coop s'ouvre depuis une partie déjà lancée, et dans le menu principal on rejoint avec un code et un mot de passe.
 
 ### Branches de Maxens
 > Fusionne les deux branches de Maxens dans main, puis mets main sur mon Unity.

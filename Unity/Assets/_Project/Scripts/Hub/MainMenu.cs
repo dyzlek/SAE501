@@ -9,7 +9,7 @@ namespace SAE
     //   une estrade où des singes dansent (sautillent, se tournent), avec leur aura de rareté ;
     //   des ballons qui montent dans le ciel : on peut les éclater au rayon, pour s'amuser en attendant ;
     //   les boutons, à 2 m, visés au rayon : CONTINUER (ou JOUER s'il n'y a pas de sauvegarde), NOUVELLE PARTIE
-    //   (seulement s'il y a une sauvegarde, à confirmer), OPTIONS, COOP (héberger ou rejoindre une partie, CoopPanel).
+    //   (seulement s'il y a une sauvegarde, à confirmer), OPTIONS, REJOINDRE (une partie en coop, avec son code et son mot de passe : CoopPanel).
     // Posé par PrototypeGenerator dans la scène Menu ; tout se construit ici au lancement (des cubes et les modèles des singes).
     // +Z local = devant le joueur (le point d'arrivée regarde vers +Z) ; les textes se lisent côté -Z.
     public class MainMenu : MonoBehaviour
@@ -46,7 +46,7 @@ namespace SAE
             for (int i = 0; i < BalloonCount; i++) MenuBalloon.Create(transform, BalloonColors[i % BalloonColors.Length], i);
             BuildButtons();
             options = OptionsPanel.Build(transform, new Vector3(0f, 1.35f, ButtonsZ), CloseOptions);
-            coop = CoopPanel.Build(transform, new Vector3(0f, 1.35f, ButtonsZ), CloseCoop);
+            coop = CoopPanel.Build(transform, new Vector3(0f, 1.35f, ButtonsZ), inGame: false, CloseCoop);
         }
 
         void BuildTitle()
@@ -124,7 +124,7 @@ namespace SAE
                 newGameLabel = WorldButton.Create(b, "NOUVELLE PARTIE", new Vector3(0f, 1.18f, ButtonsZ), size, Red, NewGame);
             }
             WorldButton.Create(b, "OPTIONS", new Vector3(0f, hasSave ? 0.88f : 1.28f, ButtonsZ), size, Blue, OpenOptions);
-            WorldButton.Create(b, "COOP", new Vector3(0f, hasSave ? 0.58f : 0.98f, ButtonsZ), size, Purple, OpenCoop);
+            WorldButton.Create(b, "REJOINDRE", new Vector3(0f, hasSave ? 0.58f : 0.98f, ButtonsZ), size, Purple, OpenCoop);   // le coop
         }
 
         // NOUVELLE PARTIE : il faut appuyer une 2e fois en moins de 4 s (la sauvegarde sera effacée)
