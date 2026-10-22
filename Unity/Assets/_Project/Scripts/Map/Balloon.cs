@@ -14,8 +14,9 @@ namespace SAE
     // S'il atteint la sortie, il retire autant de vies qu'il lui reste de couches.
     // Un boss éclaté se divise (façon Bloons TD) : le Boss lâche 4 ballons normaux, le Dirigeable lâche 2 Boss
     // (qui se divisent à leur tour). Les petits repartent de l'endroit où il a éclaté, un peu en arrière sur la piste.
-    // Coop (Coop) : chez un invité, le ballon est une copie (Remote) de celui de l'hôte, qui porte le même numéro (Id).
-    // Elle va là où l'hôte la voit ; un tir qui la perce est envoyé à l'hôte, qui perce le vrai ballon.
+    // Coop (Coop) : chez l'hôte, chaque ballon a un double réseau (Proxy, CoopBalloon) qui le montre aux invités.
+    // Chez un invité, le ballon est une copie (Remote) posée sur ce double : elle bouge avec lui, et un tir qui la perce
+    // est envoyé à l'hôte, qui perce le vrai ballon.
     public class Balloon : MonoBehaviour
     {
         public static readonly List<Balloon> All = new List<Balloon>();
@@ -55,21 +56,10 @@ namespace SAE
         public BalloonKind Kind { get; private set; }
         public int Layers => layers;
 
-        // Coop : le numéro du ballon, le même chez l'hôte et chez les invités
-        public int Id { get; private set; }
-        static int nextId;
+        // Coop : le double réseau (hôte : celui qui nous suit ; invité : celui qui nous porte)
+        public CoopBalloon Proxy { get; set; }
         public bool Remote { get; private set; }
-        Vector3 remotePos, remoteVelocity;
-        Quaternion remoteRot;
-        float remoteTime;      // l'heure de la dernière position reçue (0 : jamais)
-        int hitRequest;        // notre dernier tir sur ce ballon, envoyé à l'hôte (voir ApplyRemote)
-        const float RemoteSmooth = 15f;
-
-        public static Balloon Find(int id)
-        {
-            foreach (var b in All) if (b.Id == id) return b;
-            return null;
-        }
+        int hitRequest;        // notre dernier tir sur ce ballon, envoyé à l'hôte (voir ApplyHostLayers)
         bool Armored => Kind == BalloonKind.Blinde || Kind == BalloonKind.Dirigeable;
         bool IsBlimp => Kind == BalloonKind.Boss || Kind == BalloonKind.Dirigeable;
 
@@ -79,7 +69,6 @@ namespace SAE
         public void Init(WaveSpawner owner, List<Vector3> points, int layerCount, BalloonKind kind)
         {
             spawner = owner;
-            Id = ++nextId;
             path = points;
             layers = layerCount;
             maxLayers = layerCount;
@@ -161,6 +150,16 @@ namespace SAE
         void OnEnable() => All.Add(this);
         void OnDisable() => All.Remove(this);
 
+        // Hôte du coop : les invités le voient aussi (son double réseau). Dans Start et pas à la création :
+        // un petit ballon de boss est d'abord déplacé là où le boss a éclaté (ContinueFrom), son double part de là.
+        void Start() => Coop.ShareBalloon(this);
+
+        // Hôte : le ballon éclate ou sort de la piste, son double réseau disparaît aussi chez les invités
+        void OnDestroy()
+        {
+            if (!Remote && Proxy && Proxy.IsSpawned) Proxy.NetworkObject.Despawn();
+        }
+
 
         // Un tir qui peut percer 'pierce' couches touche ce ballon. Renvoie la perforation dépensée :
         // 1 par couche, 2 par couche blindée. Un tir trop faible pour une couche blindée s'y arrête (tout est dépensé).
@@ -179,45 +178,40 @@ namespace SAE
         }
 
         // Coop, chez l'invité : on perce tout de suite notre copie (on voit le tir faire effet), et on prévient l'hôte.
+        // Éclatée, la copie est seulement cachée : c'est l'hôte qui la fait disparaître (avec son double réseau).
         // Les petits ballons d'un boss ne sont pas créés ici : l'hôte les crée, et ils arrivent avec les autres.
         int PopRemote(int pierce, int popped, int cost)
         {
-            hitRequest = Coop.SendHit(Id, pierce);
+            hitRequest = Coop.SendHit(Proxy, pierce);
             layers -= popped;
             if (layers <= 0)
             {
                 Sounds.Pop(transform.position);
-                CoopBalloons.Popped(Id, hitRequest);
-                Destroy(gameObject);
+                gameObject.SetActive(false);
             }
             else UpdateColor();
             return popped * cost;
         }
 
-        // Coop, chez l'invité : la copie devient celle du ballon 'id' de l'hôte
-        public void MakeRemote(int id)
+        // Coop, chez l'invité : la copie est posée sur son double réseau, elle bouge avec lui
+        public void MakeRemote(CoopBalloon proxy)
         {
             Remote = true;
-            Id = id;
+            Proxy = proxy;
+            transform.SetParent(proxy.transform, false);
+            transform.localPosition = Vector3.zero;
+            transform.localRotation = Quaternion.identity;
         }
 
-        // Coop, chez l'invité : la dernière position et les couches vues par l'hôte. doneRequest = notre dernière demande
-        // faite chez l'hôte : si notre tir sur ce ballon n'y est pas encore, ses couches sont en retard, on garde les nôtres.
-        public void ApplyRemote(Vector3 pos, Quaternion rot, int hostLayers, int doneRequest)
+        // Coop, chez l'invité : les couches vues par l'hôte. Si notre dernier tir sur ce ballon n'y est pas encore fait,
+        // elles sont en retard : on garde les nôtres. S'il est fait et que le ballon tient encore (on l'avait éclaté
+        // chez nous, l'hôte non, à un cheveu près), il réapparaît.
+        public void ApplyHostLayers(int hostLayers)
         {
-            float now = Time.unscaledTime;
-            bool first = remoteTime == 0f;
-            // Sa vitesse (de combien il a bougé depuis le paquet d'avant) : pour deviner où il est entre deux paquets
-            remoteVelocity = first ? Vector3.zero : (pos - remotePos) / Mathf.Max(0.01f, now - remoteTime);
-            remotePos = pos;
-            remoteRot = rot;
-            remoteTime = now;
-            if (first) transform.SetPositionAndRotation(pos, rot);
-            if (doneRequest >= hitRequest && hostLayers != layers)
-            {
-                layers = hostLayers;
-                UpdateColor();
-            }
+            if (Coop.DoneRequest < hitRequest || hostLayers == layers) return;
+            layers = hostLayers;
+            gameObject.SetActive(layers > 0);
+            UpdateColor();
         }
 
         // Ce que lâche un boss éclaté : (sorte, nombre, couches). Les couches suivent la solidité du boss.
@@ -252,21 +246,14 @@ namespace SAE
         public void Slow(float factor, float duration)
         {
             if (Armored) return;   // le blindage ne se laisse ni geler ni coller
-            if (Remote) { Coop.SendSlow(Id, factor, duration); return; }   // c'est l'hôte qui le fait avancer
+            if (Remote) { Coop.SendSlow(Proxy, factor, duration); return; }   // c'est l'hôte qui le fait avancer
             slowFactor = Mathf.Min(slowFactor, factor);
             slowUntil = Mathf.Max(slowUntil, Time.time + duration);
         }
 
         void Update()
         {
-            if (Remote)
-            {
-                // Une copie glisse vers là où le ballon de l'hôte doit être maintenant (dernière position + sa vitesse)
-                var predicted = remotePos + remoteVelocity * Mathf.Min(Time.unscaledTime - remoteTime, 0.2f);
-                float t = 1f - Mathf.Exp(-RemoteSmooth * Time.deltaTime);
-                transform.SetPositionAndRotation(Vector3.Lerp(transform.position, predicted, t), Quaternion.Slerp(transform.rotation, remoteRot, t));
-                return;
-            }
+            if (Remote) return;   // une copie bouge avec son double réseau (CoopBalloon), c'est l'hôte qui la fait avancer
 
             // Le ballon cœur se régénère, jusqu'à son nombre de couches de départ
             if (Kind == BalloonKind.Coeur && Time.time >= nextRegen)

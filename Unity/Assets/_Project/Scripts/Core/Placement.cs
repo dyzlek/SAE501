@@ -38,7 +38,7 @@ namespace SAE
         public static void Apply(Vector2 pos)
         {
             var action = Evaluate(pos, out var target);
-            // Coop : l'invité pose chez lui tout de suite, et l'hôte refait la même chose avec le même singe (CoopHost)
+            // Coop : l'invité pose chez lui tout de suite, et l'hôte refait la même chose avec le même singe (CoopPlayer.PlaceRpc)
             if (Coop.IsGuest && action != PlacementAction.None && action != PlacementAction.Blocked) Coop.SendPlace(pos, GameState.Held);
             switch (action)
             {

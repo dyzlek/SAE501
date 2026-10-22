@@ -4,6 +4,11 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Jeu. 22 oct. 2026
 
+### Coop sur Netcode for GameObjects
+> J'aimerais avoir un vrai système coop dans mon jeu : tout refaire avec Netcode for GameObjects (le test à deux plante).
+>
+> Suite : lance la réécriture sur une nouvelle branche, sans toucher à mes scènes non commitées.
+
 ### Coop en réseau
 > Dans une nouvelle branche, fais un système coop : entre deux casques, et entre un PC et un casque.
 >

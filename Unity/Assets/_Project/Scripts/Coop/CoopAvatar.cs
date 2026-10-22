@@ -5,7 +5,7 @@ namespace SAE
     // Un autre joueur du coop, vu chez nous : une tête avec une visière, un buste, deux mains (au casque seulement :
     // au PC, les « mains » sont la caméra) et son nom au-dessus. Une couleur par joueur.
     // On ne le voit que s'il est dans le même niveau que nous (hub, carte ou menu).
-    // Ses positions arrivent 20 fois par seconde (Coop) : on glisse vers elles pour que ça reste fluide.
+    // Ses positions arrivent 20 fois par seconde (CoopPlayer) : on glisse vers elles pour que ça reste fluide.
     public class CoopAvatar : MonoBehaviour
     {
         static readonly Color[] colors =
@@ -57,13 +57,13 @@ namespace SAE
             return go.transform;
         }
 
-        public void SetPose(Level lvl, bool isVR, Vector3 hp, Quaternion hr, Vector3 lp, Quaternion lr, Vector3 rp, Quaternion rr)
+        public void SetPose(CoopPose pose)
         {
-            level = lvl;
-            vr = isVR;
-            headPos = hp; headRot = hr;
-            leftPos = lp; leftRot = lr;
-            rightPos = rp; rightRot = rr;
+            level = pose.level;
+            vr = pose.vr;
+            headPos = pose.headPos; headRot = pose.headRot;
+            leftPos = pose.leftPos; leftRot = pose.leftRot;
+            rightPos = pose.rightPos; rightRot = pose.rightRot;
         }
 
         void Update()

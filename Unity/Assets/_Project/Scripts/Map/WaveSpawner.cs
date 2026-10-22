@@ -15,8 +15,9 @@ namespace SAE
     // Météo (Weather) : l'orage monte dès le lancement d'une vague spéciale (nuages, puis pluie), le ciel se dégage à la fin.
     // Vagues spéciales (boss, dirigeable) : annoncées sur le tableau dès la préparation, cloches au lancement,
     // cor quand le boss entre (WaveAnnouncer). Les manettes vibrent aussi : vies perdues, vague gagnée ou perdue (Haptics).
-    // Coop (Coop) : les vagues ne tournent que chez l'hôte. Chez un invité, LANCER est demandé à l'hôte, les ballons sont
-    // des copies (SpawnRemote) et la vague recopie celle de l'hôte (ApplyRemote), avec les mêmes sons et la même météo.
+    // Coop (Coop) : les vagues ne tournent que chez l'hôte, et chaque ballon y reçoit un double réseau (Balloon.Start).
+    // Chez un invité, LANCER est demandé à l'hôte, les ballons sont des copies posées sur ces doubles (SpawnRemote)
+    // et la vague recopie celle de l'hôte (ApplyRemote, appelé par CoopGame), avec les mêmes sons et la même météo.
     public class WaveSpawner : MonoBehaviour
     {
         // Les vagues de la scène Labyrinthe (null quand on est au hub)
@@ -157,11 +158,11 @@ namespace SAE
             return balloon;
         }
 
-        // Coop, chez l'invité : la copie d'un ballon de l'hôte (elle ne suit pas la piste, elle va où l'hôte la voit)
-        public Balloon SpawnRemote(BalloonKind kind, int layers, int id)
+        // Coop, chez l'invité : la copie d'un ballon de l'hôte (elle ne suit pas la piste, elle bouge avec son double réseau)
+        public Balloon SpawnRemote(BalloonKind kind, int layers, CoopBalloon proxy)
         {
             var balloon = Spawn(kind, layers);
-            balloon.MakeRemote(id);
+            balloon.MakeRemote(proxy);
             return balloon;
         }
 
