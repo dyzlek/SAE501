@@ -44,6 +44,31 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 - **Fait : le son d'alerte dans le tutoriel.** Quand on fait quelque chose que le tutoriel ne demande pas encore (ouvrir le coffre trop tôt, appuyer sur un autre bouton…), le tableau tremblait sans bruit : maintenant le son d'alerte (`UIAlert`) retentit aussi. Branché à un seul endroit (`Tutorial.Refuse`), il vaut pour tous les refus.
   - Testé en Play via Unity MCP : au début du tutoriel, toucher le coffre est refusé et joue l'alerte.
 
+- **Fait : la nouvelle roulette du casino** (branche `feat/amelioration-roulette`, partie du `main` à jour). L'ancienne n'était pas intuitive : on choisissait sa couleur en touchant une minuscule case de la roue, sans que rien ne le dise ; la mise se réglait par -10 / +10 ; et elle n'était pas belle (roue à plat, tapis vert vide, boutons tous pareils).
+
+  Avant : la roue à plat, le tapis vide, et le pupitre MISE -10 / MISE +10 / TOUT / LANCER / 100 %.
+
+  ![Avant : l'ancienne roulette](../captures/maxens-roulette-avant.png)
+
+  - **3 étapes, écrites sur l'ardoise** (celle à faire en doré, celles faites en vert) : ① choisir sa couleur, ② miser, ③ faire tourner la roue ;
+  - **un vrai tapis de casino à 3 grandes zones** : ROUGE ×2, NOIR ×2, VERT ×36. On touche une zone : son cadre doré s'allume, les cases de cette couleur s'allument sur la roue, et les bananes misées viennent s'y poser (`RouletteBetZone`) ;
+  - **des jetons pour la mise** : +1, +10, +100, TOUT, RETIRER (remet à 0). Au-dessus de la zone choisie : « mise 20 · gain 40 » ;
+  - **on lance la roue à la main, comme un croupier** (mon idée) : on attrape le plateau (grip, de près ou avec le rayon), on le fait tourner, on lâche. La roue garde l'élan du geste ; s'il est trop mou, elle est relancée plus vite, puis elle ralentit jusqu'au numéro tiré. Le tirage est fait par le code au lâcher : le geste ne décide que du spectacle, impossible de tricher. Sans pari, la roue tourne pour rien et l'ardoise dit ce qui manque. En mode PC : clic maintenu sur la roue et glisser la souris (`WheelGrab`, `RouletteWheel`) ;
+  - **la case gagnante clignote** en blanc à l'arrêt de la bille ; la couleur et la mise restent, pour rejouer tout de suite ;
+  - **le bouton « 100 % »** du bêta-test est retiré ;
+  - **la roue est un vrai modèle 3D**, inspiré de How to Fish, fait avec un script Blender comme la cabane (`Blender/roulette.py` → `Art/Roulette/Roue.glb`) : cuvette en bois épaisse avec cerclage en laiton, piste en pente où roule la bille, 37 cases en parts de gâteau dans l'ordre d'une vraie roue européenne, filets en laiton, cône, et une **tourelle à 4 branches** qu'on a envie d'attraper. Elle est inclinée de 20° vers le joueur sur un pied, pour bien voir les cases. La bille suit le relief (plus haute sur la piste, plus basse dans les cases).
+
+  La nouvelle roue, rendue dans Blender :
+
+  ![La nouvelle roue, modèle Blender](../captures/maxens-roulette-blender.png)
+
+  Dans le jeu : la roue inclinée vers le joueur, le tapis à 3 zones, les jetons et l'ardoise des 3 étapes (la première en doré).
+
+  ![La nouvelle roulette dans le jeu](../captures/maxens-roulette-en-jeu.png)
+
+  - Le texte du tutoriel sur le casino est mis à jour (« touche une couleur, mise avec les jetons, puis fais tourner la roue à la main »).
+  - Vérifié : le projet compile, le modèle s'importe. Testé en jeu après **SAE → Générer le prototype** (la table est construite par le générateur) : le nouveau design de la roue est gardé.
+
 - **Fait : les singes récolteurs ne se gênent plus** (branche `feat/amelioration-singes-ramasseur`, partie du `main` à jour). Avec beaucoup de singes et les 3 bananiers, ils se bloquaient un peu, et passaient presque tous par le milieu de la terrasse : pour éviter les meubles, chaque long trajet faisait un détour par un même cercle autour du centre.
 
   Avant (tout au maximum : 3 arbres, 4 singes, toutes les améliorations) : les 4 singes tassés au milieu de la terrasse.
@@ -72,6 +97,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude Code | Derniers sons rangés et branchés (ballons, tir coupé au premier tir, tension, singe posé), musiques des vagues et des boss | Gardé |
 | Claude Code | Sons du casino : tic de la roue (partagé avec le coffre), gain et perte | Gardé |
 | Claude Code | Son de perte du casino plus fort, son d'alerte quand le tutoriel refuse une action | Gardé |
+| Claude Code | Questions et pistes pour la roulette, puis la refonte : tapis à 3 zones, jetons, roue lancée à la main, ardoise en 3 étapes, case gagnante qui clignote ; modèle de la roue en script Blender | Gardé (design validé en jeu) |
 | Claude Code | Singes récolteurs : zones devant les étals, répartition entre les arbres, places autour du panier, 2 bananes par trajet, dorée en premier ; tests et captures en Play | Gardé |
 | Claude Code | Vitesse des singes : bug de l'interpolation trouvé en mesurant (ils n'avançaient qu'à un tiers de leur vitesse), vitesse maximale réglée à ~75 % de la production | Gardé |
 

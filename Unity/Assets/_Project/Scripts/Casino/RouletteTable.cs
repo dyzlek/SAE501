@@ -1,43 +1,49 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace SAE
 {
-    // La table de roulette (bêta-test, sur l'estrade de la carte) : le pari, la mise, le tirage et les gains.
-    // On choisit une couleur en cliquant une case de la roue : toutes les cases de cette couleur s'entourent d'une lueur
-    // (cliquer une case d'une autre couleur remplace le choix). La lueur reste jusqu'au lancer.
-    // La mise part à 1 banane ; MISE - / MISE + l'ajustent de 10 (jamais sous 1), TOUT mise toutes ses bananes.
-    // Elle n'est payée qu'au LANCER, puis elle revient à 1 quel que soit le résultat : après un gros « tout » gagné ou perdu,
-    // on n'a pas à redescendre de 10 en 10 pour faire une petite mise.
-    // À côté de la roue, des bananes posées sur le tapis montrent la mise (comme dans How to Fish) : une par tranche
-    // de 25 bananes misées, 6 au plus pour ne pas encombrer le tapis. Pendant que la roue tourne, elles montrent la mise en jeu.
-    // Bouton « 100 % » (bêta-test) : la bille tombe forcément sur la couleur choisie, pour vérifier que les gains tombent bien.
+    // La table de roulette de la bananeraie : le pari, la mise, le tirage et les gains. Trois étapes, écrites sur l'ardoise
+    // (celle à faire est en doré) :
+    //   1. choisir sa couleur sur le tapis : trois grandes zones ROUGE ×2, NOIR ×2, VERT ×36 (RouletteBetZone).
+    //      La zone choisie s'entoure d'un cadre doré, et les cases de cette couleur s'allument sur la roue ;
+    //   2. miser avec les jetons du pupitre : +1, +10, +100, TOUT, RETIRER (remet à 0). La mise s'écrit au-dessus de la zone,
+    //      avec ce qu'elle peut rapporter (« mise 20 · gain 40 »), et des bananes viennent s'y poser (une par tranche de 25, 6 au plus) ;
+    //   3. faire tourner la roue À LA MAIN (RouletteWheel, WheelGrab) : au lâcher, la mise est payée et le numéro tiré.
+    // Après un lancer, la couleur et la mise restent (dans la limite de ce qu'on a) : on peut rejouer tout de suite.
     public class RouletteTable : MonoBehaviour
     {
         public RouletteWheel wheel;
         public TextMesh board;              // l'ardoise au-dessus du pupitre
-        public GameObject[] stakeBananas;   // les bananes du tapis des mises, de la première à la dernière (6)
-        public TextMesh stakeLabel;         // la mise écrite au-dessus du tapis
+        public GameObject[] stakeBananas;   // les bananes misées, posées sur la zone choisie (6)
+        public TextMesh stakeLabel;         // la mise et le gain possible, au-dessus de la zone choisie
 
-        public const int Step = 10;         // bananes ajoutées ou retirées à chaque appui
         public const int BananasPerPile = 25;   // 1 à 25 misées : 1 banane sur le tapis, 26 à 50 : 2, etc.
         const int HistorySize = 8;          // dernières couleurs sorties, affichées sur l'ardoise
         static readonly Color GlowColor = new Color(1f, 0.85f, 0.2f);
+        const string Gold = "#FFD45A", Done = "#8CE08C", Waiting = "#7A847A";
 
-        RoulettePocket[] pockets;
+        RoulettePocket[] pockets;           // dans l'ordre de la roue : pockets[i] = la case Case_i (RouletteRules.WheelOrder[i])
+        RoulettePocket flashing;            // la case gagnante qui clignote (null : aucune)
+        RouletteBetZone[] zones;
         RouletteColor? selected;            // la couleur choisie (null = aucune)
-        int stake = 1;
+        int stake;
         int played;                         // la mise en jeu pendant que la roue tourne
         readonly List<RouletteColor> history = new List<RouletteColor>();
-        string lastResult = "Clique une couleur sur la roue, puis LANCER !";
+        string lastResult = "";
 
-        public bool Guaranteed { get; private set; }
         public bool Spinning => wheel.Spinning;
-        public int Stake => stake;
-        public bool CanSpin => !Spinning && selected.HasValue && Economy.CanAfford(stake);
-        public bool CanRaise => stake < Economy.Money;
+        public int Stake => Mathf.Min(stake, Economy.Money);
+        public bool CanRaise => !Spinning && stake < Economy.Money;
+        public bool CanClear => !Spinning && stake > 0;
 
-        void Awake() => pockets = GetComponentsInChildren<RoulettePocket>();
+        void Awake()
+        {
+            pockets = GetComponentsInChildren<RoulettePocket>();
+            System.Array.Sort(pockets, (a, b) => string.CompareOrdinal(a.name, b.name));   // Case_00, Case_01... : l'ordre de la roue
+            zones = GetComponentsInChildren<RouletteBetZone>();
+        }
 
         // Le compte change (bananes déposées, achat...) : le tapis et l'ardoise suivent
         void OnEnable() => Economy.MoneyChanged += OnMoneyChanged;
@@ -50,18 +56,19 @@ namespace SAE
             Refresh();
         }
 
-        // Les lueurs allumées pulsent doucement pour attirer l'œil
+        // Les lueurs allumées (cadre de la zone, cases de la roue) pulsent doucement pour attirer l'œil
         void Update()
         {
             if (!selected.HasValue) return;
-            var c = GlowColor * (0.75f + 0.25f * Mathf.Sin(Time.time * 6f));
+            float pulse = 0.75f + 0.25f * Mathf.Sin(Time.time * 6f);
             foreach (var p in pockets)
-                if (p.color == selected.Value) p.glow.Set(c);
+                if (p.color == selected.Value && p != flashing) p.Highlight(GlowColor, 0.35f + 0.3f * pulse);   // la case garde un peu de sa couleur
+            foreach (var z in zones) if (z.color == selected.Value) z.glow.Set(GlowColor * pulse);
         }
 
-        // --- Les cases (RoulettePocket) et les boutons (RouletteButton) ---
+        // --- Le tapis (RouletteBetZone) et les jetons (RouletteButton) ---
 
-        // Choisir une couleur : ses cases s'allument et remplacent l'ancien choix. Pas pendant que la roue tourne.
+        // Choisir une couleur : sa zone et ses cases s'allument et remplacent l'ancien choix. Pas pendant que la roue tourne.
         public void Select(RouletteColor color)
         {
             if (Spinning) return;
@@ -70,18 +77,10 @@ namespace SAE
             Refresh();
         }
 
-        public bool Raise()
+        public bool Add(int amount)
         {
             if (!CanRaise) return false;
-            stake = Mathf.Min(stake + Step, Economy.Money);
-            Refresh();
-            return true;
-        }
-
-        public bool Lower()
-        {
-            if (stake <= 1) return false;
-            stake = Mathf.Max(1, stake - Step);
+            stake = Mathf.Min(stake + amount, Economy.Money);
             Refresh();
             return true;
         }
@@ -94,36 +93,38 @@ namespace SAE
             return true;
         }
 
-        public void ToggleGuarantee()
+        public bool Clear()
         {
-            Guaranteed = !Guaranteed;
-            Refresh();
-        }
-
-        // Lance la roue : on paie la mise, la lueur s'éteint, et la mise du lancer suivant repart de 1.
-        public bool Spin()
-        {
-            if (!CanSpin || !Economy.TrySpend(stake, wheel.transform.position)) return false;
-            var color = selected.Value;
-            int bet = played = stake;
-            int result = Draw(color);
-            stake = 1;   // la mise suivante repart de 1
-            selected = null;
-            ShowGlow();
-            lastResult = $"Pari : {RouletteRules.Colored(color)}, misé {bet}. La bille tourne...";
-            wheel.Spin(result, () => Resolve(color, bet, result));
+            if (!CanClear) return false;
+            stake = 0;
             Refresh();
             return true;
         }
 
-        // Le numéro tiré : au hasard, ou en « 100 % » un numéro au hasard parmi ceux de la couleur choisie
-        int Draw(RouletteColor color)
+        // --- Le lancer (au lâcher de la roue) ---
+
+        // La roue vient d'être lancée à la main à 'speed' °/s. Pari valide : on paie la mise, on tire le numéro et la roue
+        // le montre. Sinon (pas de couleur, pas de mise) : la roue tourne pour rien et l'ardoise dit ce qui manque.
+        public bool Launch(float speed)
         {
-            if (!Guaranteed) return Random.Range(0, RouletteRules.Numbers);
-            var winners = new List<int>();
-            for (int n = 0; n < RouletteRules.Numbers; n++)
-                if (RouletteRules.ColorOf(n) == color) winners.Add(n);
-            return winners[Random.Range(0, winners.Count)];
+            if (Spinning) return false;
+            int bet = Stake;
+            if (!selected.HasValue || bet <= 0)
+            {
+                lastResult = !selected.HasValue ? "<color=#FF7A6A>Choisis d'abord une couleur sur le tapis !</color>"
+                                                : "<color=#FF7A6A>Mise d'abord des bananes avec les jetons !</color>";
+                Sounds.Play(Sounds.AchatRefuse, wheel.transform.position);
+                Refresh();
+                return false;
+            }
+            if (!Economy.TrySpend(bet, wheel.transform.position)) return false;
+            var color = selected.Value;
+            played = bet;
+            int result = Random.Range(0, RouletteRules.Numbers);
+            lastResult = $"La bille tourne... (misé {bet} sur {RouletteRules.Colored(color)})";
+            wheel.Spin(result, speed, () => { Resolve(color, bet, result); StartCoroutine(FlashWinner(result)); });
+            Refresh();
+            return true;
         }
 
         void Resolve(RouletteColor color, int bet, int result)
@@ -139,40 +140,87 @@ namespace SAE
             history.Insert(0, landed);
             if (history.Count > HistorySize) history.RemoveAt(HistorySize);
             lastResult = won > 0
-                ? $"{RouletteRules.Colored(landed)} : <color=#8CE08C>gagné, +{won} bananes !</color>"
-                : $"{RouletteRules.Colored(landed)} : perdu ({bet} sur {RouletteRules.Colored(color)})";
+                ? $"{RouletteRules.Colored(landed)} : <color={Done}>GAGNÉ, +{won} bananes !</color>"
+                : $"{RouletteRules.Colored(landed)} : perdu...";
             Refresh();
         }
 
         // --- Affichage ---
 
-        void ShowGlow()
+        // La case gagnante clignote en blanc pendant 2,5 s, sous la bille ; puis les lueurs de la couleur choisie reviennent
+        IEnumerator FlashWinner(int result)
         {
-            foreach (var p in pockets)
-                p.glow.gameObject.SetActive(selected.HasValue && p.color == selected.Value);
+            int index = System.Array.IndexOf(RouletteRules.WheelOrder, result);
+            if (index < 0 || index >= pockets.Length) yield break;
+            flashing = pockets[index];   // les cases sont rangées dans l'ordre de la roue (RouletteRules.WheelOrder)
+            for (float t = 0f; t < 2.5f && !Spinning; t += Time.deltaTime)
+            {
+                flashing.Highlight(Color.white, Mathf.Repeat(t * 4f, 1f) < 0.6f ? 1f : 0f);
+                yield return null;
+            }
+            flashing = null;
+            ShowGlow();
         }
 
-        // L'ardoise, et les bananes du tapis des mises
+        // Au repos, chaque case reprend sa couleur ; la zone choisie montre son cadre doré (les cases s'allument dans Update)
+        void ShowGlow()
+        {
+            foreach (var p in pockets) p.Rest();
+            foreach (var z in zones) z.glow.gameObject.SetActive(selected.HasValue && z.color == selected.Value);
+        }
+
+        RouletteBetZone SelectedZone()
+        {
+            if (selected.HasValue) foreach (var z in zones) if (z.color == selected.Value) return z;
+            return null;
+        }
+
+        // L'ardoise en 3 étapes, les bananes misées et la mise écrite au-dessus de la zone choisie
         void Refresh()
         {
-            // On ne montre jamais plus que ce qu'on a : compte à 0, tapis vide et pas de texte
-            int shown = Spinning ? played : Mathf.Min(stake, Economy.Money);
-            int piles = Mathf.Clamp((shown + BananasPerPile - 1) / BananasPerPile, 0, stakeBananas.Length);   // arrondi au-dessus
-            for (int i = 0; i < stakeBananas.Length; i++) stakeBananas[i].SetActive(i < piles);
-            stakeLabel.text = shown > 0 ? $"<color=#FFD45A>{shown}</color> {(shown > 1 ? "bananes" : "banane")}" : "";
+            int shown = Spinning ? played : Stake;   // on ne montre jamais plus que ce qu'on a
+            PlaceBananas(shown);
 
-            string pick = selected.HasValue
-                ? $"{RouletteRules.Colored(selected.Value)} (paie {RouletteRules.Payout(selected.Value)} contre 1)"
-                : "<color=#9AA89A>aucune</color>";
+            var zone = SelectedZone();
+            int gain = selected.HasValue ? shown * (RouletteRules.Payout(selected.Value) + 1) : 0;
+            stakeLabel.text = shown > 0 && zone ? $"mise <color={Gold}>{shown}</color> · gain {gain}" : "";
+            if (zone) stakeLabel.transform.position = zone.transform.position + Vector3.up * 0.32f;   // assez haut pour ne cacher aucune inscription
+
+            bool colorDone = selected.HasValue, stakeDone = shown > 0;
+            string colorText = colorDone ? $"{RouletteRules.Colored(selected.Value)} (×{RouletteRules.Payout(selected.Value) + 1})" : "touche une zone du tapis";
+            string stakeText = stakeDone ? $"{shown} {(shown > 1 ? "bananes" : "banane")}" + (colorDone ? $", gain possible : {gain}" : "") : "les jetons du pupitre";
+
             var text = new System.Text.StringBuilder();
-            text.Append($"couleur : {pick}\n");
-            text.Append($"mise : <color=#FFD45A>{Mathf.Min(stake, Economy.Money)}</color>\n");
-            text.Append(lastResult).Append('\n');
+            text.Append(Step(1, "Couleur : " + colorText, colorDone, !colorDone)).Append('\n');
+            text.Append(Step(2, "Mise : " + stakeText, stakeDone, colorDone && !stakeDone)).Append('\n');
+            text.Append(Step(3, Spinning ? "La roue tourne !" : "Attrape la roue et fais-la tourner !", false, colorDone && stakeDone && !Spinning)).Append('\n');
+            if (lastResult.Length > 0) text.Append(lastResult).Append('\n');
             var last = new List<string>();
             foreach (var h in history) last.Add(RouletteRules.Colored(h));
             text.Append($"<size=32>derniers : {(last.Count > 0 ? string.Join(" ", last) : "-")}</size>");
-            if (Guaranteed) text.Append("\n<color=#FFD45A>100 % ACTIF (bêta-test)</color>");
             board.text = text.ToString();
+        }
+
+        // Une étape de l'ardoise : dorée et marquée d'une flèche si c'est la prochaine à faire, verte si elle est faite
+        static string Step(int number, string text, bool done, bool current)
+        {
+            string color = current ? Gold : done ? Done : Waiting;
+            return $"<color={color}>{(current ? "> " : "")}{number}. {text}</color>";
+        }
+
+        // Les bananes misées : sur la zone choisie, en deux rangées de trois (aucune tant qu'on n'a pas choisi de couleur)
+        void PlaceBananas(int amount)
+        {
+            int piles = Mathf.Clamp((amount + BananasPerPile - 1) / BananasPerPile, 0, stakeBananas.Length);   // arrondi au-dessus
+            var zone = SelectedZone();
+            for (int i = 0; i < stakeBananas.Length; i++)
+            {
+                stakeBananas[i].SetActive(zone && i < piles);
+                if (!zone) continue;
+                // Devant l'inscription de la zone (côté joueur, -Z), pour ne pas la cacher
+                var offset = new Vector3((i % 3 - 1) * 0.12f, 0.025f, -0.1f + (i / 3) * 0.06f);   // une rangée au bord avant, la 2e juste derrière
+                stakeBananas[i].transform.position = zone.transform.position + transform.rotation * offset;
+            }
         }
     }
 }

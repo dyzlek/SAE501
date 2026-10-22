@@ -2,19 +2,17 @@ using UnityEngine;
 
 namespace SAE
 {
-    // Un bouton rond du pupitre de la roulette : régler la mise (- 10 / + 10 / tout), lancer la roue, ou le « 100 % » du bêta-test.
+    // Un jeton du pupitre de la roulette : ajouter à la mise (+1, +10, +100), tout miser, ou tout retirer (la mise revient à 0).
+    // La roue, elle, se lance à la main (WheelGrab).
     // Même fonctionnement que les boutons d'amélioration (BowUpgradeButton) : on l'enfonce avec la main ou on le vise
     // avec le rayon ; il est gris quand il ne peut rien faire, flash rouge si l'appui est refusé.
     public class RouletteButton : MonoBehaviour, IPressable
     {
-        public enum Action { StakeLess, StakeMore, AllIn, Spin, Guarantee }
+        public enum Action { AddOne, AddTen, AddHundred, AllIn, Clear }
 
         public RouletteTable table;
         public Action action;
         public Transform cap;          // le dessus du bouton, qui s'enfonce
-
-        static readonly Color Launch = new Color(0.95f, 0.45f, 0.15f);   // comme LANCER au pupitre de la carte
-        static readonly Color Gold = new Color(1f, 0.8f, 0.2f);          // « 100 % » allumé
 
         Vector3 capRest;
         float pressed, refused;
@@ -32,11 +30,11 @@ namespace SAE
             bool ok = true;
             switch (action)
             {
-                case Action.StakeLess: ok = table.Lower(); break;
-                case Action.StakeMore: ok = table.Raise(); break;
+                case Action.AddOne: ok = table.Add(1); break;
+                case Action.AddTen: ok = table.Add(10); break;
+                case Action.AddHundred: ok = table.Add(100); break;
                 case Action.AllIn: ok = table.AllIn(); break;
-                case Action.Spin: ok = table.Spin(); break;
-                default: table.ToggleGuarantee(); break;
+                default: ok = table.Clear(); break;
             }
             if (!ok) refused = 1f;
         }
@@ -52,10 +50,8 @@ namespace SAE
         // La couleur au repos dit si le bouton peut servir maintenant
         Color IdleColor() => action switch
         {
-            Action.StakeLess => table.Stake > 1 ? UpgradeButton.Affordable : UpgradeButton.TooExpensive,
-            Action.StakeMore or Action.AllIn => table.CanRaise ? UpgradeButton.Affordable : UpgradeButton.TooExpensive,
-            Action.Spin => table.CanSpin ? Launch : UpgradeButton.TooExpensive,
-            _ => table.Guaranteed ? Gold : UpgradeButton.TooExpensive,
+            Action.Clear => table.CanClear ? UpgradeButton.Affordable : UpgradeButton.TooExpensive,
+            _ => table.CanRaise ? UpgradeButton.Affordable : UpgradeButton.TooExpensive,
         };
     }
 }

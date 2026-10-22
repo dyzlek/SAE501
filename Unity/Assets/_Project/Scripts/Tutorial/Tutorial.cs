@@ -96,7 +96,7 @@ namespace SAE
             Step.Bananas => "Les bananes paient tout. Passe la\nporte DERRIÈRE TOI, et lance une\nbanane dans le panier.",
             Step.Orchard => "Au fond, sous l'abri : améliore tes\nbananiers (production, fraîcheur,\nvaleur) ou plante un nouvel arbre.",
             Step.Harvesters => "À côté, achète des singes récolteurs :\nils ramassent les bananes et les\nlancent dans le panier pour toi !",
-            Step.Casino => "À droite, la roulette : mise tes\nbananes sur une couleur. Tu peux\ngagner gros... ou tout perdre !",
+            Step.Casino => "À droite, la roulette : touche une\ncouleur, mise avec les jetons, puis\nfais tourner la roue à la main !",
             Step.Chest => "Le coffre donne un singe au hasard.\nLe premier est offert : rentre\ndans la cabane et ouvre-le !",
             Step.Fusion => "Prends ton nouveau singe et pose-le\nSUR le premier : 2 singes identiques\nfusionnent en un singe plus fort !",
             Step.NextWave => "Lance la vague 2 avec LANCER.\n100 vagues t'attendent...\nbonne chance !",

@@ -6,6 +6,7 @@ namespace SAE
     // Joueur clavier/souris, pour tester vite sans casque (mode PC : menu SAE → Mode de jeu).
     // ZQSD : marcher · souris : regarder · clic gauche : appuyer (boutons, coffre) ou prendre (singe, banane,
     // singe récolteur, fléchette), relâcher le clic : lâcher (ou LANCER droit devant : récolteur, fléchette) ·
+    // clic maintenu sur la roulette : la souris fait tourner la roue (la vue ne bouge plus), relâcher : la lancer ·
     // A maintenu : fiche du singe visé · Échap : libérer la souris.
     // Mêmes règles qu'en VR : on prend un singe ou une banane jusqu'à 6 m (GrabReach.Reach), le singe tenu se pose
     // là où on vise, la banane se lâche au-dessus du panier.
@@ -26,6 +27,7 @@ namespace SAE
         MonkeyToken heldMonkey;
         Banane heldBanana;
         IThrowable heldThrowable;             // singe récolteur ou fléchette
+        WheelGrab heldWheel;                  // la roue de la roulette, qu'on fait tourner à la souris
 
         void Start()
         {
@@ -47,7 +49,8 @@ namespace SAE
                 return;
             }
 
-            Look(mouse.delta.ReadValue() * mouseSensitivity);
+            if (heldWheel) heldWheel.MouseDrag(mouse.delta.ReadValue().x);   // la souris fait tourner la roue au lieu de la vue
+            else Look(mouse.delta.ReadValue() * mouseSensitivity);
             Walk(kb);
 
             if (mouse.leftButton.wasPressedThisFrame) Click();
@@ -85,6 +88,12 @@ namespace SAE
                 return;
 
             bool inGrabReach = hit.distance <= GrabReach.Reach;
+            var wheel = hit.collider.GetComponentInParent<WheelGrab>();
+            if (wheel)
+            {
+                if (inGrabReach && wheel.BeginMouse()) heldWheel = wheel;
+                return;
+            }
             var token = hit.collider.GetComponentInParent<MonkeyToken>();
             if (token)
             {
@@ -124,9 +133,11 @@ namespace SAE
                 held.rotation = Quaternion.LookRotation(cam.forward);   // la fléchette part pointe en avant
                 heldThrowable.Throw((cam.forward + Vector3.up * 0.1f) * throwSpeed);
             }
+            if (heldWheel) heldWheel.EndMouse();     // la roue part sur l'élan du geste
             heldMonkey = null;
             heldBanana = null;
             heldThrowable = null;
+            heldWheel = null;
         }
 
         static void LockCursor(bool locked)
@@ -140,7 +151,7 @@ namespace SAE
         {
             GUI.Label(new Rect(Screen.width / 2f - 5, Screen.height / 2f - 10, 20, 20), "+");
             GUI.Label(new Rect(10, Screen.height - 30, 900, 25),
-                "Mode PC · ZQSD : marcher · Souris : regarder · Clic : appuyer / prendre, relâcher : lâcher ou lancer · A : infos du singe · Échap : souris");
+                "Mode PC · ZQSD : marcher · Souris : regarder · Clic : appuyer / prendre (maintenu sur la roulette : la faire tourner), relâcher : lâcher ou lancer · A : infos du singe · Échap : souris");
         }
     }
 }
