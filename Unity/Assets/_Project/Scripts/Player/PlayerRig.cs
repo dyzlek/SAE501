@@ -24,6 +24,8 @@ namespace SAE
         // du casque, selon où l'on se tient dans sa zone de jeu : c'est le casque qu'on téléporte, pas la base.
         public Vector3 HeadPosition => origin && origin.Camera ? origin.Camera.transform.position : transform.position;
 
+        public bool IsVR => origin;   // au casque (sinon : mode PC). Le coop le dit aux autres joueurs (CoopAvatar).
+
         void Awake()
         {
             origin = GetComponent<XROrigin>();       // null en mode PC

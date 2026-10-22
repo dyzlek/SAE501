@@ -4,6 +4,14 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Jeu. 22 oct. 2026
 
+### Coop en réseau
+> Dans une nouvelle branche, fais un système coop : entre deux casques, et entre un PC et un casque.
+>
+> Suite (le coop est dans NE FERA PAS du GDD) : fais le coop complet quand même.
+
+### Branches de Maxens
+> Fusionne les deux branches de Maxens dans main, puis mets main sur mon Unity.
+
 ### Améliorations de l’arc (#138)
 > Maintenant, fais l’issue #138 (nouvelles améliorations de l’arc, comme les flèches qui rebondissent).
 > Suite : avec le tir triple, etc., ça ne marche pas : le rebond ne se voit pas.

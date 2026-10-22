@@ -23,6 +23,7 @@ namespace SAE
             if (amount <= 0) return;
             GameState.Money += amount;
             GameState.BananasEarned += amount - stakeBack;   // avant l'événement : les trophées se mettent à jour dessus
+            if (Coop.IsGuest) Coop.SendEarn(amount, stakeBack);   // en coop, la bourse est chez l'hôte
             MoneyChanged?.Invoke(amount, where);
         }
 
@@ -31,8 +32,22 @@ namespace SAE
             if (amount < 0) return false;
             if (GameState.Money < amount) { Sounds.Play(Sounds.AchatRefuse, where); return false; }   // pas assez d'argent : un son d'alerte
             GameState.Money -= amount;
+            if (Coop.IsGuest) Coop.SendSpend(amount);
             MoneyChanged?.Invoke(-amount, where);
             return true;
         }
+
+        // Coop, chez l'hôte : un invité a déjà payé chez lui (il avait assez d'après la bourse qu'il voyait).
+        // On ne refuse donc pas : au pire, deux achats en même temps font passer la bourse à 0, jamais en dessous.
+        public static void SpendForPartner(int amount)
+        {
+            if (amount <= 0) return;
+            int spent = Mathf.Min(amount, GameState.Money);
+            GameState.Money -= spent;
+            MoneyChanged?.Invoke(-spent, null);
+        }
+
+        // Coop, chez l'invité : la bourse de l'hôte a bougé (un autre joueur a vendu, acheté, ou une vague est gagnée)
+        public static void ChangedByHost(int delta) => MoneyChanged?.Invoke(delta, null);
     }
 }

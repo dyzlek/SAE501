@@ -15,6 +15,8 @@ namespace SAE
     // Météo (Weather) : l'orage monte dès le lancement d'une vague spéciale (nuages, puis pluie), le ciel se dégage à la fin.
     // Vagues spéciales (boss, dirigeable) : annoncées sur le tableau dès la préparation, cloches au lancement,
     // cor quand le boss entre (WaveAnnouncer). Les manettes vibrent aussi : vies perdues, vague gagnée ou perdue (Haptics).
+    // Coop (Coop) : les vagues ne tournent que chez l'hôte. Chez un invité, LANCER est demandé à l'hôte, les ballons sont
+    // des copies (SpawnRemote) et la vague recopie celle de l'hôte (ApplyRemote), avec les mêmes sons et la même météo.
     public class WaveSpawner : MonoBehaviour
     {
         // Les vagues de la scène Labyrinthe (null quand on est au hub)
@@ -70,6 +72,7 @@ namespace SAE
         // Appelé par le bouton LANCER (hub ou carte). Ne fait rien si une vague est déjà en cours.
         public void StartWave()
         {
+            if (Coop.IsGuest) { Coop.SendLaunch(); return; }
             if (Running) return;
             StartCoroutine(RunWave(Current));
         }
@@ -154,6 +157,37 @@ namespace SAE
             return balloon;
         }
 
+        // Coop, chez l'invité : la copie d'un ballon de l'hôte (elle ne suit pas la piste, elle va où l'hôte la voit)
+        public Balloon SpawnRemote(BalloonKind kind, int layers, int id)
+        {
+            var balloon = Spawn(kind, layers);
+            balloon.MakeRemote(id);
+            return balloon;
+        }
+
+        // Coop, chez l'invité : où en est la vague de l'hôte. On rejoue ce que RunWave fait chez lui (météo, sons, vibrations).
+        public void ApplyRemote(int wave, int lives, bool running, bool won, string status)
+        {
+            if (running && !Running && WaveAnnouncer.IsSpecial(Current))
+            {
+                WaveAnnouncer.WaveStarts();
+                Weather.Storm();
+            }
+            if (running && lives < Lives) DamageFeedback();
+            if (!running && Running)
+            {
+                Weather.Clear();
+                bool victory = wave > Wave;   // gagnée : l'hôte est passé à la vague suivante
+                Haptics.PlayBoth(victory ? Haptics.Victory : Haptics.Defeat);
+                Sounds.Play(victory ? Sounds.VagueGagnee : Sounds.VaguePerdue);
+            }
+            Wave = wave;
+            Lives = lives;
+            Running = running;
+            Won = won;
+            Status = status;
+        }
+
         // Un boss éclaté lâche des ballons plus petits, là où il était (voir Balloon.Split)
         public void SpawnSplit(BalloonKind kind, int layers, Balloon parent, float back) =>
             Spawn(kind, layers).ContinueFrom(parent, back);
@@ -162,7 +196,12 @@ namespace SAE
         public void BalloonEscaped(int layers)
         {
             Lives = Tutorial.StrictWave ? 0 : Mathf.Max(0, Lives - layers);
-            // Les manettes grondent quand on perd des vies (au plus deux fois par seconde, sinon ça vibre sans arrêt)
+            DamageFeedback();
+        }
+
+        // Les manettes grondent quand on perd des vies (au plus deux fois par seconde, sinon ça vibre sans arrêt)
+        void DamageFeedback()
+        {
             if (Time.time >= nextDamageBuzz)
             {
                 nextDamageBuzz = Time.time + 0.5f;

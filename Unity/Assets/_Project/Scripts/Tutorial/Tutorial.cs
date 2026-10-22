@@ -273,6 +273,7 @@ namespace SAE
         {
             Current = Step.Done;
             monkeyGiven = true;
+            Changed?.Invoke();   // coop : un invité qui rejoint passe le tutoriel en cours de partie, les tableaux se réécrivent
         }
 
         // Nouvelle partie : le tutoriel recommence
