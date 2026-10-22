@@ -78,6 +78,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude Code | Sons du casino : tic de la roue (partagé avec le coffre), gain et perte | Gardé |
 | Claude Code | Son de perte du casino plus fort, son d'alerte quand le tutoriel refuse une action | Gardé |
 | Claude Code | Questions et pistes pour la roulette, puis la refonte : tapis à 3 zones, jetons, roue lancée à la main, ardoise en 3 étapes, case gagnante qui clignote ; modèle de la roue en script Blender | Gardé (design validé en jeu) |
+| Claude Code | Issues #164 (roulette) et #165 (singes récolteurs) créées et ajoutées au tableau S2, en « En relecture » | Gardé |
 
 ## Mar. 20 oct. 2026
 - **Fait : le son de la roulette du coffre.** Je ne trouvais pas de bon son en ligne, donc il est fabriqué par le code, comme les cloches des vagues de boss :
