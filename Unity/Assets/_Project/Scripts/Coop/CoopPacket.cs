@@ -6,9 +6,9 @@ namespace SAE
     // Les sortes de messages du coop (le 1er octet utile de chaque paquet).
     public enum CoopMsg : byte
     {
-        Hello,      // invité → tout le réseau : « la partie 4821, mot de passe … ? » (chaque seconde tant qu'on n'a pas de réponse)
+        Hello,      // invité → hôte, dès qu'il est relié : « voici le mot de passe »
         Welcome,    // hôte → invité : « oui, tu es le joueur n »
-        Refused,    // hôte → invité : « non » (mauvais mot de passe, partie pleine)
+        Refused,    // hôte → invité : « non » (mauvais mot de passe)
         Bye,        // on quitte la partie
         Pose,       // la tête et les mains d'un joueur (et son niveau : hub, carte, menu)
         State,      // hôte → invité : la bourse, la bibliothèque, les singes posés, la vague

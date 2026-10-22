@@ -10,6 +10,8 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 > Suite (le coop est dans NE FERA PAS du GDD) : fais le coop complet quand même.
 >
 > Suite : le coop s'ouvre depuis une partie déjà lancée, et dans le menu principal on rejoint avec un code et un mot de passe.
+>
+> Suite : je veux pouvoir rejoindre par Internet aussi, depuis un autre réseau.
 
 ### Branches de Maxens
 > Fusionne les deux branches de Maxens dans main, puis mets main sur mon Unity.
