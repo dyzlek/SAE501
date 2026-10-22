@@ -12,6 +12,8 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 > Suite : le coop s'ouvre depuis une partie déjà lancée, et dans le menu principal on rejoint avec un code et un mot de passe.
 >
 > Suite : je veux pouvoir rejoindre par Internet aussi, depuis un autre réseau.
+>
+> Suite : fais une PR pour le merge sur main. Peut-on jouer entre différents Unity, sans faire de build (le build ne marche pas) ?
 
 ### Branches de Maxens
 > Fusionne les deux branches de Maxens dans main, puis mets main sur mon Unity.

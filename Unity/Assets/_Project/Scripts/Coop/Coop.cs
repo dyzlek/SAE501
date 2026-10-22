@@ -138,10 +138,14 @@ namespace SAE
             Busy = false;
         }
 
-        // Le relais de Unity demande d'être identifié : un compte anonyme, créé tout seul la première fois
+        // Le relais de Unity demande d'être identifié : un compte anonyme, créé tout seul la première fois.
+        // Dans l'éditeur, chaque Unity ouvert (ou joueur de Multiplayer Play Mode) prend son propre compte : sinon, sur un
+        // même PC, l'hôte et l'invité seraient le même joueur pour le relais (le profil est un nom de dossier : ≤ 30 caractères).
         static async Task SignIn()
         {
-            if (UnityServices.State != ServicesInitializationState.Initialized) await UnityServices.InitializeAsync();
+            var options = new InitializationOptions();
+            if (Application.isEditor) options.SetProfile("editeur-" + System.Diagnostics.Process.GetCurrentProcess().Id);
+            if (UnityServices.State != ServicesInitializationState.Initialized) await UnityServices.InitializeAsync(options);
             if (!AuthenticationService.Instance.IsSignedIn) await AuthenticationService.Instance.SignInAnonymouslyAsync();
         }
 
