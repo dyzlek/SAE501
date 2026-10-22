@@ -25,6 +25,7 @@ namespace SAE
 
         void Update()
         {
+            if (Coop.IsGuest) return;   // en coop, les singes tirent chez l'hôte : les ballons éclatés disparaissent ici aussi
             cooldown -= Time.deltaTime;
             if (cooldown > 0f) return;
 

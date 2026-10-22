@@ -15,6 +15,8 @@ namespace SAE
 
     // État partagé du jeu : ce qui est posé, ce qu'on tient, l'inventaire, l'argent.
     // Un singe est toujours à UN endroit : rangé dans l'inventaire (la bibliothèque), tenu en main, ou posé.
+    // En coop (Coop), c'est l'hôte qui fait foi : chez un invité, chaque changement est aussi demandé à l'hôte,
+    // puis l'état de l'hôte remplace le nôtre (ApplyFromHost). Le singe tenu (Held) reste à chaque joueur.
     public static class GameState
     {
         public static readonly List<PlacedMonkey> Placed = new List<PlacedMonkey>();
@@ -60,6 +62,7 @@ namespace SAE
 
         public static void Unlock(MonkeyType t)
         {
+            if (Coop.IsGuest) Coop.SendInventory(InventoryOp.Unlock, new Monkey(t, default));
             unlocked[(int)t] = true;
             NotifyChanged();
         }
@@ -68,6 +71,7 @@ namespace SAE
 
         public static void AddToInventory(Monkey m)
         {
+            if (Coop.IsGuest) Coop.SendInventory(InventoryOp.Add, m);
             owned[(int)m.type, (int)m.level]++;
             NotifyChanged();
         }
@@ -76,6 +80,7 @@ namespace SAE
         public static bool TakeFromInventory(Monkey m)
         {
             if (Count(m) <= 0) return false;
+            if (Coop.IsGuest) Coop.SendInventory(InventoryOp.Take, m);
             if (!Sandbox) owned[(int)m.type, (int)m.level]--;   // en bac à sable, le stock ne baisse jamais
             Held = m;
             NotifyChanged();
@@ -94,9 +99,55 @@ namespace SAE
         // Vider le plateau : tous les singes posés retournent dans la bibliothèque.
         public static void ClearBoard()
         {
+            if (Coop.IsGuest) Coop.SendInventory(InventoryOp.ClearBoard, default);
             foreach (var p in Placed) owned[(int)p.monkey.type, (int)p.monkey.level]++;
             Placed.Clear();
             NotifyChanged();
+        }
+
+        // --- Coop ---
+
+        // Hôte : un invité a sorti ce singe de la bibliothèque. Il le tient dans SA main : notre Held ne change pas.
+        public static void TakeForPartner(Monkey m)
+        {
+            if (Count(m) <= 0) return;
+            if (!Sandbox) owned[(int)m.type, (int)m.level]--;
+            NotifyChanged();
+        }
+
+        // Invité : l'état reçu de l'hôte remplace le nôtre. Les singes posés ne sont remplacés que s'ils ont changé :
+        // sinon TowerManager détruirait et recréerait tous les singes de la carte 5 fois par seconde.
+        public static void ApplyFromHost(int money, int wavesWon, int bananasEarned, int[] ownedFlat, bool[] unlockedTypes, List<PlacedMonkey> placed)
+        {
+            bool changed = money != Money || wavesWon != WavesWon;
+            if (money != Money) Economy.ChangedByHost(money - Money);   // la bourse affiche « +5 » quand un autre joueur vend
+            Money = money;
+            WavesWon = wavesWon;
+            BananasEarned = bananasEarned;
+            if (ownedFlat.Length == owned.Length)
+                for (int i = 0; i < ownedFlat.Length; i++)
+                {
+                    ref int n = ref owned[i / MonkeyData.LevelCount, i % MonkeyData.LevelCount];
+                    if (n != ownedFlat[i]) { n = ownedFlat[i]; changed = true; }
+                }
+            if (unlockedTypes.Length == unlocked.Length)
+                for (int i = 0; i < unlocked.Length; i++)
+                    if (unlocked[i] != unlockedTypes[i]) { unlocked[i] = unlockedTypes[i]; changed = true; }
+            if (!SamePlaced(placed))
+            {
+                Placed.Clear();
+                Placed.AddRange(placed);
+                changed = true;
+            }
+            if (changed) NotifyChanged();
+        }
+
+        static bool SamePlaced(List<PlacedMonkey> other)
+        {
+            if (other.Count != Placed.Count) return false;
+            for (int i = 0; i < other.Count; i++)
+                if (!other[i].monkey.Equals(Placed[i].monkey) || (other[i].pos - Placed[i].pos).sqrMagnitude > 0.0001f) return false;
+            return true;
         }
 
         // --- Sauvegarde (SaveGame) ---

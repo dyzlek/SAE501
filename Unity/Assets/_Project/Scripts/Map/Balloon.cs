@@ -14,6 +14,8 @@ namespace SAE
     // S'il atteint la sortie, il retire autant de vies qu'il lui reste de couches.
     // Un boss éclaté se divise (façon Bloons TD) : le Boss lâche 4 ballons normaux, le Dirigeable lâche 2 Boss
     // (qui se divisent à leur tour). Les petits repartent de l'endroit où il a éclaté, un peu en arrière sur la piste.
+    // Coop (Coop) : chez un invité, le ballon est une copie (Remote) de celui de l'hôte, qui porte le même numéro (Id).
+    // Elle va là où l'hôte la voit ; un tir qui la perce est envoyé à l'hôte, qui perce le vrai ballon.
     public class Balloon : MonoBehaviour
     {
         public static readonly List<Balloon> All = new List<Balloon>();
@@ -51,6 +53,23 @@ namespace SAE
         public bool TintedModel => modelTints != null;              // le modèle prend la couleur de la couche
 
         public BalloonKind Kind { get; private set; }
+        public int Layers => layers;
+
+        // Coop : le numéro du ballon, le même chez l'hôte et chez les invités
+        public int Id { get; private set; }
+        static int nextId;
+        public bool Remote { get; private set; }
+        Vector3 remotePos, remoteVelocity;
+        Quaternion remoteRot;
+        float remoteTime;      // l'heure de la dernière position reçue (0 : jamais)
+        int hitRequest;        // notre dernier tir sur ce ballon, envoyé à l'hôte (voir ApplyRemote)
+        const float RemoteSmooth = 15f;
+
+        public static Balloon Find(int id)
+        {
+            foreach (var b in All) if (b.Id == id) return b;
+            return null;
+        }
         bool Armored => Kind == BalloonKind.Blinde || Kind == BalloonKind.Dirigeable;
         bool IsBlimp => Kind == BalloonKind.Boss || Kind == BalloonKind.Dirigeable;
 
@@ -60,6 +79,7 @@ namespace SAE
         public void Init(WaveSpawner owner, List<Vector3> points, int layerCount, BalloonKind kind)
         {
             spawner = owner;
+            Id = ++nextId;
             path = points;
             layers = layerCount;
             maxLayers = layerCount;
@@ -150,11 +170,54 @@ namespace SAE
             int cost = Armored ? 2 : 1;
             int popped = Mathf.Min(layers, pierce / cost);
             if (popped == 0) return pierce;
+            if (Remote) return PopRemote(pierce, popped, cost);
 
             layers -= popped;
             if (layers <= 0) { Sounds.Pop(transform.position); Split(); Destroy(gameObject); }
             else UpdateColor();
             return popped * cost;
+        }
+
+        // Coop, chez l'invité : on perce tout de suite notre copie (on voit le tir faire effet), et on prévient l'hôte.
+        // Les petits ballons d'un boss ne sont pas créés ici : l'hôte les crée, et ils arrivent avec les autres.
+        int PopRemote(int pierce, int popped, int cost)
+        {
+            hitRequest = Coop.SendHit(Id, pierce);
+            layers -= popped;
+            if (layers <= 0)
+            {
+                Sounds.Pop(transform.position);
+                CoopBalloons.Popped(Id, hitRequest);
+                Destroy(gameObject);
+            }
+            else UpdateColor();
+            return popped * cost;
+        }
+
+        // Coop, chez l'invité : la copie devient celle du ballon 'id' de l'hôte
+        public void MakeRemote(int id)
+        {
+            Remote = true;
+            Id = id;
+        }
+
+        // Coop, chez l'invité : la dernière position et les couches vues par l'hôte. doneRequest = notre dernière demande
+        // faite chez l'hôte : si notre tir sur ce ballon n'y est pas encore, ses couches sont en retard, on garde les nôtres.
+        public void ApplyRemote(Vector3 pos, Quaternion rot, int hostLayers, int doneRequest)
+        {
+            float now = Time.unscaledTime;
+            bool first = remoteTime == 0f;
+            // Sa vitesse (de combien il a bougé depuis le paquet d'avant) : pour deviner où il est entre deux paquets
+            remoteVelocity = first ? Vector3.zero : (pos - remotePos) / Mathf.Max(0.01f, now - remoteTime);
+            remotePos = pos;
+            remoteRot = rot;
+            remoteTime = now;
+            if (first) transform.SetPositionAndRotation(pos, rot);
+            if (doneRequest >= hitRequest && hostLayers != layers)
+            {
+                layers = hostLayers;
+                UpdateColor();
+            }
         }
 
         // Ce que lâche un boss éclaté : (sorte, nombre, couches). Les couches suivent la solidité du boss.
@@ -189,12 +252,22 @@ namespace SAE
         public void Slow(float factor, float duration)
         {
             if (Armored) return;   // le blindage ne se laisse ni geler ni coller
+            if (Remote) { Coop.SendSlow(Id, factor, duration); return; }   // c'est l'hôte qui le fait avancer
             slowFactor = Mathf.Min(slowFactor, factor);
             slowUntil = Mathf.Max(slowUntil, Time.time + duration);
         }
 
         void Update()
         {
+            if (Remote)
+            {
+                // Une copie glisse vers là où le ballon de l'hôte doit être maintenant (dernière position + sa vitesse)
+                var predicted = remotePos + remoteVelocity * Mathf.Min(Time.unscaledTime - remoteTime, 0.2f);
+                float t = 1f - Mathf.Exp(-RemoteSmooth * Time.deltaTime);
+                transform.SetPositionAndRotation(Vector3.Lerp(transform.position, predicted, t), Quaternion.Slerp(transform.rotation, remoteRot, t));
+                return;
+            }
+
             // Le ballon cœur se régénère, jusqu'à son nombre de couches de départ
             if (Kind == BalloonKind.Coeur && Time.time >= nextRegen)
             {

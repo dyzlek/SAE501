@@ -14,6 +14,8 @@ namespace SAE
     //   Save()  : à chaque vague gagnée, toutes les 30 s, et quand le casque met le jeu en pause ou le ferme.
     //   NewGame() : le bouton NOUVELLE PARTIE du panneau du classement : on efface et on recommence de zéro.
     // Choix de périmètre : le GDD disait « pas de sauvegarde » ; Dylan l'a demandée le 21 oct. (journal GENERAL.md).
+    // Coop : un invité joue la partie de l'hôte, il ne sauvegarde donc rien (sa propre partie reste intacte) ;
+    //   en quittant le coop, il la retrouve (ReloadFromDisk).
     public static class SaveGame
     {
         const string Key = "SAE.Sauvegarde";
@@ -66,7 +68,7 @@ namespace SAE
 
         public static void Save()
         {
-            if (GameState.Sandbox || !Application.isPlaying) return;
+            if (GameState.Sandbox || !Application.isPlaying || Coop.IsGuest) return;
             var d = new Data
             {
                 gameId = Leaderboard.GameId,
@@ -107,6 +109,17 @@ namespace SAE
             Levels.Restart();
             Leaderboard.NewGame();
             SceneManager.LoadScene(Levels.HubScene, LoadSceneMode.Single);   // Single : la carte est déchargée avec
+        }
+
+        // Coop : l'invité quitte la partie de l'hôte. On remet tout à zéro, on relit SA sauvegarde et on recharge la cabane.
+        public static void ReloadFromDisk()
+        {
+            GameState.ResetAll();
+            BowUpgrades.Reset();
+            Tutorial.Restart();
+            Levels.Restart();
+            Load();
+            SceneManager.LoadScene(Levels.HubScene, LoadSceneMode.Single);
         }
 
         // Un objet caché qui sauvegarde régulièrement, et quand le casque met le jeu en pause (bouton Meta, casque retiré)

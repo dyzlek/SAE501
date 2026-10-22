@@ -5,7 +5,8 @@ namespace SAE
 {
     // La PAUSE, comme dans un vrai jeu (#158) : le bouton Menu de la manette gauche (ou Échap en mode PC) l'ouvre et la ferme.
     // Le jeu s'arrête (Time.timeScale = 0) et un panneau apparaît à 1,5 m devant le joueur, posé dans le décor (il ne suit
-    // pas la tête : confort VR) : REPRENDRE, OPTIONS, MENU PRINCIPAL (la partie est sauvegardée avant d'y aller).
+    // pas la tête : confort VR) : REPRENDRE, OPTIONS, COOP (ouvrir la partie aux autres joueurs, CoopPanel),
+    // MENU PRINCIPAL (la partie est sauvegardée avant d'y aller).
     // Pas de pause dans le menu principal (on y est déjà). Créé une fois par LevelLoader, survit aux changements de scène.
     public class PauseMenu : MonoBehaviour
     {
@@ -24,6 +25,8 @@ namespace SAE
         Transform panel;
         GameObject buttons;
         OptionsPanel options;
+        CoopPanel coop;
+        static readonly Color Purple = new Color(0.55f, 0.35f, 0.8f);
 
         public static bool Open => instance && instance.panel && instance.panel.gameObject.activeSelf;
 
@@ -59,11 +62,13 @@ namespace SAE
             buttons.transform.SetParent(panel, false);
             var b = buttons.transform;
             Visuals.Text(b, "PAUSE", new Vector3(0f, 0.3f, -0.05f), 0.12f, Gold, title: true);
-            var size = new Vector2(0.7f, 0.15f);
-            WorldButton.Create(b, "REPRENDRE", new Vector3(0f, 0.1f, -0.06f), size, Green, Close);
-            WorldButton.Create(b, "OPTIONS", new Vector3(0f, -0.1f, -0.06f), size, Blue, () => ShowOptions(true));
+            var size = new Vector2(0.7f, 0.12f);
+            WorldButton.Create(b, "REPRENDRE", new Vector3(0f, 0.15f, -0.06f), size, Green, Close);
+            WorldButton.Create(b, "OPTIONS", new Vector3(0f, 0f, -0.06f), size, Blue, () => ShowOptions(true));
+            WorldButton.Create(b, "COOP", new Vector3(0f, -0.15f, -0.06f), size, Purple, ShowCoop);
             WorldButton.Create(b, "MENU PRINCIPAL", new Vector3(0f, -0.3f, -0.06f), size, Red, ToMainMenu);
             options = OptionsPanel.Build(panel, new Vector3(0f, 0f, -0.08f), () => ShowOptions(false));
+            coop = CoopPanel.Build(panel, new Vector3(0f, 0f, -0.08f), inGame: true, () => ShowOptions(false));
             panel.gameObject.SetActive(false);
         }
 
@@ -93,10 +98,18 @@ namespace SAE
             if (!GameMenu.InMenu) Time.timeScale = 1f;
         }
 
+        // on = le panneau des options ; false = retour aux boutons (depuis les options ou le coop)
         void ShowOptions(bool on)
         {
             buttons.SetActive(!on);
             options.gameObject.SetActive(on);
+            coop.gameObject.SetActive(false);
+        }
+
+        void ShowCoop()
+        {
+            buttons.SetActive(false);
+            coop.gameObject.SetActive(true);
         }
 
         void ToMainMenu()

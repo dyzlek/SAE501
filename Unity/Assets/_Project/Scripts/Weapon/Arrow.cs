@@ -20,6 +20,7 @@ namespace SAE
         public float lifetime = 4f;      // secondes avant de disparaître une fois tirée (comme les balles du cours)
         public float stuckTime = 2f;     // secondes avant de disparaître une fois plantée
         [System.NonSerialized] public Transform shooterHand;   // la main qui tient l'arc (vide pour les flèches du tir triple)
+        [System.NonSerialized] public bool visualOnly;          // coop : la flèche d'un autre joueur, juste pour la voir (Coop)
 
         Rigidbody body;
         TrailRenderer trail;
@@ -59,6 +60,7 @@ namespace SAE
             trail.Clear();
             trail.emitting = true;
             Destroy(gameObject, lifetime);
+            if (!visualOnly) Coop.SendShot(transform.position, velocity);   // les autres joueurs la voient partir
         }
 
         void FixedUpdate()
@@ -77,6 +79,7 @@ namespace SAE
 
             var balloon = other.GetComponentInParent<Balloon>();
             if (!balloon) { Stick(); return; }
+            if (visualOnly) { Destroy(gameObject); return; }   // c'est chez le tireur qu'elle perce : ici, elle disparaît
             if (!touched.Add(balloon)) return;   // déjà percé (un ballon peut avoir plusieurs colliders)
 
             var center = balloon.transform.position;

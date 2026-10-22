@@ -9,7 +9,7 @@ namespace SAE
     //   une estrade où des singes dansent (sautillent, se tournent), avec leur aura de rareté ;
     //   des ballons qui montent dans le ciel : on peut les éclater au rayon, pour s'amuser en attendant ;
     //   les boutons, à 2 m, visés au rayon : CONTINUER (ou JOUER s'il n'y a pas de sauvegarde), NOUVELLE PARTIE
-    //   (seulement s'il y a une sauvegarde, à confirmer), OPTIONS.
+    //   (seulement s'il y a une sauvegarde, à confirmer), OPTIONS, REJOINDRE (une partie en coop, avec son code et son mot de passe : CoopPanel).
     // Posé par PrototypeGenerator dans la scène Menu ; tout se construit ici au lancement (des cubes et les modèles des singes).
     // +Z local = devant le joueur (le point d'arrivée regarde vers +Z) ; les textes se lisent côté -Z.
     public class MainMenu : MonoBehaviour
@@ -24,6 +24,7 @@ namespace SAE
         static readonly Color Green = new Color(0.3f, 0.75f, 0.35f);
         static readonly Color Red = new Color(0.85f, 0.3f, 0.25f);
         static readonly Color Blue = new Color(0.25f, 0.5f, 0.85f);
+        static readonly Color Purple = new Color(0.55f, 0.35f, 0.8f);
         static readonly Color[] BalloonColors =
         {
             new Color(0.9f, 0.15f, 0.15f), new Color(0.2f, 0.45f, 0.95f), new Color(0.25f, 0.8f, 0.3f),
@@ -32,6 +33,7 @@ namespace SAE
 
         GameObject buttons;
         OptionsPanel options;
+        CoopPanel coop;
         TextMesh newGameLabel, saveInfo;
         float confirmUntil;
 
@@ -44,6 +46,7 @@ namespace SAE
             for (int i = 0; i < BalloonCount; i++) MenuBalloon.Create(transform, BalloonColors[i % BalloonColors.Length], i);
             BuildButtons();
             options = OptionsPanel.Build(transform, new Vector3(0f, 1.35f, ButtonsZ), CloseOptions);
+            coop = CoopPanel.Build(transform, new Vector3(0f, 1.35f, ButtonsZ), inGame: false, CloseCoop);
         }
 
         void BuildTitle()
@@ -121,6 +124,7 @@ namespace SAE
                 newGameLabel = WorldButton.Create(b, "NOUVELLE PARTIE", new Vector3(0f, 1.18f, ButtonsZ), size, Red, NewGame);
             }
             WorldButton.Create(b, "OPTIONS", new Vector3(0f, hasSave ? 0.88f : 1.28f, ButtonsZ), size, Blue, OpenOptions);
+            WorldButton.Create(b, "REJOINDRE", new Vector3(0f, hasSave ? 0.58f : 0.98f, ButtonsZ), size, Purple, OpenCoop);   // le coop
         }
 
         // NOUVELLE PARTIE : il faut appuyer une 2e fois en moins de 4 s (la sauvegarde sera effacée)
@@ -133,6 +137,8 @@ namespace SAE
 
         void OpenOptions() { buttons.SetActive(false); options.gameObject.SetActive(true); }
         void CloseOptions() { options.gameObject.SetActive(false); buttons.SetActive(true); }
+        void OpenCoop() { buttons.SetActive(false); coop.gameObject.SetActive(true); }
+        void CloseCoop() { coop.gameObject.SetActive(false); buttons.SetActive(true); }
 
         void Update()
         {

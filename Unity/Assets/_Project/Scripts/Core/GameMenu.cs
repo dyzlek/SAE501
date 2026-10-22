@@ -43,6 +43,7 @@ namespace SAE
 
         public static void NewGame()
         {
+            if (Coop.IsGuest) { Sounds.Play(Sounds.AchatRefuse); return; }   // la partie est celle de l'hôte
             Time.timeScale = 1f;
             skipMenuOnce = true;
             SaveGame.NewGame();   // efface et recharge la cabane
