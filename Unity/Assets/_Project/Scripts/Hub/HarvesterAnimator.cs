@@ -100,6 +100,7 @@ namespace SAE
                 var hands = leftHand && rightHand ? (leftHand.position + rightHand.position) / 2f
                                                   : transform.position + up * monkey.height * 0.6f + forward * monkey.height * 0.3f;
                 monkey.Carried.transform.position = hands + forward * 0.03f;
+                if (monkey.Extra) monkey.Extra.transform.position = hands + forward * 0.03f + up * 0.07f;   // la 2e, posée sur la première
             }
         }
 

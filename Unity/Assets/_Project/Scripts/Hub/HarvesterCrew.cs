@@ -28,7 +28,9 @@ namespace SAE
         public int PriceToBuy => Free ? 0 : FirstPrice * (Count + 1);
 
         // Les trois améliorations, niveau 1 à 5
-        public float Speed => 0.25f + 0.2f * (Level(HarvesterStat.Vitesse) - 1);       // m/s : 0,25 (il flâne) → 1,05
+        // Au maximum, ils ramènent environ 75 % de ce que donnent les 3 bananiers au maximum (~1,15 banane/s) : 4 singes,
+        // 2 bananes par trajet, ~10 m d'aller-retour. Pas tout : le joueur doit encore ramasser lui-même.
+        public float Speed => 0.25f + 0.35f * (Level(HarvesterStat.Vitesse) - 1);      // m/s : 0,25 (il flâne) → 1,65 (il trottine)
         public float Pause => 3f - 0.6f * (Level(HarvesterStat.Cadence) - 1);           // s entre deux trajets : 3 → 0,6
         public float Share => 0.6f + 0.1f * (Level(HarvesterStat.Rendement) - 1);       // part payée : 60 % → 100 %
 
@@ -62,5 +64,47 @@ namespace SAE
         public bool IsClaimed(Banane banana) => claimed.Contains(banana);
         public void Claim(Banane banana) => claimed.Add(banana);
         public void Unclaim(Banane banana) => claimed.Remove(banana);
+
+        // --- Pour que les singes ne se gênent pas (voir HarvesterMonkey) ---
+
+        // Les singes (achetés) qui travaillent à cet arbre, sans compter 'except' : 2 au plus par arbre
+        public int WorkingAt(Bananier tree, HarvesterMonkey except)
+        {
+            int n = 0;
+            foreach (var m in monkeys) if (m && m != except && m.gameObject.activeSelf && m.Busy && m.Tree == tree) n++;
+            return n;
+        }
+
+        // Les singes à cet arbre, qu'ils travaillent ou qu'ils attendent dans sa zone
+        public int At(Bananier tree, HarvesterMonkey except)
+        {
+            int n = 0;
+            foreach (var m in monkeys) if (m && m != except && m.gameObject.activeSelf && m.Tree == tree) n++;
+            return n;
+        }
+
+        // Un autre singe à cet arbre (pour se tenir à côté de lui sans lui marcher dessus), ou null
+        public HarvesterMonkey OtherAt(Bananier tree, HarvesterMonkey except)
+        {
+            foreach (var m in monkeys) if (m && m != except && m.gameObject.activeSelf && m.Tree == tree) return m;
+            return null;
+        }
+
+        // Les places autour du panier : 4 en arc, côté terrasse (angles depuis la direction du milieu de la terrasse)
+        public static readonly float[] BasketAngles = { -20f, 20f, -55f, 55f };
+        readonly bool[] basketTaken = new bool[BasketAngles.Length];
+
+        // Une place libre autour du panier (la plus au milieu d'abord) ; toutes prises : -1 (il se met à la place du milieu)
+        public int TakeBasketSlot()
+        {
+            for (int i = 0; i < basketTaken.Length; i++)
+                if (!basketTaken[i]) { basketTaken[i] = true; return i; }
+            return -1;
+        }
+
+        public void FreeBasketSlot(int slot)
+        {
+            if (slot >= 0 && slot < basketTaken.Length) basketTaken[slot] = false;
+        }
     }
 }

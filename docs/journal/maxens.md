@@ -69,6 +69,26 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
   - Le texte du tutoriel sur le casino est mis à jour (« touche une couleur, mise avec les jetons, puis fais tourner la roue à la main »).
   - Vérifié : le projet compile, le modèle s'importe. Testé en jeu après **SAE → Générer le prototype** (la table est construite par le générateur) : le nouveau design de la roue est gardé.
 
+- **Fait : les singes récolteurs ne se gênent plus** (branche `feat/amelioration-singes-ramasseur`, partie du `main` à jour). Avec beaucoup de singes et les 3 bananiers, ils se bloquaient un peu, et passaient presque tous par le milieu de la terrasse : pour éviter les meubles, chaque long trajet faisait un détour par un même cercle autour du centre.
+
+  Avant (tout au maximum : 3 arbres, 4 singes, toutes les améliorations) : les 4 singes tassés au milieu de la terrasse.
+
+  ![Avant : les singes tassés au milieu](../captures/maxens-recolteurs-avant.png)
+
+  - **une zone invisible devant chaque étal**, côté terrasse : le singe y passe en allant à l'étal et en revenant, et y attend quand il n'a rien à faire. Les singes sans travail se répartissent entre les arbres au lieu d'attendre tous au même endroit ;
+  - **chaque singe va à l'arbre qui a le plus de bananes en attente**, 2 singes au plus par arbre. Les deux singes d'un même étal se tiennent chacun de leur côté (40 cm d'écart) ;
+  - **autour du panier, 4 places en arc** : chacun prend une place libre, ils ne s'empilent plus au même endroit ;
+  - **les trajets vont en ligne droite** d'une zone à l'autre (la terrasse est libre entre les étals et le panier) : plus de détour par le milieu ;
+  - **2 bananes par trajet** quand une autre attend sur le même étal (portée par-dessus la première) : ça double le débit sans ajouter de singes. Je préférais ça à 6 singes : plus de monde aurait aggravé les bouchons, et 6 singes animés, c'est plus lourd pour le casque ;
+  - **la banane dorée passe en premier** : avant, les singes la prenaient en dernier, puisqu'ils vont à la banane la plus proche de pourrir et qu'une dorée pourrit 2 fois moins vite.
+  - Testé en Play via Unity MCP, tout au maximum : les singes se répartissent sur les 3 arbres, portent souvent 2 bananes, et leurs trajets s'étalent sur toute la terrasse. Une banane dorée lâchée sur le 3e arbre est prise en moins de 2 s, alors qu'une trentaine de bananes attendent, puis vendue. Aucune erreur.
+  - **Corrigé : les singes n'avançaient qu'à un tiers de leur vitesse.** Ils portent un Rigidbody (pour qu'on puisse les attraper et les lancer) avec l'interpolation activée : à chaque image, elle les remettait à leur position physique et effaçait une partie de leurs pas (0,5 m/s au lieu de 1,65). L'interpolation n'est plus activée que pendant le vol, quand on lance un singe (`HarvesterGrab`). C'était sûrement aussi pour ça qu'ils avaient l'air de se bloquer.
+  - **Plus rapides, mais pas trop** : vitesse maximale 1,65 m/s (avant 1,05), pause 0,6 s. Au maximum, ils ramènent environ **75 %** de ce que donnent les 3 bananiers au maximum : le joueur doit encore ramasser le reste. Mesuré en Play : 34 bananes vendues en 41 s (0,83 par seconde, pour environ 1,15 qui tombent).
+
+  Après : un singe attend dans la zone de l'arbre 1, les autres reviennent vers leurs places autour du panier.
+
+  ![Après : les singes répartis](../captures/maxens-recolteurs-apres.png)
+
 ### IA
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
@@ -78,6 +98,8 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude Code | Sons du casino : tic de la roue (partagé avec le coffre), gain et perte | Gardé |
 | Claude Code | Son de perte du casino plus fort, son d'alerte quand le tutoriel refuse une action | Gardé |
 | Claude Code | Questions et pistes pour la roulette, puis la refonte : tapis à 3 zones, jetons, roue lancée à la main, ardoise en 3 étapes, case gagnante qui clignote ; modèle de la roue en script Blender | Gardé (design validé en jeu) |
+| Claude Code | Singes récolteurs : zones devant les étals, répartition entre les arbres, places autour du panier, 2 bananes par trajet, dorée en premier ; tests et captures en Play | Gardé |
+| Claude Code | Vitesse des singes : bug de l'interpolation trouvé en mesurant (ils n'avançaient qu'à un tiers de leur vitesse), vitesse maximale réglée à ~75 % de la production | Gardé |
 
 ## Mar. 20 oct. 2026
 - **Fait : le son de la roulette du coffre.** Je ne trouvais pas de bon son en ligne, donc il est fabriqué par le code, comme les cloches des vagues de boss :
