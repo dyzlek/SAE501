@@ -53,12 +53,13 @@ Entre deux vagues, il passe la porte de la cabane pour récolter ses bananes ava
 ### 4.1 Univers
 L'univers de Bloons TD est assumé : des singes, des ballons colorés, un chemin qui serpente. Le joueur incarne **Quincy**, l'archer de la cabane. Il n'y a pas de scénario à embranchements : l'histoire tient en trois tableaux au début du tutoriel (« Bienvenue à Monkey Lane », « Alerte aux Bloons », « Toi, c'est Quincy »).
 
-### 4.2 Les trois lieux
+### 4.2 Les lieux
 
 | Lieu | Ce qu'on y voit | Ce qu'on y fait |
 |---|---|---|
 | **La cabane (hub)** | Cabane ronde en rondins, toit de chaume, lustre en roue de charrette, lanternes, guirlande de ballons, tapis rond à motifs | Poser et fusionner les singes sur la maquette, ouvrir le coffre, lancer les vagues, jouer aux fléchettes |
-| **La bananeraie** | Derrière la grande porte : terrasse en planches fermée par une barrière, allée, abri en rondins, 1 à 3 bananiers, panier sur tabouret, roulette | Récolter les bananes, améliorer les arbres, acheter des récolteurs, miser à la roulette |
+| **La bananeraie** | Derrière la grande porte : terrasse en planches fermée par une barrière, allée, abri en rondins, 1 à 3 bananiers, panier sur tabouret, grand panneau du classement, voiture rouge du casino | Récolter les bananes, améliorer les arbres, acheter des récolteurs, lire le classement, partir au casino |
+| **Le casino** (3e scène) | Salle art déco : moquette rouge à losanges dorés, murs bleu canard et moulures dorées, verrière (on voit le ciel), lustres, palmiers en pot, machines à sous, grande enseigne « CASINO DES SINGES » | Roulette, blackjack, course des singes, fléchettes à gains ; on y vient et on en repart avec la voiture |
 | **La carte** | Prairie façon Monkey Lane : chemin de dalles qui se croise deux fois, fleurs, champignons, buissons, palmiers, montagnes low-poly, deux portails en pierre | Défendre à l'arc depuis une estrade en bois, améliorer l'arc |
 
 ![La cabane vue du tapis : la bibliothèque des singes à gauche, la maquette au centre, le tableau des vagues au mur.](captures/gdd/cabane-interieur.png)
@@ -238,8 +239,9 @@ Les sons s'entendent du hub comme de la carte : on sait qu'il faut y retourner. 
 
 ![Sous l'abri de la bananeraie : les comptoirs BANANIER et RÉCOLTEUR, le panier au premier plan, un bananier et son étal à gauche.](captures/gdd/bananeraie-abri.png)
 
-### 7.9 Les bonus du hub
-- **Roulette (casino), dans la bananeraie :**
+### 7.9 Le casino (et les fléchettes de la cabane)
+On va au casino en appuyant sur la **voiture rouge** garée dans la bananeraie : elle klaxonne, un voile noir, et on est au casino à côté de sa jumelle, qui nous ramène. La caméra ne bouge jamais toute seule : pas de trajet en voiture (confort). Tous les jeux misent des bananes de la bourse.
+- **Roulette :**
   - roue européenne de 37 cases ;
   - on clique une case pour choisir sa couleur (rouge, noir ou vert) ;
   - on mise par 10, ou TOUT ;
@@ -247,12 +249,14 @@ Les sons s'entendent du hub comme de la carte : on sait qu'il faut y retourner. 
   - des bananes posées sur le tapis montrent la mise.
 ![La roulette : la roue européenne, le tapis des mises (une banane misée) et le pupitre des mises.](captures/gdd/roulette.png)
 
-- **Borne de blackjack, à côté de la roulette** (style « Gamble With Your Friends ») : une partie en solo contre un singe croupier à chapeau, sous une arche noire :
+- **Borne de blackjack** (style « Gamble With Your Friends ») : une partie en solo contre un singe croupier à chapeau, sous une arche noire :
   - on tape sa mise sur un terminal (pavé 0-9, 000, C ; mises rapides MIN, 1/4, 1/2, MAX de la bourse ; min 5) ;
   - 4 gros boutons sur une console penchée : DOUBLER, RESTER, CARTE, JOUER ;
   - au-dessus de 21, la main est perdue ; le croupier tire jusqu'à 16 et reste à 17 ; gagné ×2, blackjack (21 en 2 cartes) ×2,5, égalité = mise rendue.
 - **En coop** (« gamble with your friends ») : une seule roulette pour tous (l'hôte tire, tout le monde voit le même lancer) ; au blackjack, chacun joue sa partie à sa borne. La bourse est commune (#171).
 
+- **Course des singes** (comme la course de canards de « Gamble With Your Friends ») : 5 singes, une cote chacun (×2 à ×8, tirées à chaque course) ; on choisit son singe, on mise, DÉPART. Pendant la course (~13 s), on **encourage** son singe : au casque on secoue la manette, au PC on tape sur ALLEZ ! ; il accélère un peu à chaque fois. S'il gagne : mise × cote.
+- **Fléchettes à gains** (au casino) : on choisit sa mise (10, 50, 100), JOUER, puis on **lance** 3 fléchettes. Total des points : 100 et plus = mise × 5, 60 = × 3, 35 = × 2, 20 = mise rendue, moins = perdu.
 - **Cible de fléchettes, au mur de la cabane :** 3 fléchettes par manche, 5 à 50 points selon l'anneau, meilleur score affiché. C'est une pause ludique sans enjeu.
 
 ### 7.10 Économie
@@ -332,7 +336,12 @@ Tout est posé **en cercle de 2,8 m autour du joueur**, qui se tient sur le tapi
 - **À gauche,** trois places de bananier, chacune avec son étal.
 - **À droite,** le panier et la caisse.
 - **Au fond, sous l'abri,** les comptoirs BANANIER et RÉCOLTEUR.
-- **Dans la partie agrandie, à droite,** la roulette.
+- **Dans la partie agrandie, à droite,** le grand panneau du classement (rapproché : il était dehors, dans le pré) et, devant, la voiture du casino.
+
+### 9.4 Le casino
+- **Une salle de 18 × 22 m**, ouverte sur le ciel par une verrière. On arrive près de l'entrée, à côté de la voiture.
+- **À gauche,** la borne de blackjack et les machines à sous (décor) ; **à droite,** la roulette et, contre le mur, les fléchettes ; **au fond,** la course des singes sous l'enseigne.
+- **Téléportation :** partout sur la moquette, sauf dans les meubles.
 - **Téléportation :** possible partout, sauf sur les meubles.
 
 ## 10. Interface et feedback
@@ -413,6 +422,7 @@ _Chaque action a maintenant sa vibration, avec un motif différent pour la recon
 | | Bombes à lancer, pluie de flèches de Quincy, vibrations par action ⏳ | Classement gardé entre deux lancements ; **coop par Internet** (deux casques, ou casque + PC ; ouvert depuis la pause avec un mot de passe, rejoint depuis le menu avec le code de la partie ; serveur relais Unity Relay, réseau avec Netcode for GameObjects) ⏳ (#166, #170) | |
 | | Bananes dorées, nouvelles améliorations de l'arc, mur des records, trophées, classement local ⏳ | | |
 | | | Casino à plusieurs : roulette partagée et blackjack contre un croupier ⏳ (#171) | |
+| | | **Niveau Casino** (3e scène, voiture aller-retour), course des singes, fléchettes à gains ⏳ (#173) | |
 
 _✅ = dans le jeu (à valider au casque) · ⏳ = à faire en semaine 2 (détail : [OBJECTIFS_S2.md](OBJECTIFS_S2.md))._
 

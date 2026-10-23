@@ -31,6 +31,7 @@ namespace SAE.EditorTools
         const string HubScenePath = Folder + "/Hub.unity";
         const string MapScenePath = Folder + "/Labyrinthe.unity";   // même nom que Levels.MapScene
         const string MenuScenePath = Folder + "/Menu.unity";         // même nom que Levels.MenuScene
+        const string CasinoScenePath = Folder + "/Casino.unity";     // même nom que Levels.CasinoScene
         const string OldGroveScenePath = Folder + "/Bananeraie.unity";   // l'ancienne scène de la bananeraie, supprimée
         const string OldScenePath = Folder + "/Jeu.unity";          // l'ancienne scène unique, supprimée à la génération
         const float BoardTile = 0.2f;    // plateau de 1,6 m : l'élément principal du hub
@@ -44,6 +45,7 @@ namespace SAE.EditorTools
         const float HandTilt = 35f;   // les mains tournées pouce vers le haut, comme quand on tient les manettes (pas paume à plat)
         static readonly Vector3 MenuCenter = new Vector3(0f, 0f, -1000f);   // le menu principal, loin derrière le hub
         static readonly Vector3 MapCenter = new Vector3(0f, 0f, 1000f);   // les deux scènes sont chargées ensemble : la carte est loin, hors de vue du hub
+        static readonly Vector3 CasinoCenter = new Vector3(1000f, 0f, 0f);   // le casino aussi, sur le côté
 
         static readonly Color Floor = new Color(0.35f, 0.35f, 0.38f);
         static readonly Color Wood = new Color(0.45f, 0.30f, 0.18f);
@@ -88,7 +90,14 @@ namespace SAE.EditorTools
             BuildPresence(Level.Menu, menuSpawn);
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), MenuScenePath);
 
-            // 3. Le hub, et la bananeraie derrière sa porte
+            // 3. Le casino, où mène la voiture de la bananeraie : on arrive à côté de sa voiture, face à la salle
+            NewLevelScene();
+            var casinoSpawn = Spawn("Spawn Casino", CasinoCenter + CasinoCarSpot + new Vector3(0f, 0f, 2f), Level.Casino);
+            BuildCasino();
+            BuildPresence(Level.Casino, casinoSpawn);
+            EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), CasinoScenePath);
+
+            // 4. Le hub, et la bananeraie derrière sa porte
             NewLevelScene();
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(OldGroveScenePath)) AssetDatabase.DeleteAsset(OldGroveScenePath);
             var hubSpawn = Spawn("Spawn Hub", Vector3.zero, Level.Hub);
@@ -109,9 +118,53 @@ namespace SAE.EditorTools
                 new EditorBuildSettingsScene(HubScenePath, true),
                 new EditorBuildSettingsScene(MapScenePath, true),
                 new EditorBuildSettingsScene(MenuScenePath, true),
+                new EditorBuildSettingsScene(CasinoScenePath, true),
             };
             PlayerModeMenu.Apply();   // VR ou PC, selon le menu SAE → Mode de jeu
-            Debug.Log("Prototype généré : " + HubScenePath + ", " + MapScenePath + " et " + MenuScenePath);
+            Debug.Log("Prototype généré : " + HubScenePath + ", " + MapScenePath + ", " + MenuScenePath + " et " + CasinoScenePath);
+        }
+
+        // ---------------- LE CASINO ----------------
+        // Une grande salle (CasinoRoom construit le décor au lancement) avec les quatre jeux, chacun dans son coin :
+        // la roulette à droite, le blackjack à gauche, la course des singes au fond, les fléchettes contre le mur de droite.
+        // On arrive en voiture (CasinoCar) près de l'entrée ; la même voiture ramène à la bananeraie.
+        // Le sol entier est une zone de téléportation ; les meubles ont leur collider : on ne se pose pas dedans.
+        // Lumière : le soleil entre par la verrière (CasinoRoom), une lumière ambiante chaude et un peu violette, pas de brume.
+        static readonly Vector3 CasinoCarSpot = new Vector3(-3.5f, 0f, -9f);
+
+        static void BuildCasino()
+        {
+            RenderSettings.fog = false;
+            RenderSettings.ambientSkyColor = new Color(0.55f, 0.45f, 0.65f);
+            RenderSettings.ambientEquatorColor = new Color(0.5f, 0.38f, 0.32f);
+            RenderSettings.ambientGroundColor = new Color(0.32f, 0.12f, 0.12f);
+            var sun = Object.FindFirstObjectByType<Light>();
+            if (sun) sun.intensity = 1.2f;
+
+            var root = new GameObject("Casino").transform;
+            root.position = CasinoCenter;
+            var floor = Visuals.Solid("Sol du casino", root, new Vector3(0f, -0.1f, 0f), new Vector3(CasinoRoom.Width, 0.2f, CasinoRoom.Depth), Color.white);
+            Teleportable(floor);
+            root.gameObject.AddComponent<CasinoRoom>().floor = floor.GetComponent<Renderer>();
+
+            BuildRoulette(root, new Vector3(4.2f, 0f, 2.5f), 0f);
+            Place<BlackjackTable>(root, "Blackjack", new Vector3(-4.5f, 0f, 2.5f), 0f);
+            Place<MonkeyRace>(root, "Course des singes", new Vector3(0f, 0f, 7.6f), 0f);
+            Place<DartStand>(root, "Fléchettes", new Vector3(CasinoRoom.Width / 2f - 0.05f, 0f, -3.8f), 90f);   // +Z vers le mur de droite, entre deux colonnes
+            var car = Place<CasinoCar>(root, "Voiture du casino", CasinoCarSpot, 180f);   // sa portière regarde la salle
+            car.destination = Level.Hub;
+            car.home = Level.Casino;
+            car.sign = "BANANERAIE";
+        }
+
+        // Un objet vide qui se construit seul au lancement (son script fait le reste)
+        static T Place<T>(Transform parent, string name, Vector3 localPos, float yaw) where T : Component
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = localPos;
+            go.transform.localRotation = Quaternion.Euler(0f, yaw, 0f);
+            return go.AddComponent<T>();
         }
 
         // La scène du menu : le même paysage que la carte (Paysage.glb : prairie, palmiers, montagnes tout autour),
@@ -1545,7 +1598,8 @@ namespace SAE.EditorTools
         // Mesures : celles de build_bananeraie dans cabane.py (BAN_*, SHED_*), à garder identiques.
         const float GroveX0 = -4.6f, GroveX1 = 9.4f, GroveZ0 = -3.6f, GroveZ1 = 4.8f;   // la terrasse (agrandie à droite pour la roulette)
         const float OldGroveX1 = 4.6f;                                                  // le bord droit d'avant : la caisse et le panier sont avant
-        static readonly Vector3 RouletteSpot = new Vector3(6.9f, 0f, 2.6f);             // la roulette, au fond de la partie agrandie, face au joueur
+        static readonly Vector3 RouletteSpot = new Vector3(6.9f, 0f, 2.6f);             // au fond de la partie agrandie, face au joueur (la roulette, puis le classement)
+        static readonly Vector3 GroveCarSpot = new Vector3(7.0f, 0f, -2.4f);            // la voiture du casino, devant, le long de la barrière avant
         const float RouletteFrontZ = 2.05f;                                             // le bord avant de sa table
         const float PathHalf = 1.1f, WalkZ = -4.7f, PathZ = -6.45f;                     // l'allée : demi-largeur, fin des planches, bout contre la cabane
         const float ShedX = 3.2f, ShedZ0 = 2.9f, ShedZ1 = 4.6f;                          // l'abri (mur de rondins au fond)
@@ -1642,17 +1696,20 @@ namespace SAE.EditorTools
             }
             BuildGroveMoneyBoard(env, new Vector3(3.6f, 0f, 1.7f));
 
-            // Le grand panneau du classement, dehors : dans le pré, juste après la barrière de droite (côté roulette et panier),
-            // tourné vers la terrasse : on le voit en face en regardant vers la prairie.
+            // Le grand panneau du classement, rapproché (il était dehors, dans le pré, loin derrière la barrière) : sur la
+            // terrasse, au fond de la partie agrandie (l'ancienne place de la roulette), tourné vers le joueur.
             // LeaderboardBoard se construit seul ; +Z local = dos au joueur (comme la caisse).
             var ranking = new GameObject("Classement").transform;
             ranking.SetParent(env, false);
-            ranking.localPosition = new Vector3(GroveX1 + 1.6f, 0f, 0f);
-            ranking.localRotation = Quaternion.LookRotation(Vector3.right);   // son dos vers le pré, l'ardoise vers la terrasse
+            ranking.localPosition = RouletteSpot;
             ranking.gameObject.AddComponent<LeaderboardBoard>();
 
-            // La roulette de Nicolas (bêta-test), dans la partie agrandie à droite, tournée vers le joueur
-            BuildRoulette(env, RouletteSpot, 0f);
+            // La voiture du casino, garée devant, le long de la barrière avant : la roulette est partie au casino (scène Casino).
+            // Tournée de 180° : sa portière (côté -Z de la voiture) regarde la terrasse.
+            var car = new GameObject("Voiture du casino").AddComponent<CasinoCar>();
+            car.transform.SetParent(env, false);
+            car.transform.localPosition = GroveCarSpot;
+            car.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
 
             // Au fond, sous l'abri : l'armoire des améliorations, BANANIER et RÉCOLTEUR côte à côte, dos au mur
             float counterZ = ShedZ1 - 0.45f;
@@ -1661,7 +1718,7 @@ namespace SAE.EditorTools
             if (panier) Target(panier.transform, panier.transform.position, TutorialSpot.Basket, Level.Hub, 0.7f);
             Target(env, env.TransformPoint(new Vector3(-0.85f, 2.3f, counterZ)), TutorialSpot.Orchard, Level.Hub, 0f);      // au-dessus des enseignes
             Target(env, env.TransformPoint(new Vector3(0.85f, 2.3f, counterZ)), TutorialSpot.Harvesters, Level.Hub, 0f);
-            Target(env, env.TransformPoint(RouletteSpot + new Vector3(0f, 2.4f, 0.8f)), TutorialSpot.Casino, Level.Hub, 0f);   // au-dessus de l'enseigne ROULETTE
+            Target(env, env.TransformPoint(GroveCarSpot + new Vector3(-2.05f, 2.3f, 0.3f)), TutorialSpot.Casino, Level.Hub, 0f);   // au-dessus du panneau CASINO de la voiture
             // Le tableau du tutoriel, à droite de l'arrivée, tourné vers elle
             BuildTutorialBoard(env, new Vector3(1.9f, 1.5f, -1.2f), Quaternion.Euler(0f, 55f, 0f), Level.Hub, hanging: false);
             if (trees && panier)

@@ -4,11 +4,11 @@ using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 namespace SAE
 {
-    // Un gros bouton de la borne de blackjack (JOUER, CARTE, RESTER, DOUBLER, et les touches du terminal) :
+    // Un gros bouton des jeux du casino (blackjack, course des singes, fléchettes : JOUER, CARTE, les touches du pavé…) :
     // un socle sombre et un dessus coloré qui s'enfonce. On l'enfonce avec la main (HandPress) ou on le vise au rayon
     // (RayPress), ou on clique dessus en mode PC. Gris quand il ne peut rien faire, flash rouge si l'appui est refusé
     // (comme les jetons de la roulette, RouletteButton).
-    public class BlackjackButton : MonoBehaviour, IPressable
+    public class CasinoButton : MonoBehaviour, IPressable
     {
         static readonly Color Base = new Color(0.08f, 0.08f, 0.1f);
         static readonly Color Off = new Color(0.35f, 0.35f, 0.35f);
@@ -24,7 +24,7 @@ namespace SAE
 
         // Un bouton de 'size' (largeur, hauteur) posé sur la face -Z du parent (le côté du joueur), dessus vers -Z
         // textColor : blanc sur les boutons foncés, foncé sur les touches claires du pavé (sinon on ne lit rien)
-        public static BlackjackButton Create(Transform parent, string label, Vector3 localPos, Vector2 size, Color color,
+        public static CasinoButton Create(Transform parent, string label, Vector3 localPos, Vector2 size, Color color,
                                              Func<bool> action, Func<bool> usable, float textHeight, Color? textColor = null)
         {
             var root = new GameObject("Bouton " + label).transform;
@@ -34,7 +34,7 @@ namespace SAE
 
             // Le dessus porte le collider : c'est lui qu'on touche ou qu'on vise
             var cap = Visuals.Solid("Dessus", root, new Vector3(0f, 0f, -0.015f), new Vector3(size.x, size.y, 0.03f), color);
-            var b = cap.AddComponent<BlackjackButton>();
+            var b = cap.AddComponent<CasinoButton>();
             cap.AddComponent<XRSimpleInteractable>();   // après le collider (Solid)
             cap.AddComponent<RayPress>();
             b.action = action;

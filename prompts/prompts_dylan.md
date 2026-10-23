@@ -13,6 +13,11 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 >
 > Suite (2 captures de la borne dans le jeu) : c'est moche et peu lisible, mais l'idée est là.
 
+### Niveau casino et nouveaux jeux
+> Améliore les visuels, ajoute la course des canards (la course des singes), crée un nouveau niveau (niveau casino), améliore le classement (c'est-à-dire : rapproche-le) et ajoute le tir aux fléchettes qui permet de gagner des bananes, etc.
+>
+> Suite : le casino est une nouvelle scène, on y va par exemple en voiture ou en carrousel, je te laisse choisir ; je veux surtout que ce soit vraiment beau. La course : on parie et on encourage son singe. Les fléchettes : une partie payante. Le classement : dans la bananeraie.
+
 ### Coop : ce qui n'est pas partagé
 > Certaines choses ne sont pas encore partagées, comme les singes, les ballons, etc. (testé éditeur + casque : les ballons de la carte et du plateau du hub, les récolteurs, le bananier, le coffre).
 
