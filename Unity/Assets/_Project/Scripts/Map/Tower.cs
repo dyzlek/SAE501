@@ -30,8 +30,9 @@ namespace SAE
             if (cooldown > 0f) return;
 
             float range = MonkeyData.Range(monkey);
+            bool seesCamo = MonkeyData.SeesCamo(monkey);   // un camouflé est invisible pour les autres singes
             var inRange = Balloon.All
-                .Where(b => Flat(b.transform.position - transform.position).sqrMagnitude <= range * range)
+                .Where(b => (seesCamo || !b.Camo) && Flat(b.transform.position - transform.position).sqrMagnitude <= range * range)
                 .OrderByDescending(b => b.Progress)
                 .ToList();
             if (inRange.Count == 0) return;

@@ -37,6 +37,7 @@ namespace SAE
         public string Status { get; private set; } = "Prépare-toi, puis appuie sur LANCER";
 
         public int LastWrittenWave => waves.Count;
+        const string CamoWarning = "\n<color=#B5C26A>Ballons camouflés ! Seuls le Tireur et les singes Violet et + les voient</color>";
         public WaveData Current => Wave <= waves.Count ? waves[Wave - 1] : WaveBook.Endless(Wave);
         public int BossCount => Current.BossCount;
 
@@ -84,6 +85,7 @@ namespace SAE
             Lives = startLives;   // les vies repartent au maximum à chaque vague
             bool special = WaveAnnouncer.IsSpecial(wave);
             Status = special ? WaveAnnouncer.Title(wave) : "Attaque en cours !";
+            if (wave.HasCamo) Status += CamoWarning;
             if (special)
             {
                 WaveAnnouncer.WaveStarts();
@@ -101,7 +103,8 @@ namespace SAE
                 }
                 for (int i = 0; i < group.count && Lives > 0; i++)
                 {
-                    Spawn(group.kind, group.layers);
+                    var balloon = Spawn(group.kind, group.layers);
+                    if (group.camo) balloon.MakeCamo();
                     yield return new WaitForSeconds(group.interval);
                 }
                 if (Lives <= 0) break;
@@ -136,6 +139,7 @@ namespace SAE
                 Wave++;
                 // La prochaine est spéciale : on prévient pendant la préparation
                 if (!Won && WaveAnnouncer.IsSpecial(Current)) Status += $"\n{WaveAnnouncer.Title(Current)}";
+                if (Current.HasCamo && !wave.HasCamo) Status += CamoWarning;   // les premiers camouflés : on prévient avant
                 Haptics.PlayBoth(Haptics.Victory);
                 Sounds.Play(Won && Wave == LastWrittenWave + 1 ? Sounds.VictoireFinale : Sounds.VagueGagnee);
                 Lives = startLives;   // la vague suivante repart avec toutes les vies (affiché pendant la préparation)

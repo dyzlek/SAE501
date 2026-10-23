@@ -11,6 +11,8 @@ namespace SAE
     // Avec les modèles 3D (BalloonVisuals) : Normal et Rapide = Ballon_Normal teinté par couche,
     //   Blindé = Ballon_Blindage, Boss = MOAB (hélice qui tourne), Dirigeable = BFB (2 hélices), Coeur = Ballon_Coeur.
     // Le ballon cœur regagne une couche toutes les 2 s (règle du GDD : il se régénère).
+    // Camouflé (Camo, comme dans Bloons TD) : sa couleur tire sur le kaki et il porte des taches sombres. Seuls le Tireur
+    // et les singes de rareté Violet et plus le voient (MonkeyData.SeesCamo) ; les flèches de Quincy le touchent toujours.
     // S'il atteint la sortie, il retire autant de vies qu'il lui reste de couches.
     // Un boss éclaté se divise (façon Bloons TD) : le Boss lâche 4 ballons normaux, le Dirigeable lâche 2 Boss
     // (qui se divisent à leur tour). Les petits repartent de l'endroit où il a éclaté, un peu en arrière sur la piste.
@@ -55,6 +57,9 @@ namespace SAE
 
         public BalloonKind Kind { get; private set; }
         public int Layers => layers;
+        public bool Camo { get; private set; }
+        static readonly Color CamoColor = new Color(0.36f, 0.42f, 0.2f);
+        static readonly Color CamoSpot = new Color(0.22f, 0.18f, 0.1f);
 
         // Coop : le double réseau (hôte : celui qui nous suit ; invité : celui qui nous porte)
         public CoopBalloon Proxy { get; set; }
@@ -214,6 +219,26 @@ namespace SAE
             UpdateColor();
         }
 
+        // Le rend camouflé (WaveSpawner, après Init) : la couleur kaki, et 6 taches sombres posées sur sa surface
+        public void MakeCamo()
+        {
+            if (Camo) return;
+            Camo = true;
+            for (int i = 0; i < 6; i++)
+            {
+                var dir = Quaternion.Euler(Random.Range(-35f, 35f), i * 60f + Random.Range(-15f, 15f), 0f) * Vector3.forward;
+                var spot = Visuals.Primitive(PrimitiveType.Sphere);
+                spot.name = "Tache";
+                Visuals.Kill(spot.GetComponent<Collider>());
+                spot.transform.SetParent(transform, false);
+                spot.transform.localPosition = dir * 0.4f + Vector3.up * 0.05f;
+                spot.transform.localRotation = Quaternion.LookRotation(dir);
+                spot.transform.localScale = new Vector3(0.3f, 0.22f, 0.12f);
+                spot.AddComponent<ColorTint>().Set(CamoSpot);
+            }
+            UpdateColor();
+        }
+
         // Ce que lâche un boss éclaté : (sorte, nombre, couches). Les couches suivent la solidité du boss.
         (BalloonKind kind, int count, int layers) SplitInto() => Kind switch
         {
@@ -306,8 +331,9 @@ namespace SAE
                     break;
                 default:
                     int layer = Mathf.Clamp(layers - 1, 0, layerColors.Length - 1);
-                    tint.Set(layerColors[layer]);
-                    if (modelTints != null) foreach (var t in modelTints) t.Set(layerColors[layer]);
+                    var color = Camo ? Color.Lerp(layerColors[layer], CamoColor, 0.55f) : layerColors[layer];   // on devine encore la couche
+                    tint.Set(color);
+                    if (modelTints != null) foreach (var t in modelTints) t.Set(color);
                     break;
             }
         }

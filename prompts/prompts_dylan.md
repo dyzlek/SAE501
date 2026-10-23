@@ -13,6 +13,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 >
 > Suite (2 captures de la borne dans le jeu) : c'est moche et peu lisible, mais l'idée est là.
 
+### Tower defense : fléchettes, camouflage, difficulté
+> Les fléchettes buggent un peu en VR : corrige-les. Rends les vagues vraiment plus dures, ajoute les ballons camouflés que seuls certains singes voient (le Tireur, par exemple), et la Punaise vise trop loin. Corrige tout ça, et propose des idées d'améliorations : pour l'instant, les gens ne jouent pas au tower defense. Comment faire pour qu'ils y jouent ?
+
 ### Déplacement au stick
 > Ajoute aussi la capture du menu pause dans mon journal, et dans les options, ajoute la possibilité de se déplacer comme en ZQSD au casque.
 
