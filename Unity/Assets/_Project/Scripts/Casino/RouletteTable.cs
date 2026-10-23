@@ -16,7 +16,7 @@ namespace SAE
     // C'est l'hôte qui la fait tourner : chez un invité, chaque appui (couleur, jeton, lancer) est demandé à l'hôte,
     // la couleur et la mise reviennent par CoopGame (ApplyFromHost), et le lancer tiré par l'hôte est rejoué chez tout le
     // monde (SpinFromHost) : la même roue, le même numéro. Seul l'hôte paie la mise et les gains.
-    // La table de blackjack, à côté, se construit au lancement (BlackjackTable.CreateNear).
+    // La borne de blackjack,à côté, se construit au lancement (BlackjackTable.CreateNear).
     public class RouletteTable : MonoBehaviour
     {
         public static RouletteTable Instance { get; private set; }

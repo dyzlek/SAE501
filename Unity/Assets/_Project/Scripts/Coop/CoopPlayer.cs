@@ -154,7 +154,7 @@ namespace SAE
             Done(request);
         }
 
-        // Le casino : l'hôte appuie à la place de l'invité sur SA roulette (une seule table pour tous)
+        // La roulette : l'hôte appuie à la place de l'invité sur SA roulette (une seule table pour tous)
         [Rpc(SendTo.Server)]
         public void RouletteRpc(int request, RouletteOp op, RouletteColor color, float speed)
         {
@@ -170,14 +170,6 @@ namespace SAE
                     case RouletteOp.Clear: table.Clear(); break;
                     case RouletteOp.Spin: table.Launch(speed); break;
                 }
-            Done(request);
-        }
-
-        // Au blackjack, l'invité joue à sa place : celle de son numéro
-        [Rpc(SendTo.Server)]
-        public void BlackjackRpc(int request, BlackjackOp op)
-        {
-            if (BlackjackTable.Instance) BlackjackTable.Instance.Do(Number.Value, op);
             Done(request);
         }
 

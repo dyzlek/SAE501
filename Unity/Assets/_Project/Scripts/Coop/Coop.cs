@@ -323,11 +323,10 @@ namespace SAE
         public static void SendPlace(Vector2 pos, Monkey? held) =>
             Request(true, (p, n) => p.PlaceRpc(n, pos, held.HasValue, held?.type ?? default, held?.level ?? default));
 
-        // --- Le casino : une roulette et une table de blackjack pour tous, que l'hôte fait tourner ---
+        // --- Le casino : une roulette pour tous, que l'hôte fait tourner (le blackjack se joue chacun chez soi) ---
 
         public static void SendRoulette(RouletteOp op, RouletteColor color, float speed) =>
             Request(false, (p, n) => p.RouletteRpc(n, op, color, speed));
-        public static void SendBlackjack(BlackjackOp op) => Request(false, (p, n) => p.BlackjackRpc(n, op));
 
         // Hôte : la roue vient d'être lancée (par lui ou pour un invité) : tout le monde voit le même lancer
         public static void ShareRouletteSpin(int result, float speed, RouletteColor color, int bet)

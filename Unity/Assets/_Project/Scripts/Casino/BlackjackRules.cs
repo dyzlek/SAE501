@@ -1,20 +1,26 @@
 using System.Collections.Generic;
-using Unity.Collections;
 using UnityEngine;
 
 namespace SAE
 {
     public enum CardSuit { Pique, Coeur, Carreau, Trefle }
 
+    // La partie en cours : la mise, la donne, le tour du joueur, celui du croupier, puis le résultat
+    public enum BlackjackPhase { Betting, Dealing, Playing, Dealer, Results }
+
+    public enum BlackjackResult { None, Won, Blackjack, Push, Lost, Bust }
+
     // Les règles du blackjack, toutes au même endroit (comme RouletteRules) :
     //   - une carte tient dans un octet : couleur × 13 + rang (rang 1 = As, 11 = Valet, 12 = Dame, 13 = Roi) ;
     //   - les figures valent 10, l'As vaut 11, ou 1 si on dépasserait 21 (une main « souple ») ;
     //   - blackjack = 21 avec les 2 premières cartes : payé 3 pour 2 ; une main gagnée est payée 1 pour 1 ;
-    //   - le croupier tire jusqu'à 16 et reste à 17.
+    //   - le croupier tire jusqu'à 16 et reste à 17 ;
+    //   - on mise au moins MinBet bananes, au plus ce qu'il y a dans la bourse.
     public static class BlackjackRules
     {
         public const int Target = 21;
         public const int DealerStands = 17;
+        public const int MinBet = 5;
 
         public static byte Card(CardSuit suit, int rank) => (byte)((int)suit * 13 + rank - 1);
         public static CardSuit SuitOf(byte card) => (CardSuit)(card / 13);
@@ -31,7 +37,7 @@ namespace SAE
             int n => n.ToString(),
         };
 
-        public static int Total(FixedList32Bytes<byte> hand)
+        public static int Total(List<byte> hand)
         {
             int total = 0, aces = 0;
             foreach (var card in hand)
@@ -44,14 +50,14 @@ namespace SAE
             return total;
         }
 
-        public static bool IsBlackjack(FixedList32Bytes<byte> hand) => hand.Length == 2 && Total(hand) == Target;
+        public static bool IsBlackjack(List<byte> hand) => hand.Count == 2 && Total(hand) == Target;
 
         // Ce que rend une mise selon le résultat, mise comprise (0 : perdue)
-        public static int Payout(SeatStatus result, int bet) => result switch
+        public static int Payout(BlackjackResult result, int bet) => result switch
         {
-            SeatStatus.Blackjack => bet + bet * 3 / 2,
-            SeatStatus.Won => bet * 2,
-            SeatStatus.Push => bet,
+            BlackjackResult.Blackjack => bet + bet * 3 / 2,
+            BlackjackResult.Won => bet * 2,
+            BlackjackResult.Push => bet,
             _ => 0,
         };
 

@@ -8,6 +8,8 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 > Peux-tu faire un système de blackjack et de roulette comme au casino, façon « gamble with your friends » ?
 >
 > Suite : fais la roulette et mets tout dans une PR pour aujourd'hui. Bourse commune ; au blackjack, on joue contre un croupier comme dans « Gamble With Your Friends ».
+>
+> Suite : le blackjack, vraiment en solo, à la façon de « Gamble With Your Friends » pour le style (capture jointe : croupier derrière une arche, boutons DOUBLE / STAND / HIT / PLAY, terminal de mise avec pavé numérique et MIN / MAX).
 
 ### Coop : ce qui n'est pas partagé
 > Certaines choses ne sont pas encore partagées, comme les singes, les ballons, etc. (testé éditeur + casque : les ballons de la carte et du plateau du hub, les récolteurs, le bananier, le coffre).

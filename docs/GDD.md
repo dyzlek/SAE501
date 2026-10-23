@@ -247,11 +247,11 @@ Les sons s'entendent du hub comme de la carte : on sait qu'il faut y retourner. 
   - des bananes posées sur le tapis montrent la mise.
 ![La roulette : la roue européenne, le tapis des mises (une banane misée) et le pupitre des mises.](captures/gdd/roulette.png)
 
-- **Blackjack, à côté de la roulette :** contre un singe croupier, 4 places (une par joueur du coop) :
-  - on mise à sa place (+10, +100, RETIRER), puis DISTRIBUER ;
-  - CARTE pour tirer, RESTER pour s'arrêter ; au-dessus de 21, la main est perdue ;
-  - le croupier tire jusqu'à 16 et reste à 17 ; gagné ×2, blackjack (21 en 2 cartes) ×2,5, égalité = mise rendue.
-- **En coop, on joue au casino ensemble** (« gamble with your friends ») : une seule roulette et une seule table de blackjack pour tous, la bourse est commune. L'hôte tire les numéros et les cartes ; tout le monde voit le même lancer et les mêmes cartes (#171).
+- **Borne de blackjack, à côté de la roulette** (style « Gamble With Your Friends ») : une partie en solo contre un singe croupier à chapeau, sous une arche noire :
+  - on tape sa mise sur un terminal (pavé 0-9, 000, C ; mises rapides MIN, 1/4, 1/2, MAX de la bourse ; min 5) ;
+  - 4 gros boutons sur une console penchée : DOUBLER, RESTER, CARTE, JOUER ;
+  - au-dessus de 21, la main est perdue ; le croupier tire jusqu'à 16 et reste à 17 ; gagné ×2, blackjack (21 en 2 cartes) ×2,5, égalité = mise rendue.
+- **En coop** (« gamble with your friends ») : une seule roulette pour tous (l'hôte tire, tout le monde voit le même lancer) ; au blackjack, chacun joue sa partie à sa borne. La bourse est commune (#171).
 
 - **Cible de fléchettes, au mur de la cabane :** 3 fléchettes par manche, 5 à 50 points selon l'anneau, meilleur score affiché. C'est une pause ludique sans enjeu.
 
