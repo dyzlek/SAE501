@@ -13,6 +13,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 >
 > Suite (2 captures de la borne dans le jeu) : c'est moche et peu lisible, mais l'idée est là.
 
+### Retour en arrière sur le casino
+> Reviens en arrière : garde le niveau casino dans une branche, mais remets juste la roulette et le blackjack, et rapproche le tableau du classement.
+
 ### Coop : ce qui n'est pas partagé
 > Certaines choses ne sont pas encore partagées, comme les singes, les ballons, etc. (testé éditeur + casque : les ballons de la carte et du plateau du hub, les récolteurs, le bananier, le coffre).
 
