@@ -1,80 +1,74 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
+using System.Text;
 using System.Threading.Tasks;
-using Unity.Networking.Transport;
-using Unity.Networking.Transport.Relay;
+using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Relay;
-using Unity.Services.Relay.Models;
+using Unity.Services.Relay.Models;   // ToRelayServerData
 using UnityEngine;
 
 namespace SAE
 {
     public enum CoopRole { Solo, Host, Guest }
 
-    // Le coop, par Internet : en pleine partie, un joueur l'OUVRE EN COOP depuis la pause (casque ou PC) et choisit un
-    // mot de passe ; la partie reçoit un code à 6 caractères. Jusqu'à 3 autres la REJOIGNENT depuis le menu principal
-    // en tapant le code et le mot de passe, de n'importe quel réseau (casque ou PC).
+    // Les changements de la bibliothèque (GameState) qu'un invité demande à l'hôte
+    public enum InventoryOp : byte { Add, Take, Unlock, ClearBoard }
+
+    // Ce qu'un invité fait à la roulette (RouletteTable) : choisir la couleur, les jetons, lancer la roue
+    public enum RouletteOp : byte { Select, AddOne, AddTen, AddHundred, AllIn, Clear, Spin }
+
+    // Le coop, par Internet, avec Netcode for GameObjects (NGO), la solution réseau d'Unity.
+    // En pleine partie, un joueur l'OUVRE EN COOP depuis la pause et choisit un mot de passe ; la partie reçoit un code
+    // à 6 caractères. Jusqu'à 3 autres la REJOIGNENT depuis le menu principal avec le code et le mot de passe.
     //
-    // L'hôte fait tourner la vraie partie : vagues, ballons, tirs des singes, bourse, bibliothèque, singes posés.
-    // Un invité affiche ce que l'hôte lui envoie, et lui demande d'agir à sa place : « j'ai touché le ballon 42 »,
-    // « j'ai vendu une banane », « je pose ce singe ici ». Chacun garde son arc, sa bananeraie et sa sauvegarde.
+    // L'hôte fait tourner la vraie partie (vagues, ballons, tirs des singes, bourse, bibliothèque, singes posés).
+    // NGO s'occupe du reste :
+    //   - le NetworkManager relie les joueurs. L'hôte vérifie le mot de passe avant de laisser entrer (Approve) ;
+    //   - chaque joueur a son objet réseau, CoopPlayer : sa tête et ses mains, ses flèches, et ses demandes à l'hôte
+    //     (des RPC : « j'ai touché ce ballon », « j'ai vendu une banane », « je pose ce singe ici ») ;
+    //   - CoopGame garde l'état partagé (NetworkVariable) : l'hôte l'écrit, les invités le lisent ;
+    //   - chaque ballon a son double réseau, CoopBalloon, qui le fait apparaître et bouger chez les invités.
+    // Chacun garde son arc, sa bananeraie et sa sauvegarde.
     //
-    // Le réseau : Unity Relay, un serveur relais gratuit de Unity. Deux appareils sur des réseaux différents ne peuvent pas
-    // se joindre directement (box, pare-feu de l'IUT) ; ils se connectent tous les deux AU RELAIS, qui fait passer les
-    // paquets. Le code de la partie, c'est le « code de connexion » que le relais donne à l'hôte.
-    // On passe par WebSocket sécurisé (wss, port 443, comme un site web) : c'est ce qui passe le mieux les pare-feu.
-    // Nos messages restent les mêmes (CoopPacket) :
-    //   - ce qui change sans arrêt (têtes et mains, ballons, état) part en continu ;
-    //   - les demandes de l'invité sont numérotées et renvoyées tant que l'hôte n'a pas répondu « reçu » (Ack) :
-    //     aucune n'est perdue, aucune n'est faite deux fois, et elles sont faites dans l'ordre.
+    // Le réseau passe par Unity Relay, un serveur relais gratuit de Unity : deux appareils sur des réseaux différents
+    // ne peuvent pas se joindre directement (box, pare-feu de l'IUT), ils se connectent tous les deux AU RELAIS.
+    // Le code de la partie, c'est le « code de connexion » que le relais donne à l'hôte. On passe par WebSocket sécurisé
+    // (wss, port 443, comme un site web) : c'est ce qui passe le mieux les pare-feu.
+    //
+    // Les objets réseau sont des prefabs dans Resources/Coop, créés par le menu SAE > Coop > Créer les prefabs réseau.
     public class Coop : MonoBehaviour
     {
         public const int MaxGuests = 3;
-        const string Protocol = "wss";         // WebSocket sécurisé (voir plus haut)
-        const float PoseInterval = 0.05f;      // 20 fois par seconde
-        const float StateInterval = 0.2f;      // 5 fois par seconde
-        const float BalloonInterval = 1f / 15f;
-        const float ResendInterval = 0.15f;    // une demande sans réponse repart au bout de 0,15 s
+        const string Protocol = "wss";   // WebSocket sécurisé (voir plus haut)
 
         public static CoopRole Role { get; private set; }
         public static bool IsHost => Role == CoopRole.Host;
         public static bool IsGuest => Role == CoopRole.Guest;
         public static bool Busy { get; private set; }         // on attend le serveur de Unity (connexion, code)
-        public static bool Connected { get; private set; }    // invité : l'hôte a dit oui
+        public static bool Connected { get; private set; }    // invité : l'hôte l'a laissé entrer
         public static byte LocalId { get; private set; }      // 0 = l'hôte, 1 à 3 = les invités
         public static string Status { get; private set; } = "";
         public static string Code { get; private set; } = "";  // le code de la partie (6 caractères, donné par le relais)
         public static string Password { get; private set; } = "";
 
-        // Invité : le numéro de sa dernière demande qui change l'état (bourse, bibliothèque, singes posés).
-        // Tant que l'hôte ne l'a pas faite, on n'écoute pas son état : il nous ferait revenir en arrière une seconde.
+        // Invité : chaque demande à l'hôte a un numéro (1, 2, 3…). LastStateRequest = la dernière qui change l'état
+        // (bourse, bibliothèque, singes posés). L'invité la fait tout de suite chez lui ; tant que l'hôte ne l'a pas
+        // faite, on n'écoute pas son état (voir CoopGame) : il nous ferait revenir en arrière une seconde.
         public static int LastStateRequest { get; private set; }
+
+        // Invité : la dernière de nos demandes que l'hôte a faite (CoopGame la garde pour chaque joueur)
+        public static int DoneRequest => CoopGame.Instance ? CoopGame.Instance.DoneFor(LocalId) : 0;
 
         static Coop instance;
 
-        class Peer
-        {
-            public NetworkConnection connection;
-            public byte id;
-            public bool welcomed;     // il a donné le bon mot de passe
-            public int lastRequest;   // la dernière demande faite pour lui (elles arrivent dans l'ordre)
-        }
-
-        NetworkDriver driver;
-        NetworkPipeline pipeline;                       // découpe les gros paquets (l'état, 30 ballons) en morceaux
-        readonly List<Peer> peers = new List<Peer>();   // hôte : les invités
-        NetworkConnection host;                         // invité : la connexion à l'hôte (par le relais)
-        bool stateReceived;                             // invité : l'état de l'hôte a remplacé le nôtre
-
+        NetworkManager network;
+        UnityTransport transport;
+        GameObject gamePrefab, balloonPrefab;
+        bool stateReceived;   // invité : l'état de l'hôte a remplacé le nôtre
         int nextRequest = 1;
-        readonly List<(int number, byte[] packet)> pending = new List<(int, byte[])>();   // demandes pas encore reçues
-        float nextResend, nextPose, nextState, nextBalloons;
-
-        readonly Dictionary<byte, CoopAvatar> avatars = new Dictionary<byte, CoopAvatar>();
-        Arrow arrowPrefab;   // pour montrer les flèches des autres
+        Arrow arrowPrefab;    // pour montrer les flèches des autres
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetState()
@@ -96,16 +90,21 @@ namespace SAE
             Status = "Connexion au serveur de Unity…";
             try
             {
-                await SignIn();
-                var allocation = await RelayService.Instance.CreateAllocationAsync(MaxGuests);
-                string code = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
-                var relay = allocation.ToRelayServerData(Protocol);
-                Ensure().Open(ref relay, listen: true);
-                Role = CoopRole.Host;
-                LocalId = 0;
-                Code = code;
-                Password = password;
-                Status = "En attente d'un joueur…";
+                var i = Ensure();
+                if (i != null)
+                {
+                    await SignIn();
+                    var allocation = await RelayService.Instance.CreateAllocationAsync(MaxGuests);
+                    string code = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+                    i.transport.SetRelayServerData(allocation.ToRelayServerData(Protocol));
+                    Password = password;
+                    if (!i.network.StartHost()) throw new Exception("le NetworkManager n'a pas démarré");
+                    Role = CoopRole.Host;
+                    LocalId = 0;
+                    Code = code;
+                    Status = "En attente d'un joueur…";
+                    i.SpawnShared();
+                }
             }
             catch (Exception e) { Failed(e); }   // pas d'Internet, projet pas relié à Unity Cloud… : on le dit, le jeu continue en solo
             Busy = false;
@@ -119,15 +118,23 @@ namespace SAE
             Status = $"Recherche de la partie {code}…";
             try
             {
-                await SignIn();
-                var allocation = await RelayService.Instance.JoinAllocationAsync(code);
-                var relay = allocation.ToRelayServerData(Protocol);
-                Ensure().Open(ref relay, listen: false);
-                Role = CoopRole.Guest;
-                Connected = false;
-                Code = code;
-                Password = password;
-                Status = "Connexion à la partie…";
+                var i = Ensure();
+                if (i != null)
+                {
+                    await SignIn();
+                    var allocation = await RelayService.Instance.JoinAllocationAsync(code);
+                    i.transport.SetRelayServerData(allocation.ToRelayServerData(Protocol));
+                    // Le mot de passe part avec la demande de connexion : l'hôte le lit dans Approve
+                    i.network.NetworkConfig.ConnectionData = Encoding.UTF8.GetBytes(password);
+                    i.nextRequest = 1;
+                    LastStateRequest = 0;
+                    Code = code;
+                    Password = password;
+                    Connected = false;
+                    if (!i.network.StartClient()) throw new Exception("le NetworkManager n'a pas démarré");
+                    Role = CoopRole.Guest;
+                    Status = "Connexion à la partie…";
+                }
             }
             catch (RelayServiceException e) when (e.Reason == RelayExceptionReason.JoinCodeNotFound || e.Reason == RelayExceptionReason.InvalidArgument
                                                    || e.Reason == RelayExceptionReason.InvalidRequest || e.Reason == RelayExceptionReason.EntityNotFound)
@@ -138,364 +145,217 @@ namespace SAE
             Busy = false;
         }
 
-        // Le relais de Unity demande d'être identifié : un compte anonyme, créé tout seul la première fois
+        // Le relais de Unity demande d'être identifié : un compte anonyme, créé tout seul la première fois.
+        // Dans l'éditeur, chaque Unity ouvert (ou joueur de Multiplayer Play Mode) prend son propre compte : sinon, sur un
+        // même PC, l'hôte et l'invité seraient le même joueur pour le relais (le profil est un nom de dossier : ≤ 30 caractères).
         static async Task SignIn()
         {
-            if (UnityServices.State != ServicesInitializationState.Initialized) await UnityServices.InitializeAsync();
+            var options = new InitializationOptions();
+            if (Application.isEditor) options.SetProfile("editeur-" + System.Diagnostics.Process.GetCurrentProcess().Id);
+            if (UnityServices.State != ServicesInitializationState.Initialized) await UnityServices.InitializeAsync(options);
             if (!AuthenticationService.Instance.IsSignedIn) await AuthenticationService.Instance.SignInAnonymouslyAsync();
         }
 
         static void Failed(Exception e)
         {
-            Debug.LogWarning("Coop : " + e.Message);
-            Status = "Pas d'Internet, ou le serveur de Unity ne répond pas";
+            Debug.LogWarning("Coop : " + e);
+            const string reason = "Pas d'Internet, ou le serveur de Unity ne répond pas";
+            if (Role != CoopRole.Solo) { Stop(reason); return; }
+            if (instance && instance.network.IsListening) instance.network.Shutdown();   // démarré à moitié : on coupe
+            Status = reason;
         }
 
-        public static void Leave() => Leave("");
+        public static void Leave() => Stop("");
 
-        static void Leave(string reason)
+        // On quitte (ou l'hôte est parti) : NGO coupe la connexion et efface tous les objets réseau
+        // (les autres joueurs, les doubles des ballons). Les vrais ballons de l'hôte restent : la partie continue en solo.
+        static void Stop(string reason)
         {
             if (Role == CoopRole.Solo) return;
             var i = instance;
-            var bye = CoopPacket.Bytes(CoopPacket.Begin(CoopMsg.Bye));
-            if (IsHost) foreach (var p in i.peers) i.Send(bye, p.connection);
-            else i.Send(bye, i.host);
-            i.driver.ScheduleUpdate().Complete();   // le « au revoir » part avant qu'on coupe
-
             bool reload = IsGuest && i.stateReceived;
-            i.driver.Dispose();
-            i.peers.Clear();
-            i.host = default;
-            i.pending.Clear();
-            i.stateReceived = false;
-            foreach (var a in i.avatars.Values) if (a) Destroy(a.gameObject);
-            i.avatars.Clear();
-            CoopBalloons.Clear();
+            // Solo AVANT de couper : si NGO nous prévient de la coupure (OnDisconnect), on ne repasse pas ici
             Role = CoopRole.Solo;
             Connected = false;
+            LocalId = 0;
             Status = reason;
+            i.stateReceived = false;
+            i.network.Shutdown();
             // L'invité jouait avec l'état de l'hôte : il retrouve sa propre partie, telle qu'il l'avait sauvegardée
             if (reload) SaveGame.ReloadFromDisk();
         }
 
+        // Le NetworkManager, créé la première fois. Renvoie null (avec un message) si les prefabs réseau manquent.
         static Coop Ensure()
         {
-            if (!instance)
+            if (instance) return instance;
+
+            var player = Resources.Load<GameObject>("Coop/CoopJoueur");
+            var game = Resources.Load<GameObject>("Coop/CoopPartie");
+            var balloon = Resources.Load<GameObject>("Coop/CoopBallon");
+            if (!player || !game || !balloon)
             {
-                var go = new GameObject("Coop");
-                DontDestroyOnLoad(go);   // garde la connexion quand une scène se recharge (nouvelle partie)
-                instance = go.AddComponent<Coop>();
+                Status = "Prefabs réseau manquants : menu SAE > Coop > Créer les prefabs réseau";
+                return null;
             }
-            return instance;
+
+            var go = new GameObject("Coop");
+            DontDestroyOnLoad(go);   // garde la connexion quand une scène se recharge (nouvelle partie)
+            go.SetActive(false);     // le NetworkManager lit sa configuration en s'allumant : on la remplit d'abord
+            var i = go.AddComponent<Coop>();
+            i.gamePrefab = game;
+            i.balloonPrefab = balloon;
+            i.transport = go.AddComponent<UnityTransport>();
+            i.transport.UseWebSockets = true;   // wss : voir plus haut
+            i.network = go.AddComponent<NetworkManager>();
+            i.network.NetworkConfig = new NetworkConfig
+            {
+                NetworkTransport = i.transport,
+                PlayerPrefab = player,          // NGO en crée un par joueur qui entre (l'hôte compris)
+                ConnectionApproval = true,      // l'hôte vérifie le mot de passe (Approve)
+                EnableSceneManagement = false,  // chacun charge ses scènes : on change de niveau sans attendre les autres
+            };
+            i.network.NetworkConfig.Prefabs.Add(new NetworkPrefab { Prefab = game });
+            i.network.NetworkConfig.Prefabs.Add(new NetworkPrefab { Prefab = balloon });
+            i.network.ConnectionApprovalCallback = i.Approve;
+            i.network.OnClientDisconnectCallback += i.OnDisconnect;
+            go.SetActive(true);
+            instance = i;
+            return i;
         }
 
-        // Le « driver » de Unity Transport : il parle au relais. L'hôte attend les invités (Listen), l'invité se connecte.
-        void Open(ref RelayServerData relay, bool listen)
+        // Hôte : la partie partagée et le double de chaque ballon déjà sur la carte (on peut ouvrir en pleine vague)
+        void SpawnShared()
         {
-            var settings = new NetworkSettings();
-            settings.WithRelayParameters(ref relay);
-            driver = NetworkDriver.Create(new WebSocketNetworkInterface(), settings);
-            pipeline = driver.CreatePipeline(typeof(FragmentationPipelineStage));
-            if (listen)
-            {
-                driver.Bind(NetworkEndpoint.AnyIpv4);
-                driver.Listen();
-            }
-            else host = driver.Connect();
-            nextRequest = 1;
-            LastStateRequest = 0;
+            Instantiate(gamePrefab).GetComponent<NetworkObject>().Spawn();
+            foreach (var b in Balloon.All) ShareBalloon(b);
+        }
+
+        // Hôte : un joueur frappe à la porte. Payload = le mot de passe qu'il a tapé.
+        void Approve(NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse response)
+        {
+            bool self = request.ClientNetworkId == NetworkManager.ServerClientId;
+            bool full = network.ConnectedClientsIds.Count > MaxGuests;
+            bool good = self || Encoding.UTF8.GetString(request.Payload) == Password;
+            response.Approved = good && !full;
+            response.CreatePlayerObject = response.Approved;
+            response.Reason = full ? "Partie pleine" : good ? "" : "Mot de passe incorrect";   // l'invité le lit dans OnDisconnect
+            if (response.Approved && !self) Sounds.Play(Sounds.Bouton);
+        }
+
+        // NGO : une connexion s'est coupée. Chez l'hôte, c'est un invité qui part : NGO efface son objet tout seul.
+        // Chez l'invité, c'est la sienne : refusé, hôte parti, ou Internet coupé.
+        void OnDisconnect(ulong clientId)
+        {
+            if (!IsGuest) return;
+            string reason = network.DisconnectReason;
+            if (string.IsNullOrEmpty(reason)) reason = Connected ? "L'hôte a quitté la partie" : "Impossible de joindre la partie";
+            Stop(reason);
         }
 
         void OnApplicationQuit() => Leave();
-        void OnDestroy() { if (driver.IsCreated) driver.Dispose(); }
 
-        // --- Chaque image : lire ce qui est arrivé, envoyer ce qui doit partir ---
+        // Le panneau COOP dit où on en est, avec le nombre de ballons envoyés ou reçus (pratique pour vérifier au casque)
+        // (le texte n'est refait que si un nombre change : pas de nouvelle chaîne à chaque image)
+        int shownPlayers = -1, shownBalloons = -1;
 
         void Update()
         {
-            if (Role == CoopRole.Solo) return;
-            driver.ScheduleUpdate().Complete();   // le driver envoie et reçoit (il travaille en tâche de fond, on l'attend)
-            Receive();
-            if (Role == CoopRole.Solo) return;    // on vient de quitter (l'hôte est parti)
-            float now = Time.unscaledTime;        // le menu arrête le jeu (timeScale = 0), pas le réseau
-
-            if (now >= nextPose) { nextPose = now + PoseInterval; SendPose(); }
-
-            if (IsHost)
-            {
-                if (now >= nextState)
-                {
-                    nextState = now + StateInterval;
-                    foreach (var p in peers) if (p.welcomed) Send(CoopState.Packet(p.lastRequest), p.connection);
-                }
-                if (now >= nextBalloons)
-                {
-                    nextBalloons = now + BalloonInterval;
-                    foreach (var p in peers)
-                        if (p.welcomed)
-                            foreach (var packet in CoopBalloons.Packets(p.lastRequest)) Send(packet, p.connection);
-                }
-                int players = peers.FindAll(p => p.welcomed).Count + 1;
-                Status = players == 1 ? "En attente d'un joueur…" : $"{players} joueurs dans la partie";
-            }
-            else
-            {
-                if (pending.Count > 0 && now >= nextResend)
-                {
-                    nextResend = now + ResendInterval;
-                    foreach (var r in pending) Send(r.packet, host);
-                }
-                CoopBalloons.Tick();
-            }
+            if (Role == CoopRole.Solo || (IsGuest && !Connected)) { shownPlayers = -1; return; }
+            int players = IsHost ? network.ConnectedClientsIds.Count : 0;   // la liste des joueurs n'existe que chez l'hôte
+            int balloons = CoopBalloon.Count;
+            if (players == shownPlayers && balloons == shownBalloons) return;
+            shownPlayers = players;
+            shownBalloons = balloons;
+            if (IsGuest) Status = $"Connecté · tu es le joueur {LocalId + 1} · {balloons} ballons reçus";
+            else Status = players <= 1 ? "En attente d'un joueur…" : $"{players} joueurs · {balloons} ballons partagés";
         }
 
-        void Receive()
+        // Appelé par CoopPlayer quand notre propre joueur réseau apparaît : l'hôte nous a laissés entrer
+        public static void Joined(byte number)
         {
-            if (IsHost)
-            {
-                NetworkConnection c;
-                while ((c = driver.Accept()) != default)   // un nouveau joueur arrive : il doit encore dire bonjour
-                    peers.Add(new Peer { connection = c, id = FreeId() });
-            }
-
-            NetworkEvent.Type type;
-            while (Role != CoopRole.Solo && (type = driver.PopEvent(out var connection, out var reader)) != NetworkEvent.Type.Empty)
-            {
-                switch (type)
-                {
-                    case NetworkEvent.Type.Connect:   // invité : on est relié à l'hôte, on donne le mot de passe
-                        var hello = CoopPacket.Begin(CoopMsg.Hello);
-                        hello.Write(Password);
-                        Send(CoopPacket.Bytes(hello), host);
-                        break;
-                    case NetworkEvent.Type.Disconnect:
-                        if (IsHost) RemovePeer(peers.Find(p => p.connection == connection));
-                        else Leave(Connected ? "Connexion perdue avec l'hôte" : "Impossible de joindre la partie");
-                        break;
-                    case NetworkEvent.Type.Data:
-                        var data = new byte[reader.Length];
-                        reader.ReadBytes(data);
-                        if (!CoopPacket.Open(data, out var r, out var msg)) break;
-                        try
-                        {
-                            if (IsHost) HandleAsHost(msg, r, connection, data);
-                            else HandleAsGuest(msg, r);
-                        }
-                        catch (EndOfStreamException) { }   // paquet trop court (autre version du jeu) : ignoré
-                        break;
-                }
-            }
+            LocalId = number;
+            if (!IsGuest) return;
+            Connected = true;
+            Status = $"Connecté · tu es le joueur {number + 1}";
+            Tutorial.RestoreDone();   // l'invité rejoint une partie déjà commencée : pas de tutoriel
+            Sounds.Play(Sounds.Bouton);
         }
 
-        // --- L'hôte ---
+        // Appelé par CoopGame : l'état de l'hôte a remplacé le nôtre (en quittant, on rechargera notre sauvegarde)
+        public static void StateApplied() { if (instance) instance.stateReceived = true; }
 
-        void HandleAsHost(CoopMsg type, BinaryReader r, NetworkConnection from, byte[] data)
+        // --- Les ballons ---
+
+        // Hôte : un ballon vient d'apparaître (Balloon.Start), on lui donne son double réseau
+        public static void ShareBalloon(Balloon b)
         {
-            var peer = peers.Find(p => p.connection == from);
-            if (peer == null) return;
-
-            if (type == CoopMsg.Hello)
-            {
-                if (r.ReadString() != Password) { Refuse(peer, "Mot de passe incorrect"); return; }
-                peer.welcomed = true;
-                var welcome = CoopPacket.Begin(CoopMsg.Welcome);
-                welcome.Write(peer.id);
-                Send(CoopPacket.Bytes(welcome), from);
-                Sounds.Play(Sounds.Bouton);
-                return;
-            }
-            if (!peer.welcomed) return;   // pas encore le bon mot de passe : on n'écoute rien d'autre
-
-            switch (type)
-            {
-                case CoopMsg.Bye:
-                    RemovePeer(peer);
-                    break;
-                case CoopMsg.Pose:
-                    ReadPose(r);
-                    Relay(data, peer);   // les autres invités le voient aussi
-                    break;
-                case CoopMsg.Shot:
-                    ReadShot(r);
-                    Relay(data, peer);
-                    break;
-                case CoopMsg.Request:
-                    int number = r.ReadInt32();
-                    if (number == peer.lastRequest + 1)   // la suivante : on la fait (une déjà faite ou en avance est ignorée)
-                    {
-                        CoopHost.Handle((CoopRequest)r.ReadByte(), r);
-                        peer.lastRequest = number;
-                    }
-                    var ack = CoopPacket.Begin(CoopMsg.Ack);
-                    ack.Write(peer.lastRequest);
-                    Send(CoopPacket.Bytes(ack), from);
-                    break;
-            }
+            if (!IsHost || b.Proxy) return;
+            var proxy = Instantiate(instance.balloonPrefab).GetComponent<CoopBalloon>();
+            proxy.Follow(b);
+            proxy.NetworkObject.Spawn();
         }
 
-        // Non (mauvais mot de passe) : on le lui dit, puis on coupe sa connexion
-        void Refuse(Peer peer, string reason)
-        {
-            var w = CoopPacket.Begin(CoopMsg.Refused);
-            w.Write(reason);
-            Send(CoopPacket.Bytes(w), peer.connection);
-            driver.ScheduleUpdate().Complete();
-            driver.Disconnect(peer.connection);
-            peers.Remove(peer);
-        }
+        // --- Les demandes de l'invité à l'hôte (RPC de CoopPlayer) ---
 
-        byte FreeId()
+        // Donne un numéro à la demande et l'envoie. Renvoie son numéro (le ballon touché le garde : Balloon.ApplyHostLayers).
+        static int Request(bool changesState, Action<CoopPlayer, int> send)
         {
-            for (byte id = 1; ; id++)
-                if (!peers.Exists(p => p.id == id)) return id;
-        }
-
-        void RemovePeer(Peer p)
-        {
-            if (p == null) return;
-            if (avatars.TryGetValue(p.id, out var a) && a) Destroy(a.gameObject);
-            avatars.Remove(p.id);
-            peers.Remove(p);
-        }
-
-        void Relay(byte[] data, Peer except)
-        {
-            foreach (var p in peers) if (p != except && p.welcomed) Send(data, p.connection);
-        }
-
-        // --- L'invité ---
-
-        void HandleAsGuest(CoopMsg type, BinaryReader r)
-        {
-            switch (type)
-            {
-                case CoopMsg.Refused: Leave(r.ReadString()); break;
-                case CoopMsg.Welcome:
-                    LocalId = r.ReadByte();
-                    Connected = true;
-                    Status = $"Connecté · tu es le joueur {LocalId + 1}";
-                    Tutorial.RestoreDone();   // l'invité rejoint une partie déjà commencée : pas de tutoriel
-                    Sounds.Play(Sounds.Bouton);
-                    break;
-                case CoopMsg.Bye: Leave("L'hôte a quitté la partie"); break;
-                case CoopMsg.Pose: ReadPose(r); break;
-                case CoopMsg.Shot: ReadShot(r); break;
-                case CoopMsg.State: CoopState.Read(r); stateReceived = true; break;
-                case CoopMsg.Balloons: CoopBalloons.Read(r); break;
-                case CoopMsg.Ack:
-                    int done = r.ReadInt32();
-                    pending.RemoveAll(p => p.number <= done);
-                    break;
-            }
-        }
-
-        // Une demande à l'hôte. Renvoie son numéro (le ballon touché le garde : voir Balloon.ApplyRemote).
-        static int Request(CoopRequest kind, bool changesState, Action<BinaryWriter> write)
-        {
-            if (!IsGuest || !Connected) return 0;
-            var i = instance;
-            int number = i.nextRequest++;
-            var w = CoopPacket.Begin(CoopMsg.Request);
-            w.Write(number);
-            w.Write((byte)kind);
-            write?.Invoke(w);
-            var packet = CoopPacket.Bytes(w);
-            i.pending.Add((number, packet));
-            i.Send(packet, i.host);
+            if (!IsGuest || !Connected || !CoopPlayer.Local) return 0;
+            int number = instance.nextRequest++;
             if (changesState) LastStateRequest = number;
+            send(CoopPlayer.Local, number);
             return number;
         }
 
-        public static int SendHit(int balloon, int pierce) => Request(CoopRequest.Hit, false, w => { w.Write(balloon); w.Write(pierce); });
-        public static void SendSlow(int balloon, float factor, float seconds) =>
-            Request(CoopRequest.Slow, false, w => { w.Write(balloon); w.Write(factor); w.Write(seconds); });
-        public static void SendEarn(int amount, int stakeBack) => Request(CoopRequest.Earn, true, w => { w.Write(amount); w.Write(stakeBack); });
-        public static void SendSpend(int amount) => Request(CoopRequest.Spend, true, w => w.Write(amount));
-        public static void SendInventory(InventoryOp op, Monkey m) =>
-            Request(CoopRequest.Inventory, true, w => { w.Write((byte)op); w.Write((byte)m.type); w.Write((byte)m.level); });
-        public static void SendLaunch() => Request(CoopRequest.Launch, false, null);
+        public static int SendHit(CoopBalloon balloon, int pierce) =>
+            balloon ? Request(false, (p, n) => p.HitRpc(n, balloon, pierce)) : 0;
+        public static void SendSlow(CoopBalloon balloon, float factor, float seconds)
+        {
+            if (balloon) Request(false, (p, n) => p.SlowRpc(n, balloon, factor, seconds));
+        }
+        public static void SendEarn(int amount, int stakeBack) => Request(true, (p, n) => p.EarnRpc(n, amount, stakeBack));
+        public static void SendSpend(int amount) => Request(true, (p, n) => p.SpendRpc(n, amount));
+        public static void SendInventory(InventoryOp op, Monkey m) => Request(true, (p, n) => p.InventoryRpc(n, op, m.type, m.level));
+        public static void SendLaunch() => Request(false, (p, n) => p.LaunchRpc(n));
 
         // Poser, fusionner ou reprendre un singe : l'hôte refait la même chose avec le singe que l'invité tient
-        public static void SendPlace(Vector2 pos, Monkey? held) => Request(CoopRequest.Place, true, w =>
-        {
-            w.Write(pos.x);
-            w.Write(pos.y);
-            w.Write(held.HasValue);
-            w.Write((byte)(held?.type ?? 0));
-            w.Write((byte)(held?.level ?? 0));
-        });
+        public static void SendPlace(Vector2 pos, Monkey? held) =>
+            Request(true, (p, n) => p.PlaceRpc(n, pos, held.HasValue, held?.type ?? default, held?.level ?? default));
 
-        // --- Les joueurs : tête, mains, flèches ---
+        // --- Le casino : une roulette pour tous, que l'hôte fait tourner (le blackjack se joue chacun chez soi) ---
 
-        void SendPose()
+        public static void SendRoulette(RouletteOp op, RouletteColor color, float speed) =>
+            Request(false, (p, n) => p.RouletteRpc(n, op, color, speed));
+
+        // Hôte : la roue vient d'être lancée (par lui ou pour un invité) : tout le monde voit le même lancer
+        public static void ShareRouletteSpin(int result, float speed, RouletteColor color, int bet)
         {
-            var rig = PlayerRig.Local;
-            if (!rig || (IsGuest && !Connected)) return;
-            var w = CoopPacket.Begin(CoopMsg.Pose);
-            w.Write(LocalId);
-            w.Write((byte)Levels.Current);
-            w.Write(rig.IsVR);
-            w.Write(rig.head.position); w.Write(rig.head.rotation);
-            w.Write(rig.leftHand.position); w.Write(rig.leftHand.rotation);
-            w.Write(rig.rightHand.position); w.Write(rig.rightHand.rotation);
-            SendToOthers(CoopPacket.Bytes(w));
+            if (IsHost && CoopGame.Instance) CoopGame.Instance.RouletteSpinRpc(result, speed, color, bet);
         }
 
-        void ReadPose(BinaryReader r)
-        {
-            byte id = r.ReadByte();
-            if (id == LocalId) return;
-            var level = (Level)r.ReadByte();
-            bool vr = r.ReadBoolean();
-            var hp = r.ReadVector3(); var hr = r.ReadQuaternion();
-            var lp = r.ReadVector3(); var lr = r.ReadQuaternion();
-            var rp = r.ReadVector3(); var rr = r.ReadQuaternion();
-            if (!avatars.TryGetValue(id, out var avatar) || !avatar)
-                avatars[id] = avatar = CoopAvatar.Create(id, transform);
-            avatar.SetPose(level, vr, hp, hr, lp, lr, rp, rr);
-        }
+        // --- Les flèches ---
 
         // Une flèche vient de partir (Arrow.Launch) : les autres la voient voler
         public static void SendShot(Vector3 from, Vector3 velocity)
         {
-            if (Role == CoopRole.Solo || (IsGuest && !Connected)) return;
-            var w = CoopPacket.Begin(CoopMsg.Shot);
-            w.Write(LocalId);
-            w.Write(from);
-            w.Write(velocity);
-            instance.SendToOthers(CoopPacket.Bytes(w));
+            if (Role == CoopRole.Solo || (IsGuest && !Connected) || !CoopPlayer.Local) return;
+            CoopPlayer.Local.ShotRpc(from, velocity);
         }
 
-        void ReadShot(BinaryReader r)
+        // La flèche d'un autre joueur : seulement pour la voir, c'est chez le tireur qu'elle perce les ballons
+        public static void ShowShot(Vector3 from, Vector3 velocity)
         {
-            r.ReadByte();   // le tireur (pas utile pour l'instant)
-            var from = r.ReadVector3();
-            var velocity = r.ReadVector3();
-            if (!arrowPrefab)
+            if (!instance) return;
+            if (!instance.arrowPrefab)
             {
                 var bow = FindAnyObjectByType<Bow>(FindObjectsInactive.Include);
-                if (bow) arrowPrefab = bow.arrowPrefab;
+                if (bow) instance.arrowPrefab = bow.arrowPrefab;
             }
-            if (!arrowPrefab) return;
-            var arrow = Instantiate(arrowPrefab, from, Quaternion.LookRotation(velocity));
-            arrow.visualOnly = true;   // seulement pour la voir : c'est chez le tireur qu'elle perce les ballons
+            if (!instance.arrowPrefab) return;
+            var arrow = Instantiate(instance.arrowPrefab, from, Quaternion.LookRotation(velocity));
+            arrow.visualOnly = true;
             arrow.Launch(velocity);
-        }
-
-        // --- Envoyer ---
-
-        void SendToOthers(byte[] packet)
-        {
-            if (IsHost) { foreach (var p in peers) if (p.welcomed) Send(packet, p.connection); }
-            else Send(packet, host);
-        }
-
-        void Send(byte[] packet, NetworkConnection to)
-        {
-            if (!driver.IsCreated || driver.GetConnectionState(to) != NetworkConnection.State.Connected) return;
-            if (driver.BeginSend(pipeline, to, out var writer) != 0) return;   // file d'envoi pleine : le paquet suivant repartira
-            writer.WriteBytes(packet);
-            driver.EndSend(writer);
         }
     }
 }

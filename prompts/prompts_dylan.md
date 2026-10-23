@@ -2,7 +2,29 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Ven. 23 oct. 2026
+
+### Casino à plusieurs
+> Peux-tu faire un système de blackjack et de roulette comme au casino, façon « gamble with your friends » ?
+>
+> Suite : fais la roulette et mets tout dans une PR pour aujourd'hui. Bourse commune ; au blackjack, on joue contre un croupier comme dans « Gamble With Your Friends ».
+>
+> Suite : le blackjack, vraiment en solo, à la façon de « Gamble With Your Friends » pour le style (capture jointe : croupier derrière une arche, boutons DOUBLE / STAND / HIT / PLAY, terminal de mise avec pavé numérique et MIN / MAX).
+>
+> Suite (2 captures de la borne dans le jeu) : c'est moche et peu lisible, mais l'idée est là.
+
+### Retour en arrière sur le casino
+> Reviens en arrière : garde le niveau casino dans une branche, mais remets juste la roulette et le blackjack, et rapproche le tableau du classement.
+
+### Coop : ce qui n'est pas partagé
+> Certaines choses ne sont pas encore partagées, comme les singes, les ballons, etc. (testé éditeur + casque : les ballons de la carte et du plateau du hub, les récolteurs, le bananier, le coffre).
+
 ## Jeu. 22 oct. 2026
+
+### Coop sur Netcode for GameObjects
+> J'aimerais avoir un vrai système coop dans mon jeu : tout refaire avec Netcode for GameObjects (le test à deux plante).
+>
+> Suite : lance la réécriture sur une nouvelle branche, sans toucher à mes scènes non commitées.
 
 ### Coop en réseau
 > Dans une nouvelle branche, fais un système coop : entre deux casques, et entre un PC et un casque.
@@ -12,6 +34,8 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 > Suite : le coop s'ouvre depuis une partie déjà lancée, et dans le menu principal on rejoint avec un code et un mot de passe.
 >
 > Suite : je veux pouvoir rejoindre par Internet aussi, depuis un autre réseau.
+>
+> Suite : fais une PR pour le merge sur main. Peut-on jouer entre différents Unity, sans faire de build (le build ne marche pas) ?
 
 ### Branches de Maxens
 > Fusionne les deux branches de Maxens dans main, puis mets main sur mon Unity.

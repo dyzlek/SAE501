@@ -247,6 +247,12 @@ Les sons s'entendent du hub comme de la carte : on sait qu'il faut y retourner. 
   - des bananes posées sur le tapis montrent la mise.
 ![La roulette : la roue européenne, le tapis des mises (une banane misée) et le pupitre des mises.](captures/gdd/roulette.png)
 
+- **Borne de blackjack, à côté de la roulette** (style « Gamble With Your Friends ») : une partie en solo contre un singe croupier à chapeau, sous une arche noire :
+  - on tape sa mise sur un terminal (pavé 0-9, 000, C ; mises rapides MIN, 1/4, 1/2, MAX de la bourse ; min 5) ;
+  - 4 gros boutons sur une console penchée : DOUBLER, RESTER, CARTE, JOUER ;
+  - au-dessus de 21, la main est perdue ; le croupier tire jusqu'à 16 et reste à 17 ; gagné ×2, blackjack (21 en 2 cartes) ×2,5, égalité = mise rendue.
+- **En coop** (« gamble with your friends ») : une seule roulette pour tous (l'hôte tire, tout le monde voit le même lancer) ; au blackjack, chacun joue sa partie à sa borne. La bourse est commune (#171).
+
 - **Cible de fléchettes, au mur de la cabane :** 3 fléchettes par manche, 5 à 50 points selon l'anneau, meilleur score affiché. C'est une pause ludique sans enjeu.
 
 ### 7.10 Économie
@@ -404,8 +410,9 @@ _Chaque action a maintenant sa vibration, avec un motif différent pour la recon
 | | Boss qui se divise, ballons camouflés, combo de vagues parfaites, annonce des vagues spéciales ⏳ | Brouillard, nuit, pluie sur certaines vagues | |
 | | Sauvegarde automatique de la partie sur le casque (reprendre où on en était) ⏳ | Classement en ligne (bonus : serveur PHP + MySQL de l’IUT, sans multijoueur) ⏳ | |
 | | Menu principal : une scène vivante (singes animés, ballons), CONTINUER / NOUVELLE PARTIE / OPTIONS, retour au menu en jeu (bouton Menu, Échap) ⏳ (#158) | | |
-| | Bombes à lancer, pluie de flèches de Quincy, vibrations par action ⏳ | Classement gardé entre deux lancements ; **coop par Internet** (deux casques, ou casque + PC ; ouvert depuis la pause avec un mot de passe, rejoint depuis le menu avec le code de la partie ; serveur relais Unity Relay) ⏳ (#166) | |
+| | Bombes à lancer, pluie de flèches de Quincy, vibrations par action ⏳ | Classement gardé entre deux lancements ; **coop par Internet** (deux casques, ou casque + PC ; ouvert depuis la pause avec un mot de passe, rejoint depuis le menu avec le code de la partie ; serveur relais Unity Relay, réseau avec Netcode for GameObjects) ⏳ (#166, #170) | |
 | | Bananes dorées, nouvelles améliorations de l'arc, mur des records, trophées, classement local ⏳ | | |
+| | | Casino à plusieurs : roulette partagée et blackjack contre un croupier ⏳ (#171) | |
 
 _✅ = dans le jeu (à valider au casque) · ⏳ = à faire en semaine 2 (détail : [OBJECTIFS_S2.md](OBJECTIFS_S2.md))._
 
