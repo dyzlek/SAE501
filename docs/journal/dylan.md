@@ -3,7 +3,11 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Ven. 23 oct. 2026
-**Ce que j'ai fait :** premier test du coop sur Netcode (éditeur + casque) ; casino à plusieurs.
+**Ce que j'ai fait :** premier test du coop sur Netcode (éditeur + casque) ; casino à plusieurs : la borne de blackjack (style « Gamble With Your Friends ») et le classement rapproché sur la terrasse, testés dans Unity.
+
+| | |
+|---|---|
+| ![Le classement, rapproché sur la terrasse de la bananeraie](../captures/classement-terrasse.png) | ![La borne de blackjack : le croupier singe sous son arche, la console et le terminal de mise](../captures/blackjack-borne.webp) |
 
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
