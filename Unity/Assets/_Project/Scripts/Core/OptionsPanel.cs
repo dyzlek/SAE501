@@ -13,7 +13,7 @@ namespace SAE
         static readonly Color Key = new Color(0.45f, 0.32f, 0.18f);
         static readonly Color Green = new Color(0.3f, 0.75f, 0.35f);
 
-        TextMesh music, sound, haptics;
+        TextMesh music, sound, haptics, move;
 
         // Construit le panneau sous parent, centré en localPos (1,4 × 1 m), et le renvoie (caché)
         public static OptionsPanel Build(Transform parent, Vector3 localPos, System.Action onBack)
@@ -23,8 +23,8 @@ namespace SAE
             root.localPosition = localPos;
             var panel = root.gameObject.AddComponent<OptionsPanel>();
 
-            Visuals.Box("Cadre", root, Vector3.zero, new Vector3(1.5f, 1.05f, 0.05f), Wood);
-            Visuals.Box("Ardoise", root, new Vector3(0f, 0f, -0.03f), new Vector3(1.4f, 0.95f, 0.02f), Slate);
+            Visuals.Box("Cadre", root, new Vector3(0f, -0.09f, 0f), new Vector3(1.5f, 1.23f, 0.05f), Wood);
+            Visuals.Box("Ardoise", root, new Vector3(0f, -0.09f, -0.03f), new Vector3(1.4f, 1.13f, 0.02f), Slate);
             Visuals.Text(root, "OPTIONS", new Vector3(0f, 0.36f, -0.05f), 0.11f, Gold, title: true);
 
             panel.music = panel.Row(root, "MUSIQUE", 0.16f, () => Options.Music--, () => Options.Music++);
@@ -32,7 +32,11 @@ namespace SAE
             Visuals.Text(root, "VIBRATIONS", new Vector3(-0.38f, -0.2f, -0.05f), 0.06f, Color.white, title: true);
             panel.haptics = WorldButton.Create(root, "", new Vector3(0.35f, -0.2f, -0.06f), new Vector2(0.36f, 0.12f), Key,
                 () => Options.Vibrations = !Options.Vibrations, 0.06f);
-            WorldButton.Create(root, "RETOUR", new Vector3(0f, -0.38f, -0.06f), new Vector2(0.45f, 0.12f), Green, onBack);
+            // Au casque : téléportation (par défaut, le plus confortable) ou marche au stick gauche (comme ZQSD au PC)
+            Visuals.Text(root, "DÉPLACEMENT", new Vector3(-0.38f, -0.38f, -0.05f), 0.06f, Color.white, title: true);
+            panel.move = WorldButton.Create(root, "", new Vector3(0.35f, -0.38f, -0.06f), new Vector2(0.36f, 0.12f), Key,
+                () => Options.StickMove = !Options.StickMove, 0.05f);
+            WorldButton.Create(root, "RETOUR", new Vector3(0f, -0.56f, -0.06f), new Vector2(0.45f, 0.12f), Green, onBack);
 
             panel.Refresh();
             root.gameObject.SetActive(false);
@@ -57,6 +61,7 @@ namespace SAE
             music.text = $"{Options.Music} / {Options.Steps}";
             sound.text = $"{Options.Sound} / {Options.Steps}";
             haptics.text = Options.Vibrations ? "OUI" : "NON";
+            move.text = Options.StickMove ? "STICK" : "TÉLÉPORT";
         }
     }
 }

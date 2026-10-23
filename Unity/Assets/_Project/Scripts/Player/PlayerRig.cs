@@ -2,6 +2,7 @@ using System.Collections;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit.Inputs.Haptics;
+using UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets;
 
 namespace SAE
 {
@@ -37,8 +38,20 @@ namespace SAE
         void OnEnable()
         {
             Local = this;
+            Options.Changed += ApplyMoveOption;
+            ApplyMoveOption();
             // Le texte du coffre (« [Touche] Ouvrir… ») suit le joueur actif
             foreach (var prompt in FindObjectsByType<Sae501.Coffres.ChestPrompt>()) prompt.player = head;
+        }
+
+        void OnDisable() => Options.Changed -= ApplyMoveOption;
+
+        // Option DÉPLACEMENT (menu OPTIONS) : au casque, le stick gauche fait marcher (déplacement continu des Starter Assets)
+        // au lieu de téléporter. La rotation reste par crans (snap turn) : c'est elle qui donne le plus la nausée.
+        void ApplyMoveOption()
+        {
+            foreach (var manager in GetComponentsInChildren<ControllerInputActionManager>(true))
+                manager.smoothMotionEnabled = Options.StickMove;
         }
 
         // Bug du point d'apparition : au lancement, le casque n'est pas encore suivi (la caméra est à 0, 0, 0).

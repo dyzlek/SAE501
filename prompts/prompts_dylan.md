@@ -13,6 +13,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 >
 > Suite (2 captures de la borne dans le jeu) : c'est moche et peu lisible, mais l'idée est là.
 
+### Déplacement au stick
+> Ajoute aussi la capture du menu pause dans mon journal, et dans les options, ajoute la possibilité de se déplacer comme en ZQSD au casque.
+
 ### Retour en arrière sur le casino
 > Reviens en arrière : garde le niveau casino dans une branche, mais remets juste la roulette et le blackjack, et rapproche le tableau du classement.
 
