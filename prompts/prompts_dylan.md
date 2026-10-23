@@ -2,6 +2,16 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Ven. 23 oct. 2026
+
+### Casino à plusieurs
+> Peux-tu faire un système de blackjack et de roulette comme au casino, façon « gamble with your friends » ?
+>
+> Suite : fais la roulette et mets tout dans une PR pour aujourd'hui. Bourse commune ; au blackjack, on joue contre un croupier comme dans « Gamble With Your Friends ».
+
+### Coop : ce qui n'est pas partagé
+> Certaines choses ne sont pas encore partagées, comme les singes, les ballons, etc. (testé éditeur + casque : les ballons de la carte et du plateau du hub, les récolteurs, le bananier, le coffre).
+
 ## Jeu. 22 oct. 2026
 
 ### Coop sur Netcode for GameObjects

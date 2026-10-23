@@ -154,6 +154,33 @@ namespace SAE
             Done(request);
         }
 
+        // Le casino : l'hôte appuie à la place de l'invité sur SA roulette (une seule table pour tous)
+        [Rpc(SendTo.Server)]
+        public void RouletteRpc(int request, RouletteOp op, RouletteColor color, float speed)
+        {
+            var table = RouletteTable.Instance;
+            if (table)
+                switch (op)
+                {
+                    case RouletteOp.Select: table.Select(color); break;
+                    case RouletteOp.AddOne: table.Add(1); break;
+                    case RouletteOp.AddTen: table.Add(10); break;
+                    case RouletteOp.AddHundred: table.Add(100); break;
+                    case RouletteOp.AllIn: table.AllIn(); break;
+                    case RouletteOp.Clear: table.Clear(); break;
+                    case RouletteOp.Spin: table.Launch(speed); break;
+                }
+            Done(request);
+        }
+
+        // Au blackjack, l'invité joue à sa place : celle de son numéro
+        [Rpc(SendTo.Server)]
+        public void BlackjackRpc(int request, BlackjackOp op)
+        {
+            if (BlackjackTable.Instance) BlackjackTable.Instance.Do(Number.Value, op);
+            Done(request);
+        }
+
         // La demande est faite : l'invité peut de nouveau écouter l'état de l'hôte (voir Coop.LastStateRequest)
         void Done(int request)
         {

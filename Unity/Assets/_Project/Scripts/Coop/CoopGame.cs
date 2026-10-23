@@ -17,7 +17,7 @@ namespace SAE
     }
 
     // L'état partagé du coop, en NetworkVariable et NetworkList : la bourse, la bibliothèque, les types débloqués,
-    // les singes posés et la vague en cours. Un seul objet dans la partie, créé par l'hôte (Coop.SpawnShared).
+    // les singes posés, la vague en cours et le casino (roulette, blackjack). Un seul objet dans la partie, créé par l'hôte (Coop.SpawnShared).
     // Chez l'hôte, on recopie l'état du jeu dedans à chaque image ; NGO n'envoie que ce qui a changé.
     // Chez l'invité, dès que quelque chose change, on le recopie dans le jeu (GameState.ApplyFromHost) : l'hôte fait foi.
     //
@@ -42,6 +42,11 @@ namespace SAE
         readonly NetworkVariable<bool> running = new NetworkVariable<bool>();
         readonly NetworkVariable<bool> won = new NetworkVariable<bool>();
         readonly NetworkVariable<FixedString512Bytes> status = new NetworkVariable<FixedString512Bytes>();
+
+        // Le casino : la couleur choisie à la roulette (-1 : aucune) et sa mise ; toute la table de blackjack
+        readonly NetworkVariable<int> rouletteColor = new NetworkVariable<int>(-1);
+        readonly NetworkVariable<int> rouletteStake = new NetworkVariable<int>();
+        readonly NetworkVariable<BlackjackState> blackjack = new NetworkVariable<BlackjackState>();
 
         bool stateChanged, waveChanged;   // invité : il y a du nouveau à recopier dans le jeu
 
@@ -105,8 +110,8 @@ namespace SAE
         void LateUpdate()
         {
             if (!IsSpawned) return;
-            if (IsServer) Write();
-            else Read();
+            if (IsServer) { Write(); WriteCasino(); }
+            else { Read(); ReadCasino(); }
         }
 
         // --- Hôte : le jeu → le réseau (une NetworkVariable ne part que si sa valeur a changé) ---
@@ -143,6 +148,25 @@ namespace SAE
             status.Value = spawner.Status;
         }
 
+        // Hôte : les tables du casino (dans la scène Hub : elles existent dès le lancement)
+        void WriteCasino()
+        {
+            var roulette = RouletteTable.Instance;
+            if (roulette)
+            {
+                rouletteColor.Value = roulette.SelectedIndex;
+                rouletteStake.Value = roulette.RawStake;
+            }
+            if (BlackjackTable.Instance) blackjack.Value = BlackjackTable.Instance.State;
+        }
+
+        // Hôte → tous les invités : la roue vient d'être lancée, avec ce numéro (voir RouletteTable.SpinFromHost)
+        [Rpc(SendTo.NotServer)]
+        public void RouletteSpinRpc(int result, float speed, RouletteColor color, int bet)
+        {
+            if (RouletteTable.Instance) RouletteTable.Instance.SpinFromHost(result, speed, color, bet);
+        }
+
         static void Set<T>(NetworkList<T> list, int i, T value) where T : unmanaged, IEquatable<T>
         {
             if (i >= list.Count) list.Add(value);
@@ -155,6 +179,13 @@ namespace SAE
         }
 
         // --- Invité : le réseau → le jeu ---
+
+        // Le casino n'est pas gardé par les numéros de demande : l'invité n'y change rien chez lui, il attend l'hôte
+        void ReadCasino()
+        {
+            if (RouletteTable.Instance) RouletteTable.Instance.ApplyFromHost(rouletteColor.Value, rouletteStake.Value);
+            if (BlackjackTable.Instance) BlackjackTable.Instance.ApplyFromHost(blackjack.Value);
+        }
 
         void Read()
         {

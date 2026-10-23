@@ -2,6 +2,14 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Ven. 23 oct. 2026
+**Ce que j'ai fait :** premier test du coop sur Netcode (éditeur + casque) ; casino à plusieurs.
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | Player 2 de Multiplayer Play Mode reste noir : bug de Multiplayer Play Mode avec Unity 6000.6 (sa copie du projet n'arrive pas à charger les shaders de URP), pas le code du coop. Test fait éditeur + casque : les singes posés passent, pas les ballons (cause pas encore trouvée ; le panneau COOP affiche maintenant le nombre de ballons partagés / reçus pour vérifier au casque) | Gardé |
+| Claude (Claude Code) | **Casino à plusieurs** (#171, ma demande : « gamble with your friends ») : roulette partagée en coop (l'hôte tire, tout le monde voit le même lancer ; `RouletteTable` envoie les appuis de l'invité à l'hôte) et **blackjack contre un singe croupier** (`Casino/BlackjackRules`, `BlackjackState`, `BlackjackTable`, `BlackjackView`, `BlackjackCard`) : 4 places, +10 / +100 / RETIRER, DISTRIBUER, CARTE / RESTER, croupier jusqu'à 16, cartes qui glissent du sabot, sons. La table se construit par le code à côté de la roulette. En coop, la table passe dans une NetworkVariable (CoopGame). Claude a rappelé que la S3 interdit les nouvelles features ; je l'ai voulu pour aujourd'hui. Compilé (dotnet), **pas testé** | Gardé (à tester) |
+
 ## Jeu. 22 oct. 2026
 **Ce que j'ai fait :** le menu principal, testé dans Unity.
 - Une scène à part : le titre, Quincy et les singes qui font coucou, des ballons à éclater, le paysage autour. Les boutons sont CONTINUER, NOUVELLE PARTIE (il faut appuyer deux fois) et OPTIONS.

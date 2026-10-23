@@ -119,3 +119,7 @@ Thumbs.db
 
 # Classement en ligne : le vrai fichier de configuration (mot de passe MySQL) reste sur le serveur
 server/**/config.php
+
+# Netcode for GameObjects : liste de prefabs créée toute seule par le paquet (on enregistre nos prefabs par le code, voir Coop.cs)
+/Unity/[Aa]ssets/DefaultNetworkPrefabs.asset
+/Unity/[Aa]ssets/DefaultNetworkPrefabs.asset.meta

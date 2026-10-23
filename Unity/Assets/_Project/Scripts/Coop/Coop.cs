@@ -16,6 +16,9 @@ namespace SAE
     // Les changements de la bibliothèque (GameState) qu'un invité demande à l'hôte
     public enum InventoryOp : byte { Add, Take, Unlock, ClearBoard }
 
+    // Ce qu'un invité fait à la roulette (RouletteTable) : choisir la couleur, les jetons, lancer la roue
+    public enum RouletteOp : byte { Select, AddOne, AddTen, AddHundred, AllIn, Clear, Spin }
+
     // Le coop, par Internet, avec Netcode for GameObjects (NGO), la solution réseau d'Unity.
     // En pleine partie, un joueur l'OUVRE EN COOP depuis la pause et choisit un mot de passe ; la partie reçoit un code
     // à 6 caractères. Jusqu'à 3 autres la REJOIGNENT depuis le menu principal avec le code et le mot de passe.
@@ -252,11 +255,20 @@ namespace SAE
 
         void OnApplicationQuit() => Leave();
 
+        // Le panneau COOP dit où on en est, avec le nombre de ballons envoyés ou reçus (pratique pour vérifier au casque)
+        // (le texte n'est refait que si un nombre change : pas de nouvelle chaîne à chaque image)
+        int shownPlayers = -1, shownBalloons = -1;
+
         void Update()
         {
-            if (!IsHost) return;
-            int players = network.ConnectedClientsIds.Count;
-            Status = players <= 1 ? "En attente d'un joueur…" : $"{players} joueurs dans la partie";
+            if (Role == CoopRole.Solo || (IsGuest && !Connected)) { shownPlayers = -1; return; }
+            int players = IsHost ? network.ConnectedClientsIds.Count : 0;   // la liste des joueurs n'existe que chez l'hôte
+            int balloons = CoopBalloon.Count;
+            if (players == shownPlayers && balloons == shownBalloons) return;
+            shownPlayers = players;
+            shownBalloons = balloons;
+            if (IsGuest) Status = $"Connecté · tu es le joueur {LocalId + 1} · {balloons} ballons reçus";
+            else Status = players <= 1 ? "En attente d'un joueur…" : $"{players} joueurs · {balloons} ballons partagés";
         }
 
         // Appelé par CoopPlayer quand notre propre joueur réseau apparaît : l'hôte nous a laissés entrer
@@ -310,6 +322,18 @@ namespace SAE
         // Poser, fusionner ou reprendre un singe : l'hôte refait la même chose avec le singe que l'invité tient
         public static void SendPlace(Vector2 pos, Monkey? held) =>
             Request(true, (p, n) => p.PlaceRpc(n, pos, held.HasValue, held?.type ?? default, held?.level ?? default));
+
+        // --- Le casino : une roulette et une table de blackjack pour tous, que l'hôte fait tourner ---
+
+        public static void SendRoulette(RouletteOp op, RouletteColor color, float speed) =>
+            Request(false, (p, n) => p.RouletteRpc(n, op, color, speed));
+        public static void SendBlackjack(BlackjackOp op) => Request(false, (p, n) => p.BlackjackRpc(n, op));
+
+        // Hôte : la roue vient d'être lancée (par lui ou pour un invité) : tout le monde voit le même lancer
+        public static void ShareRouletteSpin(int result, float speed, RouletteColor color, int bet)
+        {
+            if (IsHost && CoopGame.Instance) CoopGame.Instance.RouletteSpinRpc(result, speed, color, bet);
+        }
 
         // --- Les flèches ---
 

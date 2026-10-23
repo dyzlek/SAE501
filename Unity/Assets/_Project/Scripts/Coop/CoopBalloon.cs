@@ -19,6 +19,12 @@ namespace SAE
         // Hôte : le vrai ballon. Invité : sa copie.
         public Balloon Target { get; private set; }
 
+        // Le nombre de doubles en jeu chez nous : écrit sur le panneau COOP (« 12 ballons partagés / reçus »)
+        public static int Count { get; private set; }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetCount() => Count = 0;
+
         // Hôte, avant Spawn : les valeurs de départ partent avec l'objet
         public void Follow(Balloon balloon)
         {
@@ -29,10 +35,15 @@ namespace SAE
             transform.SetPositionAndRotation(balloon.transform.position, balloon.transform.rotation);
         }
 
-        public override void OnNetworkSpawn() => DontDestroyOnLoad(gameObject);
+        public override void OnNetworkSpawn()
+        {
+            DontDestroyOnLoad(gameObject);
+            Count++;
+        }
 
         public override void OnNetworkDespawn()
         {
+            Count--;
             if (!Target) return;
             // On regarde le ballon, pas IsServer : quand l'hôte ferme le coop, NGO n'est déjà plus « serveur » ici
             if (Target.Remote) Destroy(Target.gameObject);   // invité : la copie part avec son double

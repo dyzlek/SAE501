@@ -12,8 +12,15 @@ namespace SAE
     //      avec ce qu'elle peut rapporter (« mise 20 · gain 40 »), et des bananes viennent s'y poser (une par tranche de 25, 6 au plus) ;
     //   3. faire tourner la roue À LA MAIN (RouletteWheel, WheelGrab) : au lâcher, la mise est payée et le numéro tiré.
     // Après un lancer, la couleur et la mise restent (dans la limite de ce qu'on a) : on peut rejouer tout de suite.
+    // Coop (Coop) : une seule table pour tous, et la bourse est commune : on joue ensemble contre le casino.
+    // C'est l'hôte qui la fait tourner : chez un invité, chaque appui (couleur, jeton, lancer) est demandé à l'hôte,
+    // la couleur et la mise reviennent par CoopGame (ApplyFromHost), et le lancer tiré par l'hôte est rejoué chez tout le
+    // monde (SpinFromHost) : la même roue, le même numéro. Seul l'hôte paie la mise et les gains.
+    // La table de blackjack, à côté, se construit au lancement (BlackjackTable.CreateNear).
     public class RouletteTable : MonoBehaviour
     {
+        public static RouletteTable Instance { get; private set; }
+
         public RouletteWheel wheel;
         public TextMesh board;              // l'ardoise au-dessus du pupitre
         public GameObject[] stakeBananas;   // les bananes misées, posées sur la zone choisie (6)
@@ -38,8 +45,13 @@ namespace SAE
         public bool CanRaise => !Spinning && stake < Economy.Money;
         public bool CanClear => !Spinning && stake > 0;
 
+        // Coop : ce que l'hôte envoie aux invités (CoopGame) : la couleur choisie (-1 : aucune) et la mise
+        public int SelectedIndex => selected.HasValue ? (int)selected.Value : -1;
+        public int RawStake => stake;
+
         void Awake()
         {
+            Instance = this;
             pockets = GetComponentsInChildren<RoulettePocket>();
             System.Array.Sort(pockets, (a, b) => string.CompareOrdinal(a.name, b.name));   // Case_00, Case_01... : l'ordre de la roue
             zones = GetComponentsInChildren<RouletteBetZone>();
@@ -50,10 +62,13 @@ namespace SAE
         void OnDisable() => Economy.MoneyChanged -= OnMoneyChanged;
         void OnMoneyChanged(int money, Vector3? where) => Refresh();
 
+        void OnDestroy() { if (Instance == this) Instance = null; }
+
         void Start()
         {
             ShowGlow();
             Refresh();
+            BlackjackTable.CreateNear(transform);
         }
 
         // Les lueurs allumées (cadre de la zone, cases de la roue) pulsent doucement pour attirer l'œil
@@ -72,6 +87,7 @@ namespace SAE
         public void Select(RouletteColor color)
         {
             if (Spinning) return;
+            if (Coop.IsGuest) { Coop.SendRoulette(RouletteOp.Select, color, 0f); return; }
             selected = color;
             ShowGlow();
             Refresh();
@@ -80,6 +96,7 @@ namespace SAE
         public bool Add(int amount)
         {
             if (!CanRaise) return false;
+            if (Coop.IsGuest) return Ask(amount == 1 ? RouletteOp.AddOne : amount == 10 ? RouletteOp.AddTen : RouletteOp.AddHundred);
             stake = Mathf.Min(stake + amount, Economy.Money);
             Refresh();
             return true;
@@ -88,6 +105,7 @@ namespace SAE
         public bool AllIn()
         {
             if (!CanRaise) return false;   // déjà tout misé
+            if (Coop.IsGuest) return Ask(RouletteOp.AllIn);
             stake = Economy.Money;
             Refresh();
             return true;
@@ -96,6 +114,7 @@ namespace SAE
         public bool Clear()
         {
             if (!CanClear) return false;
+            if (Coop.IsGuest) return Ask(RouletteOp.Clear);
             stake = 0;
             Refresh();
             return true;
@@ -117,21 +136,55 @@ namespace SAE
                 Refresh();
                 return false;
             }
+            // Coop, invité : c'est l'hôte qui paie et tire le numéro ; son lancer nous reviendra (SpinFromHost)
+            if (Coop.IsGuest) return Ask(RouletteOp.Spin, speed);
             if (!Economy.TrySpend(bet, wheel.transform.position)) return false;
             var color = selected.Value;
-            played = bet;
             int result = Random.Range(0, RouletteRules.Numbers);
-            lastResult = $"La bille tourne... (misé {bet} sur {RouletteRules.Colored(color)})";
-            wheel.Spin(result, speed, () => { Resolve(color, bet, result); StartCoroutine(FlashWinner(result)); });
-            Refresh();
+            Coop.ShareRouletteSpin(result, speed, color, bet);   // hôte : les invités voient le même lancer
+            Play(result, speed, color, bet, pay: true);
             return true;
         }
 
-        void Resolve(RouletteColor color, int bet, int result)
+        // Coop, invité : l'hôte vient de lancer la roue (lui ou un autre joueur) : on rejoue le même lancer, sans payer
+        public void SpinFromHost(int result, float speed, RouletteColor color, int bet)
+        {
+            selected = color;
+            Play(result, speed, color, bet, pay: false);
+        }
+
+        void Play(int result, float speed, RouletteColor color, int bet, bool pay)
+        {
+            played = bet;
+            lastResult = $"La bille tourne... (misé {bet} sur {RouletteRules.Colored(color)})";
+            wheel.Spin(result, speed, () => { Resolve(color, bet, result, pay); StartCoroutine(FlashWinner(result)); });
+            Refresh();
+        }
+
+        // Coop, invité : la couleur et la mise de la table, vues par l'hôte (CoopGame)
+        public void ApplyFromHost(int colorIndex, int hostStake)
+        {
+            var color = colorIndex < 0 ? (RouletteColor?)null : (RouletteColor)colorIndex;
+            if (color == selected && hostStake == stake) return;
+            if (color != selected && !Spinning) { selected = color; ShowGlow(); }
+            stake = hostStake;
+            Refresh();
+        }
+
+        // Coop, invité : la demande part chez l'hôte ; le bouton s'enfonce sans flash rouge
+        static bool Ask(RouletteOp op, float speed = 0f)
+        {
+            Coop.SendRoulette(op, default, speed);
+            return true;
+        }
+
+        void Resolve(RouletteColor color, int bet, int result, bool pay)
         {
             var landed = RouletteRules.ColorOf(result);
             int won = landed == color ? bet * (RouletteRules.Payout(color) + 1) : 0;   // gain + mise rendue
-            Economy.Earn(won, wheel.transform.position + Vector3.up * 0.3f, stakeBack: won > 0 ? bet : 0);   // les trophées ne comptent que le gain, pas la mise rendue
+            // Seul l'hôte (ou le joueur seul) touche les gains : la bourse est commune, elle revient aux invités par CoopGame.
+            // Les trophées ne comptent que le gain, pas la mise rendue.
+            if (pay) Economy.Earn(won, wheel.transform.position + Vector3.up * 0.3f, stakeBack: won > 0 ? bet : 0);
             // Gagné : le son du singe obtenu, ou le jingle de victoire pour le vert (×35) ; perdu : le son de vie perdue, bien audible
             var at = wheel.transform.position;
             if (won == 0) Sounds.Play(Sounds.ViePerdue, at, 1f, 0.9f);

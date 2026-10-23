@@ -247,6 +247,12 @@ Les sons s'entendent du hub comme de la carte : on sait qu'il faut y retourner. 
   - des bananes posées sur le tapis montrent la mise.
 ![La roulette : la roue européenne, le tapis des mises (une banane misée) et le pupitre des mises.](captures/gdd/roulette.png)
 
+- **Blackjack, à côté de la roulette :** contre un singe croupier, 4 places (une par joueur du coop) :
+  - on mise à sa place (+10, +100, RETIRER), puis DISTRIBUER ;
+  - CARTE pour tirer, RESTER pour s'arrêter ; au-dessus de 21, la main est perdue ;
+  - le croupier tire jusqu'à 16 et reste à 17 ; gagné ×2, blackjack (21 en 2 cartes) ×2,5, égalité = mise rendue.
+- **En coop, on joue au casino ensemble** (« gamble with your friends ») : une seule roulette et une seule table de blackjack pour tous, la bourse est commune. L'hôte tire les numéros et les cartes ; tout le monde voit le même lancer et les mêmes cartes (#171).
+
 - **Cible de fléchettes, au mur de la cabane :** 3 fléchettes par manche, 5 à 50 points selon l'anneau, meilleur score affiché. C'est une pause ludique sans enjeu.
 
 ### 7.10 Économie
@@ -406,6 +412,7 @@ _Chaque action a maintenant sa vibration, avec un motif différent pour la recon
 | | Menu principal : une scène vivante (singes animés, ballons), CONTINUER / NOUVELLE PARTIE / OPTIONS, retour au menu en jeu (bouton Menu, Échap) ⏳ (#158) | | |
 | | Bombes à lancer, pluie de flèches de Quincy, vibrations par action ⏳ | Classement gardé entre deux lancements ; **coop par Internet** (deux casques, ou casque + PC ; ouvert depuis la pause avec un mot de passe, rejoint depuis le menu avec le code de la partie ; serveur relais Unity Relay, réseau avec Netcode for GameObjects) ⏳ (#166, #170) | |
 | | Bananes dorées, nouvelles améliorations de l'arc, mur des records, trophées, classement local ⏳ | | |
+| | | Casino à plusieurs : roulette partagée et blackjack contre un croupier ⏳ (#171) | |
 
 _✅ = dans le jeu (à valider au casque) · ⏳ = à faire en semaine 2 (détail : [OBJECTIFS_S2.md](OBJECTIFS_S2.md))._
 
