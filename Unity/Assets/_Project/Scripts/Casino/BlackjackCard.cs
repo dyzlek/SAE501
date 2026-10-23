@@ -9,7 +9,7 @@ namespace SAE
     // En arrivant, elle glisse depuis le sabot jusqu'à sa place (SlideFrom).
     public class BlackjackCard : MonoBehaviour
     {
-        const float Width = 0.07f, Length = 0.1f;   // m : un peu plus grande qu'une vraie carte, pour la lire à 1 m
+        const float Width = 0.1f, Length = 0.14f;   // m : une fois et demie une vraie carte, pour la lire du premier coup d'œil
         static readonly Color Red = new Color(0.8f, 0.1f, 0.1f);
         static readonly Color Black = new Color(0.08f, 0.08f, 0.1f);
         static readonly Color Back = new Color(0.55f, 0.08f, 0.1f);
@@ -35,9 +35,13 @@ namespace SAE
             }
             Visuals.Box("Carton", tr, Vector3.zero, new Vector3(Width, 0.002f, Length), Color.white);
             var color = BlackjackRules.IsRed(card) ? Red : Black;
-            var rank = Visuals.Text(tr, BlackjackRules.RankName(card), new Vector3(-Width / 2f + 0.015f, 0.0015f, Length / 2f - 0.017f), 0.022f, color, title: true);
-            rank.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-            Suit(tr, BlackjackRules.SuitOf(card), new Vector3(0.005f, 0.0015f, -0.012f), 0.03f, color);
+            // Le rang en gros, en haut à gauche et (retourné) en bas à droite, comme une vraie carte ; la couleur au milieu
+            string name = BlackjackRules.RankName(card);
+            Visuals.Text(tr, name, new Vector3(-Width / 2f + 0.022f, 0.0015f, Length / 2f - 0.024f), 0.04f, color, title: true)
+                .transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            Visuals.Text(tr, name, new Vector3(Width / 2f - 0.022f, 0.0015f, -Length / 2f + 0.024f), 0.04f, color, title: true)
+                .transform.localRotation = Quaternion.Euler(90f, 180f, 0f);
+            Suit(tr, BlackjackRules.SuitOf(card), new Vector3(0f, 0.0015f, 0f), 0.045f, color);
             return c;
         }
 

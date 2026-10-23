@@ -23,8 +23,9 @@ namespace SAE
         float pressed, refused;
 
         // Un bouton de 'size' (largeur, hauteur) posé sur la face -Z du parent (le côté du joueur), dessus vers -Z
+        // textColor : blanc sur les boutons foncés, foncé sur les touches claires du pavé (sinon on ne lit rien)
         public static BlackjackButton Create(Transform parent, string label, Vector3 localPos, Vector2 size, Color color,
-                                             Func<bool> action, Func<bool> usable, float textHeight)
+                                             Func<bool> action, Func<bool> usable, float textHeight, Color? textColor = null)
         {
             var root = new GameObject("Bouton " + label).transform;
             root.SetParent(parent, false);
@@ -42,7 +43,7 @@ namespace SAE
             b.cap = cap.transform;
             b.capTint = cap.GetComponent<ColorTint>();
             b.capRest = cap.transform.localPosition;
-            Visuals.Text(cap.transform, label, new Vector3(0f, 0f, -0.6f), textHeight / size.y, Color.white, title: true)
+            Visuals.Text(cap.transform, label, new Vector3(0f, 0f, -0.6f), textHeight / size.y, textColor ?? Color.white, title: true)
                 .transform.localScale = new Vector3(size.y / size.x, 1f, 1f);   // le texte, enfant du dessus étiré : on le remet droit
             return b;
         }

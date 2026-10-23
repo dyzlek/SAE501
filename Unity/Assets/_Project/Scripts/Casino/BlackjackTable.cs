@@ -25,9 +25,10 @@ namespace SAE
         const int ReshuffleBelow = 15;     // cartes : en dessous, on reprend un paquet neuf mélangé
         const int MaxDigits = 7;           // le terminal affiche au plus 9 999 999
 
-        // Où la borne est posée par rapport à la roulette (dans le repère de la bananeraie) : devant elle, contre la barrière
-        // de droite, le croupier côté barrière. Tournée de 90° : le joueur regarde vers la barrière.
-        static readonly Vector3 OffsetFromRoulette = new Vector3(1.4f, 0f, -3.8f);
+        // Où la borne est posée par rapport à la roulette (dans le repère de la bananeraie) : en face d'elle, contre la barrière
+        // avant, le croupier côté barrière et le pré derrière lui. Tournée de 180° : le joueur tourne le dos à la roulette.
+        // (Contre la barrière de droite, elle cachait le grand panneau du classement.)
+        static readonly Vector3 OffsetFromRoulette = new Vector3(0.1f, 0f, -5.35f);
 
         public BlackjackPhase Phase { get; private set; }
         public BlackjackResult Result { get; private set; }
@@ -53,7 +54,7 @@ namespace SAE
             var root = new GameObject("Blackjack").transform;
             root.SetParent(roulette.parent, false);
             root.localPosition = roulette.localPosition + roulette.localRotation * OffsetFromRoulette;
-            root.localRotation = roulette.localRotation * Quaternion.Euler(0f, 90f, 0f);   // +Z local = vers le croupier
+            root.localRotation = roulette.localRotation * Quaternion.Euler(0f, 180f, 0f);   // +Z local = vers le croupier
             root.gameObject.AddComponent<BlackjackTable>();
         }
 
