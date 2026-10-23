@@ -18,23 +18,6 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 
 ---
 
-## Décor du casino fusionné par couleur
-**Ven. 23 oct. 2026** · Dylan (avec Claude) · branche `feat/coop-netcode` (PR #172)
-
-**Le problème.** La salle du casino (`Casino/CasinoRoom.cs`) est faite de **centaines de petites formes** : murs, lambris, moulures, colonnes, poutres de la verrière, ampoules des lustres et de l'enseigne, palmes, machines à sous. Chacune serait un objet dessiné à part, avec sa couleur (`ColorTint`). Unity ne peut pas les regrouper : chaque couleur passe par un *MaterialPropertyBlock*, ce qui casse le regroupement automatique.
-
-**Ce qui a été fait.** À la fin de la construction, `CasinoRoom.Merge()` met toutes les formes du décor dans **un seul maillage par couleur** (`MeshBatch`, déjà utilisé pour le décor de la carte ; nouvelle méthode `Add(mesh, matrice, couleur)`). Les formes d'origine gardent leur collider (murs, machines) mais ne sont plus dessinées. Autres choix pour le Quest : 3 lampes seulement (les lustres), **sans ombres** ; la moquette est une petite texture de 128 × 128 répétée.
-
-**Avant / après.** *À mesurer.* Il faut noter au casque, dans le casino, face à l'enseigne, les fps et les *Batches* du Profiler.
-
-**Est-ce que ça a vraiment marché ?** *Pas encore mesuré.* En théorie, environ 600 objets dessinés deviennent une vingtaine (une par couleur).
-
-**Suggestions.**
-- Si le soleil coûte trop cher (ombres de toute la verrière), couper les ombres des poutres ou baisser la distance des ombres dans cette scène.
-- Faire pareil pour la borne de blackjack et la course des singes (formes fixes nombreuses).
-
----
-
 ## Limite de 60 singes posés
 **Mer. 21 oct. 2026** · Dylan (avec Claude) · branche `feat/opti-aura`
 

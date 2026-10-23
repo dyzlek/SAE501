@@ -128,10 +128,10 @@ namespace SAE
             console.localRotation = Quaternion.Euler(35f, 0f, 0f);   // la face des boutons regarde vers le haut et vers le joueur
             Visuals.Box("Pupitre", console, new Vector3(0f, 0f, 0.035f), new Vector3(1.12f, 0.17f, 0.05f), Frame);
             var size = new Vector2(0.23f, 0.12f);
-            CasinoButton.Create(console, "DOUBLER", new Vector3(-0.405f, 0f, 0f), size, Purple, table.Double, () => table.CanDouble, 0.045f);
-            CasinoButton.Create(console, "RESTER", new Vector3(-0.135f, 0f, 0f), size, Yellow, table.Stand, () => table.CanAct, 0.045f);
-            CasinoButton.Create(console, "CARTE", new Vector3(0.135f, 0f, 0f), size, Red, table.Hit, () => table.CanAct, 0.05f);
-            CasinoButton.Create(console, "JOUER", new Vector3(0.405f, 0f, 0f), size, Green, table.Play, () => table.CanPlay, 0.05f);
+            BlackjackButton.Create(console, "DOUBLER", new Vector3(-0.405f, 0f, 0f), size, Purple, table.Double, () => table.CanDouble, 0.045f);
+            BlackjackButton.Create(console, "RESTER", new Vector3(-0.135f, 0f, 0f), size, Yellow, table.Stand, () => table.CanAct, 0.045f);
+            BlackjackButton.Create(console, "CARTE", new Vector3(0.135f, 0f, 0f), size, Red, table.Hit, () => table.CanAct, 0.05f);
+            BlackjackButton.Create(console, "JOUER", new Vector3(0.405f, 0f, 0f), size, Green, table.Play, () => table.CanPlay, 0.05f);
         }
 
         // Le terminal de mise, sur son pied, à droite du joueur, penché et tourné vers lui
@@ -151,8 +151,8 @@ namespace SAE
             {
                 string k = keys[i];
                 var pos = new Vector3(-0.25f + (i % 3) * 0.085f, 0.135f - (i / 3) * 0.088f, 0f);
-                if (k == "C") CasinoButton.Create(t, k, pos, keySize, Red, table.ClearBet, () => table.CanType, 0.045f);
-                else CasinoButton.Create(t, k, pos, keySize, Key, () => table.TypeDigits(k), () => table.CanType, k.Length > 1 ? 0.03f : 0.045f, KeyText);
+                if (k == "C") BlackjackButton.Create(t, k, pos, keySize, Red, table.ClearBet, () => table.CanType, 0.045f);
+                else BlackjackButton.Create(t, k, pos, keySize, Key, () => table.TypeDigits(k), () => table.CanType, k.Length > 1 ? 0.03f : 0.045f, KeyText);
             }
 
             // L'écran
@@ -167,7 +167,7 @@ namespace SAE
             for (int i = 0; i < names.Length; i++)
             {
                 float share = shares[i];
-                CasinoButton.Create(t, names[i], new Vector3(0.24f, 0.135f - i * 0.088f, 0f), new Vector2(0.1f, 0.072f), Orange,
+                BlackjackButton.Create(t, names[i], new Vector3(0.24f, 0.135f - i * 0.088f, 0f), new Vector2(0.1f, 0.072f), Orange,
                                        () => table.QuickBet(share), () => table.CanType, 0.038f, KeyText);
             }
         }

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace SAE
 {
-    // La borne de blackjack du casino, façon « Gamble With Your Friends » : une partie en solo contre un singe
+    // La borne de blackjack de la bananeraie, façon « Gamble With Your Friends » : une partie en solo contre un singe
     // croupier. Le tour :
     //   1. MISE : on tape le montant sur le terminal (chiffres, 000, C) ou on prend MIN, 1/4, 1/2, MAX de la bourse ;
     //   2. JOUER : la mise est payée, on reçoit 2 cartes, le croupier aussi (la 2e face cachée) ;
@@ -25,6 +25,11 @@ namespace SAE
         const int ReshuffleBelow = 15;     // cartes : en dessous, on reprend un paquet neuf mélangé
         const int MaxDigits = 7;           // le terminal affiche au plus 9 999 999
 
+        // Où la borne est posée par rapport à la roulette (dans le repère de la bananeraie) : en face d'elle, contre la barrière
+        // avant, le croupier côté barrière et le pré derrière lui. Tournée de 180° : le joueur tourne le dos à la roulette.
+        // (Contre la barrière de droite, elle cachait le grand panneau du classement.)
+        static readonly Vector3 OffsetFromRoulette = new Vector3(0.1f, 0f, -5.35f);
+
         public BlackjackPhase Phase { get; private set; }
         public BlackjackResult Result { get; private set; }
         public List<byte> Dealer { get; } = new List<byte>();
@@ -42,7 +47,17 @@ namespace SAE
         List<byte> deck = new List<byte>();
         BlackjackView view;
 
-        // La borne est posée par le générateur dans la scène Casino (+Z local = vers le croupier) ; elle se construit ici
+        // Appelé par la roulette au lancement : la borne se construit à côté d'elle (pas besoin de régénérer la scène)
+        public static void CreateNear(Transform roulette)
+        {
+            if (Instance) return;
+            var root = new GameObject("Blackjack").transform;
+            root.SetParent(roulette.parent, false);
+            root.localPosition = roulette.localPosition + roulette.localRotation * OffsetFromRoulette;
+            root.localRotation = roulette.localRotation * Quaternion.Euler(0f, 180f, 0f);   // +Z local = vers le croupier
+            root.gameObject.AddComponent<BlackjackTable>();
+        }
+
         void Awake()
         {
             Instance = this;

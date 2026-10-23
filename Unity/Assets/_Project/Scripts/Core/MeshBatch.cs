@@ -16,13 +16,6 @@ namespace SAE
             list.Add(new CombineInstance { mesh = mesh, transform = Matrix4x4.TRS(pos, rot, size) });
         }
 
-        // Pareil, avec la matrice déjà faite (une forme déjà posée dans la scène : voir CasinoRoom)
-        public void Add(Mesh mesh, Matrix4x4 matrix, Color color)
-        {
-            if (!parts.TryGetValue(color, out var list)) parts[color] = list = new List<CombineInstance>();
-            list.Add(new CombineInstance { mesh = mesh, transform = matrix });
-        }
-
         // Crée les objets sous parent : un par couleur, avec le matériau du jeu (Visuals.Box) et le maillage fusionné.
         public void Build(Transform parent, string name)
         {
