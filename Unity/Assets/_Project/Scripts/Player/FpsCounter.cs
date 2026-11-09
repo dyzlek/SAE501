@@ -21,6 +21,10 @@ namespace SAE
         {
             if (!Debug.isDebugBuild) { enabled = false; return; }
 
+            // Pour vérifier au casque (logcat) quels réglages de rendu sont vraiment utilisés (#186)
+            var pipeline = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline;
+            Debug.Log($"Rendu : qualité « {QualitySettings.names[QualitySettings.GetQualityLevel()]} », asset « {(pipeline ? pipeline.name : "aucun")} »");
+
             // La plaque, posée sur le dessus de la manette, côté poignet, inclinée vers le joueur
             var plate = Visuals.Box("Montre FPS", transform, new Vector3(0f, 0.035f, -0.07f), PlateSize, new Color(0.12f, 0.1f, 0.08f));
             plate.transform.localRotation = Quaternion.Euler(45f, 0f, 0f);

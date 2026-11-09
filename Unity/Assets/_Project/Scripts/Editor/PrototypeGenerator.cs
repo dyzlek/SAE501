@@ -318,7 +318,7 @@ namespace SAE.EditorTools
         // Distance d'affichage de la caméra : assez loin pour les montagnes (la brume finit à 230 m), mais pas plus.
         // Une plage courte (près 3 cm, loin 400 m) rend la profondeur plus précise : moins de surfaces qui
         // « clignotent » l'une sur l'autre selon l'angle (les bûches sur les fenêtres, par exemple).
-        const float NearClip = 0.03f, FarClip = 400f;
+        const float NearClip = 0.03f, FarClip = HeadsetRendering.FarClip;   // le jeu le remet aussi (HeadsetRendering)
 
         // Le point d'arrivée de la scène (le joueur y est posé, FallGuard l'y remet après une chute)
         static Transform Spawn(string name, Vector3 pos, Level level)

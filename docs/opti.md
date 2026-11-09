@@ -18,6 +18,32 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 
 ---
 
+## Réglages de rendu du casque : bon asset URP, sans post-traitement, fovéation, distance de vue
+**Lun. 9 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · issues #186, #187, #175, #184, #183
+
+**Le problème.**
+- **#186.** Le profil de build *Meta Quest* prend la qualité « Meta Quest (Build Profile) », qui pointait sur **l'asset URP par défaut du paquet**, pas sur `Mobile_RPAsset`. Au casque : rendu à 100 % au lieu de 80 %, ombres jusqu'à 50 m, carte d'ombres 2048. Tous nos réglages mobiles étaient sans doute ignorés dans le build. Vu en lisant `QualitySettings.asset` (le GUID ne correspond à aucun fichier de `Assets/`).
+- **#187.** La caméra du joueur avait le post-traitement (WhiteBalance, ColorAdjustments, Tonemapping ; seul le Bloom était coupé). Sur Quest, ça ajoute une texture intermédiaire et une passe plein écran par œil, et ça empêche la fovéation.
+- **#175.** La fovéation de Meta était cochée dans OpenXR (Android), mais aucun code ne réglait son niveau : elle restait à 0.
+- **#184.** La caméra voyait jusqu'à 400 m (1 000 m dans le prefab XRI) pour des niveaux de quelques dizaines de mètres.
+- **#183.** Traces de pile calculées pour chaque `Log` et `Warning` ; un `Debug.Log` dans une boucle du coffre.
+
+**Ce qui a été fait.**
+- `ProjectSettings/QualitySettings.asset` : la qualité « Meta Quest (Build Profile) » utilise maintenant `Mobile_RPAsset`. `FpsCounter` écrit dans la console (build de dev, logcat) la qualité et l'asset vraiment utilisés.
+- Nouveau `Player/HeadsetRendering.cs` (ajouté par `PlayerRig`) : distance de vue **250 m** partout (couvre les nuages de l'orage, qui arrivent de 150 m, et la fin du brouillard à 230 m) ; au casque seulement : **post-traitement coupé** sur la caméra, **fovéation High dynamique** (`OVRManager.foveatedRenderingLevel`, le casque ne l'active que si l'image risque d'être en retard). Le générateur utilise la même distance.
+- On a gardé la fovéation de Meta (déjà cochée) plutôt que celle de Unity : pas de changement dans les réglages OpenXR, et pas de permission de suivi des yeux ajoutée au build.
+- Traces de pile de `Log` et `Warning` à *None* (profil Meta Quest et Player) ; le `Debug.Log` du coffre seulement dans l'éditeur. *Development Build* était déjà décoché dans le profil.
+
+**Avant / après.** *À mesurer* au casque, aux deux endroits de test, build normal (pas de dev pour les chiffres finaux, mais le compteur ne s'affiche qu'en dev : mesurer d'abord en dev, puis vérifier à l'œil).
+
+**Est-ce que ça a vraiment marché ?** *Pas encore mesuré.* Ce qu'on perd en image : un peu de netteté (80 % de résolution, bords flous de la fovéation), et l'étalonnage des couleurs du post-traitement au casque. À regarder au casque : si l'image est trop froide ou trop terne, réchauffer la lumière du soleil et l'ambiance dans le générateur. Si le texte des panneaux bave sur les bords, passer la fovéation à `Medium`.
+
+**Suggestions.**
+- Les Graphics Jobs « Legacy » activés dans les réglages locaux non commités de Dylan : à tester au casque (garder seulement si les fps montent).
+- *Managed Stripping Level* Medium : pas fait (risque de casser XR et Netcode, qui utilisent la réflexion, sans pouvoir tester à 4 jours du rendu).
+
+---
+
 ## Limite de 60 singes posés
 **Mer. 21 oct. 2026** · Dylan (avec Claude) · branche `feat/opti-aura`
 
