@@ -30,6 +30,10 @@ namespace SAE
 
         List<Vector3> path;
 
+        // Pool de ballons, rangé par sorte : un ballon éclaté est désactivé puis réutilisé (Balloon.Release),
+        // au lieu d'être détruit puis recréé. Il garde son modèle 3D, qui dépend de sa sorte.
+        readonly Dictionary<BalloonKind, Stack<Balloon>> pool = new Dictionary<BalloonKind, Stack<Balloon>>();
+
         public int Wave { get; private set; } = 1;   // la vague en cours, ou la prochaine à lancer
         public int Lives { get; private set; }
         public bool Running { get; private set; }
@@ -40,6 +44,19 @@ namespace SAE
         const string CamoWarning = "\n<color=#B5C26A>Ballons camouflés ! Seuls le Tireur et les singes Violet et + les voient</color>";
         public WaveData Current => Wave <= waves.Count ? waves[Wave - 1] : WaveBook.Endless(Wave);
         public int BossCount => Current.BossCount;
+
+        // Mode admin (AdminPanel, éditeur seulement) : plus de ballons, plus solides, et vies infinies pour tester les perfs
+        public static int CheatCount = 1;      // chaque groupe a CheatCount fois plus de ballons
+        public static int CheatLayers;         // couches ajoutées à chaque ballon
+        public static bool Invincible;         // les ballons qui passent ne coûtent pas de vie
+
+        // Mode admin : sauter directement à la vague n (pas pendant une attaque)
+        public void SetWave(int n)
+        {
+            if (Running) return;
+            Wave = Mathf.Max(1, n);
+            Status = $"Admin : vague {Wave}";
+        }
 
         void Awake()
         {
@@ -101,9 +118,9 @@ namespace SAE
                     WaveAnnouncer.BossEnters(group.kind);
                     Status = group.kind == BalloonKind.Dirigeable ? "<color=#FF5555>LE DIRIGEABLE ARRIVE !</color>" : "<color=#C77DFF>LE BOSS ARRIVE !</color>";
                 }
-                for (int i = 0; i < group.count && Lives > 0; i++)
+                for (int i = 0; i < group.count * CheatCount && Lives > 0; i++)
                 {
-                    var balloon = Spawn(group.kind, group.layers);
+                    var balloon = Spawn(group.kind, group.layers + CheatLayers);
                     if (group.camo) balloon.MakeCamo();
                     yield return new WaitForSeconds(group.interval);
                 }
@@ -116,7 +133,7 @@ namespace SAE
             if (Lives <= 0)
             {
                 // Perdu : on efface les ballons et on remet la vague à zéro (même numéro, toutes les vies)
-                foreach (var b in new List<Balloon>(Balloon.All)) Destroy(b.gameObject);
+                foreach (var b in new List<Balloon>(Balloon.All)) b.Release();   // rangés dans le pool (et retirés chez les invités)
                 Lives = startLives;
                 Status = $"Vague {Wave} perdue : relance-la";
                 Tutorial.WaveLost();   // le tableau du tutoriel dit de la relancer
@@ -149,6 +166,13 @@ namespace SAE
 
         Balloon Spawn(BalloonKind kind, int layers)
         {
+            if (pool.TryGetValue(kind, out var stack) && stack.Count > 0)
+            {
+                var recycled = stack.Pop();
+                recycled.Init(this, path, layers, kind);
+                recycled.gameObject.SetActive(true);   // OnEnable le remet dans Balloon.All
+                return recycled;
+            }
             // Avec un modèle 3D, le ballon est un objet vide : Balloon.Init y pose le modèle et son collider.
             // Sans modèle, on garde l'ancienne sphère (capsule pour le dirigeable).
             var go = BalloonVisuals.Model(kind) ? new GameObject()
@@ -156,10 +180,28 @@ namespace SAE
             go.name = kind.ToString();
             go.tag = Tags.Ballon;
             go.AddComponent<ColorTint>();
+            // Un collider qui bouge sans Rigidbody est traité comme un mur « statique » : la physique reconstruit
+            // sa structure à chaque déplacement (des centaines de ballons = très cher). Kinematic = on le déplace nous-mêmes.
+            var body = go.AddComponent<Rigidbody>();
+            body.isKinematic = true;
+            body.useGravity = false;
+            // L'ancienne sphère (sans modèle 3D) ne fait pas d'ombre non plus (#177)
+            var shape = go.GetComponent<Renderer>();
+            if (shape) shape.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             var balloon = go.AddComponent<Balloon>();
             balloon.Init(this, path, layers, kind);
             PlayerRig.IgnoreCollisions(go);   // le joueur traverse les ballons et les boss ; les flèches les touchent toujours
             return balloon;
+        }
+
+        // Un ballon éclaté, sorti ou effacé : caché et rangé pour la prochaine fois (appelé par Balloon.Release).
+        // Une copie d'invité (coop) n'est pas rangée : elle part avec son double réseau.
+        public void Recycle(Balloon balloon)
+        {
+            if (balloon.Remote) { Destroy(balloon.gameObject); return; }
+            balloon.gameObject.SetActive(false);   // OnDisable le retire de Balloon.All
+            if (!pool.TryGetValue(balloon.Kind, out var stack)) pool[balloon.Kind] = stack = new Stack<Balloon>();
+            stack.Push(balloon);
         }
 
         // Coop, chez l'invité : la copie d'un ballon de l'hôte (elle ne suit pas la piste, elle bouge avec son double réseau)
@@ -200,6 +242,7 @@ namespace SAE
         // Un ballon est passé. Vague 1 du tutoriel : aucun ne doit passer, elle est ratée tout de suite.
         public void BalloonEscaped(int layers)
         {
+            if (Invincible) return;   // mode admin
             Lives = Tutorial.StrictWave ? 0 : Mathf.Max(0, Lives - layers);
             DamageFeedback();
         }

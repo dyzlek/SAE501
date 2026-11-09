@@ -146,6 +146,27 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 ### Valider la branche de Maxens
 > Annule ce que j'ai fait actuellement. Reprends ce que Maxens a fait (feat/bonus-maxens) pour le valider et corriger tous les bugs.
 
+### Clic impossible sur le tutoriel
+> Je ne peux pas cliquer sur le tutoriel.
+
+### Boutons de test en VR
+> Mets un bouton en VR pour poser 200 singes, et un pour la vague cheatée.
+
+### Instancing des ballons
+> Pour que ça lague moins avec les ballons, tu ne peux pas faire un système d'instances ?
+
+### Lag avec les ballons
+> De loin, pas d'animation pour les singes, sauf quand ils doivent tirer sur les ballons. Et comment optimiser quand il y a des ballons ? Je lague dès qu'il y en a (par exemple, réduire les particules autour des singes quand il y en a beaucoup).
+
+### Occlusion, matériaux, ombres et pool de ballons
+> Ajoute aussi de l'occlusion, et fais les optimisations suivantes : matériaux communs et GPU Instancing pour réduire les SetPass, décor fixe en Static, une seule lumière à ombres avec une distance courte (environ 15 m) et pas d'ombres pour les petits objets, et un pool de ballons réutilisés. Suite : les singes ont disparu de la bibliothèque, et je n'ai pas le mode PC admin.
+
+### Optimisation des singes et du plateau
+> Fais les optimisations proposées : sur le plateau, remplacer les singes par des copies non animées ; sur la carte, n'animer que quand le singe tire, couper l'animation des singes qu'on ne voit pas et passer à 2 os par sommet ; alléger le décor du plateau (sans herbe ni buissons) ; remplacer les miniatures des ballons par une simple sphère teintée.
+
+### Mode PC admin pour tester les perfs
+> Je voudrais un mode de jeu non VR normal et un mode non VR admin, avec un panneau facile à utiliser (argent illimité, beaucoup de singes déjà posés, vague 100 ultra cheatée, etc.), pour voir si ça lag.
+
 ## Lun. 19 oct. 2026
 
 ### Objectifs de la semaine 2

@@ -35,19 +35,50 @@ namespace SAE
             return v.models[(int)kind];
         }
 
-        // Pose la texture de la sorte sur tous les morceaux d'un modèle (sans créer de matériau).
+        // Pose la texture de la sorte sur tous les morceaux d'un modèle.
+        // En jeu : un matériau partagé par (matériau, texture), pour que le SRP Batcher et l'instancing regroupent
+        // tous les ballons d'une sorte (un MaterialPropertyBlock l'empêchait, et ColorTint l'effaçait en teintant).
+        // Hors Play (plateau du hub dans l'éditeur) : MaterialPropertyBlock, rien n'est enregistré dans la scène.
         public static void ApplyTexture(GameObject model, BalloonKind kind)
         {
             var v = Instance;
             if (!v || (int)kind >= v.textures.Length || !v.textures[(int)kind]) return;
+            var texture = v.textures[(int)kind];
             block ??= new MaterialPropertyBlock();
             foreach (var r in model.GetComponentsInChildren<Renderer>())
             {
+                if (Application.isPlaying)
+                {
+                    var mats = r.sharedMaterials;
+                    for (int i = 0; i < mats.Length; i++) mats[i] = Textured(mats[i], texture);
+                    r.sharedMaterials = mats;
+                    continue;
+                }
                 r.GetPropertyBlock(block);
-                block.SetTexture(BaseMapId, v.textures[(int)kind]);
-                block.SetTexture(MainTexId, v.textures[(int)kind]);
+                block.SetTexture(BaseMapId, texture);
+                block.SetTexture(MainTexId, texture);
                 r.SetPropertyBlock(block);
             }
+        }
+
+        static readonly System.Collections.Generic.Dictionary<(Material, Texture), Material> textured =
+            new System.Collections.Generic.Dictionary<(Material, Texture), Material>();
+
+        // Pas de rechargement du code au Play : on vide le cache, ses matériaux ont été détruits à la fin du Play précédent
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetCache() => textured.Clear();
+
+        static Material Textured(Material source, Texture texture)
+        {
+            if (!source) return null;
+            if (!textured.TryGetValue((source, texture), out var m) || !m)
+            {
+                m = new Material(source) { name = $"{source.name} {texture.name}", enableInstancing = true };
+                if (m.HasProperty(BaseMapId)) m.SetTexture(BaseMapId, texture);
+                if (m.HasProperty(MainTexId)) m.SetTexture(MainTexId, texture);
+                textured[(source, texture)] = m;
+            }
+            return m;
         }
     }
 }
