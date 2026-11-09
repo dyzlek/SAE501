@@ -9,6 +9,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 >
 > Suite : oui, corrige les issues fausses et crée les deux issues qui manquent.
 
+### Faire toutes les optimisations
+> Maintenant, fais tout (toutes les optimisations des issues).
+
 ### Lister les optimisations et créer les issues
 > Aide-moi à lister les optimisations de mon jeu. L'idée globale était : LOD sur les modèles, instancing et réduction des polygones des ballons, matériaux partagés, ombres allégées, décor statique et occlusion, pool de ballons, Rigidbody kinematic sur les ballons, singes allégés (animation, ciblage, particules). Je ne sais pas comment les faire : explique-moi, et propose-en d'autres. Plus tard, tu créeras les issues.
 >
