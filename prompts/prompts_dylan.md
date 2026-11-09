@@ -11,6 +11,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 >
 > Suite : y a-t-il d'autres optimisations que tu me recommandes ? Crée les issues pour celles qui te semblent importantes.
 
+### Ménage des issues ouvertes
+> Valide les issues déjà faites : surtout les issues ouvertes, je pense que certaines peuvent être fermées.
+
 ### Préparer l'oral de 15 minutes
 > J'aimerais préparer mon oral de présentation de 15 minutes. Je dois montrer la progression (voir l'historique de chacun), les temps forts, etc. Le sujet demande : un plan détaillé (grands titres et quelques mots ou phrases clés) et une démonstration du jeu (parcours utilisateur). Il faut aussi raconter comment on s'est organisés. Fais le plan comme demandé, puis fais un site HTML qui servira de présentation du jeu final de vendredi.
 >
