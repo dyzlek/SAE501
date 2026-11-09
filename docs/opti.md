@@ -18,6 +18,34 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 
 ---
 
+## Modèles : Mesh LOD automatique, textures des singes, pluie au casque
+**Lun. 9 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · issues #176, #180, #185
+
+**Le problème.** Triangles comptés dans les FBX (script, 9 nov.) : les singes sont légers (700 à 1 100 triangles), mais **un ballon en a 1 032** (le cœur 1 680) et il y en a des centaines par vague ; le bananier en a 5 474. Les textures des singes (2048 px) sont **intégrées dans les FBX** : c'est pour ça qu'ils pèsent 1,5 à 1,9 Mo, et les PNG rangés à côté ne servent à rien (aucun matériau ne les utilise). La pluie de l'orage : jusqu'à 1 000 gouttes transparentes.
+
+**Ce qui a été fait.**
+- **Mesh LOD** (Unity 6) coché à l'import (`generateMeshLods: 1`) des modèles sans squelette : ballons normal, blindé et cœur, MOAB, BFB, bananier, Canon, Tireur. Unity calcule tout seul des versions simplifiées dans le même maillage, et la carte graphique prend la plus légère qui suffit selon la taille à l'écran. Pas de réexport Blender, réversible en décochant la case.
+- Nouveau menu **SAE → Optimiser les textures (Quest)** (`Editor/TextureMenu.cs`) : sort les textures intégrées des FBX (comme le bouton *Extract Textures*), puis limite sur Android les textures du dossier Art à 1024 px (512 pour les projectiles), avec mipmaps. **Pas encore lancé** : à faire dans Unity, puis committer les textures extraites.
+- Pluie au casque : 40 % des gouttes (400 au plus), traits 1,5 fois plus longs (`Map/Weather.cs`).
+- **Pas fait, volontairement :**
+  - fusionner les 2-3 maillages de chaque singe (Blender) : réexporter des modèles riggés sans pouvoir tester dans Unity, à 4 jours du rendu, c'est trop risqué (noms d'os, échelle, animations) ;
+  - #185 (synchro réseau) : un ballon normal ne tourne jamais, donc NGO n'envoie déjà pas sa rotation (seuil). Couper la rotation ne gagnerait rien. Baisser le *Tick Rate* toucherait aussi les joueurs. À revoir seulement si une partie coop rame (mesure d'abord) ;
+  - #180 MSAA : gardé en 4x (le crénelage se voit beaucoup en VR) ; textes 3D et occlusion : à mesurer d'abord.
+
+**Avant / après.**
+
+| Mesure | Avant | Après |
+|---|---|---|
+| Triangles d'un ballon normal (FBX) | 1 032 | 1 032 au plus près, moins de loin (Mesh LOD) |
+
+Le reste *à mesurer* : triangles et fps du mode admin (200 singes, grosse vague) ; mémoire des textures (*Memory Profiler*) avant / après le menu.
+
+**Est-ce que ça a vraiment marché ?** *Pas encore mesuré.* À regarder au casque : un ballon de loin ne doit pas paraître cabossé. Si c'est le cas, monter *Mesh LOD Threshold* (Quality) ou décocher la case sur ce modèle.
+
+**Suggestions.** Si les *skinned meshes* restent le problème après mesure : fusionner les maillages des singes dans Blender (`Ctrl+J`, même armature), un singe à la fois, en vérifiant chacun dans Unity.
+
+---
+
 ## Pools (sons, projectiles, ondes, traits), préchargement, Update coupés
 **Lun. 9 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · issues #178, #181, #182
 

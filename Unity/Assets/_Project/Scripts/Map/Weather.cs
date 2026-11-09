@@ -303,6 +303,11 @@ namespace SAE
 
         // ---------------- Pluie ----------------
         // Des traits fins qui tombent d'un carré de 24 m au-dessus de la tête. Matériau du jeu (le shader est dans le build).
+        // Au casque (#180) : 40 % des gouttes, un peu plus longues pour garder l'effet. Ce sont des particules transparentes
+        // qui se superposent : le GPU du Quest les paie cher.
+        static bool Headset => Application.platform == RuntimePlatform.Android;
+        const float HeadsetRainShare = 0.4f;
+
         void BuildRain()
         {
             var go = new GameObject("Pluie");
@@ -319,7 +324,7 @@ namespace SAE
             main.startSize = 0.02f;
             main.startColor = new Color(0.78f, 0.85f, 0.95f, 0.4f);
             main.gravityModifier = 0f;
-            main.maxParticles = 1000;
+            main.maxParticles = Headset ? 400 : 1000;
 
             var shape = rain.shape;
             shape.shapeType = ParticleSystemShapeType.Box;
@@ -331,7 +336,7 @@ namespace SAE
 
             var r = go.GetComponent<ParticleSystemRenderer>();
             r.renderMode = ParticleSystemRenderMode.Stretch;
-            r.lengthScale = 2f;
+            r.lengthScale = Headset ? 3f : 2f;
             r.velocityScale = 0.04f;
             r.sharedMaterial = Visuals.LineMaterial;
             r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
@@ -346,7 +351,7 @@ namespace SAE
             if (raining && !rain.isPlaying) rain.Play();
             else if (!raining && rain.isPlaying) rain.Stop(true, ParticleSystemStopBehavior.StopEmitting);   // les dernières gouttes finissent de tomber
             var emission = rain.emission;
-            emission.rateOverTime = rainRate * rainAmount;
+            emission.rateOverTime = rainRate * rainAmount * (Headset ? HeadsetRainShare : 1f);
 
             rainSound.volume = 0.3f * rainAmount * (OnMap ? 1f : HubVolume);
             if (raining && !rainSound.isPlaying) rainSound.Play();
