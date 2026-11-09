@@ -2,6 +2,15 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Lun. 9 nov. 2026
+**Ce que j'ai fait :** préparation de l'oral de 15 minutes : le plan détaillé ([ORAL.md](../ORAL.md)) et un site de présentation en 13 diapos ([oral/index.html](../oral/index.html), touches ← → N T F). Pas encore répété ni relu par Maxens et Nicolas.
+- **À compléter par nous :** la colonne S3 de la chronologie et la dernière diapo (rien n'est committé depuis le 23 oct.), puis répéter en 15 min chrono.
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | Lecture des journaux, du GDD, d'opti.md et de l'historique git/GitHub (116 issues, 57 PR, 334 commits au 23 oct.) pour écrire `docs/ORAL.md` (minutage, qui parle, phrases clés, parcours de démo, liste d'avant-oral) et le site `docs/oral/index.html` (captures du dépôt, notes du présentateur, chrono). Vérifié dans le navigateur : pas de débordement sur les 13 diapos. Les chiffres viennent du dépôt ; les deux zones « À COMPLÉTER » sont à remplir | Gardé (à relire et répéter) |
+| Claude (Claude Code) | Liste des optimisations (ma liste : LOD, instancing, matériaux partagés, ombres, static/occlusion, pool, Rigidbody kinematic, singes allégés), vérifiée dans le code et les réglages. Claude a vu que `feat/optim-plateau` (#153, ni fusionnée ni en PR) fait déjà le ciblage sans LINQ, le Rigidbody kinematic, les matériaux partagés, les ombres à 15 m, le static + occlusion, le pool de ballons et les singes figés : pas d'issue en double. Il a aussi trouvé ce qui manque : foveated rendering désactivé, singes riggés lourds (1,5-1,9 Mo), taches du camo en 6 sphères, ombres des objets créés en vague, objets créés/détruits à chaque tir et chaque son. 7 issues créées avec une proposition de « comment faire » (#174 à #180 : fusion de la branche d'opti avec coop/camo, foveated, polygones + LOD, ombres, pool projectiles/sons, taches camo, réglages fins), jalon S3 (sauf la POURRAIT), ajoutées au tableau en « À faire ». Aucun code modifié | Gardé |
+
 ## Ven. 23 oct. 2026
 **Ce que j'ai fait :** premier test du coop sur Netcode (éditeur + casque) ; casino à plusieurs : la borne de blackjack (style « Gamble With Your Friends ») et le classement rapproché sur la terrasse, testés dans Unity.
 
