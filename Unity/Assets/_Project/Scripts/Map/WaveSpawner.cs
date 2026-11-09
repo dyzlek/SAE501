@@ -70,6 +70,7 @@ namespace SAE
             path = new List<Vector3>();
             foreach (var p in MapLayout.PathPoints())
                 path.Add(transform.position + p + Vector3.up * balloonHeight);
+            Prewarm();
             Lives = startLives;
             Wave = GameState.WavesWon + 1;            // partie reprise (SaveGame) : on repart de la vague suivante
             Won = GameState.WavesWon >= LastWrittenWave;
@@ -192,6 +193,26 @@ namespace SAE
             balloon.Init(this, path, layers, kind);
             PlayerRig.IgnoreCollisions(go);   // le joueur traverse les ballons et les boss ; les flèches les touchent toujours
             return balloon;
+        }
+
+        // Au chargement de la carte (#181) : les pools sont remplis d'avance, pour que la première vague ne crée pas
+        // ses ballons (modèle 3D, collider) et les projectiles des singes posés en pleine partie.
+        const int PrewarmBalloons = 30, PrewarmCamo = 10, PrewarmProjectiles = 12;
+
+        void Prewarm()
+        {
+            var made = new List<Balloon>();
+            for (int i = 0; i < PrewarmBalloons; i++)
+            {
+                var b = Spawn(BalloonKind.Normal, 1);
+                if (i < PrewarmCamo) b.MakeCamo();   // les taches existent déjà : un camouflé recyclé n'a qu'à les montrer
+                made.Add(b);
+            }
+            foreach (var b in made) b.Release();
+
+            var types = new HashSet<MonkeyType>();
+            foreach (var p in GameState.Placed) types.Add(p.monkey.type);
+            foreach (var type in types) Projectile.Prewarm(type, PrewarmProjectiles);
         }
 
         // Un ballon éclaté, sorti ou effacé : caché et rangé pour la prochaine fois (appelé par Balloon.Release).

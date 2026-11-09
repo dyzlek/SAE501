@@ -37,6 +37,7 @@ namespace SAE
 
         Vector3 baseScale;
         float phase;
+        Renderer rend;
 
         // Pose une aura sur target. bodySize = taille du singe en mètres (largeur, hauteur, profondeur).
         // Le singe est centré sur target, donc ses pieds sont à -hauteur/2.
@@ -64,6 +65,7 @@ namespace SAE
             r.receiveShadows = false;
 
             var aura = go.AddComponent<Aura>();
+            aura.rend = r;
             aura.baseScale = go.transform.localScale;
             aura.phase = Random.value * 6.28f;   // les auras ne battent pas toutes en même temps
             return aura;
@@ -71,6 +73,7 @@ namespace SAE
 
         void Update()
         {
+            if (!rend.isVisible) return;   // personne ne la regarde (derrière le joueur, hors champ) : pas la peine de l'animer (#182)
             float s = 1f + PulseSize * Mathf.Sin(Time.time * PulseSpeed + phase);
             transform.localScale = new Vector3(baseScale.x, baseScale.y * s, baseScale.z);
             transform.Rotate(0f, SpinSpeed * Time.deltaTime, 0f, Space.Self);

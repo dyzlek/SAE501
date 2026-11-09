@@ -40,11 +40,20 @@ namespace SAE
             return m;
         }
 
-        public void Set(Color c, bool isRainbow = false) { color = c; rainbow = isRainbow; Apply(); }
+        public void Set(Color c, bool isRainbow = false) { color = c; rainbow = isRainbow; Apply(); SleepUnlessRainbow(); }
 
-        void OnEnable() => Apply();
+        void OnEnable() { Apply(); SleepUnlessRainbow(); }
         void OnValidate() => Apply();
         void Update() { if (rainbow) Apply(); }
+
+        // Optimisation (#182) : Update ne sert qu'à l'arc-en-ciel. Pour les centaines d'autres objets teintés
+        // (ballons, morceaux de modèles, cubes du décor), on coupe le composant : Unity ne l'appelle plus à chaque image.
+        // Set marche toujours sur un composant coupé (et le rallume si on passe en arc-en-ciel).
+        // Seulement en jeu : hors Play, la case « activé » serait enregistrée dans la scène.
+        void SleepUnlessRainbow()
+        {
+            if (Application.isPlaying) enabled = rainbow;
+        }
 
         void Apply()
         {

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SAE
@@ -11,6 +12,13 @@ namespace SAE
         const float Duration = 0.25f;   // secondes
         static readonly Color WaveColor = new Color(1f, 0.6f, 0.15f);
 
+        // Ondes et étincelles réutilisées (#178) : avant, chaque explosion créait un objet, et un système de particules neuf.
+        static readonly Stack<Shockwave> pool = new Stack<Shockwave>();
+        static ParticleSystem sparks;
+        const int SparkCount = 25;   // étincelles par explosion (avant : 40)
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetPool() { pool.Clear(); sparks = null; }
+
         LineRenderer ring;
         Color color = WaveColor;
         float radius;
@@ -19,36 +27,45 @@ namespace SAE
         public static void Spawn(Vector3 center, float radius) => Spawn(center, radius, WaveColor, true);
 
         // Même onde, d'une autre couleur (ex. l'onde de froid bleue du singe de glace), avec ou sans étincelles.
-        public static void Spawn(Vector3 center, float radius, Color color, bool sparks)
+        public static void Spawn(Vector3 center, float radius, Color color, bool withSparks)
         {
-            var go = new GameObject("Onde");
-            go.transform.position = center;
-            var wave = go.AddComponent<Shockwave>();
+            Shockwave wave = null;
+            while (pool.Count > 0 && !wave) wave = pool.Pop();   // une onde détruite avec sa scène est sautée
+            if (!wave) wave = new GameObject("Onde").AddComponent<Shockwave>();
+            wave.transform.position = center;
             wave.radius = radius;
             wave.color = color;
-            if (sparks) Sparks(center);
+            wave.age = 0f;
+            wave.gameObject.SetActive(true);
+            wave.Grow(0f);
+            if (withSparks) Sparks(center);
         }
 
-        // Une gerbe d'étincelles orange : 40 petits points qui partent dans tous les sens, retombent et s'éteignent
-        // (un seul « burst », puis l'objet se détruit tout seul quand elles sont toutes éteintes).
+        // Une gerbe d'étincelles orange : de petits points qui partent dans tous les sens, retombent et s'éteignent.
+        // Un seul système de particules pour toute la scène : on le déplace puis on émet d'un coup (Emit).
         static void Sparks(Vector3 center)
         {
+            if (!sparks) sparks = MakeSparks();
+            sparks.transform.position = center;
+            sparks.Emit(SparkCount);
+        }
+
+        static ParticleSystem MakeSparks()
+        {
             var go = new GameObject("Étincelles");
-            go.transform.position = center;
             var ps = go.AddComponent<ParticleSystem>();
             ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);   // on règle avant de jouer
             var main = ps.main;
-            main.duration = 0.1f;
-            main.loop = false;
+            main.loop = true;                                   // toujours « en marche », sans rien émettre seul : Emit ajoute les gerbes
+            main.simulationSpace = ParticleSystemSimulationSpace.World;   // une gerbe ne suit pas le système quand il part ailleurs
+            main.maxParticles = 300;
             main.startLifetime = new ParticleSystem.MinMaxCurve(0.3f, 0.6f);
             main.startSpeed = new ParticleSystem.MinMaxCurve(3f, 7f);
             main.startSize = new ParticleSystem.MinMaxCurve(0.03f, 0.06f);
             main.startColor = new ParticleSystem.MinMaxGradient(new Color(1f, 0.9f, 0.4f), WaveColor);
             main.gravityModifier = 1f;                          // elles retombent
-            main.stopAction = ParticleSystemStopAction.Destroy;
             var emission = ps.emission;
             emission.rateOverTime = 0f;
-            emission.SetBursts(new[] { new ParticleSystem.Burst(0f, 40) });
             var shape = ps.shape;
             shape.shapeType = ParticleSystemShapeType.Sphere;
             shape.radius = 0.1f;
@@ -59,6 +76,7 @@ namespace SAE
             r.sharedMaterial = Visuals.LineMaterial;
             r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             ps.Play();
+            return ps;
         }
 
         void Awake()
@@ -75,17 +93,22 @@ namespace SAE
                 float a = i * Mathf.PI * 2f / Points;
                 ring.SetPosition(i, new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)));   // cercle de 1 m, agrandi par l'échelle
             }
-            Destroy(gameObject, Duration);
         }
 
-        void Update()
+        // Appelée aussi tout de suite par Spawn (avec age = 0) : taille et couleur de départ sans attendre une image
+        void Update() => Grow(Time.deltaTime);
+
+        void Grow(float dt)
         {
-            age += Time.deltaTime;
+            age += dt;
             float t = Mathf.Clamp01(age / Duration);
             transform.localScale = Vector3.one * Mathf.Lerp(0.2f, radius, t);
             var c = color;
             c.a = 1f - t;
             ring.startColor = ring.endColor = c;
+            if (t < 1f) return;
+            gameObject.SetActive(false);   // finie : rangée pour la prochaine explosion
+            pool.Push(this);
         }
     }
 }

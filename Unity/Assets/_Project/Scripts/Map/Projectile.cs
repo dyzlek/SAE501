@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SAE
@@ -17,6 +18,12 @@ namespace SAE
         static readonly float[] Curves =         { 0f,        1.5f,      0f,    0f,     0f,      0f,    0f };      // écart sur le côté (boomerang)
         static readonly float[] Spins =          { 0f,        1080f,     360f,  0f,     0f,      360f,  0f };      // tours sur lui-même, en degrés/s
 
+        // Les projectiles sont réutilisés (#178), un pool par type (chacun garde son modèle) : avant, chaque tir créait
+        // un objet et son modèle 3D, détruits à l'arrivée. Des centaines par vague = des à-coups.
+        static readonly Dictionary<MonkeyType, Stack<Projectile>> pool = new Dictionary<MonkeyType, Stack<Projectile>>();
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetPool() => pool.Clear();
+
         MonkeyType type;
         Vector3 from, lastTarget;
         Balloon target;
@@ -30,17 +37,51 @@ namespace SAE
             var asset = MonkeyVisuals.Projectile(type);
             if (!asset || !target) return false;
 
-            var go = new GameObject($"Projectile {type}");
-            go.transform.position = from;
-            Visuals.FitModel(asset, 0f, go.transform, Sizes[(int)type], out _);
-            var p = go.AddComponent<Projectile>();
+            var p = Take(type);
+            if (!p) p = Create(type, asset);
+            // Tout est remis à zéro : un projectile du pool garde sinon la position et la rotation de son dernier vol
+            p.transform.SetPositionAndRotation(from, Quaternion.identity);
+            p.age = 0f;
             p.type = type;
             p.from = from;
             p.target = target;
             p.lastTarget = target.transform.position;
             p.onHit = onHit;
             p.duration = Mathf.Max(0.05f, Vector3.Distance(from, p.lastTarget) / Speeds[(int)type]);
+            p.gameObject.SetActive(true);
             return true;
+        }
+
+        // Au chargement de la carte (WaveSpawner) : count projectiles de ce type, créés d'avance et rangés (#181)
+        public static void Prewarm(MonkeyType type, int count)
+        {
+            var asset = MonkeyVisuals.Projectile(type);
+            if (!asset) return;
+            if (!pool.TryGetValue(type, out var stack)) pool[type] = stack = new Stack<Projectile>();
+            for (int i = stack.Count; i < count; i++) stack.Push(Create(type, asset));
+        }
+
+        static Projectile Create(MonkeyType type, GameObject asset)
+        {
+            var go = new GameObject($"Projectile {type}");
+            Visuals.FitModel(asset, 0f, go.transform, Sizes[(int)type], out _);
+            // Pas d'ombre : elle ne se voit pas sur un objet si petit et si rapide, mais redessine le modèle (#177)
+            foreach (var r in go.GetComponentsInChildren<Renderer>())
+                r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            go.SetActive(false);
+            return go.AddComponent<Projectile>();
+        }
+
+        // Un projectile rangé de ce type (null s'il n'y en a pas). Ceux détruits avec leur scène sont sautés.
+        static Projectile Take(MonkeyType type)
+        {
+            if (!pool.TryGetValue(type, out var stack)) return null;
+            while (stack.Count > 0)
+            {
+                var p = stack.Pop();
+                if (p) return p;
+            }
+            return null;
         }
 
         void Update()
@@ -62,7 +103,11 @@ namespace SAE
 
             if (t < 1f) return;
             if (target && target.isActiveAndEnabled) onHit?.Invoke();
-            Destroy(gameObject);
+            target = null;
+            onHit = null;   // ne garde pas le singe et le ballon en mémoire
+            gameObject.SetActive(false);
+            if (!pool.TryGetValue(type, out var stack)) pool[type] = stack = new Stack<Projectile>();
+            stack.Push(this);
         }
     }
 }

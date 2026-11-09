@@ -18,6 +18,48 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 
 ---
 
+## Pools (sons, projectiles, ondes, traits), préchargement, Update coupés
+**Lun. 9 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · issues #178, #181, #182
+
+**Le problème.** Pendant une vague, le jeu créait et détruisait des objets sans arrêt : un `GameObject` + une `AudioSource` par son, un objet + son modèle 3D par projectile, un objet par onde de choc, un système de particules neuf (40 étincelles) par explosion, un `LineRenderer` par tir du Sniper. Ça charge le ramasse-miettes et donne des à-coups. Les sons étaient chargés au premier usage (`Resources.LoadAll` + lecture de tout le fichier pour sauter le silence) : le premier « pop » de la partie faisait un à-coup. Et `ColorTint.Update` tournait à chaque image sur chaque objet teinté (des centaines), alors qu'il ne sert qu'à l'arc-en-ciel.
+
+**Ce qui a été fait.**
+- `Core/Sounds.cs` : 24 sources créées une fois (objet « Sons », gardé entre les scènes), la première libre est prise, sinon la plus ancienne. `Preload()` charge tous les sons au lancement du jeu (sauf la musique).
+- `Map/Projectile.cs` : un pool par type de singe, remise à zéro (position, rotation, âge, cible) à chaque lancer ; projectiles sans ombre.
+- `Weapon/Shockwave.cs` : pool d'ondes ; **un seul** système d'étincelles par scène, déplacé puis `Emit(25)` (au lieu de 40 étincelles dans un système neuf).
+- `Map/Tower.cs` (dans la fusion) : pool des traits du Sniper.
+- `Map/WaveSpawner.cs` : au chargement de la carte, 30 ballons (dont 10 avec leurs taches de camo) et 12 projectiles par type de singe posé sont créés d'avance et rangés.
+- `Core/ColorTint.cs` : le composant se coupe tout seul s'il n'est pas en arc-en-ciel (`Set` marche toujours). `Core/Aura.cs` : l'aura ne bat et ne tourne que si une caméra la voit.
+
+**Avant / après.** *À mesurer* dans le Profiler (build de dev au casque, vague chargée avec le panneau admin) : *GC Alloc* par image, pics, temps de `Update.ScriptRunBehaviourUpdate`, et le premier pop de la partie.
+
+**Est-ce que ça a vraiment marché ?** *Pas encore mesuré.* Rien ne change à l'écran, sauf des gerbes d'étincelles un peu moins fournies (25 au lieu de 40). Risque connu des pools : un objet recyclé qui garde un état de sa vie d'avant. Tout est remis à zéro à la sortie du pool ; à vérifier en jeu (ballons camo recyclés, boss qui se divise, projectiles qui partent du bon singe).
+
+**Suggestions.**
+- Si un son se coupe en pleine grosse vague (24 sources occupées), monter `Voices` à 32.
+- `Billboard`, `FlameFlicker`, `Spinner` gardent leur `Update` : ils sont posés sur peu d'objets.
+- Préchauffage des shaders (`GraphicsStateCollection`) pas fait : les ballons et projectiles créés d'avance ne sont pas dessinés. À faire seulement si le Profiler montre encore un pic au premier boss.
+
+---
+
+## Fusion de `feat/optim-plateau` avec le coop et les ballons camo
+**Lun. 9 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · issues #174, #153, #177, #179
+
+**Le problème.** Les optimisations de #153 (mesure : 41 fps, CPU limitant, 231 skinned meshes, 626 k triangles, 141 SetPass) étaient dans `feat/optim-plateau`, jamais fusionnée, partie d'un `main` plus ancien que le coop et les ballons camouflés. Rien n'arrivait au casque. Sur `main`, chaque ballon avait en plus un `BoxCollider` **sans Rigidbody** : pour la physique, un collider « statique » qu'on déplace à chaque image.
+
+**Ce qui a été fait.** Fusion dans `feat/opti-fusion`, conflits résolus : ciblage sans LINQ **avec** le filtre camo ; explosion du Canon sans LINQ ; pool de ballons compatible avec le coop (le double réseau est retiré quand le ballon est rangé, et un ballon recyclé est re-partagé à sa 1re image) et avec le camo (un ballon recyclé n'est plus camouflé) ; les copies d'un invité ne vont jamais dans le pool. Ce que la branche apporte : Rigidbody kinematic sur les ballons, matériaux partagés (`ColorTint.Shared`), ombres à 15 m, décor static + occlusion, singes figés sur le plateau (`MonkeyView.Freeze`), singes immobiles loin du joueur (`TowerAnimator`), 2 os par sommet, mode admin (#151).
+- **#179** : les 6 sphères de Unity des taches du camo (~4 500 triangles, 6 objets) sont remplacées par **un seul maillage** de 6 petites boules (480 triangles), partagé par tous les ballons camouflés, avec un matériau partagé.
+- **#177** : les modèles des ballons, les taches du camo, les projectiles et les traits du Sniper ne projettent plus d'ombre (l'aura n'en avait déjà plus).
+- Corrigé en passant : dans la branche, le corps du `if` de `Tutorial.TryPress` était dans le commentaire (le bouton de test était refusé).
+
+**Avant / après.** Mesure de #153 avant la fusion : 41 fps (mode admin, 200 singes). *Après : à mesurer* au même endroit, avec les mêmes réglages du panneau admin.
+
+**Est-ce que ça a vraiment marché ?** *Pas encore mesuré.* À vérifier en jeu : une vague normale, une vague camo, un boss qui se divise, une partie en coop (hôte + invité).
+
+**Suggestions.** Les lumières du hub (#177, étape 3 : *Per Object Limit* 4 → 2 ou lumières par sommet) n'ont pas été touchées : c'est un changement d'image, à décider au casque.
+
+---
+
 ## Réglages de rendu du casque : bon asset URP, sans post-traitement, fovéation, distance de vue
 **Lun. 9 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · issues #186, #187, #175, #184, #183
 
