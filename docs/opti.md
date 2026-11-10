@@ -43,7 +43,7 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 
 **Ce qui a été fait.**
 - **Mesh LOD** (Unity 6) coché à l'import (`generateMeshLods: 1`) des modèles sans squelette : ballons normal, blindé et cœur, MOAB, BFB, bananier, Canon, Tireur. Unity calcule tout seul des versions simplifiées dans le même maillage, et la carte graphique prend la plus légère qui suffit selon la taille à l'écran. Pas de réexport Blender, réversible en décochant la case.
-- Nouveau menu **SAE → Optimiser les textures (Quest)** (`Editor/TextureMenu.cs`) : sort les textures intégrées des FBX (comme le bouton *Extract Textures*), puis limite sur Android les textures du dossier Art à 1024 px (512 pour les projectiles), avec mipmaps. **Pas encore lancé** : à faire dans Unity, puis committer les textures extraites.
+- Nouveau menu **SAE → Optimiser les textures (Quest)** (`Editor/TextureMenu.cs`) : sort les textures intégrées des FBX (comme le bouton *Extract Textures*), puis limite sur Android les textures du dossier Art à 1024 px (512 pour les projectiles), avec mipmaps. **Lancé le 10 nov.** (mode batch) : 30 FBX vidés de leurs textures intégrées (18 PNG extraits, 7,9 Mo, dans `<Sujet>/Textures/Extraites`), 39 textures limitées sur Android. À vérifier dans Unity : les singes et ballons gardent leurs couleurs (pas de modèle blanc ou rose). Poids du build : à mesurer.
 - Pluie au casque : 40 % des gouttes (400 au plus), traits 1,5 fois plus longs (`Map/Weather.cs`).
 - **Pas fait, volontairement :**
   - fusionner les 2-3 maillages de chaque singe (Blender) : réexporter des modèles riggés sans pouvoir tester dans Unity, à 4 jours du rendu, c'est trop risqué (noms d'os, échelle, animations) ;
