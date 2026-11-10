@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 10 nov. 2026
 
+### Retirer les boutons de test
+> Enlève les deux boutons au-dessus de SE TP (capture jointe : les cubes « 200 SINGES » et « VAGUE CHEAT »).
+
 ### PDF des optimisations
 > Fais un gros fichier PDF qui explique ce que tu as fait concrètement pour les optimisations (la liste en une phrase par optimisation), où c'est, et comment le vérifier.
 

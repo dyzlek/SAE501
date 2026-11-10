@@ -2,7 +2,8 @@ using UnityEngine;
 
 namespace SAE
 {
-    // Les triches de test (performances), partagées par le panneau PC (AdminPanel) et les boutons au casque (AdminButton).
+    // Les triches de test (performances), utilisées par le panneau PC (AdminPanel, touche F1).
+    // (Les cubes de test au casque, AdminButton, ont été retirés le 10 nov. : ils gênaient au-dessus des pupitres.)
     // Rien ici n'est appelé par le jeu normal.
     public static class AdminCheats
     {
