@@ -1113,7 +1113,9 @@ def build_mountains(M, coll, suffix=""):
     sculptée par un bruit « à crêtes » (ridged noise, le bruit des générateurs de terrain) : vallées, arêtes et pics.
     Couleurs par sommet, selon la hauteur ET la pente : prairie au pied, forêt sombre, roche, et de la neige sur
     les sommets mais pas dans les pentes raides (comme en vrai). Au loin, tout se fond dans le bleu du ciel
-    (perspective aérienne : c'est ce qui donne la profondeur). Facettes nettes : on garde le style low poly du jeu.
+    (perspective aérienne : c'est ce qui donne la profondeur).
+    Lisses depuis le 10 nov. (demande de Dylan) : sommets partagés, ombrage lisse et couleurs fondues d'un sommet
+    à l'autre, au lieu de facettes nettes (6 720 sommets au lieu de 39 168).
     Devant le joueur (angle 0), la chaîne commence plus loin : on voit plus de prairie devant le plateau."""
     from mathutils import noise
     g = random.Random(11 if not suffix else 23)
@@ -1169,22 +1171,28 @@ def build_mountains(M, coll, suffix=""):
         mist = 0.72 * smooth(55, 175, dist)
         return tuple(x * (1 - mist) + hz * mist for x, hz in zip(c, haze))
 
+    verts = [[b.bm.verts.new(p) for p in row] for row in grid]       # un sommet par point de la grille, partagé
+    mi = b.mi(M["montagne"])
     for k in range(rings):
         for j in range(segs):
             j2 = (j + 1) % segs
-            for tri in ((grid[k][j], grid[k + 1][j], grid[k + 1][j2]), (grid[k][j], grid[k + 1][j2], grid[k][j2])):
-                f = b.face(tri, [(0, 0)] * 3, M["montagne"])
+            for tri in ((verts[k][j], verts[k + 1][j], verts[k + 1][j2]), (verts[k][j], verts[k + 1][j2], verts[k][j2])):
+                f = b.bm.faces.new(tri)
                 f.normal_update()
                 if f.normal.z < 0:
                     f.normal_flip()
-                centre = (tri[0] + tri[1] + tri[2]) / 3
-                c = colour(centre, f.normal, Vector((centre.x, centre.y)).length)   # une couleur par facette : le style low poly net
-                for loop in f.loops:
-                    loop[b.col] = (*c, 1)
+                f.material_index = mi
+                f.smooth = True
                 f.tag = True
+    b.bm.normal_update()                                             # normales des sommets : la moyenne des faces autour
+    for row in verts:
+        for v in row:
+            c = colour(v.co, v.normal, Vector((v.co.x, v.co.y)).length)   # une couleur par sommet : elle se fond entre deux sommets
+            for loop in v.link_loops:
+                loop[b.col] = (*c, 1)
     ob = b.finish("Montagnes" + suffix, coll, recalc=False)
     for p in ob.data.polygons:
-        p.use_smooth = False                                         # facettes nettes : style « low poly »
+        p.use_smooth = True                                          # ombrage lisse : plus de facettes
     return ob
 
 

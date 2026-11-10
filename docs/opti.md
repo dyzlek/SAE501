@@ -18,6 +18,19 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 
 ---
 
+## Montagnes lisses (hub et carte)
+**Mar. 10 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-tapis-lustre` · issue #195
+
+**Le problème.** Les montagnes (`build_mountains` dans `Blender/cabane.py`) étaient en facettes nettes (style low poly) : chaque triangle avait ses 3 sommets à lui et sa couleur, soit **39 168 sommets** pour 13 056 triangles, dans `Cabane.glb` et `Paysage.glb`. De loin, la lumière et les ombres dessinaient chaque facette (demande de Dylan : « de loin, des montagnes lisses »).
+
+**Ce qui a été fait.** Sommets partagés (un par point de la grille), ombrage lisse (normales moyennées) et une couleur par sommet, qui se fond d'un sommet à l'autre. Même relief, mêmes triangles. Vérifié : seules les montagnes changent dans les deux fichiers.
+
+**Avant / après.** Sommets : 39 168 → **6 720** par chaîne (triangles inchangés : 13 056). Moins de sommets à transformer et à envoyer au GPU. Fps à mesurer.
+
+**Est-ce que ça a vraiment marché ?** Rendu comparé en image dans Blender (avant facettes, après lisse) ; **pas vu dans Unity ni au casque**. Perte : le style low poly des montagnes (choix de Dylan).
+
+**Suggestions.** Les montagnes sont à 40 m et plus : vérifier dans Unity qu'elles ne projettent pas d'ombre (*Cast Shadows* : Off), la distance d'ombre ne va de toute façon pas jusque-là.
+
 ## Sol de la cabane et de la bananeraie : une dalle texturée au lieu de centaines de planches
 **Mar. 10 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-tapis-lustre` · issue #195
 
