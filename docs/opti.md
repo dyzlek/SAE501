@@ -18,6 +18,19 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 
 ---
 
+## Sol de la cabane et de la bananeraie : une dalle texturée au lieu de centaines de planches
+**Mar. 10 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-tapis-lustre` · issue #195
+
+**Le problème.** Le plancher était fait de **planches en 3D, une par une** (chacune un pavé biseauté) : **9 064 triangles** dans la cabane et **14 036** dans la bananeraie, pour un sol plat. On voyait même l'herbe entre deux planches (capture de Dylan).
+
+**Ce qui a été fait** (`Blender/cabane.py`, `build_floor` et nouvelle texture `tex_floor`) : le sol est **une seule dalle plate (12 triangles)**. Les planches sont **dessinées dans la texture** `Plancher_Sol` (JPEG 1024 + carte de normales) : 8 planches de 19 cm, chacune avec sa teinte et ses veines, des joints en bout de planche, des fentes sombres. La texture se répète tous les 1,52 m. Le script tire toujours les mêmes nombres au hasard qu'avant, pour que le reste du décor (herbe, bougies…) ne bouge pas : vérifié, seuls les sols changent dans `Cabane.glb` et `Bananeraie.glb`.
+
+**Avant / après.** Triangles : cabane 106 789 → 97 737 (dont le lustre), bananeraie 24 720 → 10 696. Fps à mesurer au casque.
+
+**Est-ce que ça a vraiment marché ?** À mesurer. Rendu vérifié en image dans Blender, **pas testé dans Unity ni au casque**. Perte visuelle : plus de relief réel entre les planches (seulement la carte de normales), le motif se répète tous les 1,52 m.
+
+**Suggestions.** Même méthode possible pour d'autres surfaces faites de pièces (allée de la bananeraie, murs en rondins vus de loin).
+
 ## Cabane : tapis opaque et lustre en « donut » de bois
 **Mar. 10 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-tapis-lustre` · issue #195
 

@@ -109,6 +109,37 @@ def tex_wood(name, base, lines, seed, n=1024, strength=6.0):
     return image(name, col), image(name + "_N", normal_from_height(h, strength), data=True)
 
 
+FLOOR_TILE = 1.52   # la texture du sol couvre 1,52 m × 1,52 m (8 planches de 19 cm), puis se répète
+
+
+def tex_floor(n=1024, planks=8):
+    """Plancher dessiné dans la texture (10 nov., optimisation) : 8 planches côte à côte, chacune sa teinte et ses veines,
+    un joint en bout de planche, des fentes sombres entre elles. Raccordable : le sol entier est une seule dalle plate."""
+    g = np.random.default_rng(11)
+    col, h = grain(n, (0.68, 0.47, 0.27), 33, 11)
+    w = n // planks                                      # largeur d'une planche en pixels
+    v = np.arange(n)
+    for i in range(planks):
+        sl = slice(i * w, (i + 1) * w)
+        shift = g.integers(0, n)
+        col[:, sl] = np.roll(col[:, sl], shift, axis=0)  # les veines ne se suivent pas d'une planche à l'autre
+        h[:, sl] = np.roll(h[:, sl], shift, axis=0)
+        joint = g.integers(0, n)                         # deux bouts de planche par carreau : des planches de 76 cm
+        tint = np.where(((v - joint) % n) < n // 2, g.uniform(0.78, 1.05), g.uniform(0.78, 1.05))
+        col[:, sl] *= tint[:, None, None]                # chaque planche a sa teinte
+        d = (v - joint) % (n // 2)
+        d = np.minimum(d, n // 2 - d)[:, None]
+        gapv = np.clip(1 - d / 3.0, 0, 1)                # la fente du joint (3 px ≈ 4 mm)
+        col[:, sl] *= (1 - 0.75 * gapv)[..., None]
+        h[:, sl] -= 0.6 * gapv
+    x = np.arange(n) % w
+    du = np.minimum(x, w - 1 - x)[None, :]
+    gapu = np.clip(1 - du / 3.0, 0, 1)                   # la fente entre deux planches
+    col *= (1 - 0.75 * gapu)[..., None]
+    h -= 0.6 * gapu
+    return image("Plancher_Sol", np.clip(col, 0, 1)), image("Plancher_Sol_N", normal_from_height(h, 6), data=True)
+
+
 def tex_log_end(n=512):
     y, x = np.mgrid[0:n, 0:n] / (n - 1) * 2 - 1
     r = np.sqrt(x * x + y * y)
@@ -288,6 +319,7 @@ def material(name, base=None, normal=None, color=(0.8, 0.8, 0.8), rough=0.75, me
 def build_materials():
     M = {}
     M["plancher"] = material("Plancher", *tex_wood("Plancher", (0.68, 0.47, 0.27), 26, 11), rough=0.6, vcol=True)
+    M["sol"] = material("Plancher_Sol", *tex_floor(), rough=0.6)   # le sol : une dalle, les planches sont dans la texture
     M["rondin"] = material("Rondin", *tex_wood("Rondin", (0.74, 0.49, 0.27), 18, 21, strength=8), rough=0.8, vcol=True)
     M["bout"] = material("Rondin_Bout", *tex_log_end(), rough=0.85)
     M["poutre"] = material("Poutre", *tex_wood("Poutre", (0.42, 0.27, 0.15), 34, 23), rough=0.8, vcol=True)
@@ -502,24 +534,23 @@ def empty(name, loc, coll):
 
 def build_floor(M, coll, x0=-4.0, x1=4.0, z0=-5.6, z1=4.0, suffix=""):
     """Plateforme en planches (dedans + terrasse derrière la porte), posée sur une poutre de rive et des pieux.
-    x0..x1 et z0..z1 : ses bornes dans le repère Unity (par défaut, la cabane et sa terrasse, côté porte)."""
-    b = Builder([M["plancher"]])
-    width, gap, thick = 0.19, 0.008, 0.05
+    x0..x1 et z0..z1 : ses bornes dans le repère Unity (par défaut, la cabane et sa terrasse, côté porte).
+    Depuis le 10 nov. (optimisation) : une seule dalle plate (12 triangles) avec les planches dessinées dans la texture,
+    au lieu de centaines de planches en 3D (9 000 triangles dans la cabane, 14 000 dans la bananeraie)."""
+    width, thick = 0.19, 0.05
+    # On tire les mêmes nombres qu'avant : le reste du décor (herbe, bougies...) utilise le même générateur
+    # et ne doit pas bouger.
     x = x0
-    row = 0
     while x < x1 - 0.01:
         z = z0 - rng.uniform(0, 1.5)
         while z < z1:
             length = rng.uniform(1.6, 3.2)
-            za, zb = max(z, z0), min(z + length, z1)
-            if zb - za > 0.15:
-                c = P(x + width / 2, -thick / 2 + rng.uniform(-0.002, 0.002), (za + zb) / 2)
-                rot = Matrix(((1, 0, 0), (0, 1, 0), (0, 0, 1)))    # x Blender = x Unity (inversé, sans importance), y = le long
-                b.box(c, (width - gap, zb - za - gap, thick), rot, M["plancher"], uv_scale=1 / 1.2, uv_offset=(rng.random(), rng.random()), bevel=0.006,
-                      tint=rng.uniform(0.78, 1.05))   # chaque planche a sa teinte
+            if min(z + length, z1) - max(z, z0) > 0.15:
+                rng.uniform(-0.002, 0.002), rng.random(), rng.random(), rng.uniform(0.78, 1.05)
             z += length
         x += width
-        row += 1
+    b = Builder([M["sol"]])
+    b.box(P((x0 + x1) / 2, -thick / 2, (z0 + z1) / 2), (x1 - x0, z1 - z0, thick), Matrix.Identity(3), M["sol"], uv_scale=1 / FLOOR_TILE)
     floor = b.finish("Plancher" + suffix, coll)
 
     # Poutres de rive et pieux (on les voit depuis la terrasse et par les fenêtres)

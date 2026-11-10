@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 10 nov. 2026
 
+### Sol en une seule texture
+> Pour le sol, évite de mettre plein de planches : juste une texture.
+
 ### Optimiser le tapis et le lustre
 > J'aimerais que tu optimises le tapis et le lustre pour éviter qu'ils fassent laguer (le tapis, c'est juste une texture, et le lustre un donut de bois).
 
