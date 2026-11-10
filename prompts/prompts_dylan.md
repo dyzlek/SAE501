@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 10 nov. 2026
 
+### Tourner la texture du sol
+> Tourne de 90° la texture du bois du sol que tu as modifiée.
+
 ### Sol en une seule texture
 > Pour le sol, évite de mettre plein de planches : juste une texture.
 

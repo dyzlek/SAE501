@@ -550,7 +550,11 @@ def build_floor(M, coll, x0=-4.0, x1=4.0, z0=-5.6, z1=4.0, suffix=""):
             z += length
         x += width
     b = Builder([M["sol"]])
-    b.box(P((x0 + x1) / 2, -thick / 2, (z0 + z1) / 2), (x1 - x0, z1 - z0, thick), Matrix.Identity(3), M["sol"], uv_scale=1 / FLOOR_TILE)
+    faces = b.box(P((x0 + x1) / 2, -thick / 2, (z0 + z1) / 2), (x1 - x0, z1 - z0, thick), Matrix.Identity(3), M["sol"], uv_scale=1 / FLOOR_TILE)
+    for f in faces:                                      # texture tournée de 90° (10 nov., demande de Dylan) : planches dans l'autre sens
+        for loop in f.loops:
+            u, v = loop[b.uv].uv
+            loop[b.uv].uv = (v, -u)
     floor = b.finish("Plancher" + suffix, coll)
 
     # Poutres de rive et pieux (on les voit depuis la terrasse et par les fenêtres)

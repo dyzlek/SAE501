@@ -23,7 +23,7 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 
 **Le problème.** Le plancher était fait de **planches en 3D, une par une** (chacune un pavé biseauté) : **9 064 triangles** dans la cabane et **14 036** dans la bananeraie, pour un sol plat. On voyait même l'herbe entre deux planches (capture de Dylan).
 
-**Ce qui a été fait** (`Blender/cabane.py`, `build_floor` et nouvelle texture `tex_floor`) : le sol est **une seule dalle plate (12 triangles)**. Les planches sont **dessinées dans la texture** `Plancher_Sol` (JPEG 1024 + carte de normales) : 8 planches de 19 cm, chacune avec sa teinte et ses veines, des joints en bout de planche, des fentes sombres. La texture se répète tous les 1,52 m. Le script tire toujours les mêmes nombres au hasard qu'avant, pour que le reste du décor (herbe, bougies…) ne bouge pas : vérifié, seuls les sols changent dans `Cabane.glb` et `Bananeraie.glb`.
+**Ce qui a été fait** (`Blender/cabane.py`, `build_floor` et nouvelle texture `tex_floor`) : le sol est **une seule dalle plate (12 triangles)**. Les planches sont **dessinées dans la texture** `Plancher_Sol` (JPEG 1024 + carte de normales) : 8 planches de 19 cm, chacune avec sa teinte et ses veines, des joints en bout de planche, des fentes sombres. La texture se répète tous les 1,52 m. Texture tournée de 90° ensuite (demande de Dylan) : les planches vont dans l'autre sens. Le script tire toujours les mêmes nombres au hasard qu'avant, pour que le reste du décor (herbe, bougies…) ne bouge pas : vérifié, seuls les sols changent dans `Cabane.glb` et `Bananeraie.glb`.
 
 **Avant / après.** Triangles : cabane 106 789 → 97 737 (dont le lustre), bananeraie 24 720 → 10 696. Fps à mesurer au casque.
 
