@@ -140,14 +140,15 @@ def tex_thatch(n=1024):
     return image("Chaume", col), image("Chaume_N", normal_from_height(h, 7), data=True)
 
 
-def tex_rug(n=1024):
-    """Tapis rond : bordure dorée, frise de losanges, champ rouge à fleur, médaillon, franges (transparence)."""
+def tex_rug(n=512):
+    """Tapis rond : bordure dorée, frise de losanges, champ rouge à fleur, médaillon.
+    Opaque et en 512 (10 nov., optimisation) : plus de franges découpées par la transparence, le tissu va jusqu'au bord du disque."""
     y, x = np.mgrid[0:n, 0:n] / (n - 1) * 2 - 1
     r = np.sqrt(x * x + y * y)
     a = np.arctan2(y, x)
     gold, red, navy, cream, rust = [np.array(c) for c in ((0.86, 0.64, 0.24), (0.58, 0.09, 0.07), (0.1, 0.13, 0.28), (0.93, 0.86, 0.68), (0.75, 0.32, 0.12))]
     col = np.zeros((n, n, 3)) + red
-    rr = r / 0.92                                        # le tissu va jusqu'à 0,92 ; au-delà, les franges
+    rr = r                                               # le tissu va jusqu'au bord du disque (avant : 0,92, puis des franges)
     petal = np.abs(np.cos(a * 4)) * 0.22 + 0.36
     field = (rr < 0.68) & (rr > 0.3)
     col[field & (np.abs(rr - petal - 0.1) < 0.012)] = gold
@@ -168,19 +169,12 @@ def tex_rug(n=1024):
     col[band & diamond] = cream
     col[band & (np.abs(t) * 2 + np.abs(k) < 0.35)] = rust
     col[(rr >= 0.68) & (rr < 0.7)] = gold
-    col[(rr >= 0.9) & (rr <= 1.0)] = gold
-    wool = tnoise(n, 300, 300, 51)
+    col[rr >= 0.9] = gold                                # la bordure, et les coins (hors du disque, jamais vus)
+    wool = tnoise(n, 150, 150, 51)
     col = col * (0.92 + 0.05 * wool)[..., None]
-    alpha = (r <= 0.92).astype(float)
-    # Franges : des brins crème tout autour, de longueur un peu irrégulière
-    strand = (np.cos(a * 360) > -0.1)
-    length = 0.92 + 0.07 * (0.8 + 0.2 * np.cos(a * 37))
-    fr = (r > 0.92) & (r < length) & strand
-    col[fr] = cream * 0.95
-    alpha[fr] = 1
-    edge_ao = np.clip(1 - np.abs(r - 0.92) / 0.02, 0, 1) * 0.25
+    edge_ao = np.clip(1 - np.abs(r - 1.0) / 0.03, 0, 1) * 0.25   # le bord un peu plus sombre
     col = col * (1 - edge_ao)[..., None]
-    return image("Tapis", np.clip(col, 0, 1), alpha=alpha, fmt="PNG")
+    return image("Tapis", np.clip(col, 0, 1))             # JPEG sans alpha
 
 
 def tex_dartboard(n=512):
@@ -299,7 +293,7 @@ def build_materials():
     M["poutre"] = material("Poutre", *tex_wood("Poutre", (0.42, 0.27, 0.15), 34, 23), rough=0.8, vcol=True)
     M["chaume"] = material("Chaume", *tex_thatch(), rough=0.95)
     M["peint"] = material("Bois_Peint", *tex_wood("Bois_Peint", (0.20, 0.50, 0.42), 20, 27, strength=4), rough=0.7)
-    M["tapis"] = material("Tapis", tex_rug(), rough=0.95, clip=True)
+    M["tapis"] = material("Tapis", tex_rug(), rough=0.95)   # opaque (10 nov.) : la transparence découpée coûtait cher au casque
     M["cible"] = material("Cible", tex_dartboard(), rough=0.8)
     M["herbe"] = material("Herbe", *tex_grass(), rough=0.9)
     M["fer"] = material("Fer", color=(0.2, 0.2, 0.21), rough=0.45, metal=0.8)
@@ -723,17 +717,17 @@ def flame(M, coll, base, name, size=1.0):
 
 
 def build_chandelier(M, coll):
-    """Lustre en roue de charrette : jante, 8 rayons, moyeu, 8 bougies avec flamme, 4 chaînes jusqu'au crochet."""
-    b = Builder([M["poutre"], M["fer"], M["cire"], M["flamme"], M["bout"]])
+    """Lustre en roue de charrette : jante, 8 rayons, moyeu, 8 bougies avec flamme, 4 chaînes jusqu'au crochet.
+    Allégé le 10 nov. (optimisation) : la jante est un seul tore de bois (un « donut ») au lieu de 16 rondins
+    avec leurs bouts, et tout le bois prend le même matériau (Poutre) : 3 matériaux au lieu de 4."""
+    b = Builder([M["poutre"], M["fer"], M["cire"]])
     y = 2.75
     rad = 0.55
-    n = 16
-    for k in range(n):
-        a0, a1 = 360 * k / n, 360 * (k + 1) / n
-        b.log(polar(a0, rad, y), polar(a1, rad, y), 0.035, M["poutre"], M["bout"], 800 + k, segs=6)
+    ring = [(rad + 0.035 * math.cos(2 * math.pi * k / 6), 0.035 * math.sin(2 * math.pi * k / 6)) for k in range(7)]
+    b.lathe(ring, 24, M["poutre"], P(0, y, 0), u_scale=6.0, v_scale=4.0)   # la jante : un tore, 6 × 24 faces
     for k in range(8):
-        b.log(polar(45 * k, 0.07, y), polar(45 * k, rad - 0.02, y), 0.018, M["poutre"], M["bout"], 820 + k, segs=6)
-    b.lathe([(0.08, -0.06), (0.09, 0.0), (0.08, 0.06)], 10, M["poutre"], P(0, y, 0), cap_top=M["bout"], cap_bottom=M["bout"])
+        b.log(polar(45 * k, 0.07, y), polar(45 * k, rad - 0.02, y), 0.018, M["poutre"], M["poutre"], 820 + k, segs=6)
+    b.lathe([(0.08, -0.06), (0.09, 0.0), (0.08, 0.06)], 10, M["poutre"], P(0, y, 0), cap_top=M["poutre"], cap_bottom=M["poutre"])
     for k in range(8):
         c = polar(22.5 + 45 * k, rad, y)
         b.lathe([(0.045, 0.0), (0.05, 0.02)], 8, M["fer"], c + Vector((0, 0, 0.03)), cap_bottom=M["fer"])
@@ -774,7 +768,7 @@ def build_lanterns(M, coll):
 
 
 def build_rug(M, coll):
-    """Tapis rond (un disque un peu épais), texture à franges découpée par la transparence."""
+    """Tapis rond : un disque plat et opaque, avec sa texture (sans franges ni transparence depuis le 10 nov.)."""
     b = Builder([M["tapis"]])
     n = 64
     top = [P(math.sin(2 * math.pi * k / n) * RUG, 0.012, math.cos(2 * math.pi * k / n) * RUG) for k in range(n)]

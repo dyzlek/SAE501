@@ -18,6 +18,24 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 
 ---
 
+## Cabane : tapis opaque et lustre en « donut » de bois
+**Mar. 10 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-tapis-lustre` · issue #195
+
+**Le problème.** Le hub lague près du tapis et du lustre (ressenti de Dylan, pas mesuré). Les deux viennent du modèle généré par `Blender/cabane.py` (`Cabane.glb`) :
+- **Tapis** : un disque de 3 m de diamètre (~7 m² de sol) en **transparence découpée** (glTF « MASK », pour les franges). Sur le GPU du Quest, un pixel découpé empêche d'éliminer tôt ce qui est caché derrière, et le MSAA 4x le rend plus cher. Sa texture était un **PNG 1024 avec alpha (1,7 Mo)**, importée sans compression par glTFast (≈ 4 Mo en mémoire avec les mipmaps).
+- **Lustre** : 2 436 triangles, **4 matériaux** (bois, bout de rondin, fer, cire) ; la jante était faite de 16 rondins avec chacun ses deux bouts.
+
+**Ce qui a été fait** (`Blender/cabane.py`, puis `Cabane.glb` régénéré avec Blender 5.2 en mode batch ; les autres .glb régénérés ont été remis comme avant) :
+- Tapis **opaque** : plus de franges ni d'alpha, le tissu va jusqu'au bord du disque ; texture **JPEG 512 sans alpha (114 Ko)**.
+- Lustre : la jante devient **un seul tore de bois** (6 × 24 faces) et tout le bois prend le matériau Poutre (plus de bouts de rondin) : **3 matériaux au lieu de 4**, **1 636 triangles au lieu de 2 436**. Bougies, flammes et chaînes inchangées.
+- Rien d'autre ne change dans la cabane (vérifié : mêmes objets, mêmes maillages et matériaux, sauf ces deux-là). Fichier : 11,8 → 10,1 Mo.
+
+**Avant / après.** À mesurer au casque (compteur au poignet), au centre de la cabane, en regardant le tapis puis le lustre. Profiler : *Batches* en baisse d'au moins 1 sous le lustre.
+
+**Est-ce que ça a vraiment marché ?** À mesurer. Rendu vérifié en image (tapis, lustre), **pas testé dans Unity ni au casque**. Perte visuelle : plus de franges au tapis (bord doré net) ; le lustre garde sa forme de roue.
+
+**Suggestions.** La lumière du lustre (`PrototypeGenerator.cs`, `AddLight(t, 8f, 3.2f)`) est une lumière ponctuelle en temps réel de **8 m de portée** : elle éclaire toute la cabane et une partie de dehors, donc presque chaque pixel du hub fait un calcul de lumière en plus. C'est probablement le plus gros coût « du lustre ». Pistes : portée 5 m (la cabane fait 3,4 m de rayon), ou lumière cuite (*Baked*) puisqu'elle ne bouge pas (on perd le vacillement). Pas fait ici : il faut regénérer ou modifier la scène Hub.
+
 ## Corrections après relecture de la PR #188 : couleurs animées, miniatures des boss
 **Mar. 10 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · PR #188
 
