@@ -58,6 +58,13 @@ namespace SAE
         public bool TintedModel => modelTints != null;              // le modèle prend la couleur de la couche
 
         public BalloonKind Kind { get; private set; }
+
+        // Numéro de vie : il change à chaque sortie du pool. Un tir encore en vol vers un ballon éclaté garde l'ancien
+        // numéro : le ballon recyclé (même objet, reparti de l'entrée) n'est donc pas pris pour la même cible.
+        public int Life { get; private set; }
+
+        // Le ballon visé (avec son numéro de vie au moment du tir) est-il toujours en jeu ?
+        public static bool StillThere(Balloon b, int life) => b && b.isActiveAndEnabled && b.Life == life;
         public int Layers => layers;
         public bool Camo { get; private set; }
         static readonly Color CamoColor = new Color(0.36f, 0.42f, 0.2f);
@@ -77,6 +84,7 @@ namespace SAE
         {
             spawner = owner;
             path = points;
+            Life++;
             // Un ballon peut sortir du pool (WaveSpawner) : on remet tout à zéro
             nextPoint = 1;
             Progress = 0f;

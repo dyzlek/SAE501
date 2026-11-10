@@ -18,6 +18,24 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 
 ---
 
+## Corrections après relecture de la PR #188 : couleurs animées, miniatures des boss
+**Mar. 10 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · PR #188
+
+**Le problème.** Relecture de la PR avant le merge :
+- `ColorTint` crée en jeu un matériau partagé **par couleur** (pour le SRP Batcher). Mais une dizaine de scripts animent une couleur à chaque image (cadre du tutoriel qui pulse, panneau d'argent, boutons refusés, roulette, nuages de l'orage) : chaque image créait un nouveau matériau, gardé à vie dans le cache. Environ 72 matériaux par seconde pendant tout le tutoriel : la mémoire monte et des à-coups arrivent, l'inverse du but. `Set` recréait aussi un tableau de matériaux à chaque appel, même sans changement de couleur.
+- Les miniatures du plateau (instancing) dessinaient les boss et les dirigeables en **boules étirées** : on ne les reconnaissait plus. Perte visuelle non notée jusqu'ici.
+
+**Ce qui a été fait.**
+- `ColorTint` : deux méthodes. `Set(couleur)` pour une couleur fixe (ballons, décor) → matériau partagé comme avant. `Animate(couleur)` pour une couleur qui change à chaque image → `MaterialPropertyBlock`, aucun matériau créé. Les 11 appels qui animent passent par `Animate`. Si la couleur n'a pas changé, `Set` et `Animate` ne font plus rien (plus de tableau recréé).
+- Plateau (`Hub/Board.cs`) : boss et dirigeables gardent une vraie copie de leur modèle (peu nombreux, sans ombre ni collider ; cachée quand le boss retourne au pool, réutilisée ensuite). Les ballons normaux restent en instancing.
+- Hors perf, même relecture : projectiles qui suivaient un ballon recyclé (numéro de vie `Balloon.Life`), 4 sources de son réservées aux sons 2D (annonces, voix, jingles) pour que les pops ne les coupent plus.
+
+**Avant / après.** À mesurer (Profiler, *Memory* → nombre de matériaux, pendant le tutoriel) : avant, +72 matériaux par seconde ; après, attendu stable. Le plateau coûte quelques appels de dessin de plus pendant un boss.
+
+**Est-ce que ça a vraiment marché ?** À mesurer. Compilé, pas testé au casque.
+
+**Suggestions.** Une couleur animée perd le regroupement du SRP Batcher : ça ne concerne que quelques boutons et panneaux, sans effet visible attendu.
+
 ## Modèles : Mesh LOD automatique, textures des singes, pluie au casque
 **Lun. 9 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · issues #176, #180, #185
 

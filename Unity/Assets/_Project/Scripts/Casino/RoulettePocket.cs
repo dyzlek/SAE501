@@ -12,6 +12,6 @@ namespace SAE
         public Color baseColor;         // sa couleur au repos
 
         public void Rest() => tint.Set(baseColor);
-        public void Highlight(Color glow, float amount) => tint.Set(Color.Lerp(baseColor, glow, amount));
+        public void Highlight(Color glow, float amount) => tint.Animate(Color.Lerp(baseColor, glow, amount));
     }
 }

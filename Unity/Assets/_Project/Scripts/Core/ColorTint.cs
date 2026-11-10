@@ -6,6 +6,10 @@ namespace SAE
     // En jeu : un matériau partagé par couleur (Shared). Un MaterialPropertyBlock empêche le SRP Batcher de regrouper
     // les objets, et chaque cube teinté coûtait un changement de matériau (SetPass) : tous les cubes d'une même couleur
     // partagent maintenant le même matériau. Le mode arc-en-ciel change à chaque image : il garde le MaterialPropertyBlock.
+    // Pareil pour une couleur animée par un autre script (cadre du tutoriel qui pulse, bouton refusé, panneau d'argent) :
+    // un matériau par couleur, ce serait un nouveau matériau à chaque image, jamais libéré. Ces scripts appellent Animate.
+    //   Set(couleur)     : couleur fixe (ballon, cube du décor)      → matériau partagé ;
+    //   Animate(couleur) : couleur qui change à chaque image          → MaterialPropertyBlock, aucun matériau créé.
     [ExecuteAlways]
     public class ColorTint : MonoBehaviour
     {
@@ -17,6 +21,8 @@ namespace SAE
         MaterialPropertyBlock block;
         Renderer rend;
         Material[] originals;   // les matériaux d'origine, d'où partent les copies teintées
+        bool animated;          // dernière couleur posée par Animate
+        bool applied;           // la couleur actuelle est déjà posée sur le renderer
 
         static readonly System.Collections.Generic.Dictionary<(Material, Color), Material> shared =
             new System.Collections.Generic.Dictionary<(Material, Color), Material>();
@@ -40,7 +46,19 @@ namespace SAE
             return m;
         }
 
-        public void Set(Color c, bool isRainbow = false) { color = c; rainbow = isRainbow; Apply(); SleepUnlessRainbow(); }
+        public void Set(Color c, bool isRainbow = false) => Change(c, isRainbow, false);
+        public void Animate(Color c) => Change(c, false, true);
+
+        void Change(Color c, bool isRainbow, bool isAnimated)
+        {
+            // Beaucoup d'appelants le font à chaque image : si rien n'a changé, on ne touche à rien
+            if (Application.isPlaying && applied && c == color && isRainbow == rainbow && isAnimated == animated) return;
+            color = c;
+            rainbow = isRainbow;
+            animated = isAnimated;
+            Apply();
+            SleepUnlessRainbow();
+        }
 
         void OnEnable() { Apply(); SleepUnlessRainbow(); }
         void OnValidate() => Apply();
@@ -59,7 +77,8 @@ namespace SAE
         {
             if (!rend) rend = GetComponent<Renderer>();
             if (!rend) return;
-            if (Application.isPlaying && !rainbow)
+            applied = true;
+            if (Application.isPlaying && !rainbow && !animated)
             {
                 originals ??= rend.sharedMaterials;
                 var mats = new Material[originals.Length];

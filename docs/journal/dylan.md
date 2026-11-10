@@ -2,6 +2,13 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Mar. 10 nov. 2026
+**Ce que j'ai fait :** relecture de la PR #188 (optimisations) avant le merge, et corrections.
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | Corrections de la PR #188 d'après la relecture (ma demande) : (1) `ColorTint` créait un matériau à chaque image pour les couleurs animées (tutoriel, panneau d'argent, boutons, roulette, nuages) → nouvelle méthode `Animate` (bloc de propriétés), 11 appels changés ; (2) un projectile suivait le ballon recyclé à l'entrée de la carte → numéro de vie `Balloon.Life` vérifié par `Projectile` et `Tower` ; (3) 4 sources de son gardées pour les sons 2D (annonces, voix, jingles), un pop en trop est sauté ; (4) boss et dirigeables avec leur vrai modèle sur le plateau (je ne voulais pas de boules étirées) ; (5) commentaire faux du menu des textures corrigé (mipmaps aussi sur PC) ; (6) `Closes #N` au lieu de `Ferme #N` (GitHub ne comprend que l'anglais) dans CLAUDE.md, ORGANISATION.md, le modèle de PR et la PR #188 ; #170 et #171 fermées (PR #172 fusionnée) ; (7) étape « Calculer l'occlusion » ajoutée au README. Claude a d'abord essayé une détection automatique des couleurs animées, jetée : un ballon touché deux images de suite aurait perdu le regroupement. Point de la relecture jugé faux : les scènes ne sont pas commitées exprès (générées, voir README). Compilé en mode batch, **pas testé dans Unity ni au casque** ; menu des textures pas lancé | Gardé (à tester) |
+
 ## Lun. 9 nov. 2026
 **Ce que j'ai fait :** préparation de l'oral de 15 minutes : le plan détaillé ([ORAL.md](../ORAL.md)) et un site de présentation en 13 diapos ([oral/index.html](../oral/index.html), touches ← → N T F). Pas encore répété ni relu par Maxens et Nicolas.
 - **À compléter par nous :** la colonne S3 de la chronologie et la dernière diapo (rien n'est committé depuis le 23 oct.), puis répéter en 15 min chrono.

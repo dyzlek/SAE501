@@ -48,7 +48,7 @@ namespace SAE
 
         // Sans rechargement du domaine (Enter Play Mode rapide), les statiques survivent d'une partie à l'autre
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetState() { clips.Clear(); starts.Clear(); nextQuincy = 0f; popFrame = -1; popsThisFrame = 0; voices = null; nextVoice = 0; }
+        static void ResetState() { clips.Clear(); starts.Clear(); nextQuincy = 0f; popFrame = -1; popsThisFrame = 0; voices = null; nextFlat = 0; }
 
         // Au lancement : tous les sons du jeu (les constantes ci-dessus) sont chargés et leur début de son calculé (#181).
         // La musique n'est pas concernée : Music la charge elle-même, et elle est trop longue pour être lue ici.
@@ -65,12 +65,15 @@ namespace SAE
         }
 
         // Les sources de son, créées une seule fois et réutilisées (#178) : avant, chaque son créait un objet et une
-        // AudioSource, détruits à la fin. Si toutes jouent encore, on reprend la plus ancienne (elle est presque finie).
-        const int Voices = 24;
+        // AudioSource, détruits à la fin.
+        // Les 4 premières sont gardées pour les sons 2D (annonce du boss, voix de Quincy, jingles) : pendant une grosse
+        // vague, les pops occupent toutes les autres, et ils ne doivent jamais couper une annonce.
+        // Si toutes les sources 3D jouent déjà, un nouveau pop est simplement sauté : il y en a des dizaines, ça ne s'entend pas.
+        const int Voices = 24, FlatVoices = 4;
         static AudioSource[] voices;
-        static int nextVoice;
+        static int nextFlat;   // sons 2D tous occupés (rare) : on reprend la plus ancienne, à tour de rôle
 
-        static AudioSource FreeVoice()
+        static AudioSource FreeVoice(bool flat)
         {
             if (voices == null || !voices[0])
             {
@@ -84,16 +87,12 @@ namespace SAE
                     voices[i].playOnAwake = false;
                 }
             }
-            for (int n = 0; n < Voices; n++)
-            {
-                var voice = voices[(nextVoice + n) % Voices];
-                if (voice.isPlaying) continue;
-                nextVoice = (nextVoice + n + 1) % Voices;
-                return voice;
-            }
-            var oldest = voices[nextVoice];   // toutes occupées : on tourne dans l'ordre, la suivante est la plus ancienne
-            nextVoice = (nextVoice + 1) % Voices;
-            return oldest;
+            int first = flat ? 0 : FlatVoices, last = flat ? FlatVoices : Voices;
+            for (int i = first; i < last; i++)
+                if (!voices[i].isPlaying) return voices[i];
+            if (!flat) return null;
+            nextFlat = (nextFlat + 1) % FlatVoices;
+            return voices[nextFlat];
         }
 
         public static bool Has(string sound) => Clips(sound).Length > 0;
@@ -121,7 +120,8 @@ namespace SAE
         {
             var clip = Clip(sound);
             if (!clip) return;
-            var source = FreeVoice();
+            var source = FreeVoice(flat: !where.HasValue);
+            if (!source) return;   // trop de sons 3D en même temps : celui-ci est sauté
             if (where.HasValue) source.transform.position = where.Value;
             source.clip = clip;
             source.volume = volume * Options.SoundVolume;   // × le réglage SONS du menu OPTIONS

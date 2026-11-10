@@ -48,24 +48,27 @@ namespace SAE
                 if ((seesCamo || !b.Camo) && Flat(b.transform.position - transform.position).sqrMagnitude <= range * range) found.Add(b);
             if (found.Count == 0) { cooldown = SearchDelay; return; }
             found.Sort((a, b) => b.Progress.CompareTo(a.Progress));   // le plus avancé d'abord
-            var inRange = new List<Balloon>(found);                   // copie : le tir l'utilise plus tard (coroutine)
+            // Copie, avec le numéro de vie de chaque ballon : le tir part plus tard (coroutine), et un ballon éclaté
+            // pendant le geste peut déjà être ressorti du pool à l'entrée de la carte
+            var inRange = new List<(Balloon ball, int life)>(found.Count);
+            foreach (var b in found) inRange.Add((b, b.Life));
 
             cooldown = MonkeyData.FireDelay(monkey);
-            if (animator) animator.Attack(inRange[0].transform.position);
+            if (animator) animator.Attack(inRange[0].ball.transform.position);
             StartCoroutine(Fire(inRange));
         }
 
         // Le tir part au moment où le bras passe devant (TowerAnimator.ReleaseDelay).
-        IEnumerator Fire(List<Balloon> targets)
+        IEnumerator Fire(List<(Balloon ball, int life)> targets)
         {
             if (animator) yield return new WaitForSeconds(TowerAnimator.ReleaseDelay);
-            targets.RemoveAll(b => !b || !b.isActiveAndEnabled);   // éclatés pendant le geste (rangés dans le pool)
+            targets.RemoveAll(t => !Balloon.StillThere(t.ball, t.life));   // éclatés pendant le geste (même s'ils sont ressortis)
             if (targets.Count == 0) yield break;
 
             if (monkey.type == MonkeyType.Glace)
             {
                 Shockwave.Spawn(transform.position, MonkeyData.Range(monkey), FrostColor, false);
-                foreach (var b in targets) Hit(b);
+                foreach (var t in targets) Hit(t.ball);
                 yield break;
             }
 
@@ -73,7 +76,7 @@ namespace SAE
             var from = animator ? animator.LaunchPoint : transform.position + Vector3.up * 0.6f;
             for (int i = 0; i < count; i++)
             {
-                var b = targets[i];
+                var b = targets[i].ball;
                 if (monkey.type == MonkeyType.Sniper) Shot(from, b.transform.position);   // la traînée de la balle
                 // Le projectile touche en arrivant ; sans modèle (ou au-delà de MaxProjectiles), on touche tout de suite
                 if (i >= MaxProjectiles || !Projectile.Launch(monkey.type, from, b, () => Hit(b))) Hit(b);

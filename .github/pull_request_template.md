@@ -1,4 +1,5 @@
-Ferme #
+Closes #
+<!-- Une ligne « Closes #N » par issue. En anglais : « Ferme #N » ne ferme rien. -->
 
 **Ce que ça change :**
 

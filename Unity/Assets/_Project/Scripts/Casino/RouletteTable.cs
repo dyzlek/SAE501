@@ -78,7 +78,7 @@ namespace SAE
             float pulse = 0.75f + 0.25f * Mathf.Sin(Time.time * 6f);
             foreach (var p in pockets)
                 if (p.color == selected.Value && p != flashing) p.Highlight(GlowColor, 0.35f + 0.3f * pulse);   // la case garde un peu de sa couleur
-            foreach (var z in zones) if (z.color == selected.Value) z.glow.Set(GlowColor * pulse);
+            foreach (var z in zones) if (z.color == selected.Value) z.glow.Animate(GlowColor * pulse);
         }
 
         // --- Le tapis (RouletteBetZone) et les jetons (RouletteButton) ---

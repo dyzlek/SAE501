@@ -2,6 +2,11 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Mar. 10 nov. 2026
+
+### Corriger la PR des optimisations après relecture
+> Hier, un agent m'a fait une PR (#188) : aide-moi vraiment à bien la finir. Voici la relecture : un matériau créé à chaque image par `ColorTint.Set` avec une couleur animée (tutoriel, panneau d'argent, roulette, boutons refusés) ; des projectiles qui suivent un ballon recyclé ; des sons longs coupés par les pops ; « Ferme #N » qui ne ferme aucune issue ; des scènes pas à jour dans le dépôt et l'occlusion jamais calculée ; le menu des textures jamais lancé et son commentaire faux sur les mipmaps ; les boss dessinés en boules étirées sur le plateau (ça, je n'aimerais pas).
+
 ## Lun. 9 nov. 2026
 
 ### Analyser le projet et les optimisations

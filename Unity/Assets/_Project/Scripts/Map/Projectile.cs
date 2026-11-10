@@ -27,6 +27,7 @@ namespace SAE
         MonkeyType type;
         Vector3 from, lastTarget;
         Balloon target;
+        int targetLife;   // le numéro de vie du ballon au départ : s'il a éclaté puis resservi, ce n'est plus la cible
         Action onHit;
         float duration, age;
 
@@ -45,6 +46,7 @@ namespace SAE
             p.type = type;
             p.from = from;
             p.target = target;
+            p.targetLife = target.Life;
             p.lastTarget = target.transform.position;
             p.onHit = onHit;
             p.duration = Mathf.Max(0.05f, Vector3.Distance(from, p.lastTarget) / Speeds[(int)type]);
@@ -86,7 +88,7 @@ namespace SAE
 
         void Update()
         {
-            if (target && target.isActiveAndEnabled) lastTarget = target.transform.position;   // il suit le ballon
+            if (Balloon.StillThere(target, targetLife)) lastTarget = target.transform.position;   // il suit le ballon
             age += Time.deltaTime;
             float t = Mathf.Clamp01(age / duration);
             int i = (int)type;
@@ -102,7 +104,7 @@ namespace SAE
             transform.position = next;
 
             if (t < 1f) return;
-            if (target && target.isActiveAndEnabled) onHit?.Invoke();
+            if (Balloon.StillThere(target, targetLife)) onHit?.Invoke();
             target = null;
             onHit = null;   // ne garde pas le singe et le ballon en mémoire
             gameObject.SetActive(false);

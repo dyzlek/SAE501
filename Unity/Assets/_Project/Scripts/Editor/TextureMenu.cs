@@ -9,7 +9,9 @@ namespace SAE
     // Unity ne laisse pas régler la taille d'une texture intégrée : on la sort du FBX (comme le bouton « Extract Textures »
     // de l'Inspector), dans <Sujet>/Textures/Extraites, et le FBX s'en sert à la place.
     // Ensuite, sur Android seulement (le casque), chaque texture du dossier Art est limitée à 1024 px (512 pour les
-    // projectiles, tout petits à l'écran). Dans l'éditeur et sur PC, rien ne change.
+    // projectiles, tout petits à l'écran). Dans l'éditeur et sur PC, la taille ne change pas.
+    // Les mipmaps, eux, sont un réglage commun à toutes les plateformes : ils sont activés aussi sur PC
+    // (un tiers de mémoire en plus par texture, mais plus de scintillement de loin).
     public static class TextureMenu
     {
         const string ArtFolder = "Assets/_Project/Art";

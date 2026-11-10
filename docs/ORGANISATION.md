@@ -37,7 +37,7 @@ Sur le tableau, le champ **Niveau** (Chantier / Tâche) sert à filtrer : vue de
 ## Le cycle d'une tâche
 1. **Créer l'issue** (modèle « Tâche » ou « Bug ») : un label `prio:`, un label `type:`/`zone:`, le jalon, un responsable. Nouvelle mécanique → l'écrire d'abord dans le GDD.
 2. **Commencer** : `git pull` sur `main`, branche `feat/…`, `fix/…`, `docs/…` ou `art/…` ; passer la carte en **En cours**.
-3. **Finir** : PR vers `main` avec `Ferme #N` dans la description (le modèle de PR a la check-list) ; carte en **En relecture**.
+3. **Finir** : PR vers `main` avec `Closes #N` dans la description (en anglais : GitHub ne reconnaît pas `Ferme #N`, l'issue resterait ouverte) (le modèle de PR a la check-list) ; carte en **En relecture**.
 4. **Relire** : un autre membre relit et teste ; merge, suppression de la branche ; l'issue se ferme et passe en **Fait**.
 
 ## Les rituels

@@ -297,7 +297,7 @@ namespace SAE
                 var spot = cloudSpot[i];
                 var outward = new Vector3(spot.x, 0f, spot.z).normalized * CloudFarAway;
                 cloudBody[i].localPosition = Vector3.Lerp(outward + Vector3.up * spot.y, spot, arrive);
-                cloudTint[i].Set(tint);
+                cloudTint[i].Animate(tint);
             }
         }
 

@@ -51,7 +51,7 @@ namespace SAE
 
             punch = Mathf.MoveTowards(punch, 0f, Time.deltaTime * 2.5f);
             if (panel) panel.localScale = panelScale * (1f + 0.12f * Mathf.Sin(punch * Mathf.PI));
-            if (frame) frame.Set(Color.Lerp(FrameColor, flash, punch));
+            if (frame) frame.Animate(Color.Lerp(FrameColor, flash, punch));
         }
     }
 }

@@ -38,7 +38,7 @@ namespace SAE
             cap.localPosition = capRest + Vector3.down * (0.015f * pressed);
 
             var color = Economy.CanAfford(BowUpgrades.Price(upgrade)) ? UpgradeButton.Affordable : UpgradeButton.TooExpensive;
-            capTint.Set(Color.Lerp(color, UpgradeButton.Refused, refused));
+            capTint.Animate(Color.Lerp(color, UpgradeButton.Refused, refused));
         }
 
         string Text(bool done)
