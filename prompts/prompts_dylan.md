@@ -4,6 +4,14 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 10 nov. 2026
 
+### Améliorer le suivi GitHub
+> Améliore nos issues, fais des jalons, etc. : on va être notés sur la gestion de projet (https://github.com/users/dyzlek/projects/2).
+>
+> Suite (mes réponses) : ferme comme abandonnées les issues des gestes S2 non fusionnés (#132, #134, #135) ; #139 est faite par le classement et l'armoire à trophées ; #36 et #37 ont été faites ; supprime les labels par défaut inutilisés.
+
+### Liste des optimisations en une phrase chacune
+> Fais-moi une liste, comme celle-ci (LOD sur les modèles, instancing, matériaux partagés…), avec une seule phrase par optimisation faite.
+
 ### Corriger la PR des optimisations après relecture
 > Hier, un agent m'a fait une PR (#188) : aide-moi vraiment à bien la finir. Voici la relecture : un matériau créé à chaque image par `ColorTint.Set` avec une couleur animée (tutoriel, panneau d'argent, roulette, boutons refusés) ; des projectiles qui suivent un ballon recyclé ; des sons longs coupés par les pops ; « Ferme #N » qui ne ferme aucune issue ; des scènes pas à jour dans le dépôt et l'occlusion jamais calculée ; le menu des textures jamais lancé et son commentaire faux sur les mipmaps ; les boss dessinés en boules étirées sur le plateau (ça, je n'aimerais pas).
 >
