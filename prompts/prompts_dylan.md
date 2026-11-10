@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 10 nov. 2026
 
+### Cabane moins détaillée
+> Essaie d'avoir moins de rondins de bois pour la maison, et des fenêtres et volets moins détaillés, la porte aussi, mais que ça reste joli.
+
 ### Montagnes lisses
 > Je veux que, de loin, les montagnes soient lisses, surtout pour leurs ombres, etc.
 

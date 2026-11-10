@@ -415,8 +415,10 @@ class Builder:
             bmesh.ops.bevel(self.bm, geom=edges, offset=bevel, segments=1, affect="EDGES", clamp_overlap=True)
         return faces
 
-    def log(self, p0, p1, r, side_mat, end_mat, seed, segs=14):
-        """Rondin de p0 à p1 : un cylindre un peu irrégulier, bouts chanfreinés, bois de bout (cernes) aux extrémités."""
+    def log(self, p0, p1, r, side_mat, end_mat, seed, segs=14, tall=1.0, simple=False):
+        """Rondin de p0 à p1 : un cylindre un peu irrégulier, bouts chanfreinés, bois de bout (cernes) aux extrémités.
+        tall : hauteur / profondeur (> 1 = rondin ovale, plus haut que profond).
+        simple : 3 tronçons au lieu de 5 (sans le léger renflement du milieu), pour les murs (10 nov., optimisation)."""
         g = random.Random(seed)
         axis = (p1 - p0)
         length = axis.length
@@ -426,6 +428,8 @@ class Builder:
         w_ax = axis.cross(u_ax).normalized()
         stations = [0.0, 0.025, 0.33, 0.66, 0.975, 1.0]
         radii = [0.86, 1.0, 1.0 + g.uniform(-0.04, 0.04), 1.0 + g.uniform(-0.04, 0.04), 1.0, 0.86]
+        if simple:
+            stations, radii = [0.0, 0.025, 0.975, 1.0], [0.86, 1.0, 1.0, 0.86]
         bend = Vector((0, 0, g.uniform(-0.012, 0.012)))
         uoff, voff = g.random(), g.random()
         rings = []
@@ -437,7 +441,7 @@ class Builder:
             for j in range(segs):
                 a = 2 * math.pi * j / segs
                 d = u_ax * math.cos(a) + w_ax * math.sin(a)
-                v = self.bm.verts.new(c + d * (r * k))
+                v = self.bm.verts.new(c + (u_ax * math.cos(a) + w_ax * math.sin(a) * tall) * (r * k))
                 # Ombre dans les creux : le dessus et surtout le dessous du rondin, là où il touche ses voisins
                 crevice = abs(d.z) ** 3
                 shade[v] = tint * (1 - 0.5 * crevice) * (1 - 0.12 * max(0.0, -d.z))
@@ -575,42 +579,61 @@ def build_walls(M, coll):
     b = Builder([M["rondin"], M["bout"]])
     side_len = 2 * R * math.tan(math.pi / SIDES)
     over = 0.2                                     # les rondins dépassent de 20 cm aux angles, dehors
-    step = LOG_R * 2 * 1.05                       # un petit jour entre deux rondins : on y voit le joint (torchis)
-    seed = 0
-    for i in range(SIDES):
+
+    def wall_pieces(rv):
+        """Les rondins des murs : (mur, hauteur, début, fin) ; rv = demi-hauteur d'un rondin."""
+        step = rv * 2 * 1.05                       # un petit jour entre deux rondins : on y voit le joint (torchis)
+        out = []
+        for i in range(SIDES):
+            ang = i * 360 / SIDES
+            cuts = []                              # morceaux du mur à NE PAS couvrir : (x0, x1, y0, y1) dans le repère du mur
+            if ang == DOOR:
+                cuts.append((-DOOR_W / 2, DOOR_W / 2, -1, DOOR_H))
+            elif ang in WINDOWS:
+                # 4 cm de plus de chaque côté : le bout des rondins se cache dans les montants de la fenêtre
+                # (au ras du montant, les deux faces se superposaient et « clignotaient » selon l'angle de vue)
+                cuts.append((-WIN_W / 2 - 0.04, WIN_W / 2 + 0.04, WIN_Y0, WIN_Y1))
+            y = rv + (i % 2) * step / 2
+            while y < H - rv * 0.3:
+                pieces = [(-side_len / 2 - over, side_len / 2 + over)]
+                for (cx0, cx1, cy0, cy1) in cuts:
+                    if y + rv > cy0 and y - rv < cy1:     # tout rondin qui touche l'ouverture est coupé
+                        new = []
+                        for (a, c) in pieces:
+                            if a < cx0:
+                                new.append((a, min(c, cx0)))
+                            if c > cx1:
+                                new.append((max(a, cx1), c))
+                        pieces = new
+                out += [(i, y, a, c) for (a, c) in pieces if c - a >= 0.12]
+                y += step
+        return out
+
+    # Allégé le 10 nov. (optimisation, demande de Dylan) : rondins ovales, 35 % plus hauts que profonds
+    # (moins de rangées, l'intérieur de la cabane ne bouge pas), 8 côtés au lieu de 14, sans renflement.
+    WALL_TALL = 1.35
+    old_count = len(wall_pieces(LOG_R))            # avant, chaque rondin tirait un nombre au hasard :
+    for _ in range(old_count):                     # on en tire autant, pour que le reste du décor (herbe, bougies...) ne bouge pas
+        rng.uniform(0.94, 1.04)
+    radius = random.Random(3)                      # la taille des rondins vient d'un générateur à part
+    for seed, (i, y, a, c) in enumerate(wall_pieces(LOG_R * WALL_TALL), 1):
         ang = i * 360 / SIDES
         B = basis(ang)
         center = polar(ang, R)
-        cuts = []                                  # morceaux du mur à NE PAS couvrir : (x0, x1, y0, y1) dans le repère du mur
-        if ang == DOOR:
-            cuts.append((-DOOR_W / 2, DOOR_W / 2, -1, DOOR_H))
-        elif ang in WINDOWS:
-            # 4 cm de plus de chaque côté : le bout des rondins se cache dans les montants de la fenêtre
-            # (au ras du montant, les deux faces se superposaient et « clignotaient » selon l'angle de vue)
-            cuts.append((-WIN_W / 2 - 0.04, WIN_W / 2 + 0.04, WIN_Y0, WIN_Y1))
-        y = LOG_R + (i % 2) * step / 2
-        while y < H - LOG_R * 0.3:
-            pieces = [(-side_len / 2 - over, side_len / 2 + over)]
-            for (cx0, cx1, cy0, cy1) in cuts:
-                # Tout rondin qui touche l'ouverture est coupé (avant : seulement s'il y entrait de plus d'un demi-rayon,
-                # et les autres débordaient de quelques centimètres sur la fenêtre)
-                if y + LOG_R > cy0 and y - LOG_R < cy1:
-                    new = []
-                    for (a, c) in pieces:
-                        if a < cx0:
-                            new.append((a, min(c, cx0)))
-                        if c > cx1:
-                            new.append((max(a, cx1), c))
-                    pieces = new
-            for (a, c) in pieces:
-                if c - a < 0.12:
-                    continue
-                p0 = center + B @ Vector((a, 0, y))
-                p1 = center + B @ Vector((c, 0, y))
-                seed += 1
-                b.log(p0, p1, LOG_R * rng.uniform(0.94, 1.04), M["rondin"], M["bout"], seed)
-            y += step
+        p0 = center + B @ Vector((a, 0, y))
+        p1 = center + B @ Vector((c, 0, y))
+        b.log(p0, p1, LOG_R * radius.uniform(0.94, 1.04), M["rondin"], M["bout"], seed, segs=8, tall=WALL_TALL, simple=True)
     walls = b.finish("Murs", coll)
+
+    def log_bottom_above(i, top):
+        """Le bas du premier rondin entier au-dessus d'une ouverture (mur i) : le linteau monte jusque-là,
+        sinon on voit une bande de joint blanc entre le linteau et ce rondin (les rondins sont plus hauts depuis le 10 nov.)"""
+        rv = LOG_R * WALL_TALL
+        step = rv * 2 * 1.05
+        y = rv + (i % 2) * step / 2
+        while y - rv < top:
+            y += step
+        return y - rv
 
     # Le joint (torchis clair) entre les rondins : un panneau dans l'axe de chaque mur, les rondins dépassent devant et derrière
     b = Builder([M["joint"]])
@@ -643,15 +666,17 @@ def build_walls(M, coll):
         if ang == DOOR:
             for s in (-1, 1):
                 b.box(center + B @ Vector((s * (DOOR_W / 2 + 0.06), 0, DOOR_H / 2)), (0.14, 0.32, DOOR_H), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.012)
-            b.box(center + B @ Vector((0, 0, DOOR_H + 0.07)), (DOOR_W + 0.4, 0.34, 0.16), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.015)
+            lintel = max(0.16, log_bottom_above(i, DOOR_H) + 0.03 - (DOOR_H - 0.01))
+            b.box(center + B @ Vector((0, 0, DOOR_H - 0.01 + lintel / 2)), (DOOR_W + 0.4, 0.34, lintel), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.015)
             b.box(center + B @ Vector((0, 0, 0.012)), (DOOR_W, 0.36, 0.025), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.006)
-        elif ang in WINDOWS:
+        elif ang in WINDOWS:                       # fenêtres sans biseaux depuis le 10 nov. (moins de triangles)
             wy = (WIN_Y0 + WIN_Y1) / 2
             for s in (-1, 1):
-                b.box(center + B @ Vector((s * (WIN_W / 2 + 0.04), 0, wy)), (0.08, 0.3, WIN_Y1 - WIN_Y0 + 0.16), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.008)
-            b.box(center + B @ Vector((0, 0, WIN_Y1 + 0.05)), (WIN_W + 0.24, 0.3, 0.1), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.01)
-            b.box(center + B @ Vector((0, -0.03, WIN_Y0 - 0.04)), (WIN_W + 0.3, 0.42, 0.07), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.01)   # appui
-            b.box(center + B @ Vector((0, 0, WIN_Y0 - 0.17)), (WIN_W + 0.08, 0.26, 0.3), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.008)    # allège : bouche le jour sous l'appui
+                b.box(center + B @ Vector((s * (WIN_W / 2 + 0.04), 0, wy)), (0.08, 0.3, WIN_Y1 - WIN_Y0 + 0.16), B, M["poutre"], uv_scale=1 / 1.5)
+            lintel = max(0.1, log_bottom_above(i, WIN_Y1) + 0.03 - WIN_Y1)
+            b.box(center + B @ Vector((0, 0, WIN_Y1 + lintel / 2)), (WIN_W + 0.24, 0.3, lintel), B, M["poutre"], uv_scale=1 / 1.5)
+            b.box(center + B @ Vector((0, -0.03, WIN_Y0 - 0.04)), (WIN_W + 0.3, 0.42, 0.07), B, M["poutre"], uv_scale=1 / 1.5)   # appui
+            b.box(center + B @ Vector((0, 0, WIN_Y0 - 0.17)), (WIN_W + 0.08, 0.26, 0.3), B, M["poutre"], uv_scale=1 / 1.5)    # allège : bouche le jour sous l'appui
             b.box(center + B @ Vector((0, 0, wy)), (0.035, 0.05, WIN_Y1 - WIN_Y0), B, M["poutre"], uv_scale=1 / 1.5)                     # croisillon
             b.box(center + B @ Vector((0, 0, wy)), (WIN_W, 0.05, 0.035), B, M["poutre"], uv_scale=1 / 1.5)
     frames = b.finish("Encadrements", coll)
@@ -664,9 +689,10 @@ def build_walls(M, coll):
         wy = (WIN_Y0 + WIN_Y1) / 2
         for s in (-1, 1):
             c = center + B @ Vector((s * (WIN_W / 2 + 0.08 + WIN_W / 4), LOG_R + 0.06, wy))
-            for k in range(3):   # trois lattes par volet
-                b.box(c + B @ Vector((s * (k - 1) * WIN_W / 6, 0, 0)), (WIN_W / 6 - 0.01, 0.03, WIN_Y1 - WIN_Y0), B, M["peint"], uv_scale=1 / 1.2, bevel=0.004)
-            b.box(c + B @ Vector((0, 0.02, 0)), (WIN_W / 2, 0.025, 0.06), B, M["peint"], uv_scale=1 / 1.2, bevel=0.004)
+            # Un panneau et deux traverses, sans biseau (10 nov. ; avant : trois lattes biseautées et une traverse)
+            b.box(c, (WIN_W / 2 - 0.01, 0.03, WIN_Y1 - WIN_Y0), B, M["peint"], uv_scale=1 / 1.2)
+            for zz in (-0.25, 0.25):
+                b.box(c + B @ Vector((0, 0.02, zz * (WIN_Y1 - WIN_Y0))), (WIN_W / 2, 0.025, 0.06), B, M["peint"], uv_scale=1 / 1.2)
     shutters = b.finish("Volets", coll)
     B = basis(DOOR)
     door = door_leaf(M, coll, polar(DOOR, R) + B @ Vector((DOOR_W / 2 + 0.06, LOG_R + 0.05, 0)), B)
@@ -678,13 +704,14 @@ def door_leaf(M, coll, hinge, B, width=DOOR_W + 0.06, height=DOOR_H):
     Objet à part, dont l'origine est sur la charnière (montant droit vu de l'intérieur) : Unity l'ouvre en le tournant
     autour de l'axe vertical (PortalDoor). B : repère du mur (x le long du mur, y vers l'extérieur, z en haut)."""
     b = Builder([M["peint"], M["fer"]])
-    for k in range(6):
-        x = -width + (k + 0.5) * width / 6
-        b.box(B @ Vector((x, 0.03, height / 2 - 0.02)), (width / 6 - 0.01, 0.045, height - 0.06), B, M["peint"], uv_scale=1 / 1.2, bevel=0.005)
+    # Allégée le 10 nov. : 3 planches sans biseau au lieu de 6 biseautées (on voit encore les fentes entre elles)
+    for k in range(3):
+        x = -width + (k + 0.5) * width / 3
+        b.box(B @ Vector((x, 0.03, height / 2 - 0.02)), (width / 3 - 0.012, 0.045, height - 0.06), B, M["peint"], uv_scale=1 / 1.2)
     for zz in (0.35, height - 0.4):
-        b.box(B @ Vector((-width / 2, -0.01, zz)), (width - 0.06, 0.03, 0.12), B, M["peint"], uv_scale=1 / 1.2, bevel=0.006)
+        b.box(B @ Vector((-width / 2, -0.01, zz)), (width - 0.06, 0.03, 0.12), B, M["peint"], uv_scale=1 / 1.2)
     for side in (-1, 1):   # poignées en fer, dedans et dehors, du côté opposé à la charnière
-        b.box(B @ Vector((-width + 0.14, 0.03 + side * 0.06, 1.0)), (0.04, 0.03, 0.2), B, M["fer"], bevel=0.008)
+        b.box(B @ Vector((-width + 0.14, 0.03 + side * 0.06, 1.0)), (0.04, 0.03, 0.2), B, M["fer"])
     for zz in (0.3, height - 0.3):   # pentures (les charnières en fer)
         b.box(B @ Vector((-0.2, 0.058, zz)), (0.4, 0.008, 0.05), B, M["fer"])
     ob = b.finish("Porte_Battant", coll)
