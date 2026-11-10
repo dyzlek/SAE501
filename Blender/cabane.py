@@ -609,9 +609,9 @@ def build_walls(M, coll):
                 y += step
         return out
 
-    # Allégé le 10 nov. (optimisation, demande de Dylan) : rondins ovales, 35 % plus hauts que profonds
-    # (moins de rangées, l'intérieur de la cabane ne bouge pas), 8 côtés au lieu de 14, sans renflement.
-    WALL_TALL = 1.35
+    # Allégé le 10 nov. (optimisation, demande de Dylan) : gros rondins ovales, 1,9 fois plus hauts que profonds
+    # (7 rangées au lieu de 12, l'intérieur de la cabane ne bouge pas), 8 côtés au lieu de 14, sans renflement.
+    WALL_TALL = 1.9
     old_count = len(wall_pieces(LOG_R))            # avant, chaque rondin tirait un nombre au hasard :
     for _ in range(old_count):                     # on en tire autant, pour que le reste du décor (herbe, bougies...) ne bouge pas
         rng.uniform(0.94, 1.04)
@@ -689,10 +689,8 @@ def build_walls(M, coll):
         wy = (WIN_Y0 + WIN_Y1) / 2
         for s in (-1, 1):
             c = center + B @ Vector((s * (WIN_W / 2 + 0.08 + WIN_W / 4), LOG_R + 0.06, wy))
-            # Un panneau et deux traverses, sans biseau (10 nov. ; avant : trois lattes biseautées et une traverse)
+            # Un seul panneau, sans biseau (10 nov. ; avant : trois lattes biseautées et une traverse)
             b.box(c, (WIN_W / 2 - 0.01, 0.03, WIN_Y1 - WIN_Y0), B, M["peint"], uv_scale=1 / 1.2)
-            for zz in (-0.25, 0.25):
-                b.box(c + B @ Vector((0, 0.02, zz * (WIN_Y1 - WIN_Y0))), (WIN_W / 2, 0.025, 0.06), B, M["peint"], uv_scale=1 / 1.2)
     shutters = b.finish("Volets", coll)
     B = basis(DOOR)
     door = door_leaf(M, coll, polar(DOOR, R) + B @ Vector((DOOR_W / 2 + 0.06, LOG_R + 0.05, 0)), B)

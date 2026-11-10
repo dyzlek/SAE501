@@ -24,14 +24,14 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 **Le problème.** Les murs étaient le plus gros morceau de la cabane : environ 160 rondins à 14 côtés et 5 tronçons chacun (**26 240 triangles**, 18 880 sommets). Fenêtres, volets et porte : des planches et lattes toutes biseautées (un biseau triple à peu près les triangles d'un pavé).
 
 **Ce qui a été fait** (`Blender/cabane.py`) :
-- **Rondins des murs** : ovales, 35 % plus hauts que profonds, donc **moins de rangées** sur la même hauteur ; **8 côtés au lieu de 14**, 3 tronçons au lieu de 5 (sans le léger renflement). La profondeur ne change pas : l'intérieur de la cabane (cible, lanternes, étagères) reste à la même place.
+- **Rondins des murs** : gros rondins ovales, 1,9 fois plus hauts que profonds, donc **7 rangées au lieu de 12** sur la même hauteur (d'abord 1,35 fois, puis plus gros à la demande de Dylan) ; **8 côtés au lieu de 14**, 3 tronçons au lieu de 5 (sans le léger renflement). La profondeur ne change pas : l'intérieur de la cabane (cible, lanternes, étagères) reste à la même place.
 - **Linteaux** de la porte et des fenêtres : ils montent jusqu'au rondin du dessus (sinon une bande de joint blanc de 20 cm apparaissait avec les rondins plus hauts).
-- **Fenêtres** : encadrements sans biseau. **Volets** : un panneau et deux traverses au lieu de trois lattes biseautées et une traverse. **Porte** : 3 planches sans biseau au lieu de 6 biseautées (on voit encore les fentes).
+- **Fenêtres** : encadrements sans biseau. **Volets** : un seul rectangle au lieu de trois lattes biseautées et une traverse. **Porte** : 3 planches sans biseau au lieu de 6 biseautées (on voit encore les fentes).
 - Le script tire toujours autant de nombres au hasard qu'avant : le reste du décor ne bouge pas (vérifié, seuls ces 4 objets changent).
 
-**Avant / après.** Sommets : murs 18 880 → 6 188, encadrements 3 120 → 2 040, volets 2 304 → 432, porte 1 008 → 216. Triangles de la cabane : 97 737 → **76 961**. Fps à mesurer.
+**Avant / après.** Sommets : murs 18 880 → 4 420, encadrements 3 120 → 2 040, volets 2 304 → 144, porte 1 008 → 216. Triangles de la cabane : 97 737 → **74 777**. Fps à mesurer.
 
-**Est-ce que ça a vraiment marché ?** Rendu comparé en images (dehors, dedans, porte) ; **pas vu dans Unity ni au casque**. Perte : rondins un peu moins ronds de près, volets et porte plus simples.
+**Est-ce que ça a vraiment marché ?** Rendu comparé en images (dehors, dedans, porte) ; **pas vu dans Unity ni au casque**. Perte : rondins moins ronds de près, linteaux hauts au-dessus de la porte et d'une fenêtre, volets et porte plus simples.
 
 ## Montagnes lisses (hub et carte)
 **Mar. 10 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-tapis-lustre` · issue #195
