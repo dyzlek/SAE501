@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 10 nov. 2026
 
+### PDF des optimisations
+> Fais un gros fichier PDF qui explique ce que tu as fait concrètement pour les optimisations (la liste en une phrase par optimisation), où c'est, et comment le vérifier.
+
 ### Améliorer le suivi GitHub
 > Améliore nos issues, fais des jalons, etc. : on va être notés sur la gestion de projet (https://github.com/users/dyzlek/projects/2).
 >
