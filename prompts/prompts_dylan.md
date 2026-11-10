@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 10 nov. 2026
 
+### Optimiser le tapis et le lustre
+> J'aimerais que tu optimises le tapis et le lustre pour éviter qu'ils fassent laguer (le tapis, c'est juste une texture, et le lustre un donut de bois).
+
 ### PDF des optimisations
 > Fais un gros fichier PDF qui explique ce que tu as fait concrètement pour les optimisations (la liste en une phrase par optimisation), où c'est, et comment le vérifier.
 
