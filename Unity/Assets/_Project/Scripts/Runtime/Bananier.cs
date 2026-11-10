@@ -113,6 +113,7 @@ public class Bananier : MonoBehaviour
     {
         if (!enProduction) return;
         auSol.RemoveAll(b => b == null);
+        if (SAE.CoopOrchard.Mirroring) return;   // invité du coop : seules les bananes de l'hôte tombent (CreerCopie)
         if (auSol.Count >= maxAuSol) return;
 
         minuteur += Time.deltaTime;
@@ -132,6 +133,19 @@ public class Bananier : MonoBehaviour
         if (Random.value < chanceDoree) b.RendreDoree(multiplicateurDore, pourritureDoree);
         auSol.Add(b);
         if (arbre != null) { StopAllCoroutines(); StartCoroutine(Boing()); }
+    }
+
+    /// Coop, chez l'invité : la copie d'une banane de l'hôte (même numéro, même place). « neuve » : elle vient de tomber,
+    /// l'arbre fait son boing comme chez l'hôte.
+    public Banane CreerCopie(int id, bool doree, Vector3 pos, Quaternion rot, bool neuve)
+    {
+        if (prefabBanane == null) return null;
+        var b = Instantiate(prefabBanane, pos, rot);
+        b.InitialiserCopie(this, id, ValeurBanane, DureePourriture);
+        if (doree) b.RendreDoree(multiplicateurDore, pourritureDoree);
+        auSol.Add(b);
+        if (neuve && arbre != null) { StopAllCoroutines(); StartCoroutine(Boing()); }
+        return b;
     }
 
     internal void Retirer(Banane b) { auSol.Remove(b); }

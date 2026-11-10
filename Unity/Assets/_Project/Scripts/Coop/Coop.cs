@@ -30,7 +30,8 @@ namespace SAE
     //     (des RPC : « j'ai touché ce ballon », « j'ai vendu une banane », « je pose ce singe ici ») ;
     //   - CoopGame garde l'état partagé (NetworkVariable) : l'hôte l'écrit, les invités le lisent ;
     //   - chaque ballon a son double réseau, CoopBalloon, qui le fait apparaître et bouger chez les invités.
-    // Chacun garde son arc, sa bananeraie et sa sauvegarde.
+    //   - la bananeraie aussi est partagée (CoopOrchard) : mêmes bananes, mêmes singes récolteurs, mêmes arbres.
+    // Chacun garde son arc et sa sauvegarde.
     //
     // Le réseau passe par Unity Relay, un serveur relais gratuit de Unity : deux appareils sur des réseaux différents
     // ne peuvent pas se joindre directement (box, pare-feu de l'IUT), ils se connectent tous les deux AU RELAIS.
@@ -193,7 +194,8 @@ namespace SAE
             var player = Resources.Load<GameObject>("Coop/CoopJoueur");
             var game = Resources.Load<GameObject>("Coop/CoopPartie");
             var balloon = Resources.Load<GameObject>("Coop/CoopBallon");
-            if (!player || !game || !balloon)
+            // (un vieux prefab CoopPartie sans la bananeraie partagée compte comme manquant : l'hôte et l'invité doivent avoir le même)
+            if (!player || !game || !balloon || !game.GetComponent<CoopOrchard>())
             {
                 Status = "Prefabs réseau manquants : menu SAE > Coop > Créer les prefabs réseau";
                 return null;

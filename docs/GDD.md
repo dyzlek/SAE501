@@ -412,7 +412,7 @@ _Chaque action a maintenant sa vibration, avec un motif différent pour la recon
 | | Boss qui se divise, ballons camouflés, combo de vagues parfaites, annonce des vagues spéciales ⏳ | Brouillard, nuit, pluie sur certaines vagues | |
 | | Sauvegarde automatique de la partie sur le casque (reprendre où on en était) ⏳ | Classement en ligne (bonus : serveur PHP + MySQL de l’IUT, sans multijoueur) ⏳ | |
 | | Menu principal : une scène vivante (singes animés, ballons), CONTINUER / NOUVELLE PARTIE / OPTIONS, retour au menu en jeu (bouton Menu, Échap) ⏳ (#158) | | |
-| | Bombes à lancer, pluie de flèches de Quincy, vibrations par action ⏳ | Classement gardé entre deux lancements ; **coop par Internet** (deux casques, ou casque + PC ; ouvert depuis la pause avec un mot de passe, rejoint depuis le menu avec le code de la partie ; serveur relais Unity Relay, réseau avec Netcode for GameObjects) ⏳ (#166, #170) | |
+| | Bombes à lancer, pluie de flèches de Quincy, vibrations par action ⏳ | Classement gardé entre deux lancements ; **coop par Internet** (deux casques, ou casque + PC ; ouvert depuis la pause avec un mot de passe, rejoint depuis le menu avec le code de la partie ; serveur relais Unity Relay, réseau avec Netcode for GameObjects ; bananeraie partagée : mêmes bananes, mêmes singes récolteurs, même comptoir) ⏳ (#166, #170) | |
 | | Bananes dorées, nouvelles améliorations de l'arc, mur des records, trophées, classement local ⏳ | | |
 | | | Casino à plusieurs : roulette partagée et blackjack contre un croupier ⏳ (#171) | |
 

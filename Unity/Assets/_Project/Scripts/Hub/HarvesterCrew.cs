@@ -34,6 +34,20 @@ namespace SAE
         public float Pause => 3f - 0.6f * (Level(HarvesterStat.Cadence) - 1);           // s entre deux trajets : 3 → 0,6
         public float Share => 0.6f + 0.1f * (Level(HarvesterStat.Rendement) - 1);       // part payée : 60 % → 100 %
 
+        // L'équipe de la scène (pour le coop, CoopOrchard)
+        public static HarvesterCrew Instance { get; private set; }
+        void Awake() => Instance = this;
+
+        // Coop, chez l'invité : le nombre de singes et les améliorations de l'hôte remplacent les nôtres.
+        // Nos singes, eux, imitent ceux de l'hôte (HarvesterMonkey.Mirror) : ils ne travaillent plus d'eux-mêmes.
+        public void ApplyFromHost(int count, int vitesse, int cadence, int rendement)
+        {
+            Count = Mathf.Clamp(count, 0, monkeys.Length);
+            levels[(int)HarvesterStat.Vitesse] = vitesse;
+            levels[(int)HarvesterStat.Cadence] = cadence;
+            levels[(int)HarvesterStat.Rendement] = rendement;
+        }
+
         // Sauvegarde : les singes achetés se remettent au travail, avec leurs améliorations
         void Start()
         {
