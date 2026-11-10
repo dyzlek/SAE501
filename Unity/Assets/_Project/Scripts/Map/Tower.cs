@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace SAE
@@ -17,6 +16,19 @@ namespace SAE
         TowerAnimator animator;
         float cooldown;
 
+        // Optimisation : quand aucun ballon n'est à portée, on ne recherche que 10 fois par seconde au lieu de chaque image
+        // (200 singes × 500 ballons = 100 000 tests par image), et sans LINQ (qui crée des listes à chaque appel).
+        const float SearchDelay = 0.1f;
+        static readonly List<Balloon> found = new List<Balloon>();
+        static readonly List<Balloon> blast = new List<Balloon>();
+        const float BlastRadius = 1.5f;   // rayon de l'explosion du Canon, en mètres
+
+        // Les traits du Sniper sont réutilisés (#178) : un LineRenderer neuf à chaque tir, puis détruit, donne des à-coups
+        static readonly Stack<LineRenderer> shots = new Stack<LineRenderer>();
+        const float ShotTime = 0.08f;     // durée du trait, en secondes
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetPool() => shots.Clear();
+
         public void Init(Monkey m)
         {
             monkey = m;
@@ -30,36 +42,41 @@ namespace SAE
             if (cooldown > 0f) return;
 
             float range = MonkeyData.Range(monkey);
-            var inRange = Balloon.All
-                .Where(b => Flat(b.transform.position - transform.position).sqrMagnitude <= range * range)
-                .OrderByDescending(b => b.Progress)
-                .ToList();
-            if (inRange.Count == 0) return;
+            bool seesCamo = MonkeyData.SeesCamo(monkey);   // un camouflé est invisible pour les autres singes
+            found.Clear();
+            foreach (var b in Balloon.All)
+                if ((seesCamo || !b.Camo) && Flat(b.transform.position - transform.position).sqrMagnitude <= range * range) found.Add(b);
+            if (found.Count == 0) { cooldown = SearchDelay; return; }
+            found.Sort((a, b) => b.Progress.CompareTo(a.Progress));   // le plus avancé d'abord
+            // Copie, avec le numéro de vie de chaque ballon : le tir part plus tard (coroutine), et un ballon éclaté
+            // pendant le geste peut déjà être ressorti du pool à l'entrée de la carte
+            var inRange = new List<(Balloon ball, int life)>(found.Count);
+            foreach (var b in found) inRange.Add((b, b.Life));
 
             cooldown = MonkeyData.FireDelay(monkey);
-            if (animator) animator.Attack(inRange[0].transform.position);
+            if (animator) animator.Attack(inRange[0].ball.transform.position);
             StartCoroutine(Fire(inRange));
         }
 
         // Le tir part au moment où le bras passe devant (TowerAnimator.ReleaseDelay).
-        IEnumerator Fire(List<Balloon> targets)
+        IEnumerator Fire(List<(Balloon ball, int life)> targets)
         {
             if (animator) yield return new WaitForSeconds(TowerAnimator.ReleaseDelay);
-            targets.RemoveAll(b => !b);   // éclatés pendant le geste
+            targets.RemoveAll(t => !Balloon.StillThere(t.ball, t.life));   // éclatés pendant le geste (même s'ils sont ressortis)
             if (targets.Count == 0) yield break;
 
             if (monkey.type == MonkeyType.Glace)
             {
                 Shockwave.Spawn(transform.position, MonkeyData.Range(monkey), FrostColor, false);
-                foreach (var b in targets) Hit(b);
+                foreach (var t in targets) Hit(t.ball);
                 yield break;
             }
 
-            var hits = targets.Take(MonkeyData.Targets(monkey)).ToList();
+            int count = Mathf.Min(targets.Count, MonkeyData.Targets(monkey));
             var from = animator ? animator.LaunchPoint : transform.position + Vector3.up * 0.6f;
-            for (int i = 0; i < hits.Count; i++)
+            for (int i = 0; i < count; i++)
             {
-                var b = hits[i];
+                var b = targets[i].ball;
                 if (monkey.type == MonkeyType.Sniper) Shot(from, b.transform.position);   // la traînée de la balle
                 // Le projectile touche en arrivant ; sans modèle (ou au-delà de MaxProjectiles), on touche tout de suite
                 if (i >= MaxProjectiles || !Projectile.Launch(monkey.type, from, b, () => Hit(b))) Hit(b);
@@ -69,15 +86,18 @@ namespace SAE
         // Ce que fait un tir sur un ballon : ralentir (Glace, Colle), exploser autour (Canon), percer des couches.
         void Hit(Balloon b)
         {
-            if (!b) return;
+            if (!b || !b.isActiveAndEnabled) return;   // déjà éclaté (rangé dans le pool) pendant le vol du projectile
             int pierce = MonkeyData.Pierce(monkey);
             if (monkey.type == MonkeyType.Canon)
             {
                 // Explosion : touche aussi les ballons proches de la cible
                 var center = b.transform.position;
-                Shockwave.Spawn(center, 1.5f);
-                foreach (var near in Balloon.All.Where(o => (o.transform.position - center).sqrMagnitude < 1.5f * 1.5f).ToList())
-                    near.Pop(pierce);
+                Shockwave.Spawn(center, BlastRadius);
+                // Une liste à part, réutilisée (pas de LINQ) : un ballon éclaté quitte Balloon.All pendant la boucle
+                blast.Clear();
+                foreach (var o in Balloon.All)
+                    if ((o.transform.position - center).sqrMagnitude < BlastRadius * BlastRadius) blast.Add(o);
+                foreach (var near in blast) near.Pop(pierce);
                 return;
             }
             if (monkey.type == MonkeyType.Glace) b.Slow(0.4f, 1.5f);
@@ -85,18 +105,34 @@ namespace SAE
             b.Pop(pierce);
         }
 
-        // Trait bref entre le singe et la cible.
+        // Trait bref entre le singe et la cible (pris dans le pool, rendu au bout de ShotTime)
         void Shot(Vector3 from, Vector3 to)
         {
-            var go = new GameObject("Tir");
-            var line = go.AddComponent<LineRenderer>();
-            line.sharedMaterial = Visuals.LineMaterial;
-            line.positionCount = 2;
+            LineRenderer line = null;
+            while (shots.Count > 0 && !line) line = shots.Pop();   // un trait détruit avec sa scène est sauté
+            if (!line)
+            {
+                line = new GameObject("Tir").AddComponent<LineRenderer>();
+                line.sharedMaterial = Visuals.LineMaterial;
+                line.positionCount = 2;
+                line.widthMultiplier = 0.06f;
+                line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            }
             line.SetPosition(0, from);
             line.SetPosition(1, to);
-            line.widthMultiplier = 0.06f;
             line.startColor = line.endColor = MonkeyData.IsRainbow(monkey.level) ? Color.magenta : MonkeyData.RarityColor(monkey.level);
-            Destroy(go, 0.08f);
+            line.gameObject.SetActive(true);
+            // Lancé par le WaveSpawner : si ce singe est repris pendant le trait, le trait disparaît quand même
+            var runner = WaveSpawner.Instance ? (MonoBehaviour)WaveSpawner.Instance : this;
+            runner.StartCoroutine(HideShot(line));
+        }
+
+        static IEnumerator HideShot(LineRenderer line)
+        {
+            yield return new WaitForSeconds(ShotTime);
+            if (!line) yield break;
+            line.gameObject.SetActive(false);
+            shots.Push(line);
         }
 
         static Vector3 Flat(Vector3 v) => new Vector3(v.x, 0f, v.z);

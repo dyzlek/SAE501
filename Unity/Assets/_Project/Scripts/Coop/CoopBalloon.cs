@@ -15,6 +15,7 @@ namespace SAE
     {
         readonly NetworkVariable<BalloonKind> kind = new NetworkVariable<BalloonKind>();
         readonly NetworkVariable<int> layers = new NetworkVariable<int>();
+        readonly NetworkVariable<bool> camo = new NetworkVariable<bool>();
 
         // Hôte : le vrai ballon. Invité : sa copie.
         public Balloon Target { get; private set; }
@@ -32,6 +33,7 @@ namespace SAE
             balloon.Proxy = this;
             kind.Value = balloon.Kind;
             layers.Value = balloon.Layers;
+            camo.Value = balloon.Camo;
             transform.SetPositionAndRotation(balloon.transform.position, balloon.transform.rotation);
         }
 
@@ -66,6 +68,7 @@ namespace SAE
             {
                 var spawner = WaveSpawner.Instance;
                 if (spawner) Target = spawner.SpawnRemote(kind.Value, layers.Value, this);
+                if (Target && camo.Value) Target.MakeCamo();
                 return;
             }
             Target.ApplyHostLayers(layers.Value);

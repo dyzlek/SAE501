@@ -2,6 +2,38 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Mar. 10 nov. 2026
+
+### Corriger la PR des optimisations après relecture
+> Hier, un agent m'a fait une PR (#188) : aide-moi vraiment à bien la finir. Voici la relecture : un matériau créé à chaque image par `ColorTint.Set` avec une couleur animée (tutoriel, panneau d'argent, roulette, boutons refusés) ; des projectiles qui suivent un ballon recyclé ; des sons longs coupés par les pops ; « Ferme #N » qui ne ferme aucune issue ; des scènes pas à jour dans le dépôt et l'occlusion jamais calculée ; le menu des textures jamais lancé et son commentaire faux sur les mipmaps ; les boss dessinés en boules étirées sur le plateau (ça, je n'aimerais pas).
+>
+> Suite : oui, lance le menu des textures.
+
+## Lun. 9 nov. 2026
+
+### Analyser le projet et les optimisations
+> J'aimerais que tu analyses tout le projet, ainsi que toutes les optimisations que j'ai mises dans les issues, etc.
+>
+> Suite : oui, corrige les issues fausses et crée les deux issues qui manquent.
+
+### Faire toutes les optimisations
+> Maintenant, fais tout (toutes les optimisations des issues).
+
+### Lister les optimisations et créer les issues
+> Aide-moi à lister les optimisations de mon jeu. L'idée globale était : LOD sur les modèles, instancing et réduction des polygones des ballons, matériaux partagés, ombres allégées, décor statique et occlusion, pool de ballons, Rigidbody kinematic sur les ballons, singes allégés (animation, ciblage, particules). Je ne sais pas comment les faire : explique-moi, et propose-en d'autres. Plus tard, tu créeras les issues.
+>
+> Suite : crée chaque issue en précisant comment faire (une proposition).
+>
+> Suite : y a-t-il d'autres optimisations que tu me recommandes ? Crée les issues pour celles qui te semblent importantes.
+
+### Ménage des issues ouvertes
+> Valide les issues déjà faites : surtout les issues ouvertes, je pense que certaines peuvent être fermées.
+
+### Préparer l'oral de 15 minutes
+> J'aimerais préparer mon oral de présentation de 15 minutes. Je dois montrer la progression (voir l'historique de chacun), les temps forts, etc. Le sujet demande : un plan détaillé (grands titres et quelques mots ou phrases clés) et une démonstration du jeu (parcours utilisateur). Il faut aussi raconter comment on s'est organisés. Fais le plan comme demandé, puis fais un site HTML qui servira de présentation du jeu final de vendredi.
+>
+> Suite : à « Bloons TD, mais avec ton arc en main », ajoute aussi Plate Up, pour le côté multijoueur où chacun a un rôle. Reformule toutes les phrases, elles font trop IA. Pour l'organisation : chacun a testé plusieurs mécaniques de gameplay à ajouter, puis on a tout fusionné. Je vais présenter ça à mon prof. Enlève « scènes générées par code » et « modèles 3D par script ».
+
 ## Ven. 23 oct. 2026
 
 ### Casino à plusieurs
@@ -12,6 +44,12 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 > Suite : le blackjack, vraiment en solo, à la façon de « Gamble With Your Friends » pour le style (capture jointe : croupier derrière une arche, boutons DOUBLE / STAND / HIT / PLAY, terminal de mise avec pavé numérique et MIN / MAX).
 >
 > Suite (2 captures de la borne dans le jeu) : c'est moche et peu lisible, mais l'idée est là.
+
+### Tower defense : fléchettes, camouflage, difficulté
+> Les fléchettes buggent un peu en VR : corrige-les. Rends les vagues vraiment plus dures, ajoute les ballons camouflés que seuls certains singes voient (le Tireur, par exemple), et la Punaise vise trop loin. Corrige tout ça, et propose des idées d'améliorations : pour l'instant, les gens ne jouent pas au tower defense. Comment faire pour qu'ils y jouent ?
+
+### Déplacement au stick
+> Ajoute aussi la capture du menu pause dans mon journal, et dans les options, ajoute la possibilité de se déplacer comme en ZQSD au casque.
 
 ### Retour en arrière sur le casino
 > Reviens en arrière : garde le niveau casino dans une branche, mais remets juste la roulette et le blackjack, et rapproche le tableau du classement.
@@ -117,6 +155,27 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ### Valider la branche de Maxens
 > Annule ce que j'ai fait actuellement. Reprends ce que Maxens a fait (feat/bonus-maxens) pour le valider et corriger tous les bugs.
+
+### Clic impossible sur le tutoriel
+> Je ne peux pas cliquer sur le tutoriel.
+
+### Boutons de test en VR
+> Mets un bouton en VR pour poser 200 singes, et un pour la vague cheatée.
+
+### Instancing des ballons
+> Pour que ça lague moins avec les ballons, tu ne peux pas faire un système d'instances ?
+
+### Lag avec les ballons
+> De loin, pas d'animation pour les singes, sauf quand ils doivent tirer sur les ballons. Et comment optimiser quand il y a des ballons ? Je lague dès qu'il y en a (par exemple, réduire les particules autour des singes quand il y en a beaucoup).
+
+### Occlusion, matériaux, ombres et pool de ballons
+> Ajoute aussi de l'occlusion, et fais les optimisations suivantes : matériaux communs et GPU Instancing pour réduire les SetPass, décor fixe en Static, une seule lumière à ombres avec une distance courte (environ 15 m) et pas d'ombres pour les petits objets, et un pool de ballons réutilisés. Suite : les singes ont disparu de la bibliothèque, et je n'ai pas le mode PC admin.
+
+### Optimisation des singes et du plateau
+> Fais les optimisations proposées : sur le plateau, remplacer les singes par des copies non animées ; sur la carte, n'animer que quand le singe tire, couper l'animation des singes qu'on ne voit pas et passer à 2 os par sommet ; alléger le décor du plateau (sans herbe ni buissons) ; remplacer les miniatures des ballons par une simple sphère teintée.
+
+### Mode PC admin pour tester les perfs
+> Je voudrais un mode de jeu non VR normal et un mode non VR admin, avec un panneau facile à utiliser (argent illimité, beaucoup de singes déjà posés, vague 100 ultra cheatée, etc.), pour voir si ça lag.
 
 ## Lun. 19 oct. 2026
 

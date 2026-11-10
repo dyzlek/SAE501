@@ -2,7 +2,14 @@ using UnityEngine;
 
 namespace SAE
 {
-    // Couleur d'un objet sans créer de matériau (MaterialPropertyBlock). Marche aussi hors Play.
+    // Couleur d'un objet. Hors Play : MaterialPropertyBlock (rien n'est enregistré dans la scène).
+    // En jeu : un matériau partagé par couleur (Shared). Un MaterialPropertyBlock empêche le SRP Batcher de regrouper
+    // les objets, et chaque cube teinté coûtait un changement de matériau (SetPass) : tous les cubes d'une même couleur
+    // partagent maintenant le même matériau. Le mode arc-en-ciel change à chaque image : il garde le MaterialPropertyBlock.
+    // Pareil pour une couleur animée par un autre script (cadre du tutoriel qui pulse, bouton refusé, panneau d'argent) :
+    // un matériau par couleur, ce serait un nouveau matériau à chaque image, jamais libéré. Ces scripts appellent Animate.
+    //   Set(couleur)     : couleur fixe (ballon, cube du décor)      → matériau partagé ;
+    //   Animate(couleur) : couleur qui change à chaque image          → MaterialPropertyBlock, aucun matériau créé.
     [ExecuteAlways]
     public class ColorTint : MonoBehaviour
     {
@@ -13,17 +20,73 @@ namespace SAE
         static readonly int ColorId = Shader.PropertyToID("_Color");
         MaterialPropertyBlock block;
         Renderer rend;
+        Material[] originals;   // les matériaux d'origine, d'où partent les copies teintées
+        bool animated;          // dernière couleur posée par Animate
+        bool applied;           // la couleur actuelle est déjà posée sur le renderer
 
-        public void Set(Color c, bool isRainbow = false) { color = c; rainbow = isRainbow; Apply(); }
+        static readonly System.Collections.Generic.Dictionary<(Material, Color), Material> shared =
+            new System.Collections.Generic.Dictionary<(Material, Color), Material>();
 
-        void OnEnable() => Apply();
+        // Le projet ne recharge pas le code au Play (Enter Play Mode Options) : sans ça, le cache garderait
+        // les matériaux détruits à la fin du Play précédent, et tout s'afficherait en magenta.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetCache() => shared.Clear();
+
+        // Le matériau source, teinté de cette couleur : créé une seule fois, puis partagé par tous les objets de cette couleur
+        public static Material Shared(Material source, Color c)
+        {
+            if (!source) return null;
+            if (!shared.TryGetValue((source, c), out var m) || !m)
+            {
+                m = new Material(source) { name = $"{source.name} {ColorUtility.ToHtmlStringRGB(c)}", enableInstancing = true };
+                if (m.HasProperty(BaseColorId)) m.SetColor(BaseColorId, c);
+                if (m.HasProperty(ColorId)) m.SetColor(ColorId, c);
+                shared[(source, c)] = m;
+            }
+            return m;
+        }
+
+        public void Set(Color c, bool isRainbow = false) => Change(c, isRainbow, false);
+        public void Animate(Color c) => Change(c, false, true);
+
+        void Change(Color c, bool isRainbow, bool isAnimated)
+        {
+            // Beaucoup d'appelants le font à chaque image : si rien n'a changé, on ne touche à rien
+            if (Application.isPlaying && applied && c == color && isRainbow == rainbow && isAnimated == animated) return;
+            color = c;
+            rainbow = isRainbow;
+            animated = isAnimated;
+            Apply();
+            SleepUnlessRainbow();
+        }
+
+        void OnEnable() { Apply(); SleepUnlessRainbow(); }
         void OnValidate() => Apply();
         void Update() { if (rainbow) Apply(); }
+
+        // Optimisation (#182) : Update ne sert qu'à l'arc-en-ciel. Pour les centaines d'autres objets teintés
+        // (ballons, morceaux de modèles, cubes du décor), on coupe le composant : Unity ne l'appelle plus à chaque image.
+        // Set marche toujours sur un composant coupé (et le rallume si on passe en arc-en-ciel).
+        // Seulement en jeu : hors Play, la case « activé » serait enregistrée dans la scène.
+        void SleepUnlessRainbow()
+        {
+            if (Application.isPlaying) enabled = rainbow;
+        }
 
         void Apply()
         {
             if (!rend) rend = GetComponent<Renderer>();
             if (!rend) return;
+            applied = true;
+            if (Application.isPlaying && !rainbow && !animated)
+            {
+                originals ??= rend.sharedMaterials;
+                var mats = new Material[originals.Length];
+                for (int i = 0; i < mats.Length; i++) mats[i] = Shared(originals[i], color);
+                rend.SetPropertyBlock(null);   // plus de bloc : le SRP Batcher peut regrouper
+                rend.sharedMaterials = mats;
+                return;
+            }
             block ??= new MaterialPropertyBlock();
             var c = rainbow ? Color.HSVToRGB(Mathf.Repeat(Time.realtimeSinceStartup * 0.3f, 1f), 0.8f, 1f) : color;
             rend.GetPropertyBlock(block);

@@ -11,6 +11,8 @@ namespace SAE
     // Avec les modèles 3D (BalloonVisuals) : Normal et Rapide = Ballon_Normal teinté par couche,
     //   Blindé = Ballon_Blindage, Boss = MOAB (hélice qui tourne), Dirigeable = BFB (2 hélices), Coeur = Ballon_Coeur.
     // Le ballon cœur regagne une couche toutes les 2 s (règle du GDD : il se régénère).
+    // Camouflé (Camo, comme dans Bloons TD) : sa couleur tire sur le kaki et il porte des taches sombres. Seuls le Tireur
+    // et les singes de rareté Violet et plus le voient (MonkeyData.SeesCamo) ; les flèches de Quincy le touchent toujours.
     // S'il atteint la sortie, il retire autant de vies qu'il lui reste de couches.
     // Un boss éclaté se divise (façon Bloons TD) : le Boss lâche 4 ballons normaux, le Dirigeable lâche 2 Boss
     // (qui se divisent à leur tour). Les petits repartent de l'endroit où il a éclaté, un peu en arrière sur la piste.
@@ -19,7 +21,7 @@ namespace SAE
     // est envoyé à l'hôte, qui perce le vrai ballon.
     public class Balloon : MonoBehaviour
     {
-        public static readonly List<Balloon> All = new List<Balloon>();
+        public static readonly List<Balloon> All = new List<Balloon>();   // les ballons en jeu (pas ceux rangés dans le pool)
 
         static readonly Color[] layerColors =
         {
@@ -49,12 +51,24 @@ namespace SAE
         ColorTint tint;
         ColorTint[] modelTints;   // les morceaux du modèle 3D qui prennent la couleur de la couche
         bool hasModel;
+        bool shared;              // coop : déjà montré aux invités (voir Update)
+        GameObject camoSpots;     // les taches du camouflage (un seul maillage, caché quand le ballon sort du pool)
 
         public GameObject Model { get; private set; }               // le modèle 3D, recopié en miniature par le plateau
         public bool TintedModel => modelTints != null;              // le modèle prend la couleur de la couche
 
         public BalloonKind Kind { get; private set; }
+
+        // Numéro de vie : il change à chaque sortie du pool. Un tir encore en vol vers un ballon éclaté garde l'ancien
+        // numéro : le ballon recyclé (même objet, reparti de l'entrée) n'est donc pas pris pour la même cible.
+        public int Life { get; private set; }
+
+        // Le ballon visé (avec son numéro de vie au moment du tir) est-il toujours en jeu ?
+        public static bool StillThere(Balloon b, int life) => b && b.isActiveAndEnabled && b.Life == life;
         public int Layers => layers;
+        public bool Camo { get; private set; }
+        static readonly Color CamoColor = new Color(0.36f, 0.42f, 0.2f);
+        static readonly Color CamoSpot = new Color(0.22f, 0.18f, 0.1f);
 
         // Coop : le double réseau (hôte : celui qui nous suit ; invité : celui qui nous porte)
         public CoopBalloon Proxy { get; set; }
@@ -70,6 +84,17 @@ namespace SAE
         {
             spawner = owner;
             path = points;
+            Life++;
+            // Un ballon peut sortir du pool (WaveSpawner) : on remet tout à zéro
+            nextPoint = 1;
+            Progress = 0f;
+            slowFactor = 1f;
+            slowUntil = 0f;
+            facingSet = false;
+            transform.rotation = Quaternion.identity;
+            shared = false;
+            Camo = false;
+            if (camoSpots) camoSpots.SetActive(false);
             layers = layerCount;
             maxLayers = layerCount;
             nextRegen = Time.time + RegenDelay;
@@ -93,7 +118,7 @@ namespace SAE
                 // Les dirigeables (MOAB, BFB) sont longs : leur taille est leur longueur, on les grandit un peu.
                 if (IsBlimp) size *= 1.5f;
                 transform.localScale = Vector3.one * size;
-                AddModel(modelAsset);
+                if (!Model) AddModel(modelAsset);   // ballon recyclé : il a déjà son modèle (le pool est rangé par sorte)
             }
             else
                 transform.localScale = kind == BalloonKind.Dirigeable ? new Vector3(size, size * 1.6f, size) : Vector3.one * size;
@@ -110,6 +135,8 @@ namespace SAE
             model.transform.SetPositionAndRotation(Vector3.zero, asset.transform.rotation);
 
             var renderers = model.GetComponentsInChildren<Renderer>();
+            // Pas d'ombre : chaque ombre redessine le ballon une 2e fois, et des centaines de ballons volent (#177)
+            foreach (var r in renderers) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             var bounds = renderers[0].bounds;
             foreach (var r in renderers) bounds.Encapsulate(r.bounds);
 
@@ -150,14 +177,23 @@ namespace SAE
         void OnEnable() => All.Add(this);
         void OnDisable() => All.Remove(this);
 
-        // Hôte du coop : les invités le voient aussi (son double réseau). Dans Start et pas à la création :
-        // un petit ballon de boss est d'abord déplacé là où le boss a éclaté (ContinueFrom), son double part de là.
-        void Start() => Coop.ShareBalloon(this);
+        // Éclaté ou sorti : il retourne dans le pool du WaveSpawner au lieu d'être détruit
+        // (créer et détruire des centaines d'objets par vague provoque des à-coups).
+        // Son double réseau (coop, hôte) disparaît chez les invités : le ballon recyclé en aura un nouveau.
+        public void Release()
+        {
+            Unshare();
+            if (spawner) spawner.Recycle(this);
+            else Destroy(gameObject);
+        }
 
-        // Hôte : le ballon éclate ou sort de la piste, son double réseau disparaît aussi chez les invités
-        void OnDestroy()
+        // Fin de la scène (ballon détruit pour de bon) : son double réseau disparaît aussi
+        void OnDestroy() => Unshare();
+
+        void Unshare()
         {
             if (!Remote && Proxy && Proxy.IsSpawned) Proxy.NetworkObject.Despawn();
+            Proxy = null;
         }
 
 
@@ -165,14 +201,14 @@ namespace SAE
         // 1 par couche, 2 par couche blindée. Un tir trop faible pour une couche blindée s'y arrête (tout est dépensé).
         public int Pop(int pierce)
         {
-            if (pierce <= 0 || layers <= 0) return 0;
+            if (pierce <= 0 || layers <= 0 || !isActiveAndEnabled) return 0;   // déjà rangé dans le pool
             int cost = Armored ? 2 : 1;
             int popped = Mathf.Min(layers, pierce / cost);
             if (popped == 0) return pierce;
             if (Remote) return PopRemote(pierce, popped, cost);
 
             layers -= popped;
-            if (layers <= 0) { Sounds.Pop(transform.position); Split(); Destroy(gameObject); }
+            if (layers <= 0) { Sounds.Pop(transform.position); Split(); Release(); }
             else UpdateColor();
             return popped * cost;
         }
@@ -212,6 +248,52 @@ namespace SAE
             layers = hostLayers;
             gameObject.SetActive(layers > 0);
             UpdateColor();
+        }
+
+        // Le rend camouflé (WaveSpawner, après Init) : la couleur kaki, et 6 taches sombres posées sur sa surface.
+        // Les 6 taches sont UN seul maillage, fait une fois et partagé par tous les ballons camouflés (comme l'aura) :
+        // 1 objet et 1 appel de dessin par ballon, au lieu de 6 sphères de Unity (~4 500 triangles).
+        public void MakeCamo()
+        {
+            if (Camo) return;
+            Camo = true;
+            if (!camoSpots)
+            {
+                camoSpots = new GameObject("Taches");
+                camoSpots.transform.SetParent(transform, false);
+                camoSpots.AddComponent<MeshFilter>().sharedMesh = SpotsMesh;
+                var r = camoSpots.AddComponent<MeshRenderer>();
+                r.sharedMaterial = ColorTint.Shared(Visuals.PrimitiveMaterial, CamoSpot);
+                r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;   // ombre invisible sous le ballon (#177)
+            }
+            camoSpots.SetActive(true);
+            UpdateColor();
+        }
+
+        static Mesh spotsMesh;
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetSpots() => spotsMesh = null;   // sans rechargement du domaine, l'ancien maillage est détruit
+
+        // 6 taches aplaties tout autour du ballon (petites boules de 80 faces), toujours les mêmes : un seul maillage.
+        static Mesh SpotsMesh
+        {
+            get
+            {
+                if (spotsMesh) return spotsMesh;
+                var random = new System.Random(7);   // un tirage fixe : les taches gardent l'air irrégulier
+                var parts = new CombineInstance[6];
+                for (int i = 0; i < parts.Length; i++)
+                {
+                    float tilt = (float)(random.NextDouble() * 70.0 - 35.0), turn = i * 60f + (float)(random.NextDouble() * 30.0 - 15.0);
+                    var dir = Quaternion.Euler(tilt, turn, 0f) * Vector3.forward;
+                    var matrix = Matrix4x4.TRS(dir * 0.4f + Vector3.up * 0.05f, Quaternion.LookRotation(dir), new Vector3(0.3f, 0.22f, 0.12f));
+                    parts[i] = new CombineInstance { mesh = MeshBatch.SmallBall, transform = matrix };
+                }
+                spotsMesh = new Mesh { name = "Taches du camo" };
+                spotsMesh.CombineMeshes(parts, true, true);
+                spotsMesh.RecalculateBounds();
+                return spotsMesh;
+            }
         }
 
         // Ce que lâche un boss éclaté : (sorte, nombre, couches). Les couches suivent la solidité du boss.
@@ -255,6 +337,11 @@ namespace SAE
         {
             if (Remote) return;   // une copie bouge avec son double réseau (CoopBalloon), c'est l'hôte qui la fait avancer
 
+            // Hôte du coop : les invités le voient aussi (son double réseau). À la 1re image et pas à la création :
+            // un petit ballon de boss est d'abord déplacé là où le boss a éclaté (ContinueFrom), son double part de là.
+            // Pas dans Start : un ballon qui sort du pool ne repasse pas par Start.
+            if (!shared) { shared = true; Coop.ShareBalloon(this); }
+
             // Le ballon cœur se régénère, jusqu'à son nombre de couches de départ
             if (Kind == BalloonKind.Coeur && Time.time >= nextRegen)
             {
@@ -287,7 +374,7 @@ namespace SAE
                 if (nextPoint >= path.Count)
                 {
                     spawner.BalloonEscaped(layers);
-                    Destroy(gameObject);
+                    Release();
                 }
             }
         }
@@ -306,8 +393,9 @@ namespace SAE
                     break;
                 default:
                     int layer = Mathf.Clamp(layers - 1, 0, layerColors.Length - 1);
-                    tint.Set(layerColors[layer]);
-                    if (modelTints != null) foreach (var t in modelTints) t.Set(layerColors[layer]);
+                    var color = Camo ? Color.Lerp(layerColors[layer], CamoColor, 0.55f) : layerColors[layer];   // on devine encore la couche
+                    tint.Set(color);
+                    if (modelTints != null) foreach (var t in modelTints) t.Set(color);
                     break;
             }
         }

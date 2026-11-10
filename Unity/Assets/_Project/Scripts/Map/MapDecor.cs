@@ -30,11 +30,13 @@ namespace SAE
         const float StoneStep = 1f;       // une rangée de dalles par mètre de chemin
         const float StoneHeight = 0.08f;  // épaisseur des dalles, en mètres
 
-        public static void Build(Transform parent, float scale, bool withBushes)
+        // withGrassDecor = fleurs, herbes, cailloux, champignons : on les retire du plateau du hub (en miniature on ne les voit pas,
+        // et ils doublaient le nombre de triangles de la scène).
+        public static void Build(Transform parent, float scale, bool withBushes, bool withGrassDecor = true)
         {
             var random = new System.Random(501);   // graine fixe : toujours le même décor
             BuildPath(parent, scale, random);
-            BuildGrassDecor(parent, scale, random);
+            if (withGrassDecor) BuildGrassDecor(parent, scale, random);
             BuildPortals(parent, scale);
             if (withBushes) BuildBushes(parent, scale, random);
         }
@@ -250,7 +252,7 @@ namespace SAE
                 if (FreeSpot(random, 0.6f, out var p)) Pebbles(batch, p, scale, random);
             for (int i = 0; i < 6; i++)
                 if (FreeSpot(random, 0.5f, out var p)) Mushroom(batch, p, scale, random);
-            batch.Build(parent, "Décor du terrain");
+            batch.Build(parent, "Décor du terrain", castShadows: false);
         }
 
         // Un point au hasard dans la carte, à au moins margin mètres du bord du chemin.
@@ -274,9 +276,9 @@ namespace SAE
                 for (int k = 0; k < 5; k++)
                 {
                     var dir = Quaternion.Euler(0f, turn + k * 72f, 0f);
-                    batch.Add(MeshBatch.Ball, (center + dir * Vector3.forward * 0.045f) * scale, dir, new Vector3(0.05f, 0.02f, 0.08f) * scale, petal);
+                    batch.Add(MeshBatch.TinyBall, (center + dir * Vector3.forward * 0.045f) * scale, dir, new Vector3(0.05f, 0.02f, 0.08f) * scale, petal);
                 }
-                batch.Add(MeshBatch.Ball, (center + Vector3.up * 0.01f) * scale, Quaternion.identity, new Vector3(0.05f, 0.03f, 0.05f) * scale, FlowerHeart);
+                batch.Add(MeshBatch.TinyBall, (center + Vector3.up * 0.01f) * scale, Quaternion.identity, new Vector3(0.05f, 0.03f, 0.05f) * scale, FlowerHeart);
             }
         }
 
@@ -301,7 +303,7 @@ namespace SAE
                 float size = k == 0 ? Range(random, 0.35f, 0.6f) : Range(random, 0.12f, 0.25f);
                 var pos = at + (k == 0 ? Vector3.zero : new Vector3(Range(random, -0.45f, 0.45f), 0f, Range(random, -0.45f, 0.45f)));
                 var rot = Quaternion.Euler(Range(random, -10f, 10f), Range(random, 0f, 360f), Range(random, -10f, 10f));
-                batch.Add(MeshBatch.Ball, (pos + Vector3.up * size * 0.2f) * scale, rot, new Vector3(size * 1.3f, size * 0.6f, size) * scale, Rock);
+                batch.Add(MeshBatch.SmallBall, (pos + Vector3.up * size * 0.2f) * scale, rot, new Vector3(size * 1.3f, size * 0.6f, size) * scale, Rock);
             }
         }
 
@@ -310,7 +312,7 @@ namespace SAE
         {
             float h = Range(random, 0.15f, 0.25f);
             batch.Add(MeshBatch.Cube, (at + Vector3.up * h / 2f) * scale, Quaternion.Euler(0f, Range(random, 0f, 90f), 0f), new Vector3(0.06f, h, 0.06f) * scale, MushroomStem);
-            batch.Add(MeshBatch.Ball, (at + Vector3.up * h) * scale, Quaternion.identity, new Vector3(0.22f, 0.12f, 0.22f) * h / 0.2f * scale, MushroomCap);
+            batch.Add(MeshBatch.SmallBall, (at + Vector3.up * h) * scale, Quaternion.identity, new Vector3(0.22f, 0.12f, 0.22f) * h / 0.2f * scale, MushroomCap);
         }
 
         // Des buissons tout autour, juste au bord du terrain (pas sur l'entrée, la sortie ni l'estrade du joueur).

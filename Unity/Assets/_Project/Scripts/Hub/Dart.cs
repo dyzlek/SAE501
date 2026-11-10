@@ -14,11 +14,16 @@ namespace SAE
         const float ReturnDelay = 3f;     // en secondes, après s'être plantée ou posée
         const float LostDelay = 6f;       // en secondes : partie trop loin, elle revient quand même
         const float Length = 0.18f;       // en mètres
+        const float GrabRadius = 0.05f;   // m : posée ou en main, un gros collider (facile à viser et à attraper)
+        const float FlightRadius = 0.008f;   // m : en vol, la vraie finesse de la fléchette (sinon elle se plante 5 cm trop tôt)
+
+        static readonly System.Collections.Generic.List<Collider> all = new System.Collections.Generic.List<Collider>();
 
         public Vector3 home;              // sa place sur le présentoir
         public Quaternion homeRotation;
 
         Rigidbody body;
+        CapsuleCollider capsule;
         XRGrabInteractable grab;
         ThrowVelocity handSpeed;
         bool flying;
@@ -38,13 +43,13 @@ namespace SAE
 
             var col = go.AddComponent<CapsuleCollider>();   // avant le XR Grab : il récupère les colliders à sa création
             col.direction = 2;                               // le long de Z
-            col.radius = 0.05f;   // plus large que la fléchette : facile à viser et à attraper
+            col.radius = GrabRadius;   // plus large que la fléchette : facile à viser et à attraper
             col.height = Length;
             var rb = go.AddComponent<Rigidbody>();
             rb.isKinematic = true;
             rb.useGravity = false;
             rb.interpolation = RigidbodyInterpolation.Interpolate;
-            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;   // petite et rapide
+            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;   // petite et rapide : elle ne traverse pas la cible
             var g = go.AddComponent<XRGrabInteractable>();
             g.throwOnDetach = false;                         // c'est Dart qui la lance (voir ThrowVelocity)
             g.farAttachMode = UnityEngine.XR.Interaction.Toolkit.Attachment.InteractableFarAttachMode.Near;   // prise de loin, elle vient dans la main
@@ -59,10 +64,16 @@ namespace SAE
         {
             body = GetComponent<Rigidbody>();
             grab = GetComponent<XRGrabInteractable>();
+            capsule = GetComponent<CapsuleCollider>();
             handSpeed = gameObject.AddComponent<ThrowVelocity>();
             gameObject.AddComponent<ThrowTrail>();
             PlayerRig.IgnoreCollisions(gameObject);
+            // Les fléchettes ne se cognent pas entre elles (sinon, lancée près du présentoir, elle tape les autres et tombe)
+            foreach (var other in all) if (other) Physics.IgnoreCollision(capsule, other);
+            all.Add(capsule);
         }
+
+        void OnDestroy() => all.Remove(capsule);
 
         void OnEnable()
         {
@@ -87,6 +98,7 @@ namespace SAE
         // Prise dans la main (VR) ou au clic (mode PC)
         public void Grab()
         {
+            capsule.radius = GrabRadius;
             handSpeed.Clear();
             flying = false;
             returnAt = -1f;
@@ -97,6 +109,7 @@ namespace SAE
         public void Throw(Vector3 velocity)
         {
             throwVelocity = velocity;
+            capsule.radius = FlightRadius;
             flying = true;
             returnAt = Time.time + LostDelay;
         }
@@ -119,9 +132,14 @@ namespace SAE
             if (!flying) return;
             flying = false;
             returnAt = Time.time + ReturnDelay;
+            capsule.radius = GrabRadius;   // au repos : de nouveau facile à attraper
             var board = collision.collider.GetComponent<DartBoard>();
             if (!board) return;
+            // Le point compté : là où la POINTE touche la face de la cible, dans le sens du vol (pas le bord du collider)
             var point = collision.GetContact(0).point;
+            var face = new Plane(-board.transform.forward, board.transform.position);
+            var ray = new Ray(transform.position - transform.forward * Length, transform.forward);
+            if (face.Raycast(ray, out float distance)) point = ray.GetPoint(distance);
             body.isKinematic = true;
             transform.position = point - transform.forward * (Length * 0.4f);   // la pointe enfoncée dans la cible
             board.Hit(point);
@@ -138,6 +156,7 @@ namespace SAE
             flying = false;
             body.isKinematic = true;
             body.useGravity = false;
+            capsule.radius = GrabRadius;
             transform.SetPositionAndRotation(home, homeRotation);
         }
     }

@@ -18,6 +18,120 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 
 ---
 
+## Corrections après relecture de la PR #188 : couleurs animées, miniatures des boss
+**Mar. 10 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · PR #188
+
+**Le problème.** Relecture de la PR avant le merge :
+- `ColorTint` crée en jeu un matériau partagé **par couleur** (pour le SRP Batcher). Mais une dizaine de scripts animent une couleur à chaque image (cadre du tutoriel qui pulse, panneau d'argent, boutons refusés, roulette, nuages de l'orage) : chaque image créait un nouveau matériau, gardé à vie dans le cache. Environ 72 matériaux par seconde pendant tout le tutoriel : la mémoire monte et des à-coups arrivent, l'inverse du but. `Set` recréait aussi un tableau de matériaux à chaque appel, même sans changement de couleur.
+- Les miniatures du plateau (instancing) dessinaient les boss et les dirigeables en **boules étirées** : on ne les reconnaissait plus. Perte visuelle non notée jusqu'ici.
+
+**Ce qui a été fait.**
+- `ColorTint` : deux méthodes. `Set(couleur)` pour une couleur fixe (ballons, décor) → matériau partagé comme avant. `Animate(couleur)` pour une couleur qui change à chaque image → `MaterialPropertyBlock`, aucun matériau créé. Les 11 appels qui animent passent par `Animate`. Si la couleur n'a pas changé, `Set` et `Animate` ne font plus rien (plus de tableau recréé).
+- Plateau (`Hub/Board.cs`) : boss et dirigeables gardent une vraie copie de leur modèle (peu nombreux, sans ombre ni collider ; cachée quand le boss retourne au pool, réutilisée ensuite). Les ballons normaux restent en instancing.
+- Hors perf, même relecture : projectiles qui suivaient un ballon recyclé (numéro de vie `Balloon.Life`), 4 sources de son réservées aux sons 2D (annonces, voix, jingles) pour que les pops ne les coupent plus.
+
+**Avant / après.** À mesurer (Profiler, *Memory* → nombre de matériaux, pendant le tutoriel) : avant, +72 matériaux par seconde ; après, attendu stable. Le plateau coûte quelques appels de dessin de plus pendant un boss.
+
+**Est-ce que ça a vraiment marché ?** À mesurer. Compilé, pas testé au casque.
+
+**Suggestions.** Une couleur animée perd le regroupement du SRP Batcher : ça ne concerne que quelques boutons et panneaux, sans effet visible attendu.
+
+## Modèles : Mesh LOD automatique, textures des singes, pluie au casque
+**Lun. 9 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · issues #176, #180, #185
+
+**Le problème.** Triangles comptés dans les FBX (script, 9 nov.) : les singes sont légers (700 à 1 100 triangles), mais **un ballon en a 1 032** (le cœur 1 680) et il y en a des centaines par vague ; le bananier en a 5 474. Les textures des singes (2048 px) sont **intégrées dans les FBX** : c'est pour ça qu'ils pèsent 1,5 à 1,9 Mo, et les PNG rangés à côté ne servent à rien (aucun matériau ne les utilise). La pluie de l'orage : jusqu'à 1 000 gouttes transparentes.
+
+**Ce qui a été fait.**
+- **Mesh LOD** (Unity 6) coché à l'import (`generateMeshLods: 1`) des modèles sans squelette : ballons normal, blindé et cœur, MOAB, BFB, bananier, Canon, Tireur. Unity calcule tout seul des versions simplifiées dans le même maillage, et la carte graphique prend la plus légère qui suffit selon la taille à l'écran. Pas de réexport Blender, réversible en décochant la case.
+- Nouveau menu **SAE → Optimiser les textures (Quest)** (`Editor/TextureMenu.cs`) : sort les textures intégrées des FBX (comme le bouton *Extract Textures*), puis limite sur Android les textures du dossier Art à 1024 px (512 pour les projectiles), avec mipmaps. **Lancé le 10 nov.** (mode batch) : 30 FBX vidés de leurs textures intégrées (18 PNG extraits, 7,9 Mo, dans `<Sujet>/Textures/Extraites`), 39 textures limitées sur Android. À vérifier dans Unity : les singes et ballons gardent leurs couleurs (pas de modèle blanc ou rose). Poids du build : à mesurer.
+- Pluie au casque : 40 % des gouttes (400 au plus), traits 1,5 fois plus longs (`Map/Weather.cs`).
+- **Pas fait, volontairement :**
+  - fusionner les 2-3 maillages de chaque singe (Blender) : réexporter des modèles riggés sans pouvoir tester dans Unity, à 4 jours du rendu, c'est trop risqué (noms d'os, échelle, animations) ;
+  - #185 (synchro réseau) : un ballon normal ne tourne jamais, donc NGO n'envoie déjà pas sa rotation (seuil). Couper la rotation ne gagnerait rien. Baisser le *Tick Rate* toucherait aussi les joueurs. À revoir seulement si une partie coop rame (mesure d'abord) ;
+  - #180 MSAA : gardé en 4x (le crénelage se voit beaucoup en VR) ; textes 3D et occlusion : à mesurer d'abord.
+
+**Avant / après.**
+
+| Mesure | Avant | Après |
+|---|---|---|
+| Triangles d'un ballon normal (FBX) | 1 032 | 1 032 au plus près, moins de loin (Mesh LOD) |
+
+Le reste *à mesurer* : triangles et fps du mode admin (200 singes, grosse vague) ; mémoire des textures (*Memory Profiler*) avant / après le menu.
+
+**Est-ce que ça a vraiment marché ?** *Pas encore mesuré.* À regarder au casque : un ballon de loin ne doit pas paraître cabossé. Si c'est le cas, monter *Mesh LOD Threshold* (Quality) ou décocher la case sur ce modèle.
+
+**Suggestions.** Si les *skinned meshes* restent le problème après mesure : fusionner les maillages des singes dans Blender (`Ctrl+J`, même armature), un singe à la fois, en vérifiant chacun dans Unity.
+
+---
+
+## Pools (sons, projectiles, ondes, traits), préchargement, Update coupés
+**Lun. 9 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · issues #178, #181, #182
+
+**Le problème.** Pendant une vague, le jeu créait et détruisait des objets sans arrêt : un `GameObject` + une `AudioSource` par son, un objet + son modèle 3D par projectile, un objet par onde de choc, un système de particules neuf (40 étincelles) par explosion, un `LineRenderer` par tir du Sniper. Ça charge le ramasse-miettes et donne des à-coups. Les sons étaient chargés au premier usage (`Resources.LoadAll` + lecture de tout le fichier pour sauter le silence) : le premier « pop » de la partie faisait un à-coup. Et `ColorTint.Update` tournait à chaque image sur chaque objet teinté (des centaines), alors qu'il ne sert qu'à l'arc-en-ciel.
+
+**Ce qui a été fait.**
+- `Core/Sounds.cs` : 24 sources créées une fois (objet « Sons », gardé entre les scènes), la première libre est prise, sinon la plus ancienne. `Preload()` charge tous les sons au lancement du jeu (sauf la musique).
+- `Map/Projectile.cs` : un pool par type de singe, remise à zéro (position, rotation, âge, cible) à chaque lancer ; projectiles sans ombre.
+- `Weapon/Shockwave.cs` : pool d'ondes ; **un seul** système d'étincelles par scène, déplacé puis `Emit(25)` (au lieu de 40 étincelles dans un système neuf).
+- `Map/Tower.cs` (dans la fusion) : pool des traits du Sniper.
+- `Map/WaveSpawner.cs` : au chargement de la carte, 30 ballons (dont 10 avec leurs taches de camo) et 12 projectiles par type de singe posé sont créés d'avance et rangés.
+- `Core/ColorTint.cs` : le composant se coupe tout seul s'il n'est pas en arc-en-ciel (`Set` marche toujours). `Core/Aura.cs` : l'aura ne bat et ne tourne que si une caméra la voit.
+
+**Avant / après.** *À mesurer* dans le Profiler (build de dev au casque, vague chargée avec le panneau admin) : *GC Alloc* par image, pics, temps de `Update.ScriptRunBehaviourUpdate`, et le premier pop de la partie.
+
+**Est-ce que ça a vraiment marché ?** *Pas encore mesuré.* Rien ne change à l'écran, sauf des gerbes d'étincelles un peu moins fournies (25 au lieu de 40). Risque connu des pools : un objet recyclé qui garde un état de sa vie d'avant. Tout est remis à zéro à la sortie du pool ; à vérifier en jeu (ballons camo recyclés, boss qui se divise, projectiles qui partent du bon singe).
+
+**Suggestions.**
+- Si un son se coupe en pleine grosse vague (24 sources occupées), monter `Voices` à 32.
+- `Billboard`, `FlameFlicker`, `Spinner` gardent leur `Update` : ils sont posés sur peu d'objets.
+- Préchauffage des shaders (`GraphicsStateCollection`) pas fait : les ballons et projectiles créés d'avance ne sont pas dessinés. À faire seulement si le Profiler montre encore un pic au premier boss.
+
+---
+
+## Fusion de `feat/optim-plateau` avec le coop et les ballons camo
+**Lun. 9 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · issues #174, #153, #177, #179
+
+**Le problème.** Les optimisations de #153 (mesure : 41 fps, CPU limitant, 231 skinned meshes, 626 k triangles, 141 SetPass) étaient dans `feat/optim-plateau`, jamais fusionnée, partie d'un `main` plus ancien que le coop et les ballons camouflés. Rien n'arrivait au casque. Sur `main`, chaque ballon avait en plus un `BoxCollider` **sans Rigidbody** : pour la physique, un collider « statique » qu'on déplace à chaque image.
+
+**Ce qui a été fait.** Fusion dans `feat/opti-fusion`, conflits résolus : ciblage sans LINQ **avec** le filtre camo ; explosion du Canon sans LINQ ; pool de ballons compatible avec le coop (le double réseau est retiré quand le ballon est rangé, et un ballon recyclé est re-partagé à sa 1re image) et avec le camo (un ballon recyclé n'est plus camouflé) ; les copies d'un invité ne vont jamais dans le pool. Ce que la branche apporte : Rigidbody kinematic sur les ballons, matériaux partagés (`ColorTint.Shared`), ombres à 15 m, décor static + occlusion, singes figés sur le plateau (`MonkeyView.Freeze`), singes immobiles loin du joueur (`TowerAnimator`), 2 os par sommet, mode admin (#151).
+- **#179** : les 6 sphères de Unity des taches du camo (~4 500 triangles, 6 objets) sont remplacées par **un seul maillage** de 6 petites boules (480 triangles), partagé par tous les ballons camouflés, avec un matériau partagé.
+- **#177** : les modèles des ballons, les taches du camo, les projectiles et les traits du Sniper ne projettent plus d'ombre (l'aura n'en avait déjà plus).
+- Corrigé en passant : dans la branche, le corps du `if` de `Tutorial.TryPress` était dans le commentaire (le bouton de test était refusé).
+
+**Avant / après.** Mesure de #153 avant la fusion : 41 fps (mode admin, 200 singes). *Après : à mesurer* au même endroit, avec les mêmes réglages du panneau admin.
+
+**Est-ce que ça a vraiment marché ?** *Pas encore mesuré.* À vérifier en jeu : une vague normale, une vague camo, un boss qui se divise, une partie en coop (hôte + invité).
+
+**Suggestions.** Les lumières du hub (#177, étape 3 : *Per Object Limit* 4 → 2 ou lumières par sommet) n'ont pas été touchées : c'est un changement d'image, à décider au casque.
+
+---
+
+## Réglages de rendu du casque : bon asset URP, sans post-traitement, fovéation, distance de vue
+**Lun. 9 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · issues #186, #187, #175, #184, #183
+
+**Le problème.**
+- **#186.** Le profil de build *Meta Quest* prend la qualité « Meta Quest (Build Profile) », qui pointait sur **l'asset URP par défaut du paquet**, pas sur `Mobile_RPAsset`. Au casque : rendu à 100 % au lieu de 80 %, ombres jusqu'à 50 m, carte d'ombres 2048. Tous nos réglages mobiles étaient sans doute ignorés dans le build. Vu en lisant `QualitySettings.asset` (le GUID ne correspond à aucun fichier de `Assets/`).
+- **#187.** La caméra du joueur avait le post-traitement (WhiteBalance, ColorAdjustments, Tonemapping ; seul le Bloom était coupé). Sur Quest, ça ajoute une texture intermédiaire et une passe plein écran par œil, et ça empêche la fovéation.
+- **#175.** La fovéation de Meta était cochée dans OpenXR (Android), mais aucun code ne réglait son niveau : elle restait à 0.
+- **#184.** La caméra voyait jusqu'à 400 m (1 000 m dans le prefab XRI) pour des niveaux de quelques dizaines de mètres.
+- **#183.** Traces de pile calculées pour chaque `Log` et `Warning` ; un `Debug.Log` dans une boucle du coffre.
+
+**Ce qui a été fait.**
+- `ProjectSettings/QualitySettings.asset` : la qualité « Meta Quest (Build Profile) » utilise maintenant `Mobile_RPAsset`. `FpsCounter` écrit dans la console (build de dev, logcat) la qualité et l'asset vraiment utilisés.
+- Nouveau `Player/HeadsetRendering.cs` (ajouté par `PlayerRig`) : distance de vue **250 m** partout (couvre les nuages de l'orage, qui arrivent de 150 m, et la fin du brouillard à 230 m) ; au casque seulement : **post-traitement coupé** sur la caméra, **fovéation High dynamique** (`OVRManager.foveatedRenderingLevel`, le casque ne l'active que si l'image risque d'être en retard). Le générateur utilise la même distance.
+- On a gardé la fovéation de Meta (déjà cochée) plutôt que celle de Unity : pas de changement dans les réglages OpenXR, et pas de permission de suivi des yeux ajoutée au build.
+- Traces de pile de `Log` et `Warning` à *None* (profil Meta Quest et Player) ; le `Debug.Log` du coffre seulement dans l'éditeur. *Development Build* était déjà décoché dans le profil.
+
+**Avant / après.** *À mesurer* au casque, aux deux endroits de test, build normal (pas de dev pour les chiffres finaux, mais le compteur ne s'affiche qu'en dev : mesurer d'abord en dev, puis vérifier à l'œil).
+
+**Est-ce que ça a vraiment marché ?** *Pas encore mesuré.* Ce qu'on perd en image : un peu de netteté (80 % de résolution, bords flous de la fovéation), et l'étalonnage des couleurs du post-traitement au casque. À regarder au casque : si l'image est trop froide ou trop terne, réchauffer la lumière du soleil et l'ambiance dans le générateur. Si le texte des panneaux bave sur les bords, passer la fovéation à `Medium`.
+
+**Suggestions.**
+- Les Graphics Jobs « Legacy » activés dans les réglages locaux non commités de Dylan : à tester au casque (garder seulement si les fps montent).
+- *Managed Stripping Level* Medium : pas fait (risque de casser XR et Netcode, qui utilisent la réflexion, sans pouvoir tester à 4 jours du rendu).
+
+---
+
 ## Limite de 60 singes posés
 **Mer. 21 oct. 2026** · Dylan (avec Claude) · branche `feat/opti-aura`
 

@@ -318,7 +318,7 @@ namespace SAE.EditorTools
         // Distance d'affichage de la caméra : assez loin pour les montagnes (la brume finit à 230 m), mais pas plus.
         // Une plage courte (près 3 cm, loin 400 m) rend la profondeur plus précise : moins de surfaces qui
         // « clignotent » l'une sur l'autre selon l'angle (les bûches sur les fenêtres, par exemple).
-        const float NearClip = 0.03f, FarClip = 400f;
+        const float NearClip = 0.03f, FarClip = HeadsetRendering.FarClip;   // le jeu le remet aussi (HeadsetRendering)
 
         // Le point d'arrivée de la scène (le joueur y est posé, FallGuard l'y remet après une chute)
         static Transform Spawn(string name, Vector3 pos, Level level)
@@ -939,11 +939,14 @@ namespace SAE.EditorTools
                 Dart.Create(env, board.TransformPoint(new Vector3((i - 1) * 0.12f, -0.65f, -0.05f)), Quaternion.LookRotation(board.right));
         }
 
-        // Rien ici ne bouge : Unity regroupe les maillages (moins d'appels de dessin, plus de fps dans le casque)
+        // Rien ici ne bouge : Unity regroupe les maillages (moins d'appels de dessin, plus de fps dans le casque).
+        // Occluder + Occludee : les murs de la cabane cachent ce qui est derrière, et ce qui est caché n'est pas dessiné
+        // (occlusion, calculée par SAE → Calculer l'occlusion).
         static void MakeStatic(GameObject model)
         {
             foreach (var t in model.GetComponentsInChildren<Transform>())
-                GameObjectUtility.SetStaticEditorFlags(t.gameObject, StaticEditorFlags.BatchingStatic);
+                GameObjectUtility.SetStaticEditorFlags(t.gameObject,
+                    StaticEditorFlags.BatchingStatic | StaticEditorFlags.OccluderStatic | StaticEditorFlags.OccludeeStatic);
         }
 
         // Le paysage autour de la carte (Blender/cabane.py → Art/Cabane/Paysage.glb) : prairie, herbes hautes, fleurs,
@@ -1904,7 +1907,7 @@ namespace SAE.EditorTools
                 lawn.GetComponent<Renderer>().enabled = false;
                 Teleportable(lawn);
             }
-            MapDecor.Build(parent, k, withBushes: walkable);   // les buissons dépasseraient du plateau du hub
+            MapDecor.Build(parent, k, withBushes: walkable, withGrassDecor: walkable);   // buissons et fleurs : pas sur le plateau du hub (trop petit pour les voir)
         }
 
         // ---------------- CARTE ----------------

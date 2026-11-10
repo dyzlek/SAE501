@@ -80,7 +80,7 @@ Les demandes faites à l'IA sont gardées dans `prompts/` : `prompts_dylan.md`, 
 ## Suivi GitHub (règle n°3)
 Le planning vit sur GitHub : [tableau Project](https://github.com/users/dyzlek/projects/2) (n° 2, owner `dyzlek`), issues, jalons S1/S2/S3. Mode d'emploi : [docs/ORGANISATION.md](docs/ORGANISATION.md). **Claude le tient à jour tout seul, sans qu'on le demande :**
 - **Avant une tâche** : chercher l'issue qui correspond (`gh issue list`). S'il n'y en a pas, la créer (labels `prio:` + `type:`/`zone:`, jalon de la semaine) et l'ajouter au tableau. Passer la carte en **En cours**.
-- **À l'ouverture d'une PR** : écrire `Ferme #N` dans la description ; ajouter la PR au tableau ; carte en **En relecture**.
+- **À l'ouverture d'une PR** : écrire `Closes #N` dans la description (une ligne par issue ; GitHub ne comprend que les mots anglais, `Ferme #N` ne ferme rien) ; ajouter la PR au tableau ; carte en **En relecture**.
 - **Après un merge** : vérifier que l'issue est fermée et la carte en **Fait**.
 - **Bug ou idée repérés en passant** : une nouvelle issue (une idée hors GDD → `prio: POURRAIT` ou `hors périmètre`, sans jalon).
 - **Aucune notification mail** : ne jamais assigner quelqu'un (`--assignee`), ne jamais écrire de `@pseudo`, ne pas commenter les issues sans demande. Le responsable s'écrit dans le corps de l'issue (« Qui : Dylan »).

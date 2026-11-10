@@ -41,7 +41,7 @@ namespace SAE
             if (plate)
             {
                 var color = open ? Unlocked : Color.Lerp(Locked, Refused, refused);
-                if (plate.color != color) plate.Set(color);
+                plate.Animate(color);   // le rouge du refus s'efface image par image
             }
         }
     }

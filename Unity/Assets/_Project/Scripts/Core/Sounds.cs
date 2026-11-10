@@ -5,7 +5,8 @@ namespace SAE
 {
     // Les sons du jeu, rangés dans Resources/Sons/<Catégorie>/<Son>/ : un dossier = un son. S'il contient plusieurs
     // fichiers (ex. les deux clics de bouton), on en tire un au hasard à chaque fois, pour que ça ne sonne pas répétitif.
-    // Les sons sont chargés à leur première utilisation. Un son qui manque ne fait rien (pas d'erreur) :
+    // Les sons sont chargés une fois pour toutes au lancement du jeu (Preload, #181) : charger un son en pleine partie,
+    // au premier « pop », faisait un à-coup. Un son qui manque ne fait rien (pas d'erreur) :
     // on peut brancher le code avant d'avoir trouvé le son.
     //   Play(son, endroit) : son 3D, qui vient de cet endroit (en VR, on l'entend du bon côté) ;
     //   Play(son)          : son 2D, entendu partout pareil (annonces, voix de Quincy).
@@ -47,7 +48,52 @@ namespace SAE
 
         // Sans rechargement du domaine (Enter Play Mode rapide), les statiques survivent d'une partie à l'autre
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetState() { clips.Clear(); starts.Clear(); nextQuincy = 0f; popFrame = -1; popsThisFrame = 0; }
+        static void ResetState() { clips.Clear(); starts.Clear(); nextQuincy = 0f; popFrame = -1; popsThisFrame = 0; voices = null; nextFlat = 0; }
+
+        // Au lancement : tous les sons du jeu (les constantes ci-dessus) sont chargés et leur début de son calculé (#181).
+        // La musique n'est pas concernée : Music la charge elle-même, et elle est trop longue pour être lue ici.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        static void Preload()
+        {
+            foreach (var field in typeof(Sounds).GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static))
+            {
+                if (!field.IsLiteral || field.FieldType != typeof(string)) continue;
+                var sound = (string)field.GetValue(null);
+                if (sound.StartsWith("Musique/")) continue;
+                foreach (var clip in Clips(sound)) Start(clip);
+            }
+        }
+
+        // Les sources de son, créées une seule fois et réutilisées (#178) : avant, chaque son créait un objet et une
+        // AudioSource, détruits à la fin.
+        // Les 4 premières sont gardées pour les sons 2D (annonce du boss, voix de Quincy, jingles) : pendant une grosse
+        // vague, les pops occupent toutes les autres, et ils ne doivent jamais couper une annonce.
+        // Si toutes les sources 3D jouent déjà, un nouveau pop est simplement sauté : il y en a des dizaines, ça ne s'entend pas.
+        const int Voices = 24, FlatVoices = 4;
+        static AudioSource[] voices;
+        static int nextFlat;   // sons 2D tous occupés (rare) : on reprend la plus ancienne, à tour de rôle
+
+        static AudioSource FreeVoice(bool flat)
+        {
+            if (voices == null || !voices[0])
+            {
+                var holder = new GameObject("Sons");
+                Object.DontDestroyOnLoad(holder);   // les sources servent dans toutes les scènes
+                voices = new AudioSource[Voices];
+                for (int i = 0; i < Voices; i++)
+                {
+                    voices[i] = new GameObject("Voix " + i).AddComponent<AudioSource>();
+                    voices[i].transform.SetParent(holder.transform, false);
+                    voices[i].playOnAwake = false;
+                }
+            }
+            int first = flat ? 0 : FlatVoices, last = flat ? FlatVoices : Voices;
+            for (int i = first; i < last; i++)
+                if (!voices[i].isPlaying) return voices[i];
+            if (!flat) return null;
+            nextFlat = (nextFlat + 1) % FlatVoices;
+            return voices[nextFlat];
+        }
 
         public static bool Has(string sound) => Clips(sound).Length > 0;
 
@@ -68,15 +114,15 @@ namespace SAE
             return found;
         }
 
-        // Joue le son une fois. Chaque son a sa propre petite source, détruite à la fin : plusieurs sons peuvent se superposer,
+        // Joue le son une fois, sur une des sources réutilisées : plusieurs sons peuvent se superposer,
         // chacun avec sa hauteur (pitch).
         public static void Play(string sound, Vector3? where = null, float volume = 1f, float pitch = 1f)
         {
             var clip = Clip(sound);
             if (!clip) return;
-            var go = new GameObject("Son " + clip.name);
-            if (where.HasValue) go.transform.position = where.Value;
-            var source = go.AddComponent<AudioSource>();
+            var source = FreeVoice(flat: !where.HasValue);
+            if (!source) return;   // trop de sons 3D en même temps : celui-ci est sauté
+            if (where.HasValue) source.transform.position = where.Value;
             source.clip = clip;
             source.volume = volume * Options.SoundVolume;   // × le réglage SONS du menu OPTIONS
             source.pitch = pitch;
@@ -84,7 +130,6 @@ namespace SAE
             source.minDistance = 2f;   // pleine puissance jusqu'à 2 m, puis il baisse avec la distance
             source.timeSamples = Start(clip);
             source.Play();
-            Object.Destroy(go, clip.length / Mathf.Max(0.1f, pitch) + 0.1f);
         }
 
         // Le premier échantillon qui n'est plus du silence (calculé une fois par fichier)

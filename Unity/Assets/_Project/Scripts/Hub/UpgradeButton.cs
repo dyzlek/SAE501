@@ -101,7 +101,7 @@ namespace SAE
             cap.localPosition = capRest + Vector3.down * (0.015f * pressed);
 
             var color = Economy.CanAfford(Price) ? Affordable : TooExpensive;
-            capTint.Set(Color.Lerp(color, Refused, refused));
+            capTint.Animate(Color.Lerp(color, Refused, refused));
         }
     }
 }

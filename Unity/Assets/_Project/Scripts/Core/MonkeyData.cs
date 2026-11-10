@@ -51,8 +51,8 @@ namespace SAE
             MonkeyType.Classique => "Tire sur le ballon le plus avancé",
             MonkeyType.Boomerang => "Touche 2 ballons à chaque lancer",
             MonkeyType.Canon => "Explosion : touche tout autour de la cible",
-            MonkeyType.Sniper => "Tire sur toute la carte, gros dégâts",
-            MonkeyType.Punaise => "Touche 4 ballons proches",
+            MonkeyType.Sniper => "Tire sur toute la carte, gros dégâts, voit les camouflés",
+            MonkeyType.Punaise => "Touche 4 ballons tout près de lui",
             MonkeyType.Glace => "Ralentit tous les ballons à portée",
             MonkeyType.Colle => "Colle un ballon : très lent pendant 3 s",
             _ => "",
@@ -65,10 +65,14 @@ namespace SAE
         public static float Range(Monkey m) => m.type switch
         {
             MonkeyType.Sniper => 100f,
-            MonkeyType.Punaise => 4f,
+            MonkeyType.Punaise => 2.5f,   // 4 m avant le 23 oct. : elle visait trop loin ; comme dans Bloons, elle protège un virage
             MonkeyType.Canon => 5f,
             _ => 6f,
-        } + (int)m.level * 0.3f;
+        } + (int)m.level * (m.type == MonkeyType.Punaise ? 0.15f : 0.3f);
+
+        // Voit les ballons camouflés (Balloon.Camo) : le Tireur toujours, les autres à partir de la rareté Violet.
+        // C'est une raison de plus de fusionner ses singes.
+        public static bool SeesCamo(Monkey m) => m.type == MonkeyType.Sniper || m.level >= Rarity.Violet;
 
         public static float FireDelay(Monkey m) => m.type switch
         {

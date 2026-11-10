@@ -41,12 +41,15 @@ namespace SAE
             var kb = Keyboard.current;
             var mouse = Mouse.current;
             if (kb == null || mouse == null) return;
+            if (AdminPanel.Open) { LockCursor(false); return; }   // panneau admin ouvert : la souris sert au panneau
 
             if (kb.escapeKey.wasPressedThisFrame) LockCursor(false);
+            // Souris libre (Échap, panneau admin refermé, fenêtre Game qui a perdu le focus) : le clic la reprend
+            // ET agit tout de suite (avant, le premier clic ne faisait que reprendre la souris : un bouton semblait ne pas marcher)
             if (Cursor.lockState != CursorLockMode.Locked)
             {
-                if (mouse.leftButton.wasPressedThisFrame) LockCursor(true);
-                return;
+                if (!mouse.leftButton.wasPressedThisFrame) return;
+                LockCursor(true);
             }
 
             if (heldWheel) heldWheel.MouseDrag(mouse.delta.ReadValue().x);   // la souris fait tourner la roue au lieu de la vue
@@ -113,8 +116,12 @@ namespace SAE
                 return;
             }
             var pressable = hit.collider.GetComponentInParent<IPressable>();
-            if (pressable != null && Tutorial.TryPress(pressable))   // pendant le tutoriel, seul ce qu'il demande est permis
-                Sounds.Play(Sounds.Bouton, hit.point);
+            bool pressed = pressable != null && Tutorial.TryPress(pressable);   // pendant le tutoriel, seul ce qu'il demande est permis
+            if (pressed) Sounds.Play(Sounds.Bouton, hit.point);
+            // Mode admin : la console dit ce que chaque clic a touché, pour trouver ce qui bloque
+            if (AdminPanel.Active)
+                Debug.Log($"Clic sur « {hit.collider.name} » à {hit.distance:0.0} m : " +
+                          (pressable == null ? "rien à enfoncer" : pressed ? $"{pressable.GetType().Name} enfoncé" : $"{pressable.GetType().Name} refusé par le tutoriel"), hit.collider);
         }
 
         void Carry(Transform held)

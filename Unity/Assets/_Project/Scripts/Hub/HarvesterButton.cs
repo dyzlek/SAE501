@@ -44,7 +44,7 @@ namespace SAE
             int price = isBuyButton ? crew.PriceToBuy : crew.Price(stat);
             bool usable = isBuyButton || crew.Count > 0;   // on n'améliore pas une équipe vide
             var color = usable && Economy.CanAfford(price) ? UpgradeButton.Affordable : UpgradeButton.TooExpensive;
-            capTint.Set(Color.Lerp(color, UpgradeButton.Refused, refused));
+            capTint.Animate(Color.Lerp(color, UpgradeButton.Refused, refused));
         }
 
         string Text(bool done, int price)

@@ -148,7 +148,9 @@ namespace Sae501.Coffres
             string first = null;
             foreach (AnimationState s in anim)
             {
-                Debug.Log("Clip du coffre : " + s.name, this);
+#if UNITY_EDITOR
+                Debug.Log("Clip du coffre : " + s.name, this);   // diagnostic : seulement dans l'éditeur, pas dans le build (#183)
+#endif
                 if (first == null) first = s.name;
                 if (s.name.ToLower().Contains("open")) return s.name;
             }

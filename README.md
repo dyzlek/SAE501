@@ -71,8 +71,9 @@ git lfs install
 ```
 2. Unity Hub → *Add* → dossier `Unity/` (version **Unity 6000.6**).
 3. **Générer les scènes :** menu **SAE > Générer le prototype**. Les scènes Hub et Labyrinthe sont construites par code ; il faut les régénérer après chaque `git pull` qui touche aux scripts ou aux modèles.
-4. Choisir le mode avec **SAE > Mode de jeu** (VR ou PC), ouvrir `Assets/_Project/Scenes/Hub.unity` (on lance **toujours depuis le Hub**), puis Play.
-5. **Tutoriel :** il se lance au démarrage, **sauf si SAE > Bac à sable est coché**. Ce mode de développement débloque tout et saute le tutoriel.
+4. **Calculer l'occlusion :** menu **SAE > Calculer l'occlusion (Hub et Labyrinthe)**, après chaque génération. Sans ça, Unity dessine aussi ce qui est caché derrière les murs (la carte et la bananeraie depuis la cabane).
+5. Choisir le mode avec **SAE > Mode de jeu** (VR ou PC), ouvrir `Assets/_Project/Scenes/Hub.unity` (on lance **toujours depuis le Hub**), puis Play.
+6. **Tutoriel :** il se lance au démarrage, **sauf si SAE > Bac à sable est coché**. Ce mode de développement débloque tout et saute le tutoriel.
 
 **Mode PC (sans casque) :**
 - ZQSD pour marcher, la souris pour regarder ;

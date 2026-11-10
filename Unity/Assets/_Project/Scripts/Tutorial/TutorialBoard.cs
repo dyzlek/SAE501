@@ -100,7 +100,7 @@ namespace SAE
 
             // Le cadre pulse doucement (rouge un instant si refusé)
             if (glow)
-                glow.Set(r < 1f ? RefusedColor : Color.Lerp(GlowB, GlowA, 0.5f + 0.5f * Mathf.Sin(Time.time * 3f)));
+                glow.Animate(r < 1f ? RefusedColor : Color.Lerp(GlowB, GlowA, 0.5f + 0.5f * Mathf.Sin(Time.time * 3f)));
         }
     }
 }

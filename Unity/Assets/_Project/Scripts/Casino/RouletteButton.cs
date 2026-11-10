@@ -44,7 +44,7 @@ namespace SAE
             pressed = Mathf.MoveTowards(pressed, 0f, Time.deltaTime * 5f);
             refused = Mathf.MoveTowards(refused, 0f, Time.deltaTime * 2f);
             cap.localPosition = capRest + Vector3.down * (0.015f * pressed);
-            capTint.Set(Color.Lerp(IdleColor(), UpgradeButton.Refused, refused));
+            capTint.Animate(Color.Lerp(IdleColor(), UpgradeButton.Refused, refused));
         }
 
         // La couleur au repos dit si le bouton peut servir maintenant

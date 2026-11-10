@@ -59,7 +59,7 @@ namespace SAE
             pressed = Mathf.MoveTowards(pressed, 0f, Time.deltaTime * 5f);
             refused = Mathf.MoveTowards(refused, 0f, Time.deltaTime * 2f);
             cap.localPosition = capRest + Vector3.forward * (0.012f * pressed);   // il s'enfonce vers le socle (+Z)
-            capTint.Set(Color.Lerp(usable() ? color : Off, RefusedColor, refused));
+            capTint.Animate(Color.Lerp(usable() ? color : Off, RefusedColor, refused));
         }
     }
 }

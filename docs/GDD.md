@@ -182,6 +182,7 @@ Le **pupitre ARC**, sur l'estrade, vend des améliorations qui se cumulent :
 | **Rapide** | 0,65 | ×1,7 | Petit et vif |
 | **Blindé** | 1 | ×0,8 | Moitié moins de dégâts, ne peut pas être ralenti |
 | **Cœur** | 0,9 | ×1 | Regagne une couche toutes les 2 s |
+| **Camouflé** (normal ou rapide) | — | — | Kaki, avec des taches sombres : **seuls le Tireur et les singes Violet et plus le voient** ; les flèches de Quincy le touchent toujours |
 | **Boss (MOAB)** | 1,8 | ×0,6 | Très solide, hélice qui tourne ; **en éclatant, lâche 4 ballons normaux** |
 | **Dirigeable rouge (BFB)** | 2,2 | ×0,35 | Boss final, blindé, insensible au ralentissement ; **en éclatant, lâche 2 boss** |
 
@@ -190,20 +191,21 @@ Le **pupitre ARC**, sur l'estrade, vend des améliorations qui se cumulent :
 Un ballon qui atteint la sortie retire **autant de vies que ses couches restantes**. On a 20 vies par vague, et elles repartent au maximum à chaque vague. Perdre une vague ne fait pas tout recommencer : on la rejoue, singes et bananes gardés. **Éclater un ballon ne rapporte rien** : seule la vague finie paie, pour pousser à défendre proprement.
 
 ### 7.7 Les 100 vagues
-Elles sont calculées par une formule (`WaveBook.Make`) qui monte sans à-coups, avec des paliers façon Bloons :
+Elles sont calculées par une formule (`WaveBook.Make`) qui monte sans à-coups, avec des paliers façon Bloons. **Durcies le 23 oct.** (retour de Dylan : trop faciles) : plus de ballons, plus de couches, plus serrés, chaque sorte arrive plus tôt.
 
 | Vague | Nouveauté | Exemple de composition |
 |---|---|---|
-| 1 | Ballons normaux seulement | 8 normaux à 1 couche |
-| 3 | Un 2e groupe plus solide | 9 × 1 couche + 4 × 2 couches |
-| 4 | **Rapides** | 10 + 5 normaux, 2 rapides |
-| 8 | **Blindés** | 12 + 6 normaux, 4 rapides, 1 blindé |
-| 12 | **Cœurs** (une vague sur deux) | 15 + 7 normaux, 6 rapides, 3 blindés, 1 cœur |
-| 15 | **Premier boss**, puis un toutes les 5 vagues | … + 1 boss à 17 couches |
-| 25 | **Dirigeable rouge** | … + 1 dirigeable à 85 couches |
-| 50 | 2 dirigeables ; un boss à chaque vague | 38 + 16 normaux, 29 rapides, 22 blindés, 7 cœurs, 2 boss, 2 dirigeables |
+| 1 | Ballons normaux seulement | 10 normaux à 1 couche |
+| 2 | Un 2e groupe plus solide | 11 × 1 couche + 5 × 2 couches |
+| 3 | **Rapides** | 12 + 6 normaux, 3 rapides |
+| 6 | **Blindés** | 15 + 7 normaux, 5 rapides, 2 blindés |
+| 10 | **Cœurs** (une vague sur deux) et **camouflés** (à chaque vague) | 19 + 8 normaux, 8 rapides, 4 blindés, 2 cœurs, 2 camouflés |
+| 12 | **Premier boss**, puis un toutes les 4 vagues | … + 1 boss à 22 couches |
+| 20 | **Rapides camouflés** | 28 + 11 normaux, 16 rapides, 11 blindés, 4 cœurs, 5 + 1 camouflés, 1 boss |
+| 25 | **Dirigeable rouge** | … + 1 dirigeable à 117 couches |
+| 50 | 2 dirigeables ; un boss à chaque vague dès la 40 | 55 + 21 normaux, 40 rapides, 31 blindés, 12 cœurs, 15 + 8 camouflés, 3 boss, 2 dirigeables |
 | 75 | 3 dirigeables | … |
-| **100** | **Finale : 4 dirigeables rouges → victoire** | 68 + 29 normaux, 59 rapides, 47 blindés, 15 cœurs, 5 boss, 4 dirigeables à 160 couches |
+| **100** | **Finale : 4 dirigeables rouges → victoire** | 100 + 38 normaux, 80 rapides, 64 blindés, 24 cœurs, 32 + 21 camouflés, 6 boss, 4 dirigeables à 230 couches |
 | 101 et + | Mode infini, la formule continue | |
 
 **Les vagues spéciales sont annoncées** (celles qui ont un boss ou un dirigeable) :
