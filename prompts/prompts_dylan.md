@@ -4,6 +4,23 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Mar. 10 nov. 2026
 
+### Encore moins de rondins
+> Encore moins de rondins, genre plus gros, et pour les volets un seul rectangle.
+
+### Cabane moins détaillée
+> Essaie d'avoir moins de rondins de bois pour la maison, et des fenêtres et volets moins détaillés, la porte aussi, mais que ça reste joli.
+
+### Montagnes lisses
+> Je veux que, de loin, les montagnes soient lisses, surtout pour leurs ombres, etc.
+
+### Tourner la texture du sol
+> Tourne de 90° la texture du bois du sol que tu as modifiée.
+
+### Sol en une seule texture
+> Pour le sol, évite de mettre plein de planches : juste une texture.
+
+### Optimiser le tapis et le lustre
+> J'aimerais que tu optimises le tapis et le lustre pour éviter qu'ils fassent laguer (le tapis, c'est juste une texture, et le lustre un donut de bois).
 ### Retirer les boutons de test
 > Enlève les deux boutons au-dessus de SE TP (capture jointe : les cubes « 200 SINGES » et « VAGUE CHEAT »).
 

@@ -18,6 +18,65 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 
 ---
 
+## Murs, fenêtres, volets et porte de la cabane allégés
+**Mar. 10 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-tapis-lustre` · issue #195
+
+**Le problème.** Les murs étaient le plus gros morceau de la cabane : environ 160 rondins à 14 côtés et 5 tronçons chacun (**26 240 triangles**, 18 880 sommets). Fenêtres, volets et porte : des planches et lattes toutes biseautées (un biseau triple à peu près les triangles d'un pavé).
+
+**Ce qui a été fait** (`Blender/cabane.py`) :
+- **Rondins des murs** : gros rondins ovales, 1,9 fois plus hauts que profonds, donc **7 rangées au lieu de 12** sur la même hauteur (d'abord 1,35 fois, puis plus gros à la demande de Dylan) ; **8 côtés au lieu de 14**, 3 tronçons au lieu de 5 (sans le léger renflement). La profondeur ne change pas : l'intérieur de la cabane (cible, lanternes, étagères) reste à la même place.
+- **Linteaux** de la porte et des fenêtres : ils montent jusqu'au rondin du dessus (sinon une bande de joint blanc de 20 cm apparaissait avec les rondins plus hauts).
+- **Fenêtres** : encadrements sans biseau. **Volets** : un seul rectangle au lieu de trois lattes biseautées et une traverse. **Porte** : 3 planches sans biseau au lieu de 6 biseautées (on voit encore les fentes).
+- Le script tire toujours autant de nombres au hasard qu'avant : le reste du décor ne bouge pas (vérifié, seuls ces 4 objets changent).
+
+**Avant / après.** Sommets : murs 18 880 → 4 420, encadrements 3 120 → 2 040, volets 2 304 → 144, porte 1 008 → 216. Triangles de la cabane : 97 737 → **74 777**. Fps à mesurer.
+
+**Est-ce que ça a vraiment marché ?** Rendu comparé en images (dehors, dedans, porte) ; **pas vu dans Unity ni au casque**. Perte : rondins moins ronds de près, linteaux hauts au-dessus de la porte et d'une fenêtre, volets et porte plus simples.
+
+## Montagnes lisses (hub et carte)
+**Mar. 10 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-tapis-lustre` · issue #195
+
+**Le problème.** Les montagnes (`build_mountains` dans `Blender/cabane.py`) étaient en facettes nettes (style low poly) : chaque triangle avait ses 3 sommets à lui et sa couleur, soit **39 168 sommets** pour 13 056 triangles, dans `Cabane.glb` et `Paysage.glb`. De loin, la lumière et les ombres dessinaient chaque facette (demande de Dylan : « de loin, des montagnes lisses »).
+
+**Ce qui a été fait.** Sommets partagés (un par point de la grille), ombrage lisse (normales moyennées) et une couleur par sommet, qui se fond d'un sommet à l'autre. Même relief, mêmes triangles. Vérifié : seules les montagnes changent dans les deux fichiers.
+
+**Avant / après.** Sommets : 39 168 → **6 720** par chaîne (triangles inchangés : 13 056). Moins de sommets à transformer et à envoyer au GPU. Fps à mesurer.
+
+**Est-ce que ça a vraiment marché ?** Rendu comparé en image dans Blender (avant facettes, après lisse) ; **pas vu dans Unity ni au casque**. Perte : le style low poly des montagnes (choix de Dylan).
+
+**Suggestions.** Les montagnes sont à 40 m et plus : vérifier dans Unity qu'elles ne projettent pas d'ombre (*Cast Shadows* : Off), la distance d'ombre ne va de toute façon pas jusque-là.
+
+## Sol de la cabane et de la bananeraie : une dalle texturée au lieu de centaines de planches
+**Mar. 10 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-tapis-lustre` · issue #195
+
+**Le problème.** Le plancher était fait de **planches en 3D, une par une** (chacune un pavé biseauté) : **9 064 triangles** dans la cabane et **14 036** dans la bananeraie, pour un sol plat. On voyait même l'herbe entre deux planches (capture de Dylan).
+
+**Ce qui a été fait** (`Blender/cabane.py`, `build_floor` et nouvelle texture `tex_floor`) : le sol est **une seule dalle plate (12 triangles)**. Les planches sont **dessinées dans la texture** `Plancher_Sol` (JPEG 1024 + carte de normales) : 8 planches de 19 cm, chacune avec sa teinte et ses veines, des joints en bout de planche, des fentes sombres. La texture se répète tous les 1,52 m. Texture tournée de 90° ensuite (demande de Dylan) : les planches vont dans l'autre sens. Le script tire toujours les mêmes nombres au hasard qu'avant, pour que le reste du décor (herbe, bougies…) ne bouge pas : vérifié, seuls les sols changent dans `Cabane.glb` et `Bananeraie.glb`.
+
+**Avant / après.** Triangles : cabane 106 789 → 97 737 (dont le lustre), bananeraie 24 720 → 10 696. Fps à mesurer au casque.
+
+**Est-ce que ça a vraiment marché ?** À mesurer. Rendu vérifié en image dans Blender, **pas testé dans Unity ni au casque**. Perte visuelle : plus de relief réel entre les planches (seulement la carte de normales), le motif se répète tous les 1,52 m.
+
+**Suggestions.** Même méthode possible pour d'autres surfaces faites de pièces (allée de la bananeraie, murs en rondins vus de loin).
+
+## Cabane : tapis opaque et lustre en « donut » de bois
+**Mar. 10 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-tapis-lustre` · issue #195
+
+**Le problème.** Le hub lague près du tapis et du lustre (ressenti de Dylan, pas mesuré). Les deux viennent du modèle généré par `Blender/cabane.py` (`Cabane.glb`) :
+- **Tapis** : un disque de 3 m de diamètre (~7 m² de sol) en **transparence découpée** (glTF « MASK », pour les franges). Sur le GPU du Quest, un pixel découpé empêche d'éliminer tôt ce qui est caché derrière, et le MSAA 4x le rend plus cher. Sa texture était un **PNG 1024 avec alpha (1,7 Mo)**, importée sans compression par glTFast (≈ 4 Mo en mémoire avec les mipmaps).
+- **Lustre** : 2 436 triangles, **4 matériaux** (bois, bout de rondin, fer, cire) ; la jante était faite de 16 rondins avec chacun ses deux bouts.
+
+**Ce qui a été fait** (`Blender/cabane.py`, puis `Cabane.glb` régénéré avec Blender 5.2 en mode batch ; les autres .glb régénérés ont été remis comme avant) :
+- Tapis **opaque** : plus de franges ni d'alpha, le tissu va jusqu'au bord du disque ; texture **JPEG 512 sans alpha (114 Ko)**.
+- Lustre : la jante devient **un seul tore de bois** (6 × 24 faces) et tout le bois prend le matériau Poutre (plus de bouts de rondin) : **3 matériaux au lieu de 4**, **1 636 triangles au lieu de 2 436**. Bougies, flammes et chaînes inchangées.
+- Rien d'autre ne change dans la cabane (vérifié : mêmes objets, mêmes maillages et matériaux, sauf ces deux-là). Fichier : 11,8 → 10,1 Mo.
+
+**Avant / après.** À mesurer au casque (compteur au poignet), au centre de la cabane, en regardant le tapis puis le lustre. Profiler : *Batches* en baisse d'au moins 1 sous le lustre.
+
+**Est-ce que ça a vraiment marché ?** À mesurer. Rendu vérifié en image (tapis, lustre), **pas testé dans Unity ni au casque**. Perte visuelle : plus de franges au tapis (bord doré net) ; le lustre garde sa forme de roue.
+
+**Suggestions.** La lumière du lustre (`PrototypeGenerator.cs`, `AddLight(t, 8f, 3.2f)`) est une lumière ponctuelle en temps réel de **8 m de portée** : elle éclaire toute la cabane et une partie de dehors, donc presque chaque pixel du hub fait un calcul de lumière en plus. C'est probablement le plus gros coût « du lustre ». Pistes : portée 5 m (la cabane fait 3,4 m de rayon), ou lumière cuite (*Baked*) puisqu'elle ne bouge pas (on perd le vacillement). Pas fait ici : il faut regénérer ou modifier la scène Hub.
+
 ## Corrections après relecture de la PR #188 : couleurs animées, miniatures des boss
 **Mar. 10 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · PR #188
 

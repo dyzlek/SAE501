@@ -109,6 +109,37 @@ def tex_wood(name, base, lines, seed, n=1024, strength=6.0):
     return image(name, col), image(name + "_N", normal_from_height(h, strength), data=True)
 
 
+FLOOR_TILE = 1.52   # la texture du sol couvre 1,52 m × 1,52 m (8 planches de 19 cm), puis se répète
+
+
+def tex_floor(n=1024, planks=8):
+    """Plancher dessiné dans la texture (10 nov., optimisation) : 8 planches côte à côte, chacune sa teinte et ses veines,
+    un joint en bout de planche, des fentes sombres entre elles. Raccordable : le sol entier est une seule dalle plate."""
+    g = np.random.default_rng(11)
+    col, h = grain(n, (0.68, 0.47, 0.27), 33, 11)
+    w = n // planks                                      # largeur d'une planche en pixels
+    v = np.arange(n)
+    for i in range(planks):
+        sl = slice(i * w, (i + 1) * w)
+        shift = g.integers(0, n)
+        col[:, sl] = np.roll(col[:, sl], shift, axis=0)  # les veines ne se suivent pas d'une planche à l'autre
+        h[:, sl] = np.roll(h[:, sl], shift, axis=0)
+        joint = g.integers(0, n)                         # deux bouts de planche par carreau : des planches de 76 cm
+        tint = np.where(((v - joint) % n) < n // 2, g.uniform(0.78, 1.05), g.uniform(0.78, 1.05))
+        col[:, sl] *= tint[:, None, None]                # chaque planche a sa teinte
+        d = (v - joint) % (n // 2)
+        d = np.minimum(d, n // 2 - d)[:, None]
+        gapv = np.clip(1 - d / 3.0, 0, 1)                # la fente du joint (3 px ≈ 4 mm)
+        col[:, sl] *= (1 - 0.75 * gapv)[..., None]
+        h[:, sl] -= 0.6 * gapv
+    x = np.arange(n) % w
+    du = np.minimum(x, w - 1 - x)[None, :]
+    gapu = np.clip(1 - du / 3.0, 0, 1)                   # la fente entre deux planches
+    col *= (1 - 0.75 * gapu)[..., None]
+    h -= 0.6 * gapu
+    return image("Plancher_Sol", np.clip(col, 0, 1)), image("Plancher_Sol_N", normal_from_height(h, 6), data=True)
+
+
 def tex_log_end(n=512):
     y, x = np.mgrid[0:n, 0:n] / (n - 1) * 2 - 1
     r = np.sqrt(x * x + y * y)
@@ -140,14 +171,15 @@ def tex_thatch(n=1024):
     return image("Chaume", col), image("Chaume_N", normal_from_height(h, 7), data=True)
 
 
-def tex_rug(n=1024):
-    """Tapis rond : bordure dorée, frise de losanges, champ rouge à fleur, médaillon, franges (transparence)."""
+def tex_rug(n=512):
+    """Tapis rond : bordure dorée, frise de losanges, champ rouge à fleur, médaillon.
+    Opaque et en 512 (10 nov., optimisation) : plus de franges découpées par la transparence, le tissu va jusqu'au bord du disque."""
     y, x = np.mgrid[0:n, 0:n] / (n - 1) * 2 - 1
     r = np.sqrt(x * x + y * y)
     a = np.arctan2(y, x)
     gold, red, navy, cream, rust = [np.array(c) for c in ((0.86, 0.64, 0.24), (0.58, 0.09, 0.07), (0.1, 0.13, 0.28), (0.93, 0.86, 0.68), (0.75, 0.32, 0.12))]
     col = np.zeros((n, n, 3)) + red
-    rr = r / 0.92                                        # le tissu va jusqu'à 0,92 ; au-delà, les franges
+    rr = r                                               # le tissu va jusqu'au bord du disque (avant : 0,92, puis des franges)
     petal = np.abs(np.cos(a * 4)) * 0.22 + 0.36
     field = (rr < 0.68) & (rr > 0.3)
     col[field & (np.abs(rr - petal - 0.1) < 0.012)] = gold
@@ -168,19 +200,12 @@ def tex_rug(n=1024):
     col[band & diamond] = cream
     col[band & (np.abs(t) * 2 + np.abs(k) < 0.35)] = rust
     col[(rr >= 0.68) & (rr < 0.7)] = gold
-    col[(rr >= 0.9) & (rr <= 1.0)] = gold
-    wool = tnoise(n, 300, 300, 51)
+    col[rr >= 0.9] = gold                                # la bordure, et les coins (hors du disque, jamais vus)
+    wool = tnoise(n, 150, 150, 51)
     col = col * (0.92 + 0.05 * wool)[..., None]
-    alpha = (r <= 0.92).astype(float)
-    # Franges : des brins crème tout autour, de longueur un peu irrégulière
-    strand = (np.cos(a * 360) > -0.1)
-    length = 0.92 + 0.07 * (0.8 + 0.2 * np.cos(a * 37))
-    fr = (r > 0.92) & (r < length) & strand
-    col[fr] = cream * 0.95
-    alpha[fr] = 1
-    edge_ao = np.clip(1 - np.abs(r - 0.92) / 0.02, 0, 1) * 0.25
+    edge_ao = np.clip(1 - np.abs(r - 1.0) / 0.03, 0, 1) * 0.25   # le bord un peu plus sombre
     col = col * (1 - edge_ao)[..., None]
-    return image("Tapis", np.clip(col, 0, 1), alpha=alpha, fmt="PNG")
+    return image("Tapis", np.clip(col, 0, 1))             # JPEG sans alpha
 
 
 def tex_dartboard(n=512):
@@ -294,12 +319,13 @@ def material(name, base=None, normal=None, color=(0.8, 0.8, 0.8), rough=0.75, me
 def build_materials():
     M = {}
     M["plancher"] = material("Plancher", *tex_wood("Plancher", (0.68, 0.47, 0.27), 26, 11), rough=0.6, vcol=True)
+    M["sol"] = material("Plancher_Sol", *tex_floor(), rough=0.6)   # le sol : une dalle, les planches sont dans la texture
     M["rondin"] = material("Rondin", *tex_wood("Rondin", (0.74, 0.49, 0.27), 18, 21, strength=8), rough=0.8, vcol=True)
     M["bout"] = material("Rondin_Bout", *tex_log_end(), rough=0.85)
     M["poutre"] = material("Poutre", *tex_wood("Poutre", (0.42, 0.27, 0.15), 34, 23), rough=0.8, vcol=True)
     M["chaume"] = material("Chaume", *tex_thatch(), rough=0.95)
     M["peint"] = material("Bois_Peint", *tex_wood("Bois_Peint", (0.20, 0.50, 0.42), 20, 27, strength=4), rough=0.7)
-    M["tapis"] = material("Tapis", tex_rug(), rough=0.95, clip=True)
+    M["tapis"] = material("Tapis", tex_rug(), rough=0.95)   # opaque (10 nov.) : la transparence découpée coûtait cher au casque
     M["cible"] = material("Cible", tex_dartboard(), rough=0.8)
     M["herbe"] = material("Herbe", *tex_grass(), rough=0.9)
     M["fer"] = material("Fer", color=(0.2, 0.2, 0.21), rough=0.45, metal=0.8)
@@ -389,8 +415,10 @@ class Builder:
             bmesh.ops.bevel(self.bm, geom=edges, offset=bevel, segments=1, affect="EDGES", clamp_overlap=True)
         return faces
 
-    def log(self, p0, p1, r, side_mat, end_mat, seed, segs=14):
-        """Rondin de p0 à p1 : un cylindre un peu irrégulier, bouts chanfreinés, bois de bout (cernes) aux extrémités."""
+    def log(self, p0, p1, r, side_mat, end_mat, seed, segs=14, tall=1.0, simple=False):
+        """Rondin de p0 à p1 : un cylindre un peu irrégulier, bouts chanfreinés, bois de bout (cernes) aux extrémités.
+        tall : hauteur / profondeur (> 1 = rondin ovale, plus haut que profond).
+        simple : 3 tronçons au lieu de 5 (sans le léger renflement du milieu), pour les murs (10 nov., optimisation)."""
         g = random.Random(seed)
         axis = (p1 - p0)
         length = axis.length
@@ -400,6 +428,8 @@ class Builder:
         w_ax = axis.cross(u_ax).normalized()
         stations = [0.0, 0.025, 0.33, 0.66, 0.975, 1.0]
         radii = [0.86, 1.0, 1.0 + g.uniform(-0.04, 0.04), 1.0 + g.uniform(-0.04, 0.04), 1.0, 0.86]
+        if simple:
+            stations, radii = [0.0, 0.025, 0.975, 1.0], [0.86, 1.0, 1.0, 0.86]
         bend = Vector((0, 0, g.uniform(-0.012, 0.012)))
         uoff, voff = g.random(), g.random()
         rings = []
@@ -411,7 +441,7 @@ class Builder:
             for j in range(segs):
                 a = 2 * math.pi * j / segs
                 d = u_ax * math.cos(a) + w_ax * math.sin(a)
-                v = self.bm.verts.new(c + d * (r * k))
+                v = self.bm.verts.new(c + (u_ax * math.cos(a) + w_ax * math.sin(a) * tall) * (r * k))
                 # Ombre dans les creux : le dessus et surtout le dessous du rondin, là où il touche ses voisins
                 crevice = abs(d.z) ** 3
                 shade[v] = tint * (1 - 0.5 * crevice) * (1 - 0.12 * max(0.0, -d.z))
@@ -508,24 +538,27 @@ def empty(name, loc, coll):
 
 def build_floor(M, coll, x0=-4.0, x1=4.0, z0=-5.6, z1=4.0, suffix=""):
     """Plateforme en planches (dedans + terrasse derrière la porte), posée sur une poutre de rive et des pieux.
-    x0..x1 et z0..z1 : ses bornes dans le repère Unity (par défaut, la cabane et sa terrasse, côté porte)."""
-    b = Builder([M["plancher"]])
-    width, gap, thick = 0.19, 0.008, 0.05
+    x0..x1 et z0..z1 : ses bornes dans le repère Unity (par défaut, la cabane et sa terrasse, côté porte).
+    Depuis le 10 nov. (optimisation) : une seule dalle plate (12 triangles) avec les planches dessinées dans la texture,
+    au lieu de centaines de planches en 3D (9 000 triangles dans la cabane, 14 000 dans la bananeraie)."""
+    width, thick = 0.19, 0.05
+    # On tire les mêmes nombres qu'avant : le reste du décor (herbe, bougies...) utilise le même générateur
+    # et ne doit pas bouger.
     x = x0
-    row = 0
     while x < x1 - 0.01:
         z = z0 - rng.uniform(0, 1.5)
         while z < z1:
             length = rng.uniform(1.6, 3.2)
-            za, zb = max(z, z0), min(z + length, z1)
-            if zb - za > 0.15:
-                c = P(x + width / 2, -thick / 2 + rng.uniform(-0.002, 0.002), (za + zb) / 2)
-                rot = Matrix(((1, 0, 0), (0, 1, 0), (0, 0, 1)))    # x Blender = x Unity (inversé, sans importance), y = le long
-                b.box(c, (width - gap, zb - za - gap, thick), rot, M["plancher"], uv_scale=1 / 1.2, uv_offset=(rng.random(), rng.random()), bevel=0.006,
-                      tint=rng.uniform(0.78, 1.05))   # chaque planche a sa teinte
+            if min(z + length, z1) - max(z, z0) > 0.15:
+                rng.uniform(-0.002, 0.002), rng.random(), rng.random(), rng.uniform(0.78, 1.05)
             z += length
         x += width
-        row += 1
+    b = Builder([M["sol"]])
+    faces = b.box(P((x0 + x1) / 2, -thick / 2, (z0 + z1) / 2), (x1 - x0, z1 - z0, thick), Matrix.Identity(3), M["sol"], uv_scale=1 / FLOOR_TILE)
+    for f in faces:                                      # texture tournée de 90° (10 nov., demande de Dylan) : planches dans l'autre sens
+        for loop in f.loops:
+            u, v = loop[b.uv].uv
+            loop[b.uv].uv = (v, -u)
     floor = b.finish("Plancher" + suffix, coll)
 
     # Poutres de rive et pieux (on les voit depuis la terrasse et par les fenêtres)
@@ -546,42 +579,61 @@ def build_walls(M, coll):
     b = Builder([M["rondin"], M["bout"]])
     side_len = 2 * R * math.tan(math.pi / SIDES)
     over = 0.2                                     # les rondins dépassent de 20 cm aux angles, dehors
-    step = LOG_R * 2 * 1.05                       # un petit jour entre deux rondins : on y voit le joint (torchis)
-    seed = 0
-    for i in range(SIDES):
+
+    def wall_pieces(rv):
+        """Les rondins des murs : (mur, hauteur, début, fin) ; rv = demi-hauteur d'un rondin."""
+        step = rv * 2 * 1.05                       # un petit jour entre deux rondins : on y voit le joint (torchis)
+        out = []
+        for i in range(SIDES):
+            ang = i * 360 / SIDES
+            cuts = []                              # morceaux du mur à NE PAS couvrir : (x0, x1, y0, y1) dans le repère du mur
+            if ang == DOOR:
+                cuts.append((-DOOR_W / 2, DOOR_W / 2, -1, DOOR_H))
+            elif ang in WINDOWS:
+                # 4 cm de plus de chaque côté : le bout des rondins se cache dans les montants de la fenêtre
+                # (au ras du montant, les deux faces se superposaient et « clignotaient » selon l'angle de vue)
+                cuts.append((-WIN_W / 2 - 0.04, WIN_W / 2 + 0.04, WIN_Y0, WIN_Y1))
+            y = rv + (i % 2) * step / 2
+            while y < H - rv * 0.3:
+                pieces = [(-side_len / 2 - over, side_len / 2 + over)]
+                for (cx0, cx1, cy0, cy1) in cuts:
+                    if y + rv > cy0 and y - rv < cy1:     # tout rondin qui touche l'ouverture est coupé
+                        new = []
+                        for (a, c) in pieces:
+                            if a < cx0:
+                                new.append((a, min(c, cx0)))
+                            if c > cx1:
+                                new.append((max(a, cx1), c))
+                        pieces = new
+                out += [(i, y, a, c) for (a, c) in pieces if c - a >= 0.12]
+                y += step
+        return out
+
+    # Allégé le 10 nov. (optimisation, demande de Dylan) : gros rondins ovales, 1,9 fois plus hauts que profonds
+    # (7 rangées au lieu de 12, l'intérieur de la cabane ne bouge pas), 8 côtés au lieu de 14, sans renflement.
+    WALL_TALL = 1.9
+    old_count = len(wall_pieces(LOG_R))            # avant, chaque rondin tirait un nombre au hasard :
+    for _ in range(old_count):                     # on en tire autant, pour que le reste du décor (herbe, bougies...) ne bouge pas
+        rng.uniform(0.94, 1.04)
+    radius = random.Random(3)                      # la taille des rondins vient d'un générateur à part
+    for seed, (i, y, a, c) in enumerate(wall_pieces(LOG_R * WALL_TALL), 1):
         ang = i * 360 / SIDES
         B = basis(ang)
         center = polar(ang, R)
-        cuts = []                                  # morceaux du mur à NE PAS couvrir : (x0, x1, y0, y1) dans le repère du mur
-        if ang == DOOR:
-            cuts.append((-DOOR_W / 2, DOOR_W / 2, -1, DOOR_H))
-        elif ang in WINDOWS:
-            # 4 cm de plus de chaque côté : le bout des rondins se cache dans les montants de la fenêtre
-            # (au ras du montant, les deux faces se superposaient et « clignotaient » selon l'angle de vue)
-            cuts.append((-WIN_W / 2 - 0.04, WIN_W / 2 + 0.04, WIN_Y0, WIN_Y1))
-        y = LOG_R + (i % 2) * step / 2
-        while y < H - LOG_R * 0.3:
-            pieces = [(-side_len / 2 - over, side_len / 2 + over)]
-            for (cx0, cx1, cy0, cy1) in cuts:
-                # Tout rondin qui touche l'ouverture est coupé (avant : seulement s'il y entrait de plus d'un demi-rayon,
-                # et les autres débordaient de quelques centimètres sur la fenêtre)
-                if y + LOG_R > cy0 and y - LOG_R < cy1:
-                    new = []
-                    for (a, c) in pieces:
-                        if a < cx0:
-                            new.append((a, min(c, cx0)))
-                        if c > cx1:
-                            new.append((max(a, cx1), c))
-                    pieces = new
-            for (a, c) in pieces:
-                if c - a < 0.12:
-                    continue
-                p0 = center + B @ Vector((a, 0, y))
-                p1 = center + B @ Vector((c, 0, y))
-                seed += 1
-                b.log(p0, p1, LOG_R * rng.uniform(0.94, 1.04), M["rondin"], M["bout"], seed)
-            y += step
+        p0 = center + B @ Vector((a, 0, y))
+        p1 = center + B @ Vector((c, 0, y))
+        b.log(p0, p1, LOG_R * radius.uniform(0.94, 1.04), M["rondin"], M["bout"], seed, segs=8, tall=WALL_TALL, simple=True)
     walls = b.finish("Murs", coll)
+
+    def log_bottom_above(i, top):
+        """Le bas du premier rondin entier au-dessus d'une ouverture (mur i) : le linteau monte jusque-là,
+        sinon on voit une bande de joint blanc entre le linteau et ce rondin (les rondins sont plus hauts depuis le 10 nov.)"""
+        rv = LOG_R * WALL_TALL
+        step = rv * 2 * 1.05
+        y = rv + (i % 2) * step / 2
+        while y - rv < top:
+            y += step
+        return y - rv
 
     # Le joint (torchis clair) entre les rondins : un panneau dans l'axe de chaque mur, les rondins dépassent devant et derrière
     b = Builder([M["joint"]])
@@ -614,15 +666,17 @@ def build_walls(M, coll):
         if ang == DOOR:
             for s in (-1, 1):
                 b.box(center + B @ Vector((s * (DOOR_W / 2 + 0.06), 0, DOOR_H / 2)), (0.14, 0.32, DOOR_H), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.012)
-            b.box(center + B @ Vector((0, 0, DOOR_H + 0.07)), (DOOR_W + 0.4, 0.34, 0.16), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.015)
+            lintel = max(0.16, log_bottom_above(i, DOOR_H) + 0.03 - (DOOR_H - 0.01))
+            b.box(center + B @ Vector((0, 0, DOOR_H - 0.01 + lintel / 2)), (DOOR_W + 0.4, 0.34, lintel), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.015)
             b.box(center + B @ Vector((0, 0, 0.012)), (DOOR_W, 0.36, 0.025), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.006)
-        elif ang in WINDOWS:
+        elif ang in WINDOWS:                       # fenêtres sans biseaux depuis le 10 nov. (moins de triangles)
             wy = (WIN_Y0 + WIN_Y1) / 2
             for s in (-1, 1):
-                b.box(center + B @ Vector((s * (WIN_W / 2 + 0.04), 0, wy)), (0.08, 0.3, WIN_Y1 - WIN_Y0 + 0.16), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.008)
-            b.box(center + B @ Vector((0, 0, WIN_Y1 + 0.05)), (WIN_W + 0.24, 0.3, 0.1), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.01)
-            b.box(center + B @ Vector((0, -0.03, WIN_Y0 - 0.04)), (WIN_W + 0.3, 0.42, 0.07), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.01)   # appui
-            b.box(center + B @ Vector((0, 0, WIN_Y0 - 0.17)), (WIN_W + 0.08, 0.26, 0.3), B, M["poutre"], uv_scale=1 / 1.5, bevel=0.008)    # allège : bouche le jour sous l'appui
+                b.box(center + B @ Vector((s * (WIN_W / 2 + 0.04), 0, wy)), (0.08, 0.3, WIN_Y1 - WIN_Y0 + 0.16), B, M["poutre"], uv_scale=1 / 1.5)
+            lintel = max(0.1, log_bottom_above(i, WIN_Y1) + 0.03 - WIN_Y1)
+            b.box(center + B @ Vector((0, 0, WIN_Y1 + lintel / 2)), (WIN_W + 0.24, 0.3, lintel), B, M["poutre"], uv_scale=1 / 1.5)
+            b.box(center + B @ Vector((0, -0.03, WIN_Y0 - 0.04)), (WIN_W + 0.3, 0.42, 0.07), B, M["poutre"], uv_scale=1 / 1.5)   # appui
+            b.box(center + B @ Vector((0, 0, WIN_Y0 - 0.17)), (WIN_W + 0.08, 0.26, 0.3), B, M["poutre"], uv_scale=1 / 1.5)    # allège : bouche le jour sous l'appui
             b.box(center + B @ Vector((0, 0, wy)), (0.035, 0.05, WIN_Y1 - WIN_Y0), B, M["poutre"], uv_scale=1 / 1.5)                     # croisillon
             b.box(center + B @ Vector((0, 0, wy)), (WIN_W, 0.05, 0.035), B, M["poutre"], uv_scale=1 / 1.5)
     frames = b.finish("Encadrements", coll)
@@ -635,9 +689,8 @@ def build_walls(M, coll):
         wy = (WIN_Y0 + WIN_Y1) / 2
         for s in (-1, 1):
             c = center + B @ Vector((s * (WIN_W / 2 + 0.08 + WIN_W / 4), LOG_R + 0.06, wy))
-            for k in range(3):   # trois lattes par volet
-                b.box(c + B @ Vector((s * (k - 1) * WIN_W / 6, 0, 0)), (WIN_W / 6 - 0.01, 0.03, WIN_Y1 - WIN_Y0), B, M["peint"], uv_scale=1 / 1.2, bevel=0.004)
-            b.box(c + B @ Vector((0, 0.02, 0)), (WIN_W / 2, 0.025, 0.06), B, M["peint"], uv_scale=1 / 1.2, bevel=0.004)
+            # Un seul panneau, sans biseau (10 nov. ; avant : trois lattes biseautées et une traverse)
+            b.box(c, (WIN_W / 2 - 0.01, 0.03, WIN_Y1 - WIN_Y0), B, M["peint"], uv_scale=1 / 1.2)
     shutters = b.finish("Volets", coll)
     B = basis(DOOR)
     door = door_leaf(M, coll, polar(DOOR, R) + B @ Vector((DOOR_W / 2 + 0.06, LOG_R + 0.05, 0)), B)
@@ -649,13 +702,14 @@ def door_leaf(M, coll, hinge, B, width=DOOR_W + 0.06, height=DOOR_H):
     Objet à part, dont l'origine est sur la charnière (montant droit vu de l'intérieur) : Unity l'ouvre en le tournant
     autour de l'axe vertical (PortalDoor). B : repère du mur (x le long du mur, y vers l'extérieur, z en haut)."""
     b = Builder([M["peint"], M["fer"]])
-    for k in range(6):
-        x = -width + (k + 0.5) * width / 6
-        b.box(B @ Vector((x, 0.03, height / 2 - 0.02)), (width / 6 - 0.01, 0.045, height - 0.06), B, M["peint"], uv_scale=1 / 1.2, bevel=0.005)
+    # Allégée le 10 nov. : 3 planches sans biseau au lieu de 6 biseautées (on voit encore les fentes entre elles)
+    for k in range(3):
+        x = -width + (k + 0.5) * width / 3
+        b.box(B @ Vector((x, 0.03, height / 2 - 0.02)), (width / 3 - 0.012, 0.045, height - 0.06), B, M["peint"], uv_scale=1 / 1.2)
     for zz in (0.35, height - 0.4):
-        b.box(B @ Vector((-width / 2, -0.01, zz)), (width - 0.06, 0.03, 0.12), B, M["peint"], uv_scale=1 / 1.2, bevel=0.006)
+        b.box(B @ Vector((-width / 2, -0.01, zz)), (width - 0.06, 0.03, 0.12), B, M["peint"], uv_scale=1 / 1.2)
     for side in (-1, 1):   # poignées en fer, dedans et dehors, du côté opposé à la charnière
-        b.box(B @ Vector((-width + 0.14, 0.03 + side * 0.06, 1.0)), (0.04, 0.03, 0.2), B, M["fer"], bevel=0.008)
+        b.box(B @ Vector((-width + 0.14, 0.03 + side * 0.06, 1.0)), (0.04, 0.03, 0.2), B, M["fer"])
     for zz in (0.3, height - 0.3):   # pentures (les charnières en fer)
         b.box(B @ Vector((-0.2, 0.058, zz)), (0.4, 0.008, 0.05), B, M["fer"])
     ob = b.finish("Porte_Battant", coll)
@@ -723,17 +777,17 @@ def flame(M, coll, base, name, size=1.0):
 
 
 def build_chandelier(M, coll):
-    """Lustre en roue de charrette : jante, 8 rayons, moyeu, 8 bougies avec flamme, 4 chaînes jusqu'au crochet."""
-    b = Builder([M["poutre"], M["fer"], M["cire"], M["flamme"], M["bout"]])
+    """Lustre en roue de charrette : jante, 8 rayons, moyeu, 8 bougies avec flamme, 4 chaînes jusqu'au crochet.
+    Allégé le 10 nov. (optimisation) : la jante est un seul tore de bois (un « donut ») au lieu de 16 rondins
+    avec leurs bouts, et tout le bois prend le même matériau (Poutre) : 3 matériaux au lieu de 4."""
+    b = Builder([M["poutre"], M["fer"], M["cire"]])
     y = 2.75
     rad = 0.55
-    n = 16
-    for k in range(n):
-        a0, a1 = 360 * k / n, 360 * (k + 1) / n
-        b.log(polar(a0, rad, y), polar(a1, rad, y), 0.035, M["poutre"], M["bout"], 800 + k, segs=6)
+    ring = [(rad + 0.035 * math.cos(2 * math.pi * k / 6), 0.035 * math.sin(2 * math.pi * k / 6)) for k in range(7)]
+    b.lathe(ring, 24, M["poutre"], P(0, y, 0), u_scale=6.0, v_scale=4.0)   # la jante : un tore, 6 × 24 faces
     for k in range(8):
-        b.log(polar(45 * k, 0.07, y), polar(45 * k, rad - 0.02, y), 0.018, M["poutre"], M["bout"], 820 + k, segs=6)
-    b.lathe([(0.08, -0.06), (0.09, 0.0), (0.08, 0.06)], 10, M["poutre"], P(0, y, 0), cap_top=M["bout"], cap_bottom=M["bout"])
+        b.log(polar(45 * k, 0.07, y), polar(45 * k, rad - 0.02, y), 0.018, M["poutre"], M["poutre"], 820 + k, segs=6)
+    b.lathe([(0.08, -0.06), (0.09, 0.0), (0.08, 0.06)], 10, M["poutre"], P(0, y, 0), cap_top=M["poutre"], cap_bottom=M["poutre"])
     for k in range(8):
         c = polar(22.5 + 45 * k, rad, y)
         b.lathe([(0.045, 0.0), (0.05, 0.02)], 8, M["fer"], c + Vector((0, 0, 0.03)), cap_bottom=M["fer"])
@@ -774,7 +828,7 @@ def build_lanterns(M, coll):
 
 
 def build_rug(M, coll):
-    """Tapis rond (un disque un peu épais), texture à franges découpée par la transparence."""
+    """Tapis rond : un disque plat et opaque, avec sa texture (sans franges ni transparence depuis le 10 nov.)."""
     b = Builder([M["tapis"]])
     n = 64
     top = [P(math.sin(2 * math.pi * k / n) * RUG, 0.012, math.cos(2 * math.pi * k / n) * RUG) for k in range(n)]
@@ -1084,7 +1138,9 @@ def build_mountains(M, coll, suffix=""):
     sculptée par un bruit « à crêtes » (ridged noise, le bruit des générateurs de terrain) : vallées, arêtes et pics.
     Couleurs par sommet, selon la hauteur ET la pente : prairie au pied, forêt sombre, roche, et de la neige sur
     les sommets mais pas dans les pentes raides (comme en vrai). Au loin, tout se fond dans le bleu du ciel
-    (perspective aérienne : c'est ce qui donne la profondeur). Facettes nettes : on garde le style low poly du jeu.
+    (perspective aérienne : c'est ce qui donne la profondeur).
+    Lisses depuis le 10 nov. (demande de Dylan) : sommets partagés, ombrage lisse et couleurs fondues d'un sommet
+    à l'autre, au lieu de facettes nettes (6 720 sommets au lieu de 39 168).
     Devant le joueur (angle 0), la chaîne commence plus loin : on voit plus de prairie devant le plateau."""
     from mathutils import noise
     g = random.Random(11 if not suffix else 23)
@@ -1140,22 +1196,28 @@ def build_mountains(M, coll, suffix=""):
         mist = 0.72 * smooth(55, 175, dist)
         return tuple(x * (1 - mist) + hz * mist for x, hz in zip(c, haze))
 
+    verts = [[b.bm.verts.new(p) for p in row] for row in grid]       # un sommet par point de la grille, partagé
+    mi = b.mi(M["montagne"])
     for k in range(rings):
         for j in range(segs):
             j2 = (j + 1) % segs
-            for tri in ((grid[k][j], grid[k + 1][j], grid[k + 1][j2]), (grid[k][j], grid[k + 1][j2], grid[k][j2])):
-                f = b.face(tri, [(0, 0)] * 3, M["montagne"])
+            for tri in ((verts[k][j], verts[k + 1][j], verts[k + 1][j2]), (verts[k][j], verts[k + 1][j2], verts[k][j2])):
+                f = b.bm.faces.new(tri)
                 f.normal_update()
                 if f.normal.z < 0:
                     f.normal_flip()
-                centre = (tri[0] + tri[1] + tri[2]) / 3
-                c = colour(centre, f.normal, Vector((centre.x, centre.y)).length)   # une couleur par facette : le style low poly net
-                for loop in f.loops:
-                    loop[b.col] = (*c, 1)
+                f.material_index = mi
+                f.smooth = True
                 f.tag = True
+    b.bm.normal_update()                                             # normales des sommets : la moyenne des faces autour
+    for row in verts:
+        for v in row:
+            c = colour(v.co, v.normal, Vector((v.co.x, v.co.y)).length)   # une couleur par sommet : elle se fond entre deux sommets
+            for loop in v.link_loops:
+                loop[b.col] = (*c, 1)
     ob = b.finish("Montagnes" + suffix, coll, recalc=False)
     for p in ob.data.polygons:
-        p.use_smooth = False                                         # facettes nettes : style « low poly »
+        p.use_smooth = True                                          # ombrage lisse : plus de facettes
     return ob
 
 
