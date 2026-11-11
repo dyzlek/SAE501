@@ -20,7 +20,11 @@ namespace SAE.EditorTools
         {
             Directory.CreateDirectory(Folder);
             Save("CoopJoueur", go => go.AddComponent<CoopPlayer>());
-            Save("CoopPartie", go => go.AddComponent<CoopGame>());
+            Save("CoopPartie", go =>
+            {
+                go.AddComponent<CoopGame>();
+                go.AddComponent<CoopOrchard>();   // la bananeraie partagée
+            });
             Save("CoopBallon", go =>
             {
                 go.AddComponent<CoopBalloon>();

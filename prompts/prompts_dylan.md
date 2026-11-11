@@ -7,6 +7,11 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 ### Retirer les boutons de test
 > Enlève les deux boutons au-dessus de SE TP (capture jointe : les cubes « 200 SINGES » et « VAGUE CHEAT »).
 
+### PDF court des 8 optimisations
+> Est-ce que tout ça a bien été fait : LOD sur les modèles, instancing et réduction de polygones des ballons, matériaux partagés, ombres allégées, décor static et occlusion, pool de ballons, Rigidbody kinematic sur les ballons, singes allégés (animation, ciblage, particules) ?
+>
+> Suite : donne-moi un PDF qui ne parle que de ces points (sans l'occlusion), et ajoute-le au dépôt.
+
 ### PDF des optimisations
 > Fais un gros fichier PDF qui explique ce que tu as fait concrètement pour les optimisations (la liste en une phrase par optimisation), où c'est, et comment le vérifier.
 

@@ -58,6 +58,7 @@ namespace SAE
 
             if (mouse.leftButton.wasPressedThisFrame) Click();
             if (heldMonkey) Carry(heldMonkey.transform);
+            if (heldBanana && heldBanana.Distante) heldBanana = null;   // coop : l'hôte l'a donnée à un autre joueur
             if (heldBanana) Carry(heldBanana.transform);
             if (heldThrowable != null) Carry(((Component)heldThrowable).transform);
             if (mouse.leftButton.wasReleasedThisFrame) Release();

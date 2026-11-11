@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5111208002665561348}
   - component: {fileID: 1504742580266997789}
   - component: {fileID: 5521937624384381454}
+  - component: {fileID: 7318264950183746215}
   m_Layer: 0
   m_Name: CoopPartie
   m_TagString: Untagged
@@ -72,4 +73,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68dc6a8a8fe748e88ee0359bcaa2ca2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SAE.CoopGame
+  ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &7318264950183746215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3356553761251883829}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4620c7e5139348de9ee6737acb25a746, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SAE.CoopOrchard
   ShowTopMostFoldoutHeaderGroup: 1

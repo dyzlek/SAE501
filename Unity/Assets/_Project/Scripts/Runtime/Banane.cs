@@ -12,6 +12,9 @@ using UnityEngine;
 ///   Select Entered -> Banane.Prise()     Select Exited -> Banane.Lachee()
 /// Test sans casque : script TestSouris sur la caméra (clic sur une banane = dans le panier).
 /// Banane dorée (rare, voir Bananier.chanceDoree) : toute dorée et brillante, avec une aura légère ; elle vaut beaucoup plus et pourrit moins vite.
+/// Coop (voir SAE.CoopOrchard) : chaque banane a un numéro. Une banane « distante » est menée par une autre machine :
+/// chez l'invité, la copie d'une banane de l'hôte ; chez l'hôte, une banane qu'un invité tient. Elle glisse vers la position
+/// reçue, ne pourrit pas toute seule et le panier ne la compte pas : c'est celui qui la mène qui décide.
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
 public class Banane : MonoBehaviour
@@ -29,6 +32,19 @@ public class Banane : MonoBehaviour
     public bool EstPourrie { get; private set; }
     public bool EnMain { get; private set; }
     public bool EstDoree { get; private set; }
+    /// Tenue par un joueur (pas par un singe) : en coop, l'hôte dit ainsi à tous qui la tient
+    public bool PriseParJoueur { get; private set; }
+
+    // ---------- coop ----------
+    public int Id { get; private set; }               // son numéro, le même chez tout le monde
+    public bool Copie { get; private set; }           // invité : la copie d'une banane de l'hôte
+    public bool Distante { get; private set; }        // menée par une autre machine (voir plus haut)
+    public byte TenuePar { get; private set; } = SAE.CoopOrchard.Nobody;   // hôte : l'invité qui la tient
+    public Rigidbody Corps => rb;
+    static int dernierId;
+    Vector3 ciblePos;
+    Quaternion cibleRot;
+    Collider[] colliders;
     /// La dernière main du joueur qui l'a tenue (pour la faire vibrer au dépôt). Vide si c'est un singe qui l'a reprise.
     public Transform DerniereMain { get; private set; }
     public bool Deposee => deposee;
@@ -67,6 +83,7 @@ public class Banane : MonoBehaviour
         vitesseMain = gameObject.AddComponent<SAE.ThrowVelocity>();   // pour la lancer
         gameObject.AddComponent<SAE.ThrowTrail>();                     // et la traînée dorée quand elle vole
         rends = GetComponentsInChildren<Renderer>();
+        colliders = GetComponentsInChildren<Collider>();
         mpb = new MaterialPropertyBlock();
         SAE.PlayerRig.IgnoreCollisions(gameObject);   // on ne peut pas monter sur une banane tenue et s'envoler
         grab = GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
@@ -86,7 +103,19 @@ public class Banane : MonoBehaviour
     public void Initialiser(Bananier bananier, int valeur, float pourriture, Vector3 cible)
     {
         source = bananier; Valeur = valeur; dureePourriture = pourriture;
+        Id = ++dernierId;
         StartCoroutine(Tomber(transform.position, cible));
+    }
+
+    /// Invité : la copie de la banane « id » de l'hôte, déjà là où elle est chez lui
+    public void InitialiserCopie(Bananier bananier, int id, int valeur, float pourriture)
+    {
+        source = bananier; Valeur = valeur; dureePourriture = pourriture;
+        Id = id;
+        Copie = Distante = true;
+        posee = true;
+        ciblePos = transform.position;
+        cibleRot = transform.rotation;
     }
 
     /// Fait de cette banane une banane dorée : sa valeur est multipliée, elle pourrit 'pourritureX' fois moins vite.
@@ -121,7 +150,9 @@ public class Banane : MonoBehaviour
 
     void Update()
     {
-        if (deposee || !posee) return;
+        if (deposee) return;
+        if (Distante) { SuivreCible(); return; }
+        if (!posee) return;
         if (!EnMain) age += Time.deltaTime;   // tenue (par le joueur ou un singe), elle ne pourrit pas ; lâchée, ça reprend
         AppliquerCouleur(Color.Lerp(couleurFraiche, couleurPourrie, Progression));
         if (!EstPourrie && age >= dureePourriture) { EstPourrie = true; Odeur(); }
@@ -131,6 +162,17 @@ public class Banane : MonoBehaviour
             ageDisparition += Time.deltaTime;
             if (ageDisparition >= delaiDisparition) Detruire();
         }
+    }
+
+    // Distante : elle glisse vers la dernière position reçue (20 à 30 par seconde) pour que ça reste fluide,
+    // et prend la couleur et la taille de sa pourriture, sans jamais disparaître d'elle-même
+    void SuivreCible()
+    {
+        float t = 1f - Mathf.Exp(-15f * Time.deltaTime);
+        transform.SetPositionAndRotation(Vector3.Lerp(transform.position, ciblePos, t), Quaternion.Slerp(transform.rotation, cibleRot, t));
+        if (!EstPourrie && Progression >= 1f) { EstPourrie = true; Odeur(); }
+        AppliquerCouleur(Color.Lerp(couleurFraiche, couleurPourrie, Progression));
+        transform.localScale = tailleFraiche * Mathf.Lerp(1f, TailleFinale, Progression);
     }
 
     // ---------- l'animation de la pourriture ----------
@@ -200,6 +242,14 @@ public class Banane : MonoBehaviour
     // ---------- appelé par le XR Grab Interactable ----------
     public void Prise()
     {
+        PrendreEnMain();
+        PriseParJoueur = true;
+        Distante = false;                 // invité : c'est lui qui la mène, tant qu'il la tient
+        SAE.CoopOrchard.Taken(this);      // et il la demande à l'hôte
+    }
+
+    void PrendreEnMain()
+    {
         EnMain = true; posee = true; lachee = false;
         vitesseMain.Clear();
         StopAllCoroutines();
@@ -209,7 +259,8 @@ public class Banane : MonoBehaviour
     public void PriseParSinge()
     {
         DerniereMain = null;
-        Prise();
+        PrendreEnMain();
+        PriseParJoueur = false;
     }
 
     /// Un singe récolteur l'a laissée par terre (lancer raté) : elle n'est plus tenue, elle se remet à pourrir.
@@ -229,6 +280,7 @@ public class Banane : MonoBehaviour
     // puis on lui donne l'élan de la main (une seule fois)
     void FixedUpdate()
     {
+        if (Distante) { if (!rb.isKinematic) rb.isKinematic = true; return; }   // c'est l'autre machine qui la fait bouger
         if (lachee && !EnMain && rb.isKinematic) { rb.isKinematic = false; rb.useGravity = true; }
         if (elanADonner && !rb.isKinematic)
         {
@@ -243,8 +295,86 @@ public class Banane : MonoBehaviour
         if (deposee) return 0;
         deposee = true;
         int gain = ValeurActuelle;
+        SAE.CoopOrchard.Sold(this);   // coop : les autres l'entendent, l'hôte la retire pour tous
         Detruire();
         return gain;
+    }
+
+    /// Retirée sans passer par le panier (coop : vendue ou pourrie chez une autre machine)
+    public void Effacer() => Detruire();
+
+    // ---------- coop : l'hôte (voir SAE.CoopOrchard) ----------
+
+    /// Hôte : un invité l'a prise. Elle ne pourrit plus, les singes la laissent, et elle suit la main de l'invité.
+    public void PriseParInvite(byte joueur)
+    {
+        PrendreEnMain();
+        PriseParJoueur = false;
+        TenuePar = joueur;
+        Distante = true;
+        ciblePos = transform.position;
+        cibleRot = transform.rotation;
+        rb.isKinematic = true;
+        Attrapable(false);   // l'hôte ne peut pas la lui prendre des mains
+    }
+
+    public void SuivreInvite(Vector3 pos, Quaternion rot) { ciblePos = pos; cibleRot = rot; }
+
+    /// Hôte : l'invité l'a posée (lancer raté, lâchée par terre) : elle reprend sa vie ici, là où elle est chez lui
+    public void PoseeParInvite(Vector3 pos, Quaternion rot)
+    {
+        FinPriseInvite();
+        transform.SetPositionAndRotation(pos, rot);
+        EnMain = false; lachee = false; elanADonner = false;
+        rb.isKinematic = true;
+        rb.useGravity = false;
+    }
+
+    /// Hôte : plus aucun invité ne la tient (posée, ou l'invité est parti)
+    public void FinPriseInvite()
+    {
+        TenuePar = SAE.CoopOrchard.Nobody;
+        Distante = false;
+        Attrapable(true);
+    }
+
+    // ---------- coop : l'invité ----------
+
+    /// Invité : la position que l'hôte lui donne, sa pourriture (0 à 1), et si on peut la prendre (personne ne la tient)
+    public void SuivreHote(Vector3 pos, Quaternion rot, float progression, bool libre)
+    {
+        ciblePos = pos;
+        cibleRot = rot;
+        age = progression * dureePourriture;
+        Attrapable(libre);
+    }
+
+    /// Invité : posée après son lancer, elle est rendue à l'hôte
+    public void RendreDistante()
+    {
+        Distante = true;
+        EnMain = false; lachee = false; elanADonner = false;
+        ciblePos = transform.position;
+        cibleRot = transform.rotation;
+        rb.isKinematic = true;
+        rb.useGravity = false;
+    }
+
+    /// Invité : l'hôte l'a donnée à un autre joueur (il l'avait prise juste avant) : on la lâche
+    public void Reprendre()
+    {
+        RendreDistante();
+        // En VR, on la retire de la main ; XRI appelle alors Lachee, qui la remet en physique : on refait RendreDistante
+        if (grab && grab.isSelected && grab.interactionManager)
+            grab.interactionManager.CancelInteractableSelection(
+                (UnityEngine.XR.Interaction.Toolkit.Interactables.IXRSelectInteractable)grab);
+        RendreDistante();
+    }
+
+    void Attrapable(bool oui)
+    {
+        colliders ??= GetComponentsInChildren<Collider>();
+        foreach (var c in colliders) if (c && c.enabled != oui) c.enabled = oui;
     }
 
     void Detruire()
