@@ -19,6 +19,54 @@ namespace SAE
         public int Price => Full ? 0 : prices[Mathf.Min(Count - 1, prices.Length - 1)];
         public Bananier First => trees[0];
 
+        // La bananeraie de la scène (pour le coop, CoopOrchard)
+        public static BananaOrchard Instance { get; private set; }
+        void Awake() => Instance = this;
+
+        // Le niveau d'une amélioration : tous les arbres ont les mêmes niveaux, on lit ceux du premier
+        public Bananier.Stat Stat(BananaStat stat) => stat switch
+        {
+            BananaStat.Frequence => First.frequence,
+            BananaStat.Pourriture => First.pourriture,
+            _ => First.valeur,
+        };
+
+        // Un bouton du comptoir BANANIER (UpgradeButton, ou la demande d'un invité du coop) : on paie,
+        // et la stat monte d'un niveau pour TOUS les arbres ; « Arbres » plante le suivant
+        public bool Upgrade(BananaStat stat, Vector3 at)
+        {
+            if (stat == BananaStat.Arbres) return Buy(at);
+            var s = Stat(stat);
+            if (s.EstAuMax || !Economy.TrySpend(s.PrixAmelioration, at)) return false;
+            foreach (var tree in trees)
+                switch (stat)
+                {
+                    case BananaStat.Frequence: tree.AmeliorerFrequence(); break;
+                    case BananaStat.Pourriture: tree.AmeliorerPourriture(); break;
+                    default: tree.AmeliorerValeur(); break;
+                }
+            return true;
+        }
+
+        // Coop, chez l'invité : les arbres et les niveaux de l'hôte remplacent les nôtres
+        public void ApplyFromHost(int count, int frequence, int pourriture, int valeur)
+        {
+            count = Mathf.Clamp(count, 1, trees.Length);
+            while (Count < count)
+            {
+                var spot = spots[Count++];
+                spot.SetActive(true);
+                StartCoroutine(Grow(spot.transform));   // il pousse aussi chez nous
+            }
+            while (Count > count) spots[--Count].SetActive(false);   // on avait plus d'arbres dans notre partie
+            foreach (var tree in trees)
+            {
+                tree.frequence.niveau = frequence;
+                tree.pourriture.niveau = pourriture;
+                tree.valeur.niveau = valeur;
+            }
+        }
+
         // Les arbres plantés
         public IEnumerable<Bananier> Active
         {

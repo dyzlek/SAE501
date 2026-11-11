@@ -62,6 +62,13 @@ namespace SAE
             if (Local == this) Local = null;
         }
 
+        // Ce joueur est-il (encore) dans la partie ? (la bananeraie partagée lâche les bananes d'un invité parti)
+        public static bool Exists(byte number)
+        {
+            foreach (var p in all) if (p.Number.Value == number) return true;
+            return false;
+        }
+
         // Hôte : le plus petit numéro libre (un invité qui part libère le sien)
         byte FreeNumber()
         {

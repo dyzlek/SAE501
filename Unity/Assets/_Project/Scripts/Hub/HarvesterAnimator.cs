@@ -73,7 +73,7 @@ namespace SAE
             if (monkey.Held) phase += Time.deltaTime * 25f;   // il pédale dans le vide
 
             walkBlend = Mathf.MoveTowards(walkBlend, monkey.Walking || monkey.Held ? 1f : 0f, Time.deltaTime * 5f);
-            carryBlend = Mathf.MoveTowards(carryBlend, monkey.Carried || monkey.Cheering || monkey.Held ? 1f : 0f, Time.deltaTime * 6f);
+            carryBlend = Mathf.MoveTowards(carryBlend, monkey.Carrying || monkey.Cheering || monkey.Held ? 1f : 0f, Time.deltaTime * 6f);
 
             for (int i = 0; i < bones.Length; i++) if (bones[i]) bones[i].localRotation = rest[i];
 

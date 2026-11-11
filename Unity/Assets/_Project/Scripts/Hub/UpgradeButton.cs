@@ -25,13 +25,7 @@ namespace SAE
         float refused;      // 1 = flash rouge « pas assez d'argent »
         ColorTint capTint;
 
-        // Tous les arbres ont les mêmes niveaux : on lit ceux du premier
-        Bananier.Stat S => stat switch
-        {
-            BananaStat.Frequence => orchard.First.frequence,
-            BananaStat.Pourriture => orchard.First.pourriture,
-            _ => orchard.First.valeur,
-        };
+        Bananier.Stat S => orchard.Stat(stat);
 
         bool Trees => stat == BananaStat.Arbres;
         int Price => Trees ? orchard.Price : S.PrixAmelioration;
@@ -69,19 +63,14 @@ namespace SAE
         {
             pressed = 1f;
             if (Done) return;
-            if (Trees)
+            if (CoopOrchard.Mirroring)
             {
-                if (!orchard.Buy(transform.position)) refused = 1f;
+                // Invité du coop : c'est l'hôte qui achète, avec la bourse commune (on ne refuse ici que s'il manque de l'argent)
+                if (Economy.CanAfford(Price)) CoopOrchard.Ask((OrchardOp)stat);
+                else { refused = 1f; Sounds.Play(Sounds.AchatRefuse, transform.position); }
                 return;
             }
-            if (!Economy.TrySpend(Price, transform.position)) { refused = 1f; return; }
-            foreach (var tree in orchard.trees)
-                switch (stat)
-                {
-                    case BananaStat.Frequence: tree.AmeliorerFrequence(); break;
-                    case BananaStat.Pourriture: tree.AmeliorerPourriture(); break;
-                    default: tree.AmeliorerValeur(); break;
-                }
+            if (!orchard.Upgrade(stat, transform.position)) refused = 1f;
         }
 
         void Start()

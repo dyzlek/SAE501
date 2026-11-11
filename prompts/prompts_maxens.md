@@ -2,6 +2,13 @@
 
 _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (orthographe, clarté, structure : contexte, objectif, contraintes). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/maxens.md)._
 
+## Mar. 10 nov. 2026
+
+### Partager la bananeraie en coop
+> En multijoueur, quand un joueur prend une banane, l'autre ne le voit pas la prendre. D'où ça vient ?
+>
+> Suite : fais la vraie bananeraie partagée : il faut que tout soit partagé (les bananes, les singes récolteurs, les arbres et les améliorations).
+
 ## Mer. 21 oct. 2026
 
 ### Mettre les sons dans le jeu

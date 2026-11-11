@@ -2,6 +2,20 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Mar. 10 nov. 2026
+- **Fait : la bananeraie partagée en coop** (branche `feat/bananeraie-partagee`). Avant, chaque joueur avait sa propre bananeraie : ses bananes tombaient au hasard chez lui seulement, et seul l'argent de la vente passait par le réseau. Quand un joueur prenait une banane, l'autre voyait sa main bouger, mais vide. Maintenant **tout est partagé** :
+  - **les mêmes bananes chez tout le monde** : c'est l'hôte qui les fait tomber et pourrir ; chaque invité en a une copie qui suit sa position ;
+  - **prendre, lancer, vendre** : un invité prend une banane tout de suite chez lui et la demande à l'hôte. Si quelqu'un l'a prise juste avant lui, elle lui échappe des mains. Tant qu'il la tient ou qu'elle vole, c'est lui qui envoie sa position, 20 fois par seconde. Dans le panier, il est payé chez lui, et la banane disparaît chez tout le monde ; le son de la vente s'entend partout. Si elle tombe par terre, l'hôte la reprend là où elle s'est posée ;
+  - **les singes récolteurs** : ceux de l'hôte travaillent, et chez l'invité ils les imitent (position, marche, port des bananes, lancer, dunk, bouderie). Seul l'hôte peut attraper un singe récolteur ;
+  - **le comptoir** (arbres, production, fraîcheur, valeur, singes et leurs améliorations) : un invité ne paie pas chez lui, il demande à l'hôte, qui achète avec la bourse commune. Tout le monde voit les mêmes arbres et les mêmes niveaux.
+  - **comment c'est fait** : nouveau script `Coop/CoopOrchard.cs`, sur le prefab réseau `CoopPartie` à côté de `CoopGame`. L'hôte recopie la bananeraie dans des `NetworkList`, et NGO n'envoie que ce qui change : une banane posée ne coûte rien. Les demandes des invités passent par des RPC (prendre, bouger, poser, vendu, acheter). Petites retouches dans `Banane`, `Bananier`, `Panier`, `BananaOrchard`, `UpgradeButton`, `HarvesterCrew`, `HarvesterMonkey`, `HarvesterButton`, `HarvesterGrab`, `HarvesterAnimator` et `DesktopPlayer`.
+  - **À tester à deux** (pas encore testé en jeu, compilé seulement) : un invité prend une banane, l'hôte la voit dans sa main ; un lancer dans le panier ; deux joueurs qui prennent la même banane ; un singe récolteur vu des deux côtés ; un achat au comptoir fait par l'invité.
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Code) | Recherche de la cause : les bananes n'étaient pas des objets réseau, chaque joueur avait sa bananeraie (`Coop.cs` : « chacun garde sa bananeraie ») | Gardé |
+| Claude (Code) | Bananeraie partagée en coop : bananes, prise et lancer, vente, singes récolteurs en miroir, comptoir (`CoopOrchard`) ; compilé, pas encore testé à deux | À tester à deux |
+
 ## Mer. 21 oct. 2026
 - **Fait : les sons du jeu** (issue #34). J'ai rassemblé les sons, surtout tirés de Bloons TD6 (on assume de reprendre l'univers : le jeu ne sera pas présenté aux Pégases), et ils sont branchés dans le jeu :
 

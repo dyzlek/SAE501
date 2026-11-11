@@ -59,6 +59,55 @@ namespace SAE
         Banane claimed, claimedExtra;                   // les bananes qu'il est parti chercher (les autres singes les laissent)
         int basketSlot = -1;                            // sa place autour du panier (HarvesterCrew), -1 : aucune
 
+        // Il porte des bananes : chez l'hôte, Carried ; chez l'invité du coop, ce que dit l'hôte (les bananes, elles,
+        // arrivent toutes seules à leur place : CoopOrchard envoie leur position dans ses mains)
+        public bool Carrying => Carried || mirrorCarrying;
+
+        // --- Coop, chez l'invité : il imite le singe de l'hôte (CoopOrchard) ---
+        public bool Mirrored { get; private set; }
+        bool mirrorCarrying;
+        Vector3 mirrorPos;
+        Quaternion mirrorRot;
+
+        public void Mirror(CoopHarvester state)
+        {
+            if (!Mirrored)
+            {
+                // La première fois : il arrête de travailler pour son compte et lâche tout (ses bananes ont disparu)
+                Mirrored = true;
+                StopAllCoroutines();
+                LeaveBasket();
+                claimed = claimedExtra = Carried = Extra = null;
+                Busy = false;
+                Tree = null;
+                var grab = GetComponent<HarvesterGrab>();
+                if (grab) grab.SetGrabbable(false);   // c'est le singe de l'hôte : seul l'hôte peut l'attraper
+            }
+
+            bool active = state.Has(CoopHarvester.Active);
+            if (gameObject.activeSelf != active)
+            {
+                gameObject.SetActive(active);
+                if (active) transform.SetPositionAndRotation(state.pos, state.rotation);   // il apparaît à sa place, sans glisser
+            }
+            mirrorPos = state.pos;
+            mirrorRot = state.rotation;
+            Walking = state.Has(CoopHarvester.Walking);
+            mirrorCarrying = state.Has(CoopHarvester.Carrying);
+            Cheering = state.Has(CoopHarvester.Cheering);
+            Sulking = state.Has(CoopHarvester.Sulking);
+            Held = state.Has(CoopHarvester.Held);
+            ThrowPhase = state.throwPhase / 255f;
+        }
+
+        // Invité : il glisse vers la dernière position reçue (envoyée 30 fois par seconde au plus)
+        void Update()
+        {
+            if (!Mirrored) return;
+            float t = 1f - Mathf.Exp(-15f * Time.deltaTime);
+            transform.SetPositionAndRotation(Vector3.Lerp(transform.position, mirrorPos, t), Quaternion.Slerp(transform.rotation, mirrorRot, t));
+        }
+
         // Appelé par l'équipe quand on achète ce singe : il apparaît et se met au travail
         public void StartWork()
         {
