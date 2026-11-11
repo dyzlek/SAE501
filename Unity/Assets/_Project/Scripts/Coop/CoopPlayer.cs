@@ -14,9 +14,17 @@ namespace SAE
         public Vector3 headPos, leftPos, rightPos;
         public Quaternion headRot, leftRot, rightRot;
 
+        // Le singe qu'il tient (pris dans la bibliothèque, pas encore posé) : les autres le voient dans sa main
+        public bool holding;
+        public MonkeyType heldType;
+        public Rarity heldLevel;
+        public Vector3 heldPos;
+        public Quaternion heldRot;
+
         public bool Equals(CoopPose o) =>
             level == o.level && vr == o.vr && headPos == o.headPos && leftPos == o.leftPos && rightPos == o.rightPos
-            && headRot == o.headRot && leftRot == o.leftRot && rightRot == o.rightRot;
+            && headRot == o.headRot && leftRot == o.leftRot && rightRot == o.rightRot
+            && holding == o.holding && heldType == o.heldType && heldLevel == o.heldLevel && heldPos == o.heldPos && heldRot == o.heldRot;
     }
 
     // Le joueur réseau (le « Player Prefab » de NGO) : il y en a un par joueur dans la partie, l'hôte compris, chez tout le monde.
@@ -26,7 +34,8 @@ namespace SAE
     //     L'invité appelle HitRpc(…) chez lui, la méthode s'exécute chez l'hôte. NGO garantit qu'elles arrivent,
     //     une seule fois et dans l'ordre. L'hôte y fait les mêmes appels que pour son propre joueur, pour que les règles
     //     (prix, placement, fusion) restent écrites à un seul endroit.
-    //   - Ses flèches : ShotRpc [SendTo.NotMe], tout le monde sauf lui les voit voler.
+    //   - Ses flèches : ShotRpc [SendTo.NotMe], tout le monde sauf lui les voit voler. De même pour le coffre qu'il ouvre
+    //     (ChestRpc), ses fléchettes (DartRpc), et le singe qu'il tient (dans Pose).
     public class CoopPlayer : NetworkBehaviour
     {
         const float PoseInterval = 0.05f;   // 20 fois par seconde
@@ -89,6 +98,9 @@ namespace SAE
             nextPose = Time.unscaledTime + PoseInterval;
             var rig = PlayerRig.Local;
             if (!rig) return;
+            var token = MonkeyToken.Held;
+            var held = GameState.Held;
+            bool holding = token && held.HasValue;
             pose.Value = new CoopPose
             {
                 level = Levels.Current,
@@ -96,8 +108,23 @@ namespace SAE
                 headPos = rig.head.position, headRot = rig.head.rotation,
                 leftPos = rig.leftHand.position, leftRot = rig.leftHand.rotation,
                 rightPos = rig.rightHand.position, rightRot = rig.rightHand.rotation,
+                holding = holding,
+                heldType = holding ? held.Value.type : default,
+                heldLevel = holding ? held.Value.level : default,
+                heldPos = holding ? token.transform.position : default,
+                heldRot = holding ? token.transform.rotation : default,
             };
         }
+
+        // --- Ce que les autres voient faire (SendTo.NotMe : tout le monde sauf celui qui le fait, comme ses flèches) ---
+
+        // Il ouvre le coffre : chez les autres, le coffre s'ouvre aussi et montre le même singe (sans rien donner)
+        [Rpc(SendTo.NotMe)]
+        public void ChestRpc(int rarity, int type) => Coop.ShowChest(rarity, type);
+
+        // Il lance une fléchette : les autres la voient voler et se planter (elle marque aussi sur leur cible)
+        [Rpc(SendTo.NotMe)]
+        public void DartRpc(Vector3 pos, Quaternion rotation, Vector3 velocity) => Dart.ShowRemote(pos, rotation, velocity);
 
         // --- Les demandes de l'invité, faites chez l'hôte. request = leur numéro (voir Coop.Request). ---
 
