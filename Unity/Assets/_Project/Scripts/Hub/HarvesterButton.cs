@@ -21,6 +21,15 @@ namespace SAE
         public void Press()
         {
             pressed = 1f;
+            if (CoopOrchard.Mirroring)
+            {
+                // Invité du coop : c'est l'hôte qui achète, avec la bourse commune (voir UpgradeButton)
+                int price = isBuyButton ? crew.PriceToBuy : crew.Price(stat);
+                bool possible = isBuyButton ? !crew.Full : crew.Count > 0 && !crew.IsMax(stat);
+                if (possible && Economy.CanAfford(price)) CoopOrchard.Ask(isBuyButton ? OrchardOp.Singe : (OrchardOp)((int)OrchardOp.Vitesse + (int)stat));
+                else { refused = 1f; Sounds.Play(Sounds.AchatRefuse, transform.position); }
+                return;
+            }
             bool ok = isBuyButton ? crew.Buy() : crew.Upgrade(stat);
             if (!ok) refused = 1f;
         }

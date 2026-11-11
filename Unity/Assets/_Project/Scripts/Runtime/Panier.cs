@@ -37,14 +37,14 @@ public class Panier : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         var b = other.GetComponentInParent<Banane>();
-        if (b != null && !b.EnMain) Recevoir(b);
+        if (b != null && !b.EnMain && !b.Distante) Recevoir(b);   // distante : c'est l'autre machine qui la vend
     }
 
     // une banane lâchée pile dedans ne déclenche pas toujours OnTriggerEnter (déjà à l'intérieur)
     void OnTriggerStay(Collider other)
     {
         var b = other.GetComponentInParent<Banane>();
-        if (b != null && !b.EnMain) Recevoir(b);
+        if (b != null && !b.EnMain && !b.Distante) Recevoir(b);   // distante : c'est l'autre machine qui la vend
     }
 
     /// Ajoute la banane au panier et renvoie ce qu'elle a rapporté.
@@ -53,7 +53,7 @@ public class Panier : MonoBehaviour
     /// Version utilisée par le récolteur : seule une part de la valeur est comptée.
     public int RecevoirPart(Banane b, float part)
     {
-        if (b == null || b.Deposee) return 0;
+        if (b == null || b.Deposee || b.Distante) return 0;
         bool pourrie = b.EstPourrie;
         bool doree = b.EstDoree && !pourrie;
         var main = b.DerniereMain;

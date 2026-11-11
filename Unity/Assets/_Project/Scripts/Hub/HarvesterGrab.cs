@@ -44,6 +44,7 @@ namespace SAE
             handSpeed = gameObject.AddComponent<ThrowVelocity>();
             gameObject.AddComponent<ThrowTrail>();   // la traînée dorée quand il vole
             PlayerRig.IgnoreCollisions(gameObject);   // on ne marche pas sur lui en le tenant
+            if (monkey.Mirrored) SetGrabbable(false);   // coop : il imitait déjà le singe de l'hôte avant d'apparaître
         }
 
         void OnEnable()
@@ -73,6 +74,19 @@ namespace SAE
             handSpeed.Clear();
             body.isKinematic = true;
             monkey.PickedUp();
+        }
+
+        // Coop, chez l'invité : le singe imite celui de l'hôte (HarvesterMonkey.Mirror), on ne peut plus l'attraper.
+        // On coupe son collider : ni la main, ni le rayon, ni le clic du mode PC ne le trouvent.
+        public void SetGrabbable(bool on)
+        {
+            if (!grab) return;   // singe encore jamais affiché : Awake s'en chargera (voir la fin d'Awake)
+            grab.enabled = on;
+            foreach (var c in GetComponents<Collider>()) c.enabled = on;
+            if (on) return;
+            flying = false;
+            body.isKinematic = true;
+            body.useGravity = false;
         }
 
         // Lâché avec cette vitesse : il vole (la physique prend le relais au prochain pas, voir FixedUpdate)
