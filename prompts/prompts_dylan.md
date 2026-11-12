@@ -4,6 +4,11 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Jeu. 12 nov. 2026
 
+### Envoyer le jeu au prof
+> J'aimerais l'envoyer au prof : je ne peux pas simplement le mettre sur GitHub en .zip ?
+>
+> Suite : le build est dans `C:\Users\dylan\Documents\SAE501\Unity\exe`. Fais tout tout seul.
+
 ### Build Windows et page des commandes
 > J'aimerais compiler le jeu en .exe, s'il te plaît.
 >
