@@ -3,7 +3,7 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Jeu. 12 nov. 2026
-**Ce que j'ai fait :** correction de deux scintillements au hub (#205) ; champignons avec des points blancs en texture (#206) ; liste des modèles les plus lourds.
+**Ce que j'ai fait :** correction de deux scintillements au hub (#205) ; champignons avec des points blancs en texture (#206) ; liste des modèles les plus lourds ; palmiers allégés (#207) ; PR #208 ; GDD final et oral préparés (#43, #44).
 
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
@@ -14,6 +14,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Claude (Claude Code) | **Palmiers de la carte allégés** (ma demande) : dans `build_palms`, seulement pour la carte (palmiers à 18-34 m), tronc à 6 côtés en tronçons simples et palmes en 4 morceaux au lieu de 6 : 14 520 → 7 392 triangles, paysage 59 919 → 52 791. Rendu avant/après comparé à 10 et 25 m (presque pareil). Palmiers du hub pas touchés. Issue #207, opti.md. **Pas vu dans Unity ni au casque** | Gardé (à vérifier) |
 | Claude (Claude Code) | **Palmiers du hub allégés aussi** (ma réponse « oui, le hub aussi ») : même réglage pour les 14 palmiers du hub, 9 240 → 4 704 triangles, cabane 72 869 → 68 333. Rendu avant/après comparé à 8 et 16 m. Issue #207, opti.md. **Pas vu dans Unity ni au casque** | Gardé (à vérifier) |
 | Claude (Claude Code) | **PR #208** (ma demande : « push tout le main dans une PR ») : branche `feat/opti-fusion` poussée (coop de Maxens b8646fe + mes corrections du jour), PR vers `main` avec `Closes` #201-#203 et #205-#207, PR et cartes #205-#207 en « En relecture ». Mes modifications locales non commitées (scènes, réglages XR, Casino/Menu, _Recovery, oral) ne sont **pas** dans la PR | Gardé |
+| Claude (Claude Code) | **GDD final et oral** (ma demande : « prépare tout ce qu'il y a à dire dans le GDD et l'oral ») : chiffres vérifiés dans le code et le dépôt (prix du coffre, portée de la Punaise 2,5 m, camouflés vus par le Sniper, 4 joueurs en coop, rotation 45°, 158 scripts, 136 issues, 65 PR, 384 commits). **GDD** : version finale datée, coop (7.12) et menu / sauvegarde / trophées / classement / météo (7.11), sons de chaque action, périmètre en bilan (fait, coupé, pas testé) et ce qui a bougé depuis la v1, confort (marche en option), technique et optimisations de la S3, répartition finale, tests, risques ; `GDD.docx` régénéré. **ORAL.md** : texte à dire par partie, démo, S3 remplie, questions probables avec réponses, liste d'avant-oral ; **site de l'oral** : diapos S3 et conclusion remplies, chiffres mis à jour. Reste à dire le jour J : l'état du build et les fps au casque (pas mesurés). L'oral (ORAL.md et le site) n'était pas encore dans le dépôt : ajouté. Issues #43 et #44 | Gardé (à relire et répéter) |
 
 ## Mar. 10 nov. 2026
 **Ce que j'ai fait :** relecture de la PR #188 (optimisations) avant le merge, et corrections.

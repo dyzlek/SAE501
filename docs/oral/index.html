@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bloons VR · Oral SAÉ 5D.01</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --wood:#3b2414; --wood2:#5a3a21; --gold:#f5c542; --cream:#fff4d6; --slate:#17261f;
+  --green:#58c24a; --red:#ee5a3a; --blue:#3f9ae0; --ink:#fff4d6; --muted:#d9c7a0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#120b06;overflow:hidden;font-family:Oswald,"Arial Narrow",Arial,sans-serif;color:var(--ink)}
+#stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform-origin:center;background:linear-gradient(160deg,#4a2e1a,#2a170b);overflow:hidden}
+.slide{position:absolute;inset:0;padding:44px 64px 56px;display:none;flex-direction:column}
+.slide.on{display:flex;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+h1,h2{font-family:Bangers,Impact,sans-serif;font-weight:400;letter-spacing:.04em;color:var(--gold);text-shadow:0 3px 0 #0006}
+h1{font-size:120px;line-height:.95}
+h2{font-size:56px;margin-bottom:6px}
+.kick{font-size:20px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.lead{font-size:30px;line-height:1.3;color:var(--cream)}
+.key{background:var(--slate);border:3px solid var(--gold);border-radius:14px;padding:16px 22px;font-size:28px;line-height:1.3;color:var(--cream);box-shadow:0 6px 0 #0005}
+.key b,.lead b{color:var(--gold);font-weight:600}
+.refs .key{font-size:22px;padding:11px 18px}
+ul{list-style:none}
+li{font-size:25px;line-height:1.3;padding-left:30px;position:relative;margin:7px 0}
+li::before{content:"";position:absolute;left:0;top:.5em;width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:inset -3px -3px 0 #c9921a}
+li b{color:var(--gold);font-weight:600}
+.cols{display:grid;gap:24px;flex:1;min-height:0}
+.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:repeat(3,1fr)}
+.card{background:#00000040;border:2px solid #f5c54255;border-radius:14px;padding:16px 20px;min-height:0}
+.card h3{font-family:Bangers,Impact,sans-serif;font-weight:400;font-size:34px;color:var(--gold);letter-spacing:.04em;margin-bottom:4px}
+.card li{font-size:21px;margin:5px 0}
+.card .role{font-size:19px;color:var(--muted);margin-bottom:6px}
+img.shot{width:100%;height:100%;object-fit:cover;border-radius:12px;border:3px solid var(--gold);box-shadow:0 8px 0 #0006;display:block}
+.fig{position:relative;min-height:0}
+.fig span{position:absolute;left:10px;bottom:10px;background:#000b;color:var(--cream);font-size:16px;padding:3px 10px;border-radius:8px}
+.time{position:absolute;right:64px;top:40px;font-size:20px;color:var(--muted);border:2px solid #f5c54277;border-radius:999px;padding:2px 14px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:10px 0}
+.stat{text-align:center;background:var(--slate);border:3px solid var(--gold);border-radius:14px;padding:12px 6px}
+.stat b{display:block;font-family:Bangers,Impact;font-weight:400;font-size:68px;color:var(--gold);line-height:1}
+.stat small{font-size:20px;color:var(--muted)}
+.flow{display:flex;gap:10px;align-items:stretch;margin:10px 0}
+.flow div{flex:1;background:var(--slate);border:2px solid var(--gold);border-radius:12px;padding:10px;text-align:center;font-size:21px;position:relative}
+.flow div+div::before{content:"▶";position:absolute;left:-18px;top:50%;transform:translateY(-50%);color:var(--gold);font-size:16px}
+.steps{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;flex:1}
+.step{display:flex;gap:14px;align-items:flex-start;background:#00000040;border:2px solid #f5c54255;border-radius:12px;padding:10px 14px}
+.step i{font-style:normal;font-family:Bangers,Impact;font-size:40px;color:var(--wood);background:var(--gold);width:48px;height:48px;border-radius:50%;display:grid;place-items:center;flex:none}
+.step b{display:block;font-size:24px;color:var(--gold);font-weight:600}
+.step span{font-size:19px;color:var(--cream);line-height:1.25}
+.step em{display:block;font-size:17px;color:var(--muted);margin-top:2px}
+.tl{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;flex:1}
+.tl .card{border-top:8px solid var(--gold)}
+.tl .card:nth-child(2){border-top-color:var(--green)}.tl .card:nth-child(3){border-top-color:var(--blue)}
+.todo{border:3px dashed var(--red)!important}
+.todo p{color:#ffb4a3;font-size:21px}
+.tag{display:inline-block;font-size:17px;border-radius:999px;padding:1px 12px;margin:2px 4px 2px 0;background:var(--gold);color:var(--wood);font-weight:600}
+table{border-collapse:collapse;width:100%}
+td,th{font-size:21px;padding:7px 12px;border-bottom:1px solid #f5c54244;text-align:left;vertical-align:top}
+th{color:var(--gold);font-weight:600}
+.notes{position:absolute;left:0;right:0;bottom:0;background:#000d;border-top:3px solid var(--gold);padding:12px 64px 16px;font-size:20px;line-height:1.35;display:none;z-index:5;max-height:34%;overflow:auto}
+body.notes .notes{display:block}
+.bar{position:absolute;left:0;bottom:0;height:8px;background:var(--gold);transition:width .3s;z-index:6}
+.hud{position:absolute;right:14px;bottom:14px;font-size:17px;color:var(--muted);z-index:7;display:flex;gap:12px}
+.hud #clock{color:var(--gold);display:none}
+body.clock .hud #clock{display:inline}
+.hint{position:absolute;left:14px;bottom:14px;font-size:15px;color:#d9c7a099;z-index:7}
+.big{display:grid;place-items:center;flex:1;text-align:center}
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- 1 TITRE -->
+<section class="slide" data-t="0:30" data-notes="On se présente. En une phrase : un tower defense en VR dans l'univers de Bloons, où on tire à l'arc et où on se partage les tâches à plusieurs.">
+  <div class="cols c2" style="align-items:center">
+    <div>
+      <div class="kick">SAÉ 5D.01 · BUT MMI 3 · IUT de Béziers</div>
+      <h1>BLOONS<br>VR</h1>
+      <p class="lead" style="margin:18px 0 26px">Défends la jungle avec Quincy et ses singes.</p>
+      <div><span class="tag">Dylan</span><span class="tag">Maxens</span><span class="tag">Nicolas</span></div>
+      <p style="margin-top:18px;color:var(--muted);font-size:22px">Oral du 13 novembre 2026 · 15 minutes + démo</p>
+    </div>
+    <div class="fig" style="height:560px"><img class="shot" src="../captures/menu-principal.webp" alt="Menu principal du jeu"></div>
+  </div>
+</section>
+
+<!-- 2 PLAN -->
+<section class="slide" data-t="0:15" data-notes="Le plan en dix secondes. La démo arrive vite, c'est le plus important.">
+  <div class="kick">Plan</div><h2>Ce qu'on va voir</h2>
+  <div class="cols c2" style="margin-top:14px;align-content:start">
+    <div class="step"><i>1</i><div><b>Le jeu et la VR</b><span>Pitch, geste, pourquoi en VR</span></div></div>
+    <div class="step"><i>2</i><div><b>Démonstration</b><span>Le parcours du joueur, en direct</span></div></div>
+    <div class="step"><i>3</i><div><b>L'équipe et l'organisation</b><span>Qui a fait quoi, comment on a travaillé</span></div></div>
+    <div class="step"><i>4</i><div><b>Les 3 semaines et ce dont on est fiers</b><span>S1, S2, S3</span></div></div>
+    <div class="step"><i>5</i><div><b>La technique</b><span>Optimisation et usage de l'IA</span></div></div>
+    <div class="step"><i>6</i><div><b>Bilan</b><span>Ce qui a été dur, ce qu'il reste</span></div></div>
+  </div>
+</section>
+
+<!-- 3 PITCH -->
+<section class="slide" data-t="0:45" data-notes="Dire la phrase du titre, puis le geste, puis le principe. Plate Up : on voulait que chacun ait sa tâche, comme en cuisine. Bien dire que le jeu reste complet en solo.">
+  <div class="kick">1 · Le jeu</div><h2>Bloons TD, avec ton arc en main, et Plate Up en plus</h2>
+  <div class="cols c2" style="margin-top:12px">
+    <div class="refs" style="display:flex;flex-direction:column;gap:10px">
+      <div class="key"><b>Le geste :</b> tirer à l'arc. L'arc dans la main gauche, la corde dans la droite, on recule et on lâche.</div>
+      <div class="key"><b>Le principe :</b> on défend la carte contre des vagues de ballons. Les bananes paient les singes, les coffres et les améliorations, mais elles pourrissent si on ne les ramasse pas.</div>
+      <div class="key"><b>Plate Up :</b> à plusieurs, chacun prend un rôle : l'un tire à l'arc, l'autre place les singes, un autre ramasse les bananes.</div>
+      <div class="key"><b>Nos références :</b> <b>Bloons TD 6</b> (les ballons et les vagues), <b>Rush Royale</b> (fusionner deux singes), <b>Job Simulator</b> (tout se fait avec les mains), <b>Moss</b> (géant penché sur un petit monde), <b>The Lab</b> (le tir à l'arc), <b>How to Fish</b> (la roulette).</div>
+    </div>
+    <div class="fig"><img class="shot" src="../captures/gdd/cabane-interieur.png" alt="La cabane"><span>La cabane : bibliothèque, maquette, tableau des vagues</span></div>
+  </div>
+</section>
+
+<!-- 4 POURQUOI VR -->
+<section class="slide" data-t="0:45" data-notes="Poser des tours à la souris marcherait aussi. Tirer à l'arc et changer d'échelle, non. C'est ça qui justifie la VR.">
+  <div class="kick">2 · Pourquoi en VR ?</div><h2>L'arc, l'échelle, le corps</h2>
+  <div class="cols c2" style="margin-top:10px">
+    <div>
+      <ul>
+        <li><b>Les mains :</b> on tire à l'arc, on pose les singes, on lance les bananes, on appuie sur les boutons</li>
+        <li><b>L'échelle :</b> dans la cabane on est un géant au-dessus de la maquette, sur la carte on est à taille réelle, sous les dirigeables</li>
+        <li><b>Le corps :</b> on se retourne vers la bibliothèque, on passe la porte, on se penche</li>
+      </ul>
+      <div class="key" style="margin-top:14px"><b>Test de l'écran :</b> poser des tours marcherait à la souris, mais pas tirer à l'arc ni changer d'échelle.</div>
+      <p style="margin-top:14px;color:var(--muted);font-size:21px">Confort : téléportation, rotation par crans, textes dans le décor, tout à portée de bras, 72 fps visés</p>
+    </div>
+    <div style="display:grid;grid-template-rows:1fr 1fr;gap:16px;min-height:0">
+      <div class="fig"><img class="shot" src="../captures/maxens-arc-tendu.png" alt="Arc tendu"><span>L'arc tendu</span></div>
+      <div class="fig"><img class="shot" src="../captures/maxens-hub-a-portee-de-main.png" alt="Hub à portée de main"><span>Tout est à portée de main</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 DEMO -->
+<section class="slide" data-t="4:00" data-notes="Démo : jouer au casque. Si ça plante, passer en mode PC ou lancer la vidéo. Un commentaire court à chaque étape. Si on manque de temps, sauter l'étape 8.">
+  <div class="time">⏱ 4:00</div>
+  <div class="kick">3 · Démonstration</div><h2>Le parcours du joueur</h2>
+  <div class="steps" style="margin-top:10px">
+    <div class="step"><i>1</i><div><b>Menu</b><span>CONTINUER · NOUVELLE PARTIE · OPTIONS</span><em>Quincy fait coucou</em></div></div>
+    <div class="step"><i>2</i><div><b>Tutoriel, dans la cabane</b><span>3 tableaux, puis SE TP</span><em>Une consigne à la fois, écrite dans le décor</em></div></div>
+    <div class="step"><i>3</i><div><b>Vague 1 à l'arc</b><span>LANCER, éclater les 8 ballons</span><em>Le geste principal, dès les 2 premières minutes</em></div></div>
+    <div class="step"><i>4</i><div><b>Premier singe</b><span>Le prendre, le poser sur la maquette</span><em>La maquette montre la carte en direct</em></div></div>
+    <div class="step"><i>5</i><div><b>Les bananes</b><span>Passer la porte, lancer dans le panier</span><em>Les bananes se récoltent avec les mains</em></div></div>
+    <div class="step"><i>6</i><div><b>Coffre et fusion</b><span>Ouvrir le coffre, fusionner deux singes</span><em>Deux identiques = un plus rare</em></div></div>
+    <div class="step"><i>7</i><div><b>Vague de boss</b><span>Orage, boss qui se divise</span><em>Annoncée à l'avance, le tonnerre vibre dans les manettes</em></div></div>
+    <div class="step"><i>8</i><div><b>Bonus</b><span>Roulette, trophée, classement, coop</span><em>Du bonus, le jeu tient sans</em></div></div>
+  </div>
+</section>
+
+<!-- 6 EQUIPE -->
+<section class="slide" data-t="2:00" data-notes="Chacun présente sa part en 40 secondes. Commits sur main au 12 nov. : Dylan 317, Maxens 62, Nicolas 4 (le travail de Nicolas arrive surtout par les fusions de ses branches). Maxens : dire aussi le coop de la bananeraie et du coffre (10-11 nov.).">
+  <div class="kick">4 · L'équipe</div><h2>Qui a fait quoi</h2>
+  <div class="cols c3" style="margin-top:8px">
+    <div class="card"><h3>Dylan</h3><div class="role">Hub, carte, singes, vagues · intégration · suivi</div>
+      <ul><li>La cabane et la carte</li><li>La bibliothèque, la maquette en direct, la pose et la fusion des singes</li><li>Les 100 vagues et le tutoriel en 17 étapes</li><li>Menu, sauvegarde, classement en ligne, météo, coop</li><li>Modèles Blender et optimisation</li></ul></div>
+    <div class="card"><h3>Maxens</h3><div class="role">Bananeraie · sons · coffre</div>
+      <ul><li>Bananiers, bananes qui pourrissent, récolteurs</li><li>Le nouveau coffre</li><li><b>Tous les sons et les musiques</b></li><li>La roulette qu'on lance à la main, les boss qui se divisent</li><li>Le coop de la bananeraie et du coffre</li></ul></div>
+    <div class="card"><h3>Nicolas</h3><div class="role">Coffre, arc, casino</div>
+      <ul><li>Le premier coffre : raretés et roulette</li><li><b>L'arc refait</b>, avec 4 améliorations</li><li>Une première roulette de casino</li><li>L'armoire à trophées (8 coupes)</li></ul></div>
+  </div>
+</section>
+
+<!-- 7 ORGANISATION -->
+<section class="slide" data-t="1:30" data-notes="Raconter : au début chacun a testé sa propre mécanique dans un prototype. Le 5 octobre on a tout rassemblé dans un seul projet, puis chacun a continué sur sa branche. Montrer le tableau GitHub si possible.">
+  <div class="kick">5 · Organisation</div><h2>Chacun teste, puis on fusionne</h2>
+  <div class="stats">
+    <div class="stat"><b>136</b><small>issues</small></div>
+    <div class="stat"><b>65</b><small>pull requests</small></div>
+    <div class="stat"><b>384</b><small>commits sur main</small></div>
+    <div class="stat"><b>3</b><small>jalons S1 · S2 · S3</small></div>
+  </div>
+  <div class="flow"><div>Chacun teste une mécanique<br><small>un prototype chacun</small></div><div>On compare<br><small>on garde ce qui est fun</small></div><div>On fusionne<br><small>un seul projet Unity</small></div><div>On corrige ensemble</div><div>Pull request relue, puis <b>main</b></div></div>
+  <div class="cols c2" style="margin-top:6px">
+    <ul><li><b>Au départ :</b> hub et plateau (Dylan), coffres (Nicolas), bananier (Maxens), chacun dans son coin</li><li><b>Ensuite :</b> une branche par idée, et ce qui ne marchait pas a été jeté</li></ul>
+    <ul><li><b>Suivi :</b> tableau GitHub (À faire, En cours, En relecture, Fait), une issue par tâche, un jalon par semaine</li><li><b>Journaux :</b> un pour l'équipe, un par personne, avec l'usage de l'IA</li></ul>
+  </div>
+</section>
+
+<!-- 8 CHRONOLOGIE -->
+<section class="slide" data-t="1:15" data-notes="Raconter en trois temps. S3 : pas de nouvelle mécanique de jeu, sauf le coop complété (assumé). Surtout des corrections et de l'optimisation : la cabane passe de 97 700 à 68 300 triangles.">
+  <div class="kick">6 · Les 3 semaines</div><h2>Du prototype au jeu fini</h2>
+  <div class="tl" style="margin-top:8px">
+    <div class="card"><h3>S1 · 5-9 oct.</h3><div class="role">PROUVER</div>
+      <ul><li>3 prototypes, fusionnés le 5</li><li>Passage à la VR le 6</li><li>La cabane et deux scènes le 7</li><li>Premiers tests au casque, GDD v1 le 9</li></ul></div>
+    <div class="card"><h3>S2 · 19-23 oct.</h3><div class="role">CONSTRUIRE</div>
+      <ul><li>17 objectifs (issues #129 à #145)</li><li>Sons, météo, trophées, menu, sauvegarde</li><li>Classement en ligne, aura des singes allégée</li><li>Coop, test par un autre groupe</li></ul></div>
+    <div class="card"><h3>S3 · 9-13 nov.</h3><div class="role">FINIR · plus de nouvelle feature</div>
+      <ul><li>Optimisations fusionnées (rendu casque, pools, LOD)</li><li>Cabane allégée : 97 700 → 68 300 triangles</li><li>Coop complété : bananeraie, coffre, fléchettes</li><li>Bugs corrigés, fonctions coupées proprement</li></ul></div>
+  </div>
+</section>
+
+<!-- 9 TEMPS FORTS -->
+<section class="slide" data-t="1:00" data-notes="Une image, 10 secondes chacune. Pas besoin de tout raconter.">
+  <div class="kick">7 · Temps forts</div><h2>Ce dont on est fiers</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;gap:14px;flex:1;margin-top:8px;min-height:0">
+    <div class="fig"><img class="shot" src="../captures/meteo-pluie-carte.png" alt="Orage"><span>Orage des boss, il ne pleut pas dans la cabane</span></div>
+    <div class="fig"><img class="shot" src="../captures/maxens-boss-divise.png" alt="Boss divisé"><span>Les boss se divisent</span></div>
+    <div class="fig"><img class="shot" src="../captures/maxens-roulette-en-jeu.png" alt="Roulette"><span>Roulette lancée à la main</span></div>
+    <div class="fig"><img class="shot" src="../captures/trophees-armoire.webp" alt="Trophées"><span>Armoire à trophées</span></div>
+    <div class="fig"><img class="shot" src="../captures/blackjack-borne.webp" alt="Blackjack"><span>Blackjack (coop)</span></div>
+    <div class="fig"><img class="shot" src="../captures/classement-terrasse.png" alt="Classement"><span>Classement en ligne</span></div>
+  </div>
+</section>
+
+<!-- 10 TECHNIQUE -->
+<section class="slide" data-t="1:00" data-notes="Dire honnêtement que les 72 fps restent à mesurer au casque. Chacun doit pouvoir expliquer le code qu'il a écrit ou fait écrire.">
+  <div class="kick">8 · La technique</div><h2>Comment c'est fait, et les fps</h2>
+  <div class="cols c2" style="margin-top:8px">
+    <div class="card"><h3>Le projet</h3>
+      <ul><li><b>Unity 6000.6</b>, C#, XR Interaction Toolkit, OpenXR, Meta Quest</li><li><b>158 scripts</b>, environ 19 200 lignes</li><li>Les stats des singes, des vagues et de l'arc sont rangées au même endroit</li><li>Tous les boutons marchent pareil : on les touche, on les vise ou on clique</li><li>Le coop passe par Netcode for GameObjects et Unity Relay</li></ul></div>
+    <div class="card"><h3>Optimisation (72 fps)</h3>
+      <ul><li>Rendu casque : bon asset URP mobile, <b>sans post-traitement</b>, fovéation</li><li><b>Pools</b> : ballons, projectiles, sons ; tout préparé au chargement</li><li>Aura des singes : de <b>100 systèmes de particules</b> à <b>1 maillage</b> ; 60 singes au plus</li><li>Cabane <b>97 700 → 68 300</b> triangles, décor fusionné par couleur</li><li><b>Mesure au casque :</b> pas encore faite, notée dans opti.md</li></ul></div>
+  </div>
+</section>
+
+<!-- 11 IA -->
+<section class="slide" data-t="0:45" data-notes="Tout est dans les journaux, y compris ce qu'on a jeté. Chacun doit pouvoir expliquer le code à l'oral.">
+  <div class="kick">9 · L'IA</div><h2>Comment on a utilisé l'IA</h2>
+  <div class="cols c2" style="margin-top:10px">
+    <ul>
+      <li>On a tous les trois travaillé avec <b>Claude Code</b></li>
+      <li>Chaque usage est noté dans notre <b>journal perso</b> : l'outil, pour quoi, et si on a gardé ou jeté</li>
+      <li>Nos <b>prompts</b> sont gardés dans le dépôt</li>
+      <li>On relit et on teste avant de committer</li>
+    </ul>
+    <div class="key"><b>Ce qu'on a jeté ou mis de côté :</b><br>la première banane dorée de Nicolas, le niveau Casino (gardé dans une branche), le pupitre de choix du pari<br><br><b>À savoir :</b> certaines fonctions sont notées « compilées, pas encore testées au casque ».</div>
+  </div>
+</section>
+
+<!-- 12 DIFFICULTES -->
+<section class="slide" data-t="0:30" data-notes="Rester bref : trois difficultés, ce qu'on en retient.">
+  <div class="kick">10 · Bilan</div><h2>Ce qui a été dur</h2>
+  <div class="cols c3" style="margin-top:10px">
+    <div class="card"><h3>Pas de casque</h3><p style="font-size:22px">Le Quest n'était pas reconnu le 7 oct., donc on a testé sans casque au début.<br><b style="color:var(--gold)">Ce qu'on retient :</b> réserver les casques tôt.</p></div>
+    <div class="card"><h3>Branches qui s'empilent</h3><p style="font-size:22px">Des pull requests jamais fusionnées, qu'il a fallu trier.<br><b style="color:var(--gold)">Ce qu'on retient :</b> branches courtes, fusion rapide.</p></div>
+    <div class="card"><h3>Trop facile</h3><p style="font-size:22px">Les testeurs ne jouaient pas vraiment au tower defense.<br><b style="color:var(--gold)">Ce qu'on a fait :</b> vagues plus dures, ballons camouflés.</p></div>
+  </div>
+</section>
+
+<!-- 13 CONCLUSION -->
+<section class="slide" data-t="0:30" data-notes="Dire l'état du build tel qu'il est le jour J (testé au casque ou non). Finir en rappelant pourquoi la VR et pourquoi c'est un bon jeu, puis remercier.">
+  <div class="kick">11 · Conclusion</div><h2>Dernière ligne droite</h2>
+  <div class="big"><div>
+    <div class="key" style="font-size:36px;margin-bottom:20px">Un geste : <b>l'arc</b><br>Un jeu qui se joue seul ou à plusieurs<br>Qui se prend en main <b>sans notice</b></div>
+    <p class="lead" style="font-size:22px">S3 : on a fini plutôt qu'ajouté. Restent à mesurer : les 72 fps au casque et le coop à deux.</p>
+    <p style="font-family:Bangers,Impact;font-size:64px;color:var(--gold);margin-top:16px">Merci · des questions ?</p>
+  </div></div>
+</section>
+
+<div class="notes" id="notes"></div>
+<div class="bar" id="bar"></div>
+<div class="hint">← → naviguer · N notes · T chrono · F plein écran</div>
+<div class="hud"><span id="clock">0:00</span><span id="count"></span></div>
+</div>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+const stage=document.getElementById('stage');
+let i=0,t0=null;
+function fit(){const s=Math.min(innerWidth/1280,innerHeight/720);stage.style.transform=`translate(-50%,-50%) scale(${s})`}
+function show(n){
+  i=Math.max(0,Math.min(slides.length-1,n));
+  slides.forEach((s,k)=>s.classList.toggle('on',k===i));
+  document.getElementById('bar').style.width=((i+1)/slides.length*100)+'%';
+  document.getElementById('count').textContent=`${i+1} / ${slides.length} · ${slides[i].dataset.t}`;
+  document.getElementById('notes').textContent=slides[i].dataset.notes||'';
+  try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+}
+function tick(){if(t0===null)return;const s=Math.floor((Date.now()-t0)/1000);document.getElementById('clock').textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+setInterval(tick,500);
+addEventListener('keydown',e=>{
+  const k=e.key.toLowerCase();
+  if(['arrowright','pagedown',' ','enter'].includes(k)){e.preventDefault();show(i+1)}
+  else if(['arrowleft','pageup','backspace'].includes(k)){e.preventDefault();show(i-1)}
+  else if(k==='home')show(0);else if(k==='end')show(slides.length-1);
+  else if(k==='n')document.body.classList.toggle('notes');
+  else if(k==='t'){document.body.classList.toggle('clock');if(t0===null)t0=Date.now()}
+  else if(k==='r'){t0=Date.now()}
+  else if(k==='f'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+});
+let tx=null;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX});
+addEventListener('touchend',e=>{if(tx===null)return;const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>40)show(i+(d<0?1:-1));tx=null});
+addEventListener('click',e=>{if(e.clientX>innerWidth*.5)show(i+1);else show(i-1)});
+addEventListener('resize',fit);fit();
+show((parseInt(location.hash.slice(1))||1)-1);
+</script>
+</body>
+</html>

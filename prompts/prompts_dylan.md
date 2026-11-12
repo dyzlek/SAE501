@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Jeu. 12 nov. 2026
 
+### GDD final et oral
+> J'aimerais que tu prépares tout ce qu'il y a à dire dans le GDD et à l'oral, s'il te plaît.
+
 ### Palmiers de la carte
 > Tu peux réduire le nombre de polygones des palmiers sur la carte, s'il te plaît ?
 >

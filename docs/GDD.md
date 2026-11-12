@@ -1,6 +1,6 @@
 # Bloons VR — Game Design Document
 
-_Un tower defense en réalité virtuelle · Dylan, Maxens et Nicolas · BUT MMI 3, IUT de Béziers (SAÉ 5D.01)_
+_Un tower defense en réalité virtuelle · Dylan, Maxens et Nicolas · BUT MMI 3, IUT de Béziers (SAÉ 5D.01) · **version finale du 13 nov. 2026**_
 
 ![La cabane des singes : le tableau du tutoriel accueille le joueur au-dessus de la maquette de la carte.](captures/gdd/tutoriel-tableau.png)
 
@@ -11,7 +11,7 @@ _Un tower defense en réalité virtuelle · Dylan, Maxens et Nicolas · BUT MMI 
 | **Titre de travail** | Bloons VR (fan-game d'école, à renommer pour une diffusion) |
 | **Genre** | Tower defense + tir à l'arc + gestion légère |
 | **Support** | Casque VR autonome (Meta Quest), debout, espace de jeu de 2 × 2 m minimum ; mode PC clavier-souris pour le développement |
-| **Joueurs** | 1 |
+| **Joueurs** | 1 ; jusqu'à 4 en coop par Internet (bonus : le jeu est complet en solo) |
 | **Public** | Joueurs occasionnels dès 10 ans, découvreurs de la VR, fans de Bloons TD |
 | **Durée d'une session** | 2 min de tutoriel, puis des parties de 10 à 30 min (une vague dure 30 s à 2 min) |
 | **Ton** | Cartoon, coloré, chaleureux, jamais violent (on éclate des ballons) |
@@ -68,7 +68,7 @@ L'univers de Bloons TD est assumé : des singes, des ballons colorés, un chemin
 ![La carte à taille réelle : le chemin de dalles, les portails d'entrée et de sortie, l'estrade du joueur à droite.](captures/gdd/carte-vue.png)
 
 ### 4.3 Direction artistique
-- **Style :** low-poly coloré et lisible, sans textures réalistes, des formes rondes et des couleurs saturées. Tout est fait maison par scripts Blender (`Blender/cabane.py`, `coffre.py`) : aucun asset téléchargé.
+- **Style :** low-poly coloré et lisible, des formes rondes et des couleurs saturées. Le décor (cabane, bananeraie, paysage, coffre, roulette) est fait maison par scripts Blender (`Blender/cabane.py`, `coffre.py`, `roulette.py`), textures comprises : le bois, le plancher, le tapis ou les points des champignons sont **dessinés par le script**, rien n'est téléchargé.
 - **Palette :** bois chaud (cabane, estrade), vert prairie, gris pierre (chemin, portails), or pour l'interface (titres, cadres, flèche du tutoriel), ardoise vert-noir et craie pour les textes.
 - **Typographie :** **Bangers** pour les titres (esprit BD), **Oswald Bold** pour les textes. Tout texte est écrit sur un objet du décor.
 - **Lumière :** soleil de fin d'après-midi, poussières dorées dans les rayons des fenêtres, flammes qui vacillent dans les lanternes.
@@ -91,12 +91,14 @@ L'univers appartient à Ninja Kiwi. Le projet reste un exercice d'école et un f
 | **In Death, The Lab (Longbow)** | La sensation du tir à l'arc en VR |
 | **How to Fish** | La mise posée sur la table, visible (roulette) |
 | **Moss** | Le joueur géant penché sur un monde miniature (la maquette) |
+| **Plate Up** | En coop, chacun prend un rôle : l'un tire à l'arc, l'autre place les singes, un autre récolte |
+| **Gamble With Your Friends** | La borne de blackjack et ses gros boutons |
 
 ## 6. Contrôles
 
 | Action | Casque (Meta Quest) | Mode PC |
 |---|---|---|
-| Se déplacer | Téléportation : stick vers l'avant, viser, relâcher | ZQSD |
+| Se déplacer | Téléportation : stick vers l'avant, viser, relâcher (marche au stick gauche en option, coupée par défaut) | ZQSD |
 | Tourner | Snap turn de 45° (stick gauche / droite) | Souris |
 | Prendre un singe, une banane | Viser (rayon) ou toucher, puis serrer le grip | Clic maintenu |
 | Poser / lancer | Relâcher le grip (le rayon de pose montre où) | Relâcher le clic |
@@ -125,14 +127,15 @@ On peut reprendre un singe posé. **VIDER** (10 bananes) range tout le plateau.
 |---|---|---|---|---|---|---|
 | **Classique** | Tire sur le ballon le plus avancé | 6 m | 1 s | 1 | 1 | offert |
 | **Boomerang** | Touche 2 ballons par lancer | 6 m | 1 s | 1 | 2 | 150 |
-| **Punaise** | Touche 4 ballons proches | 4 m | 0,7 s | 1 | 4 | 200 |
+| **Punaise** | Touche 4 ballons proches (protège un virage) | 2,5 m | 0,7 s | 1 | 4 | 200 |
 | **Glace** | Ralentit tous les ballons à portée (onde de froid) | 6 m | 1,5 s | 0 | tous | 300 |
 | **Canon** | Explosion autour de la cible | 5 m | 1,5 s | 1 | zone | 400 |
 | **Colle** | Colle un ballon : très lent pendant 3 s | 6 m | 1 s | 0 | 1 | 500 |
-| **Sniper** | Tire sur toute la carte, gros dégâts | 100 m | 2 s | 3 | 1 | 600 |
+| **Sniper** | Tire sur toute la carte, gros dégâts, voit les camouflés | 100 m | 2 s | 3 | 1 | 600 |
 
 **Progression par rareté :**
-- **Portée :** +0,3 m par rareté.
+- **Portée :** +0,3 m par rareté (+0,15 m pour la Punaise).
+- **Camouflés :** le Sniper les voit toujours, les autres singes à partir de la rareté Violet.
 - **Cadence :** +20 % par rareté.
 - **Perce :** +1 couche toutes les 2 raretés.
 
@@ -182,7 +185,7 @@ Le **pupitre ARC**, sur l'estrade, vend des améliorations qui se cumulent :
 | **Rapide** | 0,65 | ×1,7 | Petit et vif |
 | **Blindé** | 1 | ×0,8 | Moitié moins de dégâts, ne peut pas être ralenti |
 | **Cœur** | 0,9 | ×1 | Regagne une couche toutes les 2 s |
-| **Camouflé** (normal ou rapide) | — | — | Kaki, avec des taches sombres : **seuls le Tireur et les singes Violet et plus le voient** ; les flèches de Quincy le touchent toujours |
+| **Camouflé** (normal ou rapide) | — | — | Kaki, avec des taches sombres : **seuls le Sniper et les singes Violet et plus le voient** ; les flèches de Quincy le touchent toujours |
 | **Boss (MOAB)** | 1,8 | ×0,6 | Très solide, hélice qui tourne ; **en éclatant, lâche 4 ballons normaux** |
 | **Dirigeable rouge (BFB)** | 2,2 | ×0,35 | Boss final, blindé, insensible au ralentissement ; **en éclatant, lâche 2 boss** |
 
@@ -269,6 +272,20 @@ Les sons s'entendent du hub comme de la carte : on sait qu'il faut y retourner. 
 - Boomerang vers la vague 3, Sniper vers la vague 10.
 
 On démarre avec **0 banane et aucun singe** : la vague 1 se gagne à l'arc, puis le tutoriel offre le premier singe. Une caisse affiche le total au hub, dans la bananeraie et sur la carte : on voit ses bananes partout.
+
+### 7.11 Autour de la partie
+- **Menu principal** : une scène vivante (singes animés, ballons), avec CONTINUER, NOUVELLE PARTIE, OPTIONS et COOP. On y revient en jeu par le menu pause.
+- **Sauvegarde automatique** sur le casque : à chaque vague gagnée, toutes les 30 s et quand on enlève le casque. On reprend où on en était. Pas de méta-progression : une nouvelle partie repart de zéro.
+- **Armoire à trophées** (8 coupes) : 4 pour les vagues (10, 50, 100, 200) et 4 pour les bananes gagnées (1 000, 5 000, 15 000, 50 000). Bronze, argent, or, platine : plus la coupe est rare, plus elle est grande et ornée. Une plaque gravée dit où on en est.
+- **Classement** : local (gardé sur le casque) et en ligne (bonus : un serveur PHP + MySQL sur l'espace web de l'IUT). Sans réseau, le local marche toujours.
+- **Météo des vagues de boss** : nuages au lancement, puis pluie, brume et tonnerre quand le boss entre, ciel dégagé à la fin. Il ne pleut pas dans la cabane, on y entend la pluie, étouffée.
+
+### 7.12 Coop par Internet (bonus)
+- **Jusqu'à 4 joueurs** (casque ou PC). L'hôte ouvre la partie depuis le menu pause avec un mot de passe ; les autres la rejoignent depuis le menu avec le code de la partie.
+- **Partagé :** la bourse, la bibliothèque, les singes posés, les vagues et les ballons, les flèches, la bananeraie (mêmes bananes, mêmes singes récolteurs, même comptoir), le coffre, les fléchettes, le singe tenu en main, la roulette.
+- **Chacun chez soi :** l'arc et ses améliorations, le blackjack, le tutoriel, la sauvegarde.
+- **Technique :** Netcode for GameObjects (la solution réseau d'Unity) et Unity Relay (un serveur relais qui passe aussi le Wi-Fi de l'IUT). L'hôte fait tourner la partie ; les autres lui envoient leurs demandes.
+- **Pourquoi c'est hors consigne :** le support de la SAÉ met le multijoueur en ligne dans les NON. On l'assume comme un bonus : il ne change rien au jeu solo, et il a été fait après que le solo était jouable du début à la fin. **Pas encore testé à deux au complet** (#204).
 
 ## 8. Tutoriel intégré (niveau 1)
 **Principe :**
@@ -359,23 +376,24 @@ Il n'y a **aucun texte à l'écran**. Tout est écrit sur un objet du décor, à
 
 | Action | Image | Vibration | Son |
 |---|---|---|---|
-| Viser un bouton | Le bouton grossit | « tic » léger | _à faire_ |
-| Appuyer | Le bouton s'enfonce | Moyenne | _à faire_ |
-| Action refusée (tutoriel) | Le tableau tremble, cadre rouge | Très faible | _à faire_ |
-| Bander l'arc, tirer | La corde se tend, traînée dorée | Monte avec la tension, coup sec au tir | _à faire_ |
-| Flèche qui touche un ballon | Le ballon change de couleur, puis disparaît | Tic sec dans la main de l'arc | _à faire_ |
-| Boss qui éclate | Onde de choc, les petits ballons en sortent | Grosse secousse, deux mains | _à faire_ |
-| Ballon qui passe (vies perdues) | Les vies baissent sur le tableau (rouges sous 5) | Grondement, deux mains | _à faire_ |
-| Vague spéciale | « VAGUE DE BOSS ! », puis « LE BOSS ARRIVE ! » | Deux battements de cœur | **Cloches**, puis **cor grave** |
-| Vague gagnée / perdue | Message sur le tableau | Trois tics qui montent / un long et sourd | _à faire_ |
-| Attraper une banane | Elle suit la main | Douce et brève | _à faire_ |
-| Vendre une banane | « +5 » qui flotte, la caisse saute | Deux tics | _à faire_ |
-| Vendre une banane dorée | « +50 » qui flotte | Trois tics qui montent | _à faire_ |
-| Fusion | Fantôme doré, halo | Forte | _à faire_ |
-| Coffre | Le couvercle s'ouvre, la roulette tourne, le singe sort en grossissant | — | _à faire_ |
-| Téléportation, porte | Voile noir fondu | — | _à faire_ |
+| Viser un bouton | Le bouton grossit | « tic » léger | — |
+| Appuyer | Le bouton s'enfonce | Moyenne | Clic de bouton |
+| Action refusée (tutoriel, achat trop cher) | Le tableau tremble, cadre rouge | Très faible | Achat refusé |
+| Bander l'arc, tirer | La corde se tend, traînée dorée | Monte avec la tension, coup sec au tir | Corde qui se tend, tir |
+| Flèche qui touche un ballon | Le ballon change de couleur, puis disparaît | Tic sec dans la main de l'arc | Éclatement (3 au plus par image, pour éviter la cacophonie) |
+| Boss qui éclate | Onde de choc, les petits ballons en sortent | Grosse secousse, deux mains | Éclatement |
+| Ballon qui passe (vies perdues) | Les vies baissent sur le tableau (rouges sous 5) | Grondement, deux mains | Vie perdue |
+| Vague spéciale | « VAGUE DE BOSS ! », puis « LE BOSS ARRIVE ! », orage | Deux battements de cœur | Cloches, puis cor grave (boss ou dirigeable), musique de boss, tonnerre |
+| Vague gagnée / perdue / victoire finale | Message sur le tableau | Trois tics qui montent / un long et sourd | Jingle gagné / perdu / victoire |
+| Attraper une banane | Elle suit la main | Douce et brève | — |
+| Vendre une banane | « +5 » qui flotte, la caisse saute | Deux tics | Vente |
+| Vendre une banane dorée | « +50 » qui flotte | Trois tics qui montent | Vente |
+| Poser un singe / fusion | Fantôme vert / doré, halo | Moyenne / forte | Pose / fusion |
+| Coffre | Le couvercle s'ouvre, la roulette tourne, le singe sort en grossissant | — | Ouverture, singe obtenu, fermeture |
+| Amélioration de l'arc | La plaque se met à jour | — | Amélioration (et un son à part au niveau max) |
+| Téléportation, porte | Voile noir fondu | — | Téléportation |
 
-_Chaque action a maintenant sa vibration, avec un motif différent pour la reconnaître sans regarder (`Haptics`). Le son reste le gros manque du jeu (seules les annonces de vague en ont) : c'est la priorité de la semaine 2 (issue #34)._
+_Chaque action a sa vibration, avec un motif différent pour la reconnaître sans regarder (`Haptics`). Les sons et les musiques (ambiance, vague, boss) sont arrivés en semaine 2 (Maxens, `Resources/Sons`)._
 
 ## 11. Pourquoi la VR
 - **Les mains :**
@@ -398,34 +416,36 @@ _Chaque action a maintenant sa vibration, avec un motif différent pour la recon
   - fusionner tout de suite ou garder deux singes ;
   - miser ses bananes ou les économiser.
 
-## 13. Périmètre (MoSCoW)
+## 13. Périmètre (MoSCoW) : bilan final
+
+_✅ = dans le jeu · ✂️ = coupé · 🧪 = codé, pas encore testé au complet. « Dans le jeu » ne veut pas dire « validé au casque » : voir 16.3._
 
 | DOIT | DEVRAIT | POURRAIT | NE FERA PAS |
 |---|---|---|---|
-| 1 carte, 1 chemin, 100 vagues progressives + finale ✅ | Fusion et raretés ✅ | Plus de types de singes ; boss qui se divisent ✅, vagues spéciales annoncées ✅ | Plusieurs cartes |
-| Quincy à l'arc (tir physique) ✅ | Bananes qui pourrissent, singes récolteurs ✅ | Améliorations de l'arc ✅, bananes dorées ✅ | Méta-progression entre les parties (bonus qui rendent la partie suivante plus facile) |
-| Singes posés à la main ✅ | Coffre et roulette du coffre ✅ | Ballons cœur et blindé ✅ | Gacha complet, achats réels |
-| Bananes → panier → déblocages ✅ | Décor soigné (cabane, montagnes, lumière) ✅ | Roulette de casino, fléchettes ✅ | Multijoueur |
-| Tutoriel intégré (niveau 1) ✅ | Animations des singes ✅ | 2e et 3e bananiers ✅ | Scénario, monde ouvert |
-| Confort : téléportation, snap turn, 72 fps | Sons ⏳ et **vibrations à chaque action** ✅ | Musique d'ambiance | Déplacement continu |
-| Écran de victoire / défaite clair ⏳ | Équilibrage testé | | |
-| | Boss qui se divise, ballons camouflés, combo de vagues parfaites, annonce des vagues spéciales ⏳ | Brouillard, nuit, pluie sur certaines vagues | |
-| | Sauvegarde automatique de la partie sur le casque (reprendre où on en était) ⏳ | Classement en ligne (bonus : serveur PHP + MySQL de l’IUT, sans multijoueur) ⏳ | |
-| | Menu principal : une scène vivante (singes animés, ballons), CONTINUER / NOUVELLE PARTIE / OPTIONS, retour au menu en jeu (bouton Menu, Échap) ⏳ (#158) | | |
-| | Bombes à lancer, pluie de flèches de Quincy, vibrations par action ⏳ | Classement gardé entre deux lancements ; **coop par Internet** (deux casques, ou casque + PC ; ouvert depuis la pause avec un mot de passe, rejoint depuis le menu avec le code de la partie ; serveur relais Unity Relay, réseau avec Netcode for GameObjects ; bananeraie partagée : mêmes bananes, mêmes singes récolteurs, même comptoir ; on voit aussi le coffre, les fléchettes et le singe tenu par les autres) ⏳ (#166, #170) | |
-| | Bananes dorées, nouvelles améliorations de l'arc, mur des records, trophées, classement local ⏳ | | |
-| | | Casino à plusieurs : roulette partagée et blackjack contre un croupier ⏳ (#171) | |
+| 1 carte, 1 chemin, 100 vagues progressives + finale ✅ | Fusion et raretés ✅ | Plus de types de singes (7) ✅ | Plusieurs cartes |
+| Quincy à l'arc, tir physique ✅ | Bananes qui pourrissent, singes récolteurs ✅ | Améliorations de l'arc (4) ✅ | Méta-progression entre les parties |
+| Singes posés à la main ✅ | Coffre et sa roulette ✅ | Ballons cœur et blindé ✅, boss qui se divisent ✅ | Gacha complet, achats réels |
+| Bananes → panier → déblocages ✅ | Décor soigné (cabane, montagnes, lumière) ✅ | Bananes dorées ✅, 2e et 3e bananiers ✅ | Scénario, monde ouvert |
+| Tutoriel intégré (niveau 1, 17 étapes) ✅ | Animations des singes ✅ | Roulette, blackjack, fléchettes ✅ | Déplacement continu **par défaut** (en option seulement) |
+| Confort : téléportation, snap turn, UI dans le décor ✅ ; 72 fps : réglages faits, **mesure au casque à faire** | Sons, musiques ✅ et une vibration par action ✅ | Météo des vagues de boss (nuages, pluie, brume, tonnerre) ✅ ; nuit ✂️ | |
+| Victoire / défaite claires (tableau, jingle, vibration) ✅ | Vagues spéciales annoncées ✅, ballons camouflés ✅ | Trophées ✅, classement local ✅ et en ligne ✅ | |
+| | Sauvegarde automatique ✅ | Menu principal vivant ✅ | |
+| | Équilibrage : vagues durcies après les tests du 23 oct. ✅ | Coop par Internet jusqu'à 4 🧪 (#204) ; casino à plusieurs 🧪 | |
+| | | Combo de vagues parfaites ✂️, bombes à lancer ✂️, pluie de flèches ✂️ (#132, #134, #135, coupés le 10 nov.) | |
 
-_✅ = dans le jeu (à valider au casque) · ⏳ = à faire en semaine 2 (détail : [OBJECTIFS_S2.md](OBJECTIFS_S2.md))._
+**Ce qui a bougé depuis la v1 du GDD (9 oct.) :**
+- **Sauvegarde** : « pas de sauvegarde » est devenu DEVRAIT (21 oct.). Sans elle, chaque lancement créait une nouvelle partie au classement. La méta-progression reste interdite.
+- **Multijoueur** : il était dans NE FERA PAS. Le coop est passé en POURRAIT (22 oct.), en bonus assumé (voir 7.12).
+- **Semaine 3** : surtout des corrections, de l'optimisation et des finitions (voir 15.2). Une exception, assumée : le coop a été complété (bananeraie, coffre, fléchettes et singe tenu en main partagés, Maxens, 10-11 nov.), car en coop on ne voyait pas ce que faisait l'autre joueur.
 
 ## 14. Confort (non négociable)
-- **Déplacement :** téléportation seulement, limitée aux zones de jeu. Pas de saut, pas de déplacement au stick. Un **voile noir fondu** couvre chaque téléportation et chaque passage de porte.
+- **Déplacement :** téléportation par défaut, limitée aux zones de jeu. Pas de saut. La marche au stick existe en option (menu OPTIONS) pour ceux qui la supportent : coupée par défaut. Un **voile noir fondu** couvre chaque téléportation et chaque passage de porte.
 - **Rotation :** snap turn par crans de 45°.
 - **Caméra :** jamais bougée à la place du joueur, pas d'accélération, pas de secousse, horizon toujours droit.
 - **Interface :** dans le décor, à 1-2 m. Pas de texte collé au visage.
 - **Portée :** tout est à portée de bras (cercle de 2,8 m). Les singes et les bananes s'attrapent de loin, jusqu'à 6 m, sans ramasser au sol en boucle.
 - **Sessions :** vagues courtes, pause naturelle entre deux vagues.
-- **Technique :** 72 fps minimum (compteur au poignet en build de test), 1 unité Unity = 1 m.
+- **Technique :** 72 fps visés (compteur au poignet en build de test), 1 unité Unity = 1 m. Au casque : fovéation dynamique, pas de post-traitement (voir 15.2). **La mesure des 72 fps au casque reste à faire** (#35).
 
 ## 15. Technique
 
@@ -439,13 +459,18 @@ _✅ = dans le jeu (à valider au casque) · ⏳ = à faire en semaine 2 (détai
   - `Economy` / `GameState` : bananes, inventaire, singes posés.
 - **Interactions :** une interface `IPressable` pour tous les boutons, qu'on touche (`HandPress`), qu'on vise (`RayPress`) ou qu'on clique (`DesktopPlayer`). Le tutoriel filtre ces appuis (`Tutorial.TryPress`).
 - **Tutoriel :** une machine à états (`Tutorial`), des tableaux qui s'abonnent à ses événements (`TutorialBoard`), une flèche (`TutorialRunner`) et des cibles posées dans les scènes (`TutorialTarget`).
-- **Modèles 3D :** générés par scripts Python dans Blender (`Blender/cabane.py`, `coffre.py`) et exportés en `.glb`. Ils sont régénérables à tout moment.
+- **Modèles 3D :** générés par scripts Python dans Blender (`Blender/cabane.py`, `coffre.py`, `roulette.py`) et exportés en `.glb`. Ils sont régénérables à tout moment.
+- **Persistance et réseau :** `SaveGame` (sauvegarde sur le casque), `Leaderboard` (classement local + API PHP/MySQL), `Coop` / `CoopGame` / `CoopOrchard` (Netcode for GameObjects + Unity Relay : l'hôte décide, les invités demandent par RPC, l'état partagé est en `NetworkVariable` / `NetworkList`).
+- **En chiffres :** 158 scripts C#, environ 19 200 lignes.
 
 ### 15.2 Optimisation (Quest)
-- Modèles low-poly : la cabane fait environ 108 000 triangles, le paysage 62 000.
-- Le décor de la carte (fleurs, cailloux, buissons) est **fusionné par couleur** (`MeshBatch`) pour limiter les appels de dessin.
-- Lumières limitées, éclairage mobile simplifié, objets statiques marqués « static ».
-- Compteur de fps au poignet en build de test.
+Chaque optimisation est notée dans [opti.md](opti.md) (problème, ce qui a été fait, avant / après, ce qu'on perd). Les principales :
+- **Rendu au casque :** le bon asset URP mobile (le profil Quest pointait sur celui par défaut), pas de post-traitement, fovéation dynamique, distance de vue à 250 m, build sans mode développement.
+- **Moins d'objets créés en jeu :** pools pour les ballons, les projectiles, les sons, les ondes ; sons et pools préparés au chargement (plus d'à-coup au premier pop ou au premier boss).
+- **CPU :** ciblage des singes sans LINQ, `Rigidbody` cinématiques sur les ballons, `Update` inutiles coupés, 60 singes posés au plus, au plus 3 sons d'éclatement par image.
+- **Dessin :** matériaux partagés, décor de la carte fusionné par couleur (`MeshBatch`), objets fixes « static » et occlusion, ombres coupées sur les ballons et les projectiles, aura des singes en un maillage au lieu de 100 systèmes de particules, Mesh LOD automatique, textures limitées à 1024 px.
+- **Modèles allégés en S3 :** cabane **97 737 → 68 333 triangles** (rondins, fenêtres, sol en une dalle texturée, tapis, lustre, champignons, palmiers), paysage de la carte **62 043 → 52 791**. Les objets les plus lourds restants : buissons (14 400) et montagnes (13 056).
+- **Ce qu'on n'a pas fait :** fusionner les maillages des singes riggés (trop risqué sans test à 4 jours du rendu), la mesure des fps au casque (#35).
 
 ### 15.3 Mode PC
 Un mode clavier-souris permet de développer et de tester sans casque. Il sert aussi à la **démo à plat** de l'oral.
@@ -460,6 +485,8 @@ Un mode clavier-souris permet de développer et de tester sans casque. Il sert a
 | S2 · 19-23 oct. | Construire : jouable du début à la fin | Test par un autre groupe (ven. 23 oct.) |
 | S3 · 9-13 nov. | Finir : plus de nouvelle fonctionnalité ; tuto, confort, fluidité, build stable | Rendu et oral (ven. 13 nov.) |
 
+**Ce qu'a été la semaine 3 :** fusion des optimisations (PR #188), modèles allégés, coop complété (bananeraie, coffre, fléchettes), cubes de test retirés, scintillements corrigés, ménage du suivi GitHub (fonctions coupées proprement, jalons S1 et S2 fermés).
+
 ### 16.2 Organisation
 - **Suivi :**
   - tableau GitHub Project (À faire / En cours / En relecture / Fait) ;
@@ -470,20 +497,20 @@ Un mode clavier-souris permet de développer et de tester sans casque. Il sert a
   - une branche courte par tâche ;
   - une Pull Request par tâche.
 - **Journaux :** un journal d'équipe et un journal par personne, avec le tableau des usages de l'IA (outil, pour quoi, gardé / jeté). Les prompts sont gardés dans `prompts/`.
-- **Répartition d'origine :**
-  - **Dylan :** hub, carte, singes, arc, tutoriel ;
-  - **Maxens :** bananeraie, bananiers, récolteurs, coffre ;
-  - **Nicolas :** améliorations de l'arc, roulette de casino.
+- **Répartition finale :**
+  - **Dylan :** hub et carte, singes (pose, fusion, maquette en direct), 100 vagues, tutoriel, menu, sauvegarde, classement, météo, coop (réseau), modèles Blender, optimisation, suivi GitHub et fusion des branches ;
+  - **Maxens :** bananeraie (bananiers, pourriture, récolteurs), coffre, sons et musiques, roulette lancée à la main, boss qui se divisent, coop de la bananeraie, du coffre et des fléchettes ;
+  - **Nicolas :** premier coffre (raretés, roulette), arc refait avec ses 4 améliorations, première roulette, armoire à trophées.
+- **En chiffres (12 nov.) :** 136 issues, 65 pull requests, 384 commits sur `main` (Dylan 317, Maxens 62, Nicolas 4 : le travail de Nicolas est surtout arrivé par fusion de ses branches).
 
 ### 16.3 Tests
 - **Au casque :** tester chaque jour, et faire un build casque chaque vendredi.
 - **Test du silence :** on donne le casque sans rien dire, on note les blocages, on corrige le jeu (S2, avec un autre groupe).
-- **Points à vérifier :**
-  - les 2 premières minutes ;
-  - la lisibilité des tableaux ;
-  - la vague 1 à l'arc ;
-  - le passage de la porte ;
-  - les 72 fps sur la carte en fin de partie.
+- **Ce que les tests ont changé :** le 23 oct., les testeurs ne jouaient pas vraiment au tower defense (trop facile) : vagues durcies, ballons camouflés, Punaise à 2,5 m. Au casque (8 oct.) : arc à 0,3 s entre deux tirs, plus de téléportation dans les arbres, fléchettes enfin attrapables.
+- **Encore à vérifier avant le rendu :**
+  - les 72 fps au casque, sur la carte en fin de partie (#35) ;
+  - le coop à deux au complet (#204) ;
+  - les modèles allégés de la S3, vus dans Unity et au casque.
 
 ### 16.4 Risques
 
@@ -491,12 +518,16 @@ Un mode clavier-souris permet de développer et de tester sans casque. Il sert a
 |---|---|
 | Chute de fps aux vagues hautes (centaines de ballons) | Mesurer sur Quest, limiter les ballons simultanés, fusionner les maillages |
 | Équilibrage des 100 vagues | Tout est dans `WaveBook.Make` et `MonkeyData` : on règle en quelques minutes |
-| Jeu muet | Sons de base en priorité en S2 |
+| Jeu muet | ✅ réglé en S2 : sons et musiques (Maxens) |
+| Coop pas testé à deux au complet | Le solo ne dépend pas du coop ; test #204 avant la démo, sinon on ne le montre pas |
+| Branches qui s'empilent | Ménage du 9-10 nov., une PR relue par tâche |
 | Droits de l'univers Bloons | Habillage remplaçable pour une diffusion (Pégases) |
 
-## 17. Oral du 13 novembre (45 min)
-1. **Présentation** : pitch, univers, références.
-2. **Tuto de prise en main** : le tutoriel intégré.
-3. **Démo à plat** : en mode PC ou en vidéo capturée au casque.
-4. **Volet technique** : scènes générées par code, architecture, optimisation, usage de l'IA (journaux).
-5. **Pourquoi la VR** : l'arc, l'échelle, le corps dans l'espace.
+## 17. Oral du 13 novembre
+Le plan détaillé, le texte de chaque partie, le parcours de démo et les questions probables sont dans [ORAL.md](ORAL.md) ; le support est le site [oral/index.html](oral/index.html).
+1. **Le jeu** : pitch, geste, boucle, références.
+2. **Pourquoi la VR** : l'arc, l'échelle, le corps dans l'espace ; le test de l'écran.
+3. **Démo** : le tutoriel (2 premières minutes) puis une vague de boss, au casque ou en mode PC.
+4. **Équipe et organisation** : qui a fait quoi, GitHub, journaux.
+5. **Technique et optimisation**, puis **l'IA** (journaux, gardé / jeté).
+6. **Bilan** : ce qui a été dur, ce qu'on retient.
