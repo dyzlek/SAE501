@@ -275,6 +275,8 @@ On démarre avec **0 banane et aucun singe** : la vague 1 se gagne à l'arc, pui
 - une consigne à la fois, écrite sur des **tableaux du décor** (suspendu dans la cabane, sur poteaux dans la bananeraie et sur la carte), jamais collée au visage ;
 - une **flèche dorée** rebondit et pulse au-dessus de ce qu'il faut toucher, avec un **rayon doré** qui monte vers le ciel (visible de loin) ; quand la cible est loin, une **flèche au sol**, aux pieds du joueur, montre la direction ;
 - les consignes de l'arc changent selon le mode (casque ou PC) ;
+- les grands moments ont leur **annonce** qui surgit devant le joueur, posée dans le décor à 2 m (pas collée au visage) : « PRÊT AU COMBAT ! », « VICTOIRE ! », « BIEN POSÉ ! », « FUSION RÉUSSIE ! »… ou « DOMMAGE ! » ; une action refusée affiche « SUIS LA FLÈCHE DORÉE ! » (le tableau est peut-être derrière lui) ;
+- le ton des textes est celui de Bloons : joyeux, direct, une action claire par tableau, le geste ou le bouton en MAJUSCULES ;
 - chaque étape arrive avec son titre qui surgit, sa consigne écrite lettre par lettre et une gerbe de petits ballons ;
 - le cadre du tableau pulse en or pour attirer l'œil.
 
@@ -289,9 +291,9 @@ On démarre avec **0 banane et aucun singe** : la vague 1 se gagne à l'arc, pui
 | 1-3 | L'univers et le genre | Cabane | Lit : la cabane, les ballons qui arrivent, ce qu'est un tower defense (éclater les ballons avant la sortie, avec l'arc et des singes posés) | SUIVANT |
 | 4 | En route | Cabane | Appuie sur SE TP | il arrive sur la carte |
 | 5 | Ton arc | Carte | Lit où est l'arc (main gauche au casque, bas de l'écran au PC) | SUIVANT |
-| 6 | Entraîne-toi | Carte | Tire 3 flèches bien tendues ; une flèche trop peu tendue tombe et le tableau dit « TENDS PLUS FORT ! » | 3 flèches parties |
+| 6 | Échauffement | Carte | Éclate 3 ballons d'entraînement qui flottent devant lui (le tableau compte « 1 / 3 BALLONS ») ; une flèche trop peu tendue tombe et le tableau dit « TENDS PLUS FORT ! » | 3 ballons éclatés |
 | 7 | Vague 1 | Carte | Appuie sur LANCER | la vague part |
-| 8 | À l'arc | Carte | Éclate les 8 ballons, sans en laisser passer | vague gagnée |
+| 8 | Pas un seul ne passe | Carte | Éclate les 8 ballons, sans en laisser passer. Raté : « DOMMAGE ! » surgit, et le tableau propose **REFAIRE** (la vague repart) ou **CONTINUER** (on passe à la suite, le premier singe est quand même offert) | vague gagnée, ou CONTINUER |
 | 9 | Améliore ton arc | Carte | Lit : les boutons de l'arc (flèches qui percent, tir triple…) | SUIVANT |
 | 10 | Bravo | Carte | Reçoit son premier singe, appuie sur HUB | il est au hub |
 | 11 | Tes bananes | Cabane | Lit : les bananes sont l'argent, la caisse les compte | SUIVANT |

@@ -49,7 +49,7 @@ namespace SAE
             CasinoOpen, CasinoPlay,                 // plus tard : le casino ouvre (CasinoGate), on y va et on apprend à jouer
         }
 
-        public const int PracticeShots = 3;         // flèches bien tendues pour finir l'entraînement
+        public const int PracticeBalloons = 3;      // ballons d'entraînement à éclater avant la vraie vague (PracticeBalloon)
 
         public static Step Current { get; private set; }
         // Le tutoriel principal est en cours : il bloque ce qui n'est pas demandé, et la partie n'est pas « finie » (SaveGame)
@@ -63,8 +63,13 @@ namespace SAE
         static bool monkeyGiven;
         static bool waveLost;                // vague 1 ratée : la consigne dit de la relancer
         static int moneyAtStep;              // l'argent au début de l'étape (pour voir qu'une banane a été vendue)
-        static int shots;                    // entraînement : flèches bien tendues
+        static int pops;                     // entraînement : ballons d'entraînement éclatés
         static bool weakShot;                // entraînement : la dernière flèche n'était pas assez tendue
+        static float nextRefusePopup;        // l'annonce « suis la flèche dorée » ne revient pas à chaque refus
+
+        // Vague 1 ratée et finie : le tableau propose REFAIRE (relancer la vague) ou CONTINUER (passer à la suite)
+        public static bool FailChoice => waveLost && Current == Step.Shoot;   // relancée (Tick) : waveLost repasse à false
+        public static int PracticeLeft => PracticeBalloons - pops;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetState()
@@ -72,7 +77,8 @@ namespace SAE
             Current = Step.Welcome;
             monkeyGiven = waveLost = weakShot = false;
             Confirming = false;
-            moneyAtStep = shots = 0;
+            moneyAtStep = pops = 0;
+            nextRefusePopup = 0f;
             Changed = null;
             Refused = null;
         }
@@ -86,68 +92,71 @@ namespace SAE
         {
             Step.Welcome => "BIENVENUE À MONKEY LANE !",
             Step.Bloons => "ALERTE AUX BLOONS !",
-            Step.TowerDefense => "UN TOWER DEFENSE",
+            Step.TowerDefense => "TA MISSION : DÉFENDRE",
             Step.GoMap => "EN ROUTE !",
-            Step.Bow => "TON ARC",
-            Step.Practice => weakShot ? "TENDS PLUS FORT !" : $"ENTRAÎNE-TOI : {shots} / {PracticeShots}",
-            Step.Launch => "VAGUE 1",
-            Step.Shoot => waveLost ? "RATÉ, UN BALLON EST PASSÉ !" : "À L'ARC !",
+            Step.Bow => "QUINCY, C'EST TOI !",
+            Step.Practice => weakShot ? "TENDS PLUS FORT !" : $"ÉCHAUFFEMENT : {pops} / {PracticeBalloons} BALLONS",
+            Step.Launch => "LA VRAIE VAGUE",
+            Step.Shoot => FailChoice ? "DOMMAGE !" : "PAS UN SEUL NE PASSE !",
             Step.BowUpgrades => "AMÉLIORE TON ARC",
-            Step.Reward => "BRAVO !",
-            Step.Money => "TES BANANES",
+            Step.Reward => GameState.WavesWon >= 1 ? "BRAVO, ARCHER !" : "TON PREMIER SINGE",
+            Step.Money => "LE NERF DE LA GUERRE",
             Step.Library => "LA BIBLIOTHÈQUE",
-            Step.Unlock => "DE NOUVEAUX SINGES",
+            Step.Unlock => "RECRUTE DES SINGES",
             Step.Take => "TON PREMIER SINGE",
-            Step.Place => "POSE-LE",
-            Step.Bananas => "LES BANANES",
+            Step.Place => "POSE-LE !",
+            Step.Bananas => "À LA BANANERAIE !",
             Step.Orchard => "LE COMPTOIR DU BANANIER",
-            Step.Harvesters => "LES SINGES RÉCOLTEURS",
-            Step.Chest => "LE COFFRE",
+            Step.Harvesters => "DES SINGES À TON SERVICE",
+            Step.Chest => "LE COFFRE MYSTÈRE",
             Step.Fusion => "LA FUSION",
-            Step.Trophies => "LES TROPHÉES",
-            Step.Darts => "POUR SOUFFLER",
+            Step.Trophies => "TA SALLE DES TROPHÉES",
+            Step.Darts => "UNE PETITE PAUSE ?",
             Step.NextWave => "À TOI DE JOUER !",
             Step.CasinoOpen => "LE CASINO OUVRE !",
-            Step.CasinoPlay => "LA ROULETTE",
+            Step.CasinoPlay => "FAITES VOS JEUX !",
             _ => "",
         };
 
-        // Lignes de ~36 caractères au plus (le texte 3D ne revient pas à la ligne tout seul), 3 lignes
+        // Lignes de ~36 caractères au plus (le texte 3D ne revient pas à la ligne tout seul), 3 lignes.
+        // Le ton : celui de Bloons, joyeux et direct ; une action claire par tableau, en MAJUSCULES le geste ou le bouton.
         public static string Body(Step s) => s switch
         {
-            Step.Welcome => "Ici, les singes vivent tranquilles\ndans leur cabane, entre la bananeraie\net les montagnes.",
-            Step.Bloons => "Mais des vagues de ballons arrivent\npar le chemin. S'ils passent,\nla cabane perd des vies !",
-            Step.TowerDefense => "Le but : éclater chaque ballon avant\nla sortie, avec ton arc et des singes\nque tu poses le long du chemin.",
-            Step.GoMap => "Appuie sur le bouton SE TP\n(la flèche dorée) pour aller\nsur la carte.",
+            Step.Welcome => "Ici, les singes coulent des jours\nheureux : bananes, siestes au soleil\net parties de fléchettes...",
+            Step.Bloons => "Mais ces ballons de malheur veulent\ntraverser la vallée ! Chaque ballon\nqui passe coûte une vie.",
+            Step.TowerDefense => "Ils suivent le chemin. Éclate-les\navant la sortie : avec ton arc,\net avec des singes à poser !",
+            Step.GoMap => "Le chemin t'attend ! Appuie sur\nle bouton SE TP, sous la flèche\ndorée, pour filer sur la carte.",
             Step.Bow => VR
-                ? "Regarde ta main GAUCHE : c'est\nton arc ! Tends ce bras devant toi,\nvers le chemin, comme pour viser."
-                : "Ton arc est en bas de l'écran.\nLe centre de l'écran, c'est ton\nviseur : vise avec la souris.",
+                ? "Regarde ta main GAUCHE : ton arc\nest là ! Tends le bras vers le\nchemin, comme un vrai archer."
+                : "Ton arc est en bas de l'écran,\net le centre de l'écran, c'est\nton viseur. Prêt à viser ?",
             Step.Practice => weakShot
-                ? (VR ? "La flèche est tombée : recule\nla main DROITE plus loin, jusqu'à\nta joue, avant de lâcher le grip."
-                      : "La flèche est tombée : garde\nle clic DROIT plus longtemps\npour bien tendre l'arc.")
-                : (VR ? "Main DROITE sur la corde : serre\nle GRIP, recule-la jusqu'à ta joue,\nvise avec la ligne... et LÂCHE !"
-                      : "Garde le clic DROIT enfoncé :\nl'arc se tend. Vise avec la ligne\npointillée, puis LÂCHE le clic."),
-            Step.Launch => "Bien tiré ! Appuie sur LANCER :\nles ballons arrivent par le portail,\nà gauche.",
-            Step.Shoot => waveLost
-                ? "Pour ce premier essai, aucun ballon\nne doit passer. Appuie sur LANCER\npour recommencer la vague."
-                : "Vise les ballons avant la sortie.\nArc bien tendu : la flèche va plus\nloin et plus vite. Aucun ne passe !",
-            Step.BowUpgrades => "Les boutons de l'arc, ici sur la\ncarte : flèches qui percent, tir\ntriple... Ils coûtent des bananes.",
-            Step.Reward => "Aucun ballon n'est passé : bien joué !\nTu gagnes ton premier singe.\nAppuie sur HUB pour rentrer.",
-            Step.Money => "Les bananes, c'est l'argent du jeu.\nLa caisse montre combien tu en as.\nChaque vague gagnée en rapporte.",
-            Step.Library => "Chaque ligne : un type de singe.\nChaque colonne : sa rareté, du gris\nau blanc. Plus rare = plus fort.",
-            Step.Unlock => "Au bout des lignes, les plaques :\npaie-en une : ce singe pourra sortir\ndu coffre. Chacun a son pouvoir !",
-            Step.Take => "Ton singe est là (la flèche).\nVise-le et serre le grip\npour le prendre.",
-            Step.Place => "Vise le plateau et lâche-le\nprès du chemin (pas dessus).\nVert : c'est bon. Rouge : impossible.",
-            Step.Bananas => "Les bananes paient tout. Passe la\nporte DERRIÈRE TOI, et lance une\nbanane dans le panier.",
-            Step.Orchard => "PRODUCTION : plus de bananes.\nFRAÎCHEUR : elles pourrissent moins.\nVALEUR : chacune rapporte plus.",
-            Step.Harvesters => "Achète des singes récolteurs : ils\nramassent les bananes pour toi.\nAméliore leur vitesse et leur part.",
-            Step.Chest => "Le coffre donne un singe au hasard.\nLe premier est offert : rentre\ndans la cabane et ouvre-le !",
-            Step.Fusion => "Prends ton nouveau singe et pose-le\nSUR le premier : 2 singes identiques\nfusionnent en un singe plus fort !",
-            Step.Trophies => "L'armoire garde tes trophées :\nvagues gagnées et bananes récoltées.\nDu bronze jusqu'au diamant !",
-            Step.Darts => "Entre deux vagues, lance des\nfléchettes sur la cible du mur.\nTouche le centre, pour voir...",
-            Step.NextWave => "Lance la vague 2 avec LANCER.\n100 vagues t'attendent...\nbonne chance !",
-            Step.CasinoOpen => $"{CasinoGate.UnlockWave} vagues gagnées : les barrières\nde la roulette sont tombées ! Passe\nla porte et suis la flèche dorée.",
-            Step.CasinoPlay => "Touche une couleur sur le tapis,\nmise avec les jetons, puis fais\ntourner la roue à la main !",
+                ? (VR ? "Ta flèche est tombée ! Recule\nla main DROITE jusqu'à ta joue\navant de lâcher : l'arc à fond !"
+                      : "Ta flèche est tombée ! Garde\nle clic DROIT plus longtemps :\nl'arc à fond, la flèche file !")
+                : (VR ? "Éclate les 3 ballons devant toi !\nMain DROITE sur la corde, serre le\nGRIP, recule à ta joue... et LÂCHE !"
+                      : "Éclate les 3 ballons devant toi !\nGarde le clic DROIT : l'arc se tend.\nVise avec la ligne, puis lâche !"),
+            Step.Launch => "Tu es prêt ! Appuie sur LANCER :\nla vraie vague arrive par le\nportail, à gauche.",
+            Step.Shoot => FailChoice
+                ? "Un ballon s'est échappé...\nREFAIRE : retente la vague 1.\nCONTINUER : passe à la suite."
+                : "Vise les ballons avant la sortie.\nArc tendu à fond = flèche rapide.\nUn seul qui passe, et c'est raté !",
+            Step.BowUpgrades => "Ces boutons rendent ton arc\nredoutable : flèches qui percent,\ntir triple... contre des bananes !",
+            Step.Reward => GameState.WavesWon >= 1
+                ? "Pas un ballon n'est passé !\nEn récompense : ton premier singe.\nAppuie sur HUB pour le chercher."
+                : "Les singes vont t'aider : le premier\nest offert ! Appuie sur HUB pour\naller le chercher à la cabane.",
+            Step.Money => "Ici, tout se paie en BANANES !\nLa caisse montre ton trésor.\nChaque vague gagnée t'en rapporte.",
+            Step.Library => "Ici dorment tes singes ! Une ligne\npar type, une colonne par rareté :\ndu gris au blanc, toujours plus fort.",
+            Step.Unlock => "Une plaque au bout de chaque ligne :\npaie-la, et ce singe pourra sortir\ndu coffre. Canon, sniper, glace...",
+            Step.Take => "Le voilà, sous la flèche ! Vise-le\net serre le GRIP pour l'attraper.\nIl est tout à toi.",
+            Step.Place => "Vise le plateau et lâche-le PRÈS\ndu chemin. Vert : parfait ! Rouge :\npas ici. Ensuite, il tire tout seul.",
+            Step.Bananas => "Les bananes paient tout ! Passe la\nporte DERRIÈRE TOI, attrape une\nbanane et lance-la dans le panier.",
+            Step.Orchard => "PRODUCTION : plus de bananes.\nFRAÎCHEUR : elles pourrissent moins.\nVALEUR : chacune rapporte plus !",
+            Step.Harvesters => "Les récolteurs ramassent et lancent\nles bananes pour toi. Plus tu les\naméliores, plus ils rapportent !",
+            Step.Chest => "Il donne un singe au hasard...\nLe premier est OFFERT ! Rentre dans\nla cabane et ouvre-le !",
+            Step.Fusion => "Pose ton nouveau singe SUR\nle premier : 2 singes identiques\nen font un plus rare et plus fort !",
+            Step.Trophies => "Vagues gagnées, bananes récoltées :\nchaque exploit allume une coupe,\ndu bronze jusqu'au diamant !",
+            Step.Darts => "Entre deux vagues, lance des\nfléchettes sur la cible du mur.\nEt vise le centre... pour voir !",
+            Step.NextWave => "Tu sais tout ! Appuie sur LANCER\npour la vague suivante. 100 vagues\nt'attendent... Courage, archer !",
+            Step.CasinoOpen => $"{CasinoGate.UnlockWave} vagues gagnées : les barrières\nsont tombées ! Passe la porte et\nfile à la roulette, sous la flèche.",
+            Step.CasinoPlay => "Touche une couleur sur le tapis,\nmise avec les jetons, puis lance\nla roue à la main. Bonne chance !",
             _ => "",
         };
 
@@ -171,7 +180,7 @@ namespace SAE
             Step.GoMap => TutorialSpot.HubTeleport,
             Step.Practice => TutorialSpot.None,                       // il regarde le chemin et tire
             Step.Launch => TutorialSpot.MapLaunch,
-            Step.Shoot => WaveRunning ? TutorialSpot.None : TutorialSpot.MapLaunch,   // ratée : on relance
+            Step.Shoot => FailChoice ? TutorialSpot.Panel : WaveRunning ? TutorialSpot.None : TutorialSpot.MapLaunch,   // ratée : le tableau propose de refaire ou de continuer
             Step.BowUpgrades => TutorialSpot.BowUpgrades,
             Step.Reward => TutorialSpot.MapHub,
             Step.Money => TutorialSpot.Money,
@@ -240,6 +249,10 @@ namespace SAE
         {
             Sounds.Play(Sounds.AchatRefuse);
             Refused?.Invoke();
+            // Le tableau est peut-être derrière lui : une petite annonce devant ses yeux le remet sur la piste
+            if (Time.unscaledTime < nextRefusePopup) return;
+            nextRefusePopup = Time.unscaledTime + 4f;
+            TutorialPopup.Show("SUIS LA FLÈCHE DORÉE !", TutorialPopup.Happy, 0.14f);
         }
 
         // --- Les événements du jeu qui comptent pour le tutoriel ---
@@ -251,16 +264,26 @@ namespace SAE
         {
             if (!StrictWave) return;
             waveLost = true;
+            TutorialPopup.Show("DOMMAGE !", TutorialPopup.Sad, 0.4f);   // le son de la vague perdue joue déjà (WaveSpawner)
             Changed?.Invoke();
         }
 
-        // Une flèche vient d'être tirée (Bow.Release) : « strong » si l'arc était assez tendu pour qu'elle parte
+        // Une flèche vient d'être tirée (Bow.Release) : « strong » si l'arc était assez tendu pour qu'elle parte.
+        // Pendant l'entraînement, une flèche trop peu tendue (elle tombe) fait dire au tableau de tendre plus fort.
         public static void ArrowShot(bool strong)
         {
-            if (Current != Step.Practice) return;
+            if (Current != Step.Practice || weakShot == !strong) return;
             weakShot = !strong;
-            if (strong) shots++;
-            Changed?.Invoke();   // le compteur et la consigne changent sur le tableau
+            Changed?.Invoke();
+        }
+
+        // Un ballon d'entraînement vient d'éclater (PracticeBalloon)
+        public static void PracticeHit()
+        {
+            if (Current != Step.Practice) return;
+            pops++;
+            weakShot = false;
+            Changed?.Invoke();   // le compteur change sur le tableau
         }
 
         // Le coffre du tutoriel : gratuit, et il donne un Classique gris (pour la fusion qui suit)
@@ -320,7 +343,7 @@ namespace SAE
         static bool IsDone(Step s) => s switch
         {
             Step.GoMap => Levels.Current == Level.Carte,
-            Step.Practice => shots >= PracticeShots,
+            Step.Practice => pops >= PracticeBalloons,
             Step.Launch => WaveRunning,
             Step.Shoot => GameState.WavesWon >= 1,
             Step.Reward => Levels.Current == Level.Hub,
@@ -353,6 +376,7 @@ namespace SAE
         public static void Next()
         {
             if (Confirming) { Confirming = false; Changed?.Invoke(); return; }   // on reprend où on en était
+            if (FailChoice) { WaveSpawner.Launch(); return; }                    // REFAIRE : la vague 1 repart
             if (Showing && NeedsNext(Current)) GoTo(After(Current));
         }
 
@@ -360,6 +384,7 @@ namespace SAE
         public static void Skip()
         {
             if (!Showing) return;
+            if (FailChoice) { GoTo(Step.BowUpgrades); return; }                  // CONTINUER : on passe à la suite
             if (Confirming) Finish();
             else { Confirming = true; Changed?.Invoke(); }
         }
@@ -380,12 +405,31 @@ namespace SAE
 
         static void GoTo(Step s)
         {
+            var from = Current;
             Current = s;
             Confirming = false;
             waveLost = weakShot = false;
             moneyAtStep = Economy.Money;
             if (s >= Step.Reward) GiveFirstMonkey();
             Changed?.Invoke();
+            Cheer(from, s);
+        }
+
+        // Les grands moments réussis : une annonce surgit devant le joueur, avec un son joyeux
+        static void Cheer(Step from, Step to)
+        {
+            string text = (from, to) switch
+            {
+                (Step.Practice, Step.Launch) => "PRÊT AU COMBAT !",
+                (Step.Shoot, Step.BowUpgrades) when GameState.WavesWon >= 1 => "VICTOIRE !",
+                (Step.Place, Step.Bananas) => "BIEN POSÉ !",
+                (Step.Bananas, Step.Orchard) => "CHA-CHING !",
+                (Step.Fusion, Step.Trophies) => "FUSION RÉUSSIE !",
+                (Step.NextWave, Step.Done) => "C'EST PARTI !",
+                (_, Step.CasinoOpen) => "CASINO OUVERT !",
+                _ => null,
+            };
+            if (text != null) TutorialPopup.Show(text, TutorialPopup.Happy, 0.35f, Sounds.SingeObtenu);
         }
 
         // Le premier singe : un Classique gris, rangé dans la bibliothèque (une seule fois)

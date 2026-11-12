@@ -77,6 +77,14 @@ namespace SAE
         {
             if (!flying || other.isTrigger || other.GetComponentInParent<PlayerRig>()) return;   // pas le joueur ni ses mains
 
+            // Un ballon d'entraînement du tutoriel : il éclate, la flèche continue sa course
+            var practice = other.GetComponentInParent<PracticeBalloon>();
+            if (practice)
+            {
+                if (!visualOnly) { practice.Pop(); Haptics.Play(shooterHand, Haptics.Hit); }
+                return;
+            }
+
             var balloon = other.GetComponentInParent<Balloon>();
             if (!balloon) { Stick(); return; }
             if (visualOnly) { Destroy(gameObject); return; }   // c'est chez le tireur qu'elle perce : ici, elle disparaît

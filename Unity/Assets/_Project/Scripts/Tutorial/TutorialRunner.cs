@@ -37,6 +37,8 @@ namespace SAE
         void Update()
         {
             Tutorial.Tick();
+            // L'entraînement à l'arc : les ballons à éclater apparaissent devant le joueur, sur la carte
+            PracticeBalloon.Keep(Tutorial.Current == Tutorial.Step.Practice && Levels.Current == Level.Carte, Tutorial.PracticeLeft);
             if (!pointer || !beam) return;
 
             var position = Vector3.zero;

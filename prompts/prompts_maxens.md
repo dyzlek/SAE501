@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Jeu. 12 nov. 2026
 
+### Retours sur le tutoriel
+> Les textes ne sont pas terribles et ne donnent pas envie. Je n'ai pas compris tout de suite qu'il fallait tirer 3 fois pour s'entraîner. Si on rate la vague, il faudrait qu'un « DOMMAGE ! » (ou autre) apparaisse, puis un choix : refaire ou continuer. Je n'ai pas pu tester le reste, mais s'il y a d'autres points comme ça, modifie-les.
+
 ### Un tutoriel complet
 > Sur une autre branche, améliore le tutoriel :
 > - la roulette ne doit être déblocable qu'après quelques vagues (5 ou 10). Au début, le tutoriel ne la montre plus et elle est bloquée, par exemple par des barrières ; quand elle se débloque, un tutoriel amène le joueur jusqu'à elle ;

@@ -3,6 +3,17 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Jeu. 12 nov. 2026
+- **Corrigé après mon test du tutoriel :**
+  - **les textes ne donnaient pas envie** : tous réécrits, sur le ton de Bloons (joyeux, direct, une action claire par tableau, le geste ou le bouton en MAJUSCULES) ;
+  - **je n'avais pas compris qu'il fallait tirer 3 fois** : l'entraînement devient un **échauffement sur 3 ballons** qui flottent devant le joueur, sur la carte (`PracticeBalloon`). Le tableau compte « ÉCHAUFFEMENT : 1 / 3 BALLONS », chaque ballon éclate avec le son des vrais ballons et une vibration ;
+  - **vague 1 ratée** : « DOMMAGE ! » surgit devant le joueur, puis le tableau propose **REFAIRE** (la vague repart) ou **CONTINUER** (on passe à la suite, sans la récompense de la vague, mais le premier singe est quand même offert) ;
+  - **dans le même esprit** : une annonce surgit aux grands moments (« PRÊT AU COMBAT ! », « VICTOIRE ! », « BIEN POSÉ ! », « CHA-CHING ! », « FUSION RÉUSSIE ! », « C'EST PARTI ! », « CASINO OUVERT ! »), avec un son joyeux. Et une action refusée affiche « SUIS LA FLÈCHE DORÉE ! », au plus toutes les 4 s, car on ne voit pas toujours le tableau trembler quand il est derrière soi. Les annonces sont posées une fois dans le décor, à 2 m devant soi, et ne suivent pas la tête (confort ; `TutorialPopup`).
+  - Compilé, pas encore testé en jeu.
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Code) | Retours sur le tutoriel : textes réécrits, échauffement sur 3 ballons, DOMMAGE ! avec REFAIRE / CONTINUER, annonces des grands moments et des refus ; compilé | À tester |
+
 - **Fait : un tutoriel plus complet** (branche `feat/tuto-complet`). Il passe de 17 à 23 étapes :
   - **le genre** : un tableau explique ce qu'est un tower defense (éclater les ballons avant la sortie, avec l'arc et des singes posés) ;
   - **l'arc** : où il est (« regarde ta main GAUCHE » au casque, le bas de l'écran au PC), puis un **entraînement** de 3 flèches avant la vague 1. Le geste est expliqué pas à pas (main droite sur la corde, grip, reculer jusqu'à la joue, viser avec la ligne, lâcher). Une flèche pas assez tendue tombe, et le tableau dit « TENDS PLUS FORT ! » avec le bon conseil. Le texte change entre le casque et le PC ;

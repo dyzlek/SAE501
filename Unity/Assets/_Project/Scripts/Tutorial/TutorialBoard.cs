@@ -63,9 +63,10 @@ namespace SAE
             fullBody = confirm ? "Tu es sûr ? Tu ne verras pas la suite\ndes explications (le premier singe\nte sera quand même offert)." : Tutorial.Body(step);
             body.text = "";
             progress.text = Tutorial.Progress(step);
-            nextButton.SetActive(confirm || Tutorial.NeedsNext(step));
-            SetLabel(nextButton, confirm ? "NON" : "SUIVANT");
-            SetLabel(skipButton, confirm ? "OUI" : "PASSER");
+            bool choice = !confirm && Tutorial.FailChoice;   // vague 1 ratée : REFAIRE ou CONTINUER
+            nextButton.SetActive(confirm || choice || Tutorial.NeedsNext(step));
+            SetLabel(nextButton, confirm ? "NON" : choice ? "REFAIRE" : "SUIVANT");
+            SetLabel(skipButton, confirm ? "OUI" : choice ? "CONTINUER" : "PASSER");
             shownAt = Time.time;
             if (confetti) confetti.Play();
         }
