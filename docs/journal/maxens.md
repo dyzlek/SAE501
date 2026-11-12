@@ -13,6 +13,14 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 |---|---|---|
 | Claude (Code) | Ballons d'entraînement sur le chemin, tableau de la carte déplacé, blackjack fermé lui aussi, texte de la pancarte corrigé ; compilé | À tester |
 
+- **Bloque : Dylan ne trouvait pas ma partie en coop**, alors que je lui donnais le code et le mot de passe. Cause trouvée dans le log d'Unity (`Logs/Editor.log`) : chez moi, l'hôte obtenait bien un code du relais de Unity, mais n'arrivait pas à s'y connecter ensuite (« Failed to establish connection with the Relay server »). NGO arrêtait alors la partie réseau sans rien dire, et le panneau gardait le code d'une partie qui n'existait plus.
+  - **Corrigé** (branche `fix/coop-relais`) : quand la liaison avec le relais est perdue, le panneau COOP le dit (« Serveur relais injoignable : vérifie Internet et rouvre le coop ») et on repasse en solo. Il suffit de rouvrir le coop pour avoir un nouveau code.
+  - **Reste à trouver** pourquoi mon PC ne joint pas le relais : réseau qui bloque les WebSocket, pare-feu de Windows ou antivirus qui bloque Unity, ou VPN. À retenter sur un autre réseau (partage de connexion du téléphone), ou avec Dylan comme hôte.
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Code) | Cause du coop introuvable trouvée dans le log d'Unity (liaison avec le relais impossible côté hôte) ; l'échec s'affiche maintenant sur le panneau COOP (`Coop.OnTransportFailure`) ; compilé | À tester à deux |
+
 - **Corrigé après mon test du tutoriel :**
   - **les textes ne donnaient pas envie** : tous réécrits, sur le ton de Bloons (joyeux, direct, une action claire par tableau, le geste ou le bouton en MAJUSCULES) ;
   - **je n'avais pas compris qu'il fallait tirer 3 fois** : l'entraînement devient un **échauffement sur 3 ballons** qui flottent devant le joueur, sur la carte (`PracticeBalloon`). Le tableau compte « ÉCHAUFFEMENT : 1 / 3 BALLONS », chaque ballon éclate avec le son des vrais ballons et une vibration ;

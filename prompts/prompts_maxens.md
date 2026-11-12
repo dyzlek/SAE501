@@ -13,6 +13,9 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 >
 > Mets tout sur `main` ensuite.
 
+### Dylan ne trouve pas ma partie
+> Je donne le code et le mot de passe à Dylan, mais il ne trouve pas ma partie. Pourquoi ?
+
 
 ### Retours sur le tutoriel
 > Les textes ne sont pas terribles et ne donnent pas envie. Je n'ai pas compris tout de suite qu'il fallait tirer 3 fois pour s'entraîner. Si on rate la vague, il faudrait qu'un « DOMMAGE ! » (ou autre) apparaisse, puis un choix : refaire ou continuer. Je n'ai pas pu tester le reste, mais s'il y a d'autres points comme ça, modifie-les.
@@ -24,6 +27,7 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 > - dis où est l'arc (si on ne regarde pas ses mains, on ne le voit pas) et surtout comment tirer ;
 > - rends les flèches d'indication plus voyantes ;
 > - explique comment débloquer les singes et pourquoi le faire, à quoi servent les améliorations de la bananeraie, etc., et pareil dans le hub. Bref, un tutoriel vraiment complet.
+
 ## Mer. 11 nov. 2026
 
 ### Partager le reste du coop
