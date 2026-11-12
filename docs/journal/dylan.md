@@ -2,6 +2,13 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Jeu. 12 nov. 2026
+**Ce que j'ai fait :** correction d'un scintillement du sol au hub (#205).
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | **Scintillement du sol** (ma demande, avec 2 captures : « règle ces bugs de clipping entre deux objets ») : le bout de l'allée en planches (bananeraie → porte) recouvrait 20 cm de la terrasse de la cabane, à la même hauteur (z-fighting). Dans `Blender/cabane.py`, l'allée s'arrête au bord de la terrasse (`WALK_END`), dernière planche recoupée, tirages aléatoires gardés pour que le reste du décor ne bouge pas ; `Bananeraie.glb` régénéré (bout de l'allée vérifié à 4,50 m au lieu de 4,70 m), les autres modèles remis comme avant. Pour trouver la cause, Claude a écrit un petit script Blender qui cherche les faces superposées dans les modèles : rien d'autre de visible dans la cabane (seulement des faces cachées dans les murs ou sous le sol). Claude pense que mes 2 captures montrent le même endroit, **à confirmer** : si la 1re (planche sombre avec un rebord) est ailleurs, il faut lui dire où. Issue #205. **Pas vu dans Unity ni au casque** | Gardé (à vérifier) |
+
 ## Mar. 10 nov. 2026
 **Ce que j'ai fait :** relecture de la PR #188 (optimisations) avant le merge, et corrections.
 

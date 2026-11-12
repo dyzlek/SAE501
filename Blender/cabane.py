@@ -1262,6 +1262,7 @@ BAN_X0, BAN_X1 = -4.6, 9.4          # la terrasse (repère Unity), agrandie à d
 BAN_Z0, BAN_Z1 = -3.6, 4.8
 PATH_HALF = 1.1                     # demi-largeur de l'allée : le battant de la porte, ouvert, y tient sans toucher la barrière
 WALK_Z = -4.7                       # le passage en planches, de la terrasse (BAN_Z0) jusqu'à la terrasse de la cabane
+WALK_END = GROVE_Z + 5.6            # = -4,5 : le bord de la terrasse de la cabane (z0 = -5,6 de build_floor) dans ce repère retourné
 PATH_Z = -6.45                      # le bout de l'allée, contre le mur de la cabane (sa porte est à -6,7 dans ce repère)
 SHED_X, SHED_Z0, SHED_Z1 = 3.2, 2.9, 4.6   # l'abri : de -SHED_X à SHED_X, de SHED_Z0 à SHED_Z1
 SHED_H = 2.75
@@ -1290,13 +1291,18 @@ def build_bananeraie(M, coll):
 
     # Le passage en planches de l'allée, au-dessus de l'herbe, entre la terrasse et celle de la cabane
     b = Builder([M["plancher"], M["poutre"]])
+    # 12 nov. (scintillement) : l'allée s'arrête au bord de la terrasse de la cabane (WALK_END). Avant, ses dernières
+    # planches recouvraient 20 cm de la terrasse, à la même hauteur : deux faces au même endroit = z-fighting.
     z = BAN_Z0
     while z > WALK_Z + 0.01:
-        b.box(P(0, -0.025, z - 0.095), (2 * PATH_HALF, 0.18, 0.05), Matrix.Identity(3), M["plancher"],
-              uv_scale=1 / 1.2, uv_offset=(rng.random(), rng.random()), bevel=0.006, tint=rng.uniform(0.78, 1.05))
+        uv_offset, tint = (rng.random(), rng.random()), rng.uniform(0.78, 1.05)   # tirés même si la planche saute : le reste du décor ne bouge pas
+        length = min(0.18, z - WALK_END)                                          # la dernière planche est recoupée au ras de la terrasse
+        if length > 0.02:
+            b.box(P(0, -0.025, z - length / 2), (2 * PATH_HALF, length, 0.05), Matrix.Identity(3), M["plancher"],
+                  uv_scale=1 / 1.2, uv_offset=uv_offset, bevel=0.006, tint=tint)
         z -= 0.19
     for side in (-1, 1):   # deux poutres dessous, posées dans l'herbe
-        b.box(P(side * (PATH_HALF - 0.1), -0.12, (BAN_Z0 + WALK_Z) / 2), (0.12, abs(WALK_Z - BAN_Z0), 0.14), Matrix.Identity(3), M["poutre"], uv_scale=1 / 1.5, bevel=0.01)
+        b.box(P(side * (PATH_HALF - 0.1), -0.12, (BAN_Z0 + WALK_END) / 2), (0.12, abs(WALK_END - BAN_Z0), 0.14), Matrix.Identity(3), M["poutre"], uv_scale=1 / 1.5, bevel=0.01)
     objs.append(b.finish("Allee", coll))
 
     # L'abri : un mur de rondins au fond, quatre poteaux, des poutres et un toit de chaume à quatre pans

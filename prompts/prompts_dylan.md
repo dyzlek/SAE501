@@ -2,6 +2,11 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Jeu. 12 nov. 2026
+
+### Scintillement entre deux objets
+> Salut, j'aimerais que tu règles ces bugs d'affichage de clipping entre deux objets, s'il te plaît. (avec deux captures)
+
 ## Mar. 10 nov. 2026
 
 ### Encore moins de rondins
