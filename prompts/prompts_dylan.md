@@ -4,6 +4,11 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Jeu. 12 nov. 2026
 
+### Ballons blindés et équilibrage des vagues
+> Est-ce que toutes les vagues sont bien réglées ? Est-ce qu'on détruit bien les ballons en acier, etc. ?
+>
+> Suite : fais en sorte qu'on puisse aussi les éclater nous-mêmes, sinon c'est trop compliqué. Et plus largement, essaie de tout équilibrer.
+
 ### Retours sur le tutoriel
 > Premier truc pour le tuto : la flèche est dégueulasse avec le trait lumineux. J'aimerais que la pancarte tienne à quelque chose, car elle vole simplement. J'aimerais indiquer par le son où se trouvent les panneaux du tuto, en 360°, sans que ce soit lourd. J'aimerais que les trois ballons soient plus visibles. Enlève deux ballons à la première vague pour que ce soit plus simple. La flèche montre au-dessus du meuble ; que la flèche dans la bibliothèque soit un peu mieux. Pour la porte, pas de flèche mais un contour autour de la porte (n'oublie pas qu'on la voit dans le hub et dans la bananeraie). (avec huit captures)
 
