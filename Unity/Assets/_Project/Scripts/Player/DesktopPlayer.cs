@@ -154,12 +154,11 @@ namespace SAE
             Cursor.visible = !locked;
         }
 
-        // Mode PC seulement (jamais en VR) : un viseur et l'aide des touches, pour tester.
+        // Mode PC seulement (jamais en VR) : le viseur au centre de l'écran.
+        // Les touches sont listées dans OPTIONS → COMMANDES (OptionsPanel), plus en bas de l'écran.
         void OnGUI()
         {
             GUI.Label(new Rect(Screen.width / 2f - 5, Screen.height / 2f - 10, 20, 20), "+");
-            GUI.Label(new Rect(10, Screen.height - 30, 900, 25),
-                "Mode PC · ZQSD : marcher · Souris : regarder · Clic : appuyer / prendre (maintenu sur la roulette : la faire tourner), relâcher : lâcher ou lancer · A : infos du singe · Échap : souris");
         }
     }
 }
