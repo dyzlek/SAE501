@@ -241,7 +241,7 @@ Les sons s'entendent du hub comme de la carte : on sait qu'il faut y retourner. 
 ![Sous l'abri de la bananeraie : les comptoirs BANANIER et RÉCOLTEUR, le panier au premier plan, un bananier et son étal à gauche.](captures/gdd/bananeraie-abri.png)
 
 ### 7.9 Les bonus du hub
-- **Roulette (casino), dans la bananeraie, ouverte à la vague 5 (barrières avant) :**
+- **Roulette (casino), dans la bananeraie, ouverte à la vague 5 (barrières avant, comme le blackjack) :**
   - roue européenne de 37 cases ;
   - on clique une case pour choisir sa couleur (rouge, noir ou vert) ;
   - on mise par 10, ou TOUT ;
@@ -291,7 +291,7 @@ On démarre avec **0 banane et aucun singe** : la vague 1 se gagne à l'arc, pui
 | 1-3 | L'univers et le genre | Cabane | Lit : la cabane, les ballons qui arrivent, ce qu'est un tower defense (éclater les ballons avant la sortie, avec l'arc et des singes posés) | SUIVANT |
 | 4 | En route | Cabane | Appuie sur SE TP | il arrive sur la carte |
 | 5 | Ton arc | Carte | Lit où est l'arc (main gauche au casque, bas de l'écran au PC) | SUIVANT |
-| 6 | Échauffement | Carte | Éclate 3 ballons d'entraînement qui flottent devant lui (le tableau compte « 1 / 3 BALLONS ») ; une flèche trop peu tendue tombe et le tableau dit « TENDS PLUS FORT ! » | 3 ballons éclatés |
+| 6 | Échauffement | Carte | Éclate 3 ballons d'entraînement qui flottent au-dessus du chemin, au milieu de la carte (le tableau compte « 1 / 3 BALLONS ») ; une flèche trop peu tendue tombe et le tableau dit « TENDS PLUS FORT ! » | 3 ballons éclatés |
 | 7 | Vague 1 | Carte | Appuie sur LANCER | la vague part |
 | 8 | Pas un seul ne passe | Carte | Éclate les 8 ballons, sans en laisser passer. Raté : « DOMMAGE ! » surgit, et le tableau propose **REFAIRE** (la vague repart) ou **CONTINUER** (on passe à la suite, le premier singe est quand même offert) | vague gagnée, ou CONTINUER |
 | 9 | Améliore ton arc | Carte | Lit : les boutons de l'arc (flèches qui percent, tir triple…) | SUIVANT |
@@ -309,7 +309,7 @@ On démarre avec **0 banane et aucun singe** : la vague 1 se gagne à l'arc, pui
 | 21-22 | Trophées, fléchettes | Cabane | Lit (la flèche montre l'armoire, puis la cible) | SUIVANT |
 | 23 | À toi de jouer | Cabane | Lance la vague 2 | la vague part : fin |
 
-**Le casino, plus tard :** la roulette n'est plus dans le tutoriel. Elle est **fermée par des barrières** rouges et blanches, avec une pancarte « CASINO FERMÉ · ouvre à la vague 5 (2 / 5) » ; ses boutons et sa roue refusent. À la **vague 5**, les barrières s'enfoncent dans le sol et deux étapes de plus apparaissent sur les tableaux : « LE CASINO OUVRE ! » (la flèche l'y amène), puis « LA ROULETTE » (comment jouer). Elles ne bloquent rien. Pourquoi : au début, on apprend la boucle (arc, singes, bananes) sans parier ses premières bananes, et le casino devient une récompense.
+**Le casino, plus tard :** la roulette n'est plus dans le tutoriel. La roulette et la borne de blackjack sont **fermées par des barrières** rouges et blanches, avec une pancarte « CASINO FERMÉ · ouvre à la vague 5 (2 / 5) » ; ses boutons et sa roue refusent. À la **vague 5**, les barrières s'enfoncent dans le sol et deux étapes de plus apparaissent sur les tableaux : « LE CASINO OUVRE ! » (la flèche l'y amène), puis « LA ROULETTE » (comment jouer). Elles ne bloquent rien. Pourquoi : au début, on apprend la boucle (arc, singes, bananes) sans parier ses premières bananes, et le casino devient une récompense.
 
 **PASSER** saute tout (le premier singe est quand même offert). Le tutoriel ne se lance pas en bac à sable (mode de développement).
 

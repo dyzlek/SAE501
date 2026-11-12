@@ -3,17 +3,17 @@ using UnityEngine;
 
 namespace SAE
 {
-    // Un ballon d'entraînement du tutoriel, sur la carte : avant la vraie vague 1, trois ballons flottent devant le joueur,
-    // immobiles (ils dansent juste un peu). Il faut les éclater à l'arc : c'est clair (« éclate les 3 ballons »),
+    // Un ballon d'entraînement du tutoriel, sur la carte : avant la vraie vague 1, trois ballons flottent au-dessus du chemin,
+    // au milieu de la carte, immobiles (ils dansent juste un peu). Il faut les éclater à l'arc : c'est clair (« éclate les 3 ballons »),
     // on voit tout de suite si on a touché, et on apprend à viser sans pression.
     // Ils ne suivent pas le chemin et ne sont pas des ballons de vague (Balloon) : la flèche les reconnaît (Arrow),
     // les éclate et continue sa course. TutorialRunner les fait apparaître pendant l'étape, et les retire après.
     public class PracticeBalloon : MonoBehaviour
     {
-        const float Size = 0.5f;                       // en mètres : plus gros qu'un vrai ballon, pour réussir vite
-        const float Distance = 7f;                     // en mètres devant le joueur
-        static readonly float[] Angles = { -18f, 0f, 18f };   // en degrés : à gauche, en face, à droite
-        static readonly float[] Heights = { 0.2f, 0.8f, 0.4f };   // en mètres au-dessus des yeux
+        const float Size = 0.7f;                       // en mètres : plus gros qu'un vrai ballon, pour réussir de loin
+        // Où ils flottent : au-dessus du chemin, au milieu de la carte (repère de la carte, voir MapLayout), bien en face
+        // du joueur qui arrive au sud. Avant, ils étaient juste devant lui... et cachés par le tableau du tutoriel.
+        static readonly Vector3[] Spots = { new Vector3(-5f, 2.2f, 0.5f), new Vector3(0f, 2.8f, 0.5f), new Vector3(4.5f, 2.4f, 0.5f) };
         static readonly Color[] Colors = { new Color(0.95f, 0.2f, 0.2f), new Color(0.25f, 0.55f, 1f), new Color(0.3f, 0.85f, 0.35f) };
 
         static readonly List<PracticeBalloon> alive = new List<PracticeBalloon>();
@@ -33,16 +33,10 @@ namespace SAE
                 alive.Clear();
                 return;
             }
-            if (alive.Count > 0 || !PlayerRig.Local) return;
-            var head = PlayerRig.Local.HeadPosition;
-            var forward = Vector3.ProjectOnPlane(PlayerRig.Local.head ? PlayerRig.Local.head.forward : Vector3.forward, Vector3.up);
-            if (forward.sqrMagnitude < 0.01f) forward = Vector3.forward;
-            forward.Normalize();
-            for (int i = 0; i < missing && i < Angles.Length; i++)
-            {
-                var dir = Quaternion.Euler(0f, Angles[i], 0f) * forward;
-                Create(head + dir * Distance + Vector3.up * Heights[i], Colors[i]);
-            }
+            var map = WaveSpawner.Instance;   // la carte : les ballons se posent dans son repère
+            if (alive.Count > 0 || !map) return;
+            for (int i = 0; i < missing && i < Spots.Length; i++)
+                Create(map.transform.position + Spots[i], Colors[i]);
         }
 
         static void Create(Vector3 position, Color color)

@@ -132,8 +132,8 @@ namespace SAE
             Step.Practice => weakShot
                 ? (VR ? "Ta flèche est tombée ! Recule\nla main DROITE jusqu'à ta joue\navant de lâcher : l'arc à fond !"
                       : "Ta flèche est tombée ! Garde\nle clic DROIT plus longtemps :\nl'arc à fond, la flèche file !")
-                : (VR ? "Éclate les 3 ballons devant toi !\nMain DROITE sur la corde, serre le\nGRIP, recule à ta joue... et LÂCHE !"
-                      : "Éclate les 3 ballons devant toi !\nGarde le clic DROIT : l'arc se tend.\nVise avec la ligne, puis lâche !"),
+                : (VR ? "Éclate les 3 ballons du chemin !\nMain DROITE sur la corde, serre le\nGRIP, recule à ta joue... et LÂCHE !"
+                      : "Éclate les 3 ballons du chemin !\nGarde le clic DROIT : l'arc se tend.\nVise avec la ligne, puis lâche !"),
             Step.Launch => "Tu es prêt ! Appuie sur LANCER :\nla vraie vague arrive par le\nportail, à gauche.",
             Step.Shoot => FailChoice
                 ? "Un ballon s'est échappé...\nREFAIRE : retente la vague 1.\nCONTINUER : passe à la suite."

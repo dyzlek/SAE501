@@ -4,6 +4,16 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Jeu. 12 nov. 2026
 
+### Corrections du tutoriel, 2e test
+> Crée une autre branche pour améliorer le tutoriel :
+> - pendant l'explication de l'arc, mets les ballons au milieu de la carte ou vers le début du chemin : là, ils sont cachés par le tableau ;
+> - le tableau cache les boutons (le pupitre de l'arc) ;
+> - le blackjack n'est pas bloqué, il n'y a que la roulette ;
+> - règle le problème d'écriture sur la pancarte de chantier.
+>
+> Mets tout sur `main` ensuite.
+
+
 ### Retours sur le tutoriel
 > Les textes ne sont pas terribles et ne donnent pas envie. Je n'ai pas compris tout de suite qu'il fallait tirer 3 fois pour s'entraîner. Si on rate la vague, il faudrait qu'un « DOMMAGE ! » (ou autre) apparaisse, puis un choix : refaire ou continuer. Je n'ai pas pu tester le reste, mais s'il y a d'autres points comme ça, modifie-les.
 

@@ -1945,8 +1945,9 @@ namespace SAE.EditorTools
             var mapHub = ConsoleButton(commands, ConsoleStep / 2f, "HUB", HubColor, ActionCube.Action.Teleport, Level.Hub);
             Target(mapLaunch.transform, mapLaunch.transform.position, TutorialSpot.MapLaunch, Level.Carte, 0.3f);
             Target(mapHub.transform, mapHub.transform.position, TutorialSpot.MapHub, Level.Carte, 0.3f);
-            // Le tableau du tutoriel, à gauche de l'arrivée, tourné vers elle (le pupitre ARC reste visible derrière)
-            BuildTutorialBoard(map.transform, new Vector3(-3.2f, 1.6f, -edge - 1.9f), Quaternion.Euler(0f, -60f, 0f), Level.Carte, hanging: false);
+            // Le tableau du tutoriel, à DROITE de l'arrivée (après la caisse), tourné vers elle : à gauche, il cachait
+            // le pupitre ARC de Nicolas
+            BuildTutorialBoard(map.transform, new Vector3(4.9f, 1.6f, -edge - 2.6f), Quaternion.Euler(0f, 60f, 0f), Level.Carte, hanging: false);
             BuildWaveBoard(map.transform, new Vector3(0, 2.4f, -edge - 0.3f), Quaternion.identity);
             for (int side = -1; side <= 1; side += 2)   // le tableau tient sur deux poteaux plantés dans le sol (il ne flotte pas)
                 Visuals.Solid("Poteau du tableau", map.transform, new Vector3(side * 0.92f, (2.4f + GroundY) / 2f, -edge - 0.25f), new Vector3(0.1f, 2.4f - GroundY, 0.1f), Wood);

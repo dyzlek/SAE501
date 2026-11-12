@@ -3,6 +3,16 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Jeu. 12 nov. 2026
+- **Corrigé après mon 2e test du tutoriel** (branche `feat/amelioration-tuto`) :
+  - **les ballons d'entraînement étaient cachés par le tableau** de la carte : ils flottent maintenant au-dessus du chemin, au milieu de la carte, bien en face de l'arrivée, et ils sont plus gros (70 cm) ;
+  - **le tableau de la carte cachait le pupitre ARC** : il passe à droite de l'arrivée, après la caisse (dans le générateur : **régénérer les scènes**) ;
+  - **le blackjack n'était pas fermé** : il a maintenant ses barrières, comme la roulette, et ses boutons refusent jusqu'à la vague 5 ;
+  - **le texte de la pancarte de chantier débordait** et passait derrière l'ardoise : il est plus petit, collé devant l'ardoise, et ne tourne plus vers la caméra.
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Code) | Ballons d'entraînement sur le chemin, tableau de la carte déplacé, blackjack fermé lui aussi, texte de la pancarte corrigé ; compilé | À tester |
+
 - **Corrigé après mon test du tutoriel :**
   - **les textes ne donnaient pas envie** : tous réécrits, sur le ton de Bloons (joyeux, direct, une action claire par tableau, le geste ou le bouton en MAJUSCULES) ;
   - **je n'avais pas compris qu'il fallait tirer 3 fois** : l'entraînement devient un **échauffement sur 3 ballons** qui flottent devant le joueur, sur la carte (`PracticeBalloon`). Le tableau compte « ÉCHAUFFEMENT : 1 / 3 BALLONS », chaque ballon éclate avec le son des vrais ballons et une vibration ;

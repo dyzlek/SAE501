@@ -1,25 +1,27 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SAE
 {
-    // Le casino (la roulette de la bananeraie) est fermé au début : des barrières rouges et blanches l'entourent,
-    // avec une pancarte « CASINO FERMÉ · ouvre à la vague 5 (2 / 5) ». Tant qu'il est fermé, ses boutons, son tapis
-    // et sa roue refusent (Tutorial.TryPress, WheelGrab) : son d'alerte et pancarte qui clignote en rouge.
+    // Le casino de la bananeraie (la roulette ET la borne de blackjack) est fermé au début : des barrières rouges et blanches
+    // entourent chaque jeu, avec une pancarte « CASINO FERMÉ · ouvre à la vague 5 (2 / 5) ». Tant qu'il est fermé, les boutons,
+    // le tapis et la roue refusent (Tutorial.TryPress, WheelGrab) : son d'alerte et pancartes qui rougissent.
     // Pourquoi : au début, le joueur doit apprendre la boucle (arc, singes, bananes) sans parier ses premières bananes ;
     // le casino devient une récompense, et le tutoriel ne s'encombre plus de lui.
     // À la vague UnlockWave, les barrières s'enfoncent dans le sol, et le tutoriel amène le joueur à la roulette
     // (Tutorial.CasinoOpened). Si la partie chargée a déjà passé cette vague, il n'y a pas de barrières du tout.
     // Construit au lancement par la roulette (RouletteTable.Start) : pas besoin de régénérer la scène.
-    // La borne de blackjack, plus loin sur la terrasse, reste ouverte.
     public class CasinoGate : MonoBehaviour
     {
         public const int UnlockWave = 5;
 
-        const float Margin = 0.45f;        // en mètres : l'écart entre la table et la barrière
+        const float Margin = 0.45f;        // en mètres : l'écart entre le jeu et la barrière
         const float FenceHeight = 1f;      // en mètres
         const float SinkTime = 1.2f;       // en secondes : les barrières s'enfoncent dans le sol
-        const float FlashTime = 0.6f;      // en secondes : la pancarte rougit quand on touche la roulette fermée
+        const float FlashTime = 0.6f;      // en secondes : la pancarte rougit quand on touche un jeu fermé
+        const float SignWidth = 1.2f, SignHeight = 0.55f;   // en mètres
+        const float TextHeight = 0.075f;   // en mètres, une ligne : le texte tient dans la pancarte
 
         static readonly Color Wood = new Color(0.45f, 0.3f, 0.18f);
         static readonly Color Red = new Color(0.85f, 0.15f, 0.12f);
@@ -27,52 +29,57 @@ namespace SAE
         static readonly Color Slate = new Color(0.12f, 0.13f, 0.15f);
         static readonly Color SignRed = new Color(0.6f, 0.08f, 0.06f);
 
-        static CasinoGate instance;
+        static readonly List<CasinoGate> all = new List<CasinoGate>();   // un enclos par jeu (roulette, blackjack)
+        static float refusedAt = -10f;
+        static bool announced;             // l'ouverture n'est annoncée qu'une fois, même avec deux enclos
 
         public static bool Open => GameState.Sandbox || GameState.WavesWon >= UnlockWave;
 
-        // Ce bouton est-il un bouton de la roulette, et le casino est-il encore fermé ?
-        public static bool Blocks(IPressable p) => !Open && p is Component c && c && c.GetComponentInParent<RouletteTable>();
+        // Ce bouton est-il un bouton d'un jeu du casino, et le casino est-il encore fermé ?
+        public static bool Blocks(IPressable p) =>
+            !Open && p is Component c && c && (c.GetComponentInParent<RouletteTable>() || c.GetComponentInParent<BlackjackTable>());
 
-        // On a touché la roulette fermée : son d'alerte, et la pancarte clignote
+        // On a touché un jeu fermé : son d'alerte, et les pancartes clignotent
         public static void Refuse()
         {
             Sounds.Play(Sounds.AchatRefuse);
-            if (instance) instance.refusedAt = Time.time;
+            refusedAt = Time.time;
         }
 
         TextMesh label;
         ColorTint sign;
         int shownWaves = -1;
-        float refusedAt = -10f;
         bool opening;
 
-        // Appelé par la roulette au lancement : les barrières, seulement si le casino est encore fermé
-        public static void CreateAround(RouletteTable table)
+        // Appelé par la roulette au lancement : un enclos autour de ce jeu, seulement si le casino est encore fermé
+        public static void CreateAround(Transform game)
         {
-            if (Open || instance) return;
-            var root = new GameObject("Barrières du casino");
-            root.transform.SetParent(table.transform.parent, false);
-            root.transform.SetPositionAndRotation(table.transform.position, table.transform.rotation);   // même repère que la table
-            instance = root.AddComponent<CasinoGate>();
-            instance.Build(table.transform);
+            if (Open || !game) return;
+            if (all.Count == 0) announced = false;
+            var root = new GameObject("Barrières du casino : " + game.name);
+            root.transform.SetParent(game.parent, false);
+            root.transform.SetPositionAndRotation(game.position, game.rotation);   // même repère que le jeu
+            var gate = root.AddComponent<CasinoGate>();
+            all.Add(gate);
+            gate.Build(game);
         }
 
-        void OnDestroy() { if (instance == this) instance = null; }
+        void OnDestroy() => all.Remove(this);
 
-        // Trois côtés de barrière autour de la table (devant et sur les côtés) ; le quatrième est la rambarde de la terrasse
-        void Build(Transform table)
+        // Trois côtés de barrière autour du jeu (devant et sur les côtés) ; le quatrième est la rambarde de la terrasse
+        void Build(Transform game)
         {
-            // La place de la table dans son propre repère (min et max de tout ce qu'on voit d'elle)
+            // La place du jeu dans son propre repère (min et max de tout ce qu'on voit de lui)
             var min = Vector3.positiveInfinity;
             var max = Vector3.negativeInfinity;
-            foreach (var r in table.GetComponentsInChildren<Renderer>())
+            foreach (var r in game.GetComponentsInChildren<Renderer>())
             {
+                if (r is ParticleSystemRenderer || r is LineRenderer) continue;   // les auras et lueurs débordent
                 var b = r.bounds;
                 for (int i = 0; i < 8; i++)
                 {
                     var corner = new Vector3((i & 1) == 0 ? b.min.x : b.max.x, (i & 2) == 0 ? b.min.y : b.max.y, (i & 4) == 0 ? b.min.z : b.max.z);
-                    var local = table.InverseTransformPoint(corner);
+                    var local = game.InverseTransformPoint(corner);
                     min = Vector3.Min(min, local);
                     max = Vector3.Max(max, local);
                 }
@@ -81,7 +88,7 @@ namespace SAE
 
             // Le devant : le côté tourné vers le milieu de la bananeraie (là d'où arrive le joueur)
             var orchard = BananaOrchard.Instance;
-            float side = orchard ? Mathf.Sign(table.InverseTransformPoint(orchard.transform.position).z) : -1f;
+            float side = orchard ? Mathf.Sign(game.InverseTransformPoint(orchard.transform.position).z) : -1f;
             if (side == 0f) side = -1f;
             float front = side < 0f ? min.z - Margin : max.z + Margin;
             float back = side < 0f ? max.z + 0.1f : min.z - 0.1f;
@@ -91,10 +98,15 @@ namespace SAE
             Fence(new Vector3(left, 0f, front), new Vector3(left, 0f, back));      // côté gauche
             Fence(new Vector3(right, 0f, front), new Vector3(right, 0f, back));    // côté droit
 
-            // La pancarte, au milieu du devant, tournée vers le joueur
-            var board = Visuals.Box("Pancarte", transform, new Vector3((left + right) / 2f, 1.35f, front), new Vector3(1f, 0.5f, 0.04f), Slate);
+            // La pancarte, au milieu du devant, tournée vers le joueur. Le texte est collé devant l'ardoise et ne tourne pas
+            // vers la caméra (sans Billboard) : il ne passe plus derrière l'ardoise quand on la regarde de côté.
+            float x = (left + right) / 2f;
+            var board = Visuals.Box("Pancarte", transform, new Vector3(x, 1.35f, front), new Vector3(SignWidth, SignHeight, 0.04f), Slate);
             sign = board.GetComponent<ColorTint>();
-            label = Visuals.Label(transform, "", new Vector3((left + right) / 2f, 1.35f, front + side * 0.04f), 0.12f, White, title: true);
+            label = Visuals.Label(transform, "", new Vector3(x, 1.35f, front + side * 0.03f), TextHeight, White, title: true);
+            var turn = label.GetComponent<Sae501.Coffres.Billboard>();
+            if (turn) Destroy(turn);
+            label.transform.localRotation = Quaternion.LookRotation(new Vector3(0f, 0f, -side));   // lisible depuis le devant
             Refresh();
         }
 
@@ -104,6 +116,7 @@ namespace SAE
         {
             var along = b - a;
             float length = along.magnitude;
+            if (length < 0.01f) return;
             var middle = (a + b) / 2f;
             var rotation = Quaternion.LookRotation(along.normalized);
             int posts = Mathf.Max(2, Mathf.CeilToInt(length / 1.2f) + 1);
@@ -133,13 +146,17 @@ namespace SAE
             sign.Animate(r < 1f ? Color.Lerp(SignRed, Slate, r) : Slate);
         }
 
-        // Le casino ouvre : la pancarte l'annonce, les barrières s'enfoncent dans le sol, puis le tutoriel y amène le joueur
+        // Le casino ouvre : les pancartes l'annoncent, les barrières s'enfoncent dans le sol, puis le tutoriel y amène le joueur
         IEnumerator OpenUp()
         {
             opening = true;
             label.text = "CASINO OUVERT !";
-            Sounds.Play(Sounds.SingeObtenu, label.transform.position);
-            Tutorial.CasinoOpened();
+            if (!announced)
+            {
+                announced = true;
+                Sounds.Play(Sounds.SingeObtenu, label.transform.position);
+                Tutorial.CasinoOpened();
+            }
             yield return new WaitForSeconds(0.8f);
             var start = transform.position;
             for (float t = 0f; t < 1f; t += Time.deltaTime / SinkTime)
