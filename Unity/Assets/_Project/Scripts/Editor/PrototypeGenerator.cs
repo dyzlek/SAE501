@@ -663,8 +663,8 @@ namespace SAE.EditorTools
                 {
                     // Jusqu'au dessous du toit conique (bord à 2,98 m et 3,95 m du centre, sommet à 5 m : cabane.py), 10 cm dedans.
                     // Avant le 12 nov. : jusqu'à 3 m seulement, le tableau avait l'air de flotter sous le toit.
-                    float r = new Vector2(localPos.x, localPos.z).magnitude;
-                    float roof = 2.98f + (5f - 2.98f) * Mathf.Clamp01(1f - r / 3.95f);
+                    float radius = new Vector2(localPos.x, localPos.z).magnitude;
+                    float roof = 2.98f + (5f - 2.98f) * Mathf.Clamp01(1f - radius / 3.95f);
                     float length = roof + 0.1f - localPos.y - top;
                     Visuals.Box("Corde", visual, new Vector3(side * (W / 2f - 0.1f), top + length / 2f, 0f), new Vector3(0.02f, length, 0.02f), DarkWood);
                 }
