@@ -429,7 +429,15 @@ namespace SAE
                 (_, Step.CasinoOpen) => "CASINO OUVERT !",
                 _ => null,
             };
-            if (text != null) TutorialPopup.Show(text, TutorialPopup.Happy, 0.35f, Sounds.SingeObtenu);
+            if (text == null) return;
+            // « C'EST PARTI ! » au-dessus du bouton LANCER du hub (12 nov. : posée devant les yeux, elle finissait dans le sol)
+            Vector3? at = null;
+            if (to == Step.Done)
+            {
+                var launch = TutorialTarget.Nearest(TutorialSpot.HubLaunch, Level.Hub, Vector3.zero);
+                if (launch) at = launch.transform.position + Vector3.up * 0.6f;
+            }
+            TutorialPopup.Show(text, TutorialPopup.Happy, 0.35f, Sounds.SingeObtenu, at);
         }
 
         // Le premier singe : un Classique gris, rangé dans la bibliothèque (une seule fois)

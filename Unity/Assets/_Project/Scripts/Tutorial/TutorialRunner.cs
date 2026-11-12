@@ -18,9 +18,9 @@ namespace SAE
     {
         public Transform pointer;          // la flèche (posée par PrototypeGenerator ; son dessin est refait au lancement)
 
-        const float BounceHeight = 0.06f, BounceSpeed = 3f, SpinSpeed = 60f;
+        const float BounceHeight = 0.06f, BounceSpeed = 3f;
         const float Gap = 0.05f;           // en mètres : entre la pointe de la flèche et la cible
-        const float SlotScale = 0.6f;      // la flèche, plus petite au-dessus d'une case de la bibliothèque
+        const float SlotScale = 0.6f;      // la flèche, plus petite devant la bibliothèque
         const float GuideDistance = 0.7f;  // en mètres : la flèche au sol, devant les pieds, vers la cible
         const float GuideMin = 2.5f;       // en mètres : plus près que ça, on voit la cible, pas besoin de la flèche au sol
         const float PingEvery = 8f;        // en secondes : le rappel sonore du tableau
@@ -30,6 +30,7 @@ namespace SAE
         Transform guide;                   // la flèche au sol
         Transform doorFrames;              // le contour de la porte (deux cadres)
         ColorTint[] doorBars;
+        bool doorRetried;
         AudioSource pingSource;
         float lastPing = -100f;
 
@@ -53,6 +54,7 @@ namespace SAE
             if (!pointer) return;
 
             var spot = Tutorial.Showing ? Tutorial.Spot(Tutorial.Current) : TutorialSpot.None;
+            if (spot == TutorialSpot.Door && !doorFrames && !doorRetried) { doorRetried = true; doorFrames = BuildDoorOutline(); }   // la porte n'était peut-être pas prête au lancement
             bool door = spot == TutorialSpot.Door && Levels.Current == Level.Hub && doorFrames;
             var position = Vector3.zero;
             bool show = !door && Where(spot, out position);
@@ -63,10 +65,20 @@ namespace SAE
             PingWhenLost(spot);
             if (!show) return;
 
+            // La flèche arrive du côté du joueur, penchée vers la cible : elle reste dans le vide devant le meuble au lieu
+            // de rentrer dedans (12 nov. : verticale au-dessus des cibles, elle traversait les étagères et le coffre).
+            // Presque à plat pour la bibliothèque (les étagères du dessus la gêneraient), penchée de 40° ailleurs.
+            var rig = PlayerRig.Local;
+            var toTarget = rig ? position - rig.HeadPosition : Vector3.forward;
+            toTarget.y = 0f;
+            if (toTarget.sqrMagnitude < 0.01f) toTarget = Vector3.forward;
+            bool shelf = spot == TutorialSpot.FirstMonkey || spot == TutorialSpot.Library || spot == TutorialSpot.Plaque;
+            float pitch = (shelf ? 12f : 40f) * Mathf.Deg2Rad;
+            var dir = toTarget.normalized * Mathf.Cos(pitch) + Vector3.down * Mathf.Sin(pitch);   // le sens où pointe la flèche
             float bounce = Mathf.Abs(Mathf.Sin(Time.time * BounceSpeed)) * BounceHeight;
-            pointer.position = position + Vector3.up * bounce;
-            pointer.rotation = Quaternion.Euler(0f, Time.time * SpinSpeed, 0f);
-            pointer.localScale = Vector3.one * (spot == TutorialSpot.FirstMonkey ? SlotScale : 1f);
+            pointer.position = position - dir * (Gap + bounce);
+            pointer.rotation = Quaternion.FromToRotation(Vector3.down, dir);
+            pointer.localScale = Vector3.one * (shelf ? SlotScale : 1f);
         }
 
         // La flèche au sol : à nos pieds, tournée vers la cible, seulement si elle est loin
@@ -226,14 +238,14 @@ namespace SAE
         Transform BuildDoorOutline()
         {
             var target = TutorialTarget.Nearest(TutorialSpot.Door, Level.Hub, Vector3.zero);
-            if (!target) return null;
-            const float W = 1.6f, H = 2.55f, Bar = 0.06f, Out = 0.22f;   // l'ouverture fait 1,3 × 2,4 m, le cadre la déborde
+            if (!target) { Debug.LogWarning("Tutoriel : pas de cible pour la porte, pas de contour."); return null; }
+            const float W = 1.6f, H = 2.55f, Bar = 0.08f, Out = 0.28f;   // l'ouverture fait 1,3 × 2,4 m, le cadre la déborde
             var center = target.transform.position;
             var outward = new Vector3(center.x, 0f, center.z).normalized;   // du centre de la cabane vers dehors
             if (outward == Vector3.zero) return null;
             float floor = transform.position.y;                              // le sol du hub
             var root = new GameObject("Contour de la porte (tutoriel)").transform;
-            root.SetParent(transform, false);
+            root.SetParent(transform, true);
             root.SetPositionAndRotation(new Vector3(center.x, floor, center.z), Quaternion.LookRotation(outward));
             var bars = new System.Collections.Generic.List<ColorTint>();
             foreach (float side in new[] { -Out, Out })   // dedans, puis dehors
@@ -262,7 +274,7 @@ namespace SAE
             {
                 var slot = LibrarySlot.Find(new Monkey(MonkeyType.Classique, Rarity.Gris));
                 if (!slot || Levels.Current != Level.Hub) return false;
-                position = slot.transform.position + Vector3.up * (0.12f + Gap);   // juste au-dessus du singe dans sa case
+                position = slot.transform.position + Vector3.up * 0.1f;   // le singe dans sa case
                 return true;
             }
             var target = TutorialTarget.Nearest(spot, Levels.Current, PlayerRig.Local ? PlayerRig.Local.HeadPosition : Vector3.zero);
