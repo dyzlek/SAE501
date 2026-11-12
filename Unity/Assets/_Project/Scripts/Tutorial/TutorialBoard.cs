@@ -37,6 +37,27 @@ namespace SAE
         {
             titleScale = title.transform.localScale;
             visualPos = visual.transform.localPosition;
+            HangFromRoof();
+        }
+
+        // Le tableau du hub pend à deux cordes : on les fait monter jusqu'au toit conique de la cabane (bord à 2,98 m et
+        // 3,95 m du centre, sommet à 5 m, comme dans Blender/cabane.py), 10 cm dedans. Fait au lancement, pour que ça
+        // marche même sans régénérer la scène (12 nov. : les cordes s'arrêtaient à 3 m, le tableau semblait flotter).
+        void HangFromRoof()
+        {
+            foreach (Transform rope in visual.transform)
+            {
+                if (!rope.name.StartsWith("Corde")) continue;
+                var bottom = rope.position - rope.up * (rope.lossyScale.y / 2f);   // le bas de la corde, sur le cadre
+                float r = new Vector2(bottom.x, bottom.z).magnitude;
+                float roof = 2.98f + (5f - 2.98f) * Mathf.Clamp01(1f - r / 3.95f) + 0.1f;
+                float length = Mathf.Max(0.05f, roof - bottom.y);
+                var parentScale = rope.parent.lossyScale.y;
+                rope.position = bottom + Vector3.up * (length / 2f);
+                rope.rotation = Quaternion.identity;                                 // droite, même si le tableau penche
+                var scale = rope.localScale;
+                rope.localScale = new Vector3(scale.x, length / parentScale, scale.z);
+            }
         }
 
         void OnEnable()

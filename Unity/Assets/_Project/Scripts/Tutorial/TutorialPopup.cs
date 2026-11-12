@@ -22,16 +22,20 @@ namespace SAE
         Vector3 start;
 
         // size : la hauteur d'une ligne, en mètres. sound : le son qui l'accompagne (null : aucun)
-        public static void Show(string text, Color color, float size = 0.3f, string sound = null)
+        // at : où la poser (null : 2,2 m devant le joueur, à hauteur des yeux)
+        public static void Show(string text, Color color, float size = 0.3f, string sound = null, Vector3? at = null)
         {
             var rig = PlayerRig.Local;
             if (!rig) return;
             if (current) Destroy(current.gameObject);
-            var head = rig.HeadPosition;
-            var forward = Vector3.ProjectOnPlane(rig.head ? rig.head.forward : Vector3.forward, Vector3.up);
+            // La vraie caméra (casque ou mode PC) : en mode PC, la tête du rig XR reste au sol, et l'annonce apparaissait
+            // en bas (12 nov.)
+            var cam = Camera.main ? Camera.main.transform : rig.head;
+            var head = cam ? cam.position : rig.HeadPosition;
+            var forward = Vector3.ProjectOnPlane(cam ? cam.forward : Vector3.forward, Vector3.up);
             if (forward.sqrMagnitude < 0.01f) forward = Vector3.forward;
             var go = new GameObject("Annonce du tutoriel");
-            go.transform.position = head + forward.normalized * Ahead;
+            go.transform.position = at ?? head + forward.normalized * Ahead;
             current = go.AddComponent<TutorialPopup>();
             current.start = go.transform.position;
             current.label = Visuals.Label(go.transform, text, Vector3.zero, size, color, title: true);

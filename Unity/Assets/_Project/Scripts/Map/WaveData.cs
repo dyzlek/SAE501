@@ -92,7 +92,7 @@ namespace SAE
 
             // Normaux : toujours là. 10 au début, ~100 à la vague 100 ; 1 couche, puis +1 toutes les 6 vagues ; vite très serrés
             float interval = Mathf.Lerp(0.7f, 0.25f, Mathf.Clamp01((w - 1) / 40f));
-            groups.Add(N(10 + w * 9 / 10, 1 + w / 6, interval));
+            groups.Add(N(w == 1 ? 8 : 10 + w * 9 / 10, 1 + w / 6, interval));   // vague 1 : 8 (le tutoriel, 12 nov. : plus simple)
             if (w >= 2) groups.Add(N(5 + w / 3, 2 + w / 6, interval));          // un 2e groupe, plus solide
 
             if (w >= 3) groups.Add(R(3 + (w - 3) * 4 / 5, 1 + (w - 3) / 7));      // rapides

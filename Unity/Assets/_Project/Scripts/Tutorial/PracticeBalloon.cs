@@ -10,10 +10,11 @@ namespace SAE
     // les éclate et continue sa course. TutorialRunner les fait apparaître pendant l'étape, et les retire après.
     public class PracticeBalloon : MonoBehaviour
     {
-        const float Size = 0.7f;                       // en mètres : plus gros qu'un vrai ballon, pour réussir de loin
+        const float Size = 1.0f;                       // en mètres : bien plus gros qu'un vrai ballon (0,7 avant le 12 nov. : on les voyait mal)
         // Où ils flottent : au-dessus du chemin, au milieu de la carte (repère de la carte, voir MapLayout), bien en face
         // du joueur qui arrive au sud. Avant, ils étaient juste devant lui... et cachés par le tableau du tutoriel.
-        static readonly Vector3[] Spots = { new Vector3(-5f, 2.2f, 0.5f), new Vector3(0f, 2.8f, 0.5f), new Vector3(4.5f, 2.4f, 0.5f) };
+        // 12 nov. : 3,5 m plus près du joueur qu'avant (z = 0,5), et plus serrés, pour qu'on les voie tout de suite.
+        static readonly Vector3[] Spots = { new Vector3(-3.5f, 2.2f, -3f), new Vector3(0f, 2.7f, -3f), new Vector3(3.5f, 2.3f, -3f) };
         static readonly Color[] Colors = { new Color(0.95f, 0.2f, 0.2f), new Color(0.25f, 0.55f, 1f), new Color(0.3f, 0.85f, 0.35f) };
 
         static readonly List<PracticeBalloon> alive = new List<PracticeBalloon>();
@@ -60,6 +61,8 @@ namespace SAE
             if (popped) return;
             float t = Time.time + phase;
             transform.position = home + new Vector3(Mathf.Sin(t * 0.7f) * 0.15f, Mathf.Sin(t * 1.3f) * 0.12f, 0f);
+            float pulse = 1f + 0.06f * Mathf.Sin(t * 4f);   // il « respire » un peu : l'œil le repère
+            transform.localScale = new Vector3(Size, Size * 1.15f, Size) * pulse;
         }
 
         // Une flèche l'a touché (Arrow) : il éclate, avec le son des vrais ballons
