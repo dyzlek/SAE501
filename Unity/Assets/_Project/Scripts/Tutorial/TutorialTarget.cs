@@ -16,6 +16,27 @@ namespace SAE
         void OnEnable() => All.Add(this);
         void OnDisable() => All.Remove(this);
 
+        // Pose une cible au-dessus de cet objet, au lancement (pour les endroits ajoutés au tutoriel après coup :
+        // pas besoin de régénérer les scènes). La pointe de la flèche est juste au-dessus du haut de ce qu'on voit de l'objet.
+        public static void Add(Transform on, TutorialSpot spot, Level level)
+        {
+            var renderers = on.GetComponentsInChildren<Renderer>();
+            var top = on.position;
+            if (renderers.Length > 0)
+            {
+                var b = renderers[0].bounds;
+                foreach (var r in renderers) b.Encapsulate(r.bounds);
+                top = new Vector3(b.center.x, b.max.y, b.center.z);
+            }
+            var go = new GameObject("Cible du tutoriel : " + spot);
+            go.transform.SetParent(on, false);
+            go.transform.position = top;
+            var t = go.AddComponent<TutorialTarget>();
+            t.spot = spot;
+            t.level = level;
+            t.height = 0.08f;   // la pointe de la flèche juste au-dessus de l'objet (0,3 avant le 12 nov. : elle flottait trop haut)
+        }
+
         // La cible de cet endroit dans ce niveau, la plus proche de from (null s'il n'y en a pas)
         public static TutorialTarget Nearest(TutorialSpot spot, Level level, Vector3 from)
         {

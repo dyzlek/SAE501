@@ -22,6 +22,12 @@ namespace SAE
 
         int Cost => MonkeyData.UnlockPrice(type);
 
+        // Le tutoriel montre une plaque à débloquer : celle du Boomerang, le premier type qu'on peut acheter
+        void Start()
+        {
+            if (type == MonkeyType.Boomerang) TutorialTarget.Add(transform, TutorialSpot.Plaque, Level.Hub);
+        }
+
         public void Press()
         {
             if (GameState.IsUnlocked(type)) return;

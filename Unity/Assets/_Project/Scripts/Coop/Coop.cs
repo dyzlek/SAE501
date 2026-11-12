@@ -221,6 +221,7 @@ namespace SAE
             i.network.NetworkConfig.Prefabs.Add(new NetworkPrefab { Prefab = balloon });
             i.network.ConnectionApprovalCallback = i.Approve;
             i.network.OnClientDisconnectCallback += i.OnDisconnect;
+            i.network.OnTransportFailure += i.OnTransportFailure;
             go.SetActive(true);
             instance = i;
             return i;
@@ -253,6 +254,17 @@ namespace SAE
             string reason = network.DisconnectReason;
             if (string.IsNullOrEmpty(reason)) reason = Connected ? "L'hôte a quitté la partie" : "Impossible de joindre la partie";
             Stop(reason);
+        }
+
+        // NGO : la liaison avec le serveur relais de Unity est perdue (ou n'a jamais pu s'ouvrir : réseau qui bloque les
+        // WebSocket, pare-feu, VPN, coupure d'Internet). NGO arrête tout seul la partie réseau : avant, on ne le voyait pas,
+        // et le panneau gardait le code d'une partie qui n'existait plus (l'autre joueur ne la trouvait pas).
+        // On le dit, et on repasse en solo : il suffit de rouvrir le coop pour avoir un nouveau code.
+        void OnTransportFailure()
+        {
+            Debug.LogWarning("Coop : liaison avec le serveur relais de Unity perdue");
+            Stop(IsHost ? "Serveur relais injoignable : vérifie Internet et rouvre le coop (nouveau code)"
+                        : "Serveur relais injoignable : vérifie Internet et rejoins de nouveau");
         }
 
         void OnApplicationQuit() => Leave();

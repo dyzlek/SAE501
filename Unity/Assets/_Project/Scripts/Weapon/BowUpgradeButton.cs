@@ -23,6 +23,10 @@ namespace SAE
 
         void Start()
         {
+            // Le tutoriel montre le meuble de l'arc : la flèche au-dessus de tout le meuble (enseigne ARC comprise), une seule fois
+            // (12 nov. : avant, au-dessus d'un bouton, devant l'ardoise)
+            if (upgrade == BowUpgrade.Perforation && transform.parent && transform.parent.parent)
+                TutorialTarget.Add(transform.parent.parent, TutorialSpot.BowUpgrades, Level.Carte);
             capRest = cap.localPosition;
             capTint = cap.GetComponent<ColorTint>();
         }

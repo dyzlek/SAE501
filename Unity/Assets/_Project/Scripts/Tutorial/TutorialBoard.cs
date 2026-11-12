@@ -10,7 +10,7 @@ namespace SAE
     //   - SUIVANT n'apparaît que sur les étapes à lire.
     // Le cadre lumineux pulse en continu, pour qu'on le remarque. Une interaction pas encore permise :
     // le tableau tremble et son cadre passe au rouge un instant.
-    // Le tutoriel fini, le tableau disparaît (visual éteint).
+    // Le tutoriel fini, le tableau disparaît (visual éteint) ; il revient pour les étapes du casino.
     public class TutorialBoard : MonoBehaviour
     {
         public GameObject visual;          // tout ce qui se voit (ardoise, textes, boutons) : éteint à la fin
@@ -37,6 +37,27 @@ namespace SAE
         {
             titleScale = title.transform.localScale;
             visualPos = visual.transform.localPosition;
+            HangFromRoof();
+        }
+
+        // Le tableau du hub pend à deux cordes : on les fait monter jusqu'au toit conique de la cabane (bord à 2,98 m et
+        // 3,95 m du centre, sommet à 5 m, comme dans Blender/cabane.py), 10 cm dedans. Fait au lancement, pour que ça
+        // marche même sans régénérer la scène (12 nov. : les cordes s'arrêtaient à 3 m, le tableau semblait flotter).
+        void HangFromRoof()
+        {
+            foreach (Transform rope in visual.transform)
+            {
+                if (!rope.name.StartsWith("Corde")) continue;
+                var bottom = rope.position - rope.up * (rope.lossyScale.y / 2f);   // le bas de la corde, sur le cadre
+                float r = new Vector2(bottom.x, bottom.z).magnitude;
+                float roof = 2.98f + (5f - 2.98f) * Mathf.Clamp01(1f - r / 3.95f) + 0.1f;
+                float length = Mathf.Max(0.05f, roof - bottom.y);
+                var parentScale = rope.parent.lossyScale.y;
+                rope.position = bottom + Vector3.up * (length / 2f);
+                rope.rotation = Quaternion.identity;                                 // droite, même si le tableau penche
+                var scale = rope.localScale;
+                rope.localScale = new Vector3(scale.x, length / parentScale, scale.z);
+            }
         }
 
         void OnEnable()
@@ -54,7 +75,7 @@ namespace SAE
 
         void Show()
         {
-            bool on = Tutorial.Active;
+            bool on = Tutorial.Showing;   // le tutoriel, ou plus tard les étapes du casino
             visual.SetActive(on);
             if (!on) return;
             var step = Tutorial.Current;
@@ -62,10 +83,11 @@ namespace SAE
             title.text = confirm ? "PASSER LE TUTORIEL ?" : Tutorial.Title(step);
             fullBody = confirm ? "Tu es sûr ? Tu ne verras pas la suite\ndes explications (le premier singe\nte sera quand même offert)." : Tutorial.Body(step);
             body.text = "";
-            progress.text = $"{(int)step + 1} / {(int)Tutorial.Step.Done}";
-            nextButton.SetActive(confirm || Tutorial.NeedsNext(step));
-            SetLabel(nextButton, confirm ? "NON" : "SUIVANT");
-            SetLabel(skipButton, confirm ? "OUI" : "PASSER");
+            progress.text = Tutorial.Progress(step);
+            bool choice = !confirm && Tutorial.FailChoice;   // vague 1 ratée : REFAIRE ou CONTINUER
+            nextButton.SetActive(confirm || choice || Tutorial.NeedsNext(step));
+            SetLabel(nextButton, confirm ? "NON" : choice ? "REFAIRE" : "SUIVANT");
+            SetLabel(skipButton, confirm ? "OUI" : choice ? "CONTINUER" : "PASSER");
             shownAt = Time.time;
             if (confetti) confetti.Play();
         }

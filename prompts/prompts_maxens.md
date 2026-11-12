@@ -2,6 +2,32 @@
 
 _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (orthographe, clarté, structure : contexte, objectif, contraintes). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/maxens.md)._
 
+## Jeu. 12 nov. 2026
+
+### Corrections du tutoriel, 2e test
+> Crée une autre branche pour améliorer le tutoriel :
+> - pendant l'explication de l'arc, mets les ballons au milieu de la carte ou vers le début du chemin : là, ils sont cachés par le tableau ;
+> - le tableau cache les boutons (le pupitre de l'arc) ;
+> - le blackjack n'est pas bloqué, il n'y a que la roulette ;
+> - règle le problème d'écriture sur la pancarte de chantier.
+>
+> Mets tout sur `main` ensuite.
+
+### Dylan ne trouve pas ma partie
+> Je donne le code et le mot de passe à Dylan, mais il ne trouve pas ma partie. Pourquoi ?
+
+
+### Retours sur le tutoriel
+> Les textes ne sont pas terribles et ne donnent pas envie. Je n'ai pas compris tout de suite qu'il fallait tirer 3 fois pour s'entraîner. Si on rate la vague, il faudrait qu'un « DOMMAGE ! » (ou autre) apparaisse, puis un choix : refaire ou continuer. Je n'ai pas pu tester le reste, mais s'il y a d'autres points comme ça, modifie-les.
+
+### Un tutoriel complet
+> Sur une autre branche, améliore le tutoriel :
+> - la roulette ne doit être déblocable qu'après quelques vagues (5 ou 10). Au début, le tutoriel ne la montre plus et elle est bloquée, par exemple par des barrières ; quand elle se débloque, un tutoriel amène le joueur jusqu'à elle ;
+> - explique rapidement ce qu'est un tower defense ;
+> - dis où est l'arc (si on ne regarde pas ses mains, on ne le voit pas) et surtout comment tirer ;
+> - rends les flèches d'indication plus voyantes ;
+> - explique comment débloquer les singes et pourquoi le faire, à quoi servent les améliorations de la bananeraie, etc., et pareil dans le hub. Bref, un tutoriel vraiment complet.
+
 ## Mer. 11 nov. 2026
 
 ### Partager le reste du coop

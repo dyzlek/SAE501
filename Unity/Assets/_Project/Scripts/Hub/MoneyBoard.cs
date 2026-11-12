@@ -26,6 +26,7 @@ namespace SAE
 
         void Start()
         {
+            TutorialTarget.Add(transform, TutorialSpot.Money, Level.Hub);   // le tutoriel montre la caisse
             shown = Economy.Money;
             if (panel) panelScale = panel.localScale;
         }

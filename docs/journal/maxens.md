@@ -2,6 +2,49 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Jeu. 12 nov. 2026
+- **Corrigé après mon 2e test du tutoriel** (branche `feat/amelioration-tuto`) :
+  - **les ballons d'entraînement étaient cachés par le tableau** de la carte : ils flottent maintenant au-dessus du chemin, au milieu de la carte, bien en face de l'arrivée, et ils sont plus gros (70 cm) ;
+  - **le tableau de la carte cachait le pupitre ARC** : il passe à droite de l'arrivée, après la caisse (dans le générateur : **régénérer les scènes**) ;
+  - **le blackjack n'était pas fermé** : il a maintenant ses barrières, comme la roulette, et ses boutons refusent jusqu'à la vague 5 ;
+  - **le texte de la pancarte de chantier débordait** et passait derrière l'ardoise : il est plus petit, collé devant l'ardoise, et ne tourne plus vers la caméra.
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Code) | Ballons d'entraînement sur le chemin, tableau de la carte déplacé, blackjack fermé lui aussi, texte de la pancarte corrigé ; compilé | À tester |
+
+- **Bloque : Dylan ne trouvait pas ma partie en coop**, alors que je lui donnais le code et le mot de passe. Cause trouvée dans le log d'Unity (`Logs/Editor.log`) : chez moi, l'hôte obtenait bien un code du relais de Unity, mais n'arrivait pas à s'y connecter ensuite (« Failed to establish connection with the Relay server »). NGO arrêtait alors la partie réseau sans rien dire, et le panneau gardait le code d'une partie qui n'existait plus.
+  - **Corrigé** (branche `fix/coop-relais`) : quand la liaison avec le relais est perdue, le panneau COOP le dit (« Serveur relais injoignable : vérifie Internet et rouvre le coop ») et on repasse en solo. Il suffit de rouvrir le coop pour avoir un nouveau code.
+  - **Reste à trouver** pourquoi mon PC ne joint pas le relais : réseau qui bloque les WebSocket, pare-feu de Windows ou antivirus qui bloque Unity, ou VPN. À retenter sur un autre réseau (partage de connexion du téléphone), ou avec Dylan comme hôte.
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Code) | Cause du coop introuvable trouvée dans le log d'Unity (liaison avec le relais impossible côté hôte) ; l'échec s'affiche maintenant sur le panneau COOP (`Coop.OnTransportFailure`) ; compilé | À tester à deux |
+
+- **Corrigé après mon test du tutoriel :**
+  - **les textes ne donnaient pas envie** : tous réécrits, sur le ton de Bloons (joyeux, direct, une action claire par tableau, le geste ou le bouton en MAJUSCULES) ;
+  - **je n'avais pas compris qu'il fallait tirer 3 fois** : l'entraînement devient un **échauffement sur 3 ballons** qui flottent devant le joueur, sur la carte (`PracticeBalloon`). Le tableau compte « ÉCHAUFFEMENT : 1 / 3 BALLONS », chaque ballon éclate avec le son des vrais ballons et une vibration ;
+  - **vague 1 ratée** : « DOMMAGE ! » surgit devant le joueur, puis le tableau propose **REFAIRE** (la vague repart) ou **CONTINUER** (on passe à la suite, sans la récompense de la vague, mais le premier singe est quand même offert) ;
+  - **dans le même esprit** : une annonce surgit aux grands moments (« PRÊT AU COMBAT ! », « VICTOIRE ! », « BIEN POSÉ ! », « CHA-CHING ! », « FUSION RÉUSSIE ! », « C'EST PARTI ! », « CASINO OUVERT ! »), avec un son joyeux. Et une action refusée affiche « SUIS LA FLÈCHE DORÉE ! », au plus toutes les 4 s, car on ne voit pas toujours le tableau trembler quand il est derrière soi. Les annonces sont posées une fois dans le décor, à 2 m devant soi, et ne suivent pas la tête (confort ; `TutorialPopup`).
+  - Compilé, pas encore testé en jeu.
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Code) | Retours sur le tutoriel : textes réécrits, échauffement sur 3 ballons, DOMMAGE ! avec REFAIRE / CONTINUER, annonces des grands moments et des refus ; compilé | À tester |
+
+- **Fait : un tutoriel plus complet** (branche `feat/tuto-complet`). Il passe de 17 à 23 étapes :
+  - **le genre** : un tableau explique ce qu'est un tower defense (éclater les ballons avant la sortie, avec l'arc et des singes posés) ;
+  - **l'arc** : où il est (« regarde ta main GAUCHE » au casque, le bas de l'écran au PC), puis un **entraînement** de 3 flèches avant la vague 1. Le geste est expliqué pas à pas (main droite sur la corde, grip, reculer jusqu'à la joue, viser avec la ligne, lâcher). Une flèche pas assez tendue tombe, et le tableau dit « TENDS PLUS FORT ! » avec le bon conseil. Le texte change entre le casque et le PC ;
+  - **le reste** : les améliorations de l'arc sur la carte, la caisse (les bananes sont l'argent), les plaques de la bibliothèque (débloquer un type pour qu'il sorte du coffre, et pourquoi), à quoi servent PRODUCTION, FRAÎCHEUR et VALEUR, les récolteurs et leurs améliorations, l'armoire à trophées et les fléchettes ;
+  - **des flèches plus voyantes** : la flèche dorée pulse, un **rayon doré** monte de la cible vers le ciel (on le voit de loin), et une **flèche au sol**, à nos pieds, montre la direction quand la cible est loin (au sol plutôt que devant les yeux : confort) ;
+  - les nouvelles cibles de la flèche (caisse, plaque, boutons de l'arc, trophées, cible des fléchettes) sont posées au lancement par les objets eux-mêmes (`TutorialTarget.Add`) : **pas besoin de régénérer les scènes**.
+- **Fait : la roulette fermée jusqu'à la vague 5** (`Casino/CasinoGate.cs`). Des barrières de chantier rouges et blanches l'entourent, avec une pancarte « CASINO FERMÉ · ouvre à la vague 5 (2 / 5) ». Ses boutons et sa roue refusent (son d'alerte, pancarte qui rougit). À la vague 5, les barrières s'enfoncent dans le sol, et deux étapes du tutoriel amènent à la roulette (« LE CASINO OUVRE ! », puis comment jouer) ; elles ne bloquent rien. Le casino ne fait donc plus partie du tutoriel du début. La borne de blackjack, plus loin, reste ouverte.
+- Compilé, **pas encore testé en jeu** (UnityMCP déconnecté : pas de captures cette fois).
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Code) | Tutoriel complet : genre, arc (où il est, comment tirer, entraînement de 3 flèches), améliorations, caisse, plaques, comptoir, récolteurs, trophées, fléchettes ; flèches plus voyantes (rayon doré, flèche au sol) ; compilé | À tester |
+| Claude (Code) | Roulette fermée par des barrières jusqu'à la vague 5, puis tutoriel qui y amène (`CasinoGate`) ; compilé | À tester |
 ## Mer. 11 nov. 2026
 - **Fait : le reste du coop partagé, hors bananeraie** (branche `feat/coop-coffre-flechettes`, issues #201, #202 et #203). J'ai fait le tour de ce qu'un joueur ne voyait pas de l'autre. L'argent, la bibliothèque, les singes posés, les vagues, les ballons, les flèches et la roulette étaient déjà partagés. Il manquait :
   - **le coffre** (#201) : quand un joueur l'ouvre, il s'ouvre aussi chez les autres, avec la même roulette et le même singe gagné. Le singe n'est donné qu'une fois, chez celui qui a ouvert (la bibliothèque est commune). Pendant l'ouverture, le coffre est occupé chez tout le monde ;

@@ -244,7 +244,7 @@ Les sons s'entendent du hub comme de la carte : on sait qu'il faut y retourner. 
 ![Sous l'abri de la bananeraie : les comptoirs BANANIER et RÉCOLTEUR, le panier au premier plan, un bananier et son étal à gauche.](captures/gdd/bananeraie-abri.png)
 
 ### 7.9 Les bonus du hub
-- **Roulette (casino), dans la bananeraie :**
+- **Roulette (casino), dans la bananeraie, ouverte à la vague 5 (barrières avant, comme le blackjack) :**
   - roue européenne de 37 cases ;
   - on clique une case pour choisir sa couleur (rouge, noir ou vert) ;
   - on mise par 10, ou TOUT ;
@@ -290,7 +290,10 @@ On démarre avec **0 banane et aucun singe** : la vague 1 se gagne à l'arc, pui
 ## 8. Tutoriel intégré (niveau 1)
 **Principe :**
 - une consigne à la fois, écrite sur des **tableaux du décor** (suspendu dans la cabane, sur poteaux dans la bananeraie et sur la carte), jamais collée au visage ;
-- une **flèche dorée** rebondit au-dessus de ce qu'il faut toucher ;
+- une **flèche dorée** rebondit et pulse au-dessus de ce qu'il faut toucher, avec un **rayon doré** qui monte vers le ciel (visible de loin) ; quand la cible est loin, une **flèche au sol**, aux pieds du joueur, montre la direction ;
+- les consignes de l'arc changent selon le mode (casque ou PC) ;
+- les grands moments ont leur **annonce** qui surgit devant le joueur, posée dans le décor à 2 m (pas collée au visage) : « PRÊT AU COMBAT ! », « VICTOIRE ! », « BIEN POSÉ ! », « FUSION RÉUSSIE ! »… ou « DOMMAGE ! » ; une action refusée affiche « SUIS LA FLÈCHE DORÉE ! » (le tableau est peut-être derrière lui) ;
+- le ton des textes est celui de Bloons : joyeux, direct, une action claire par tableau, le geste ou le bouton en MAJUSCULES ;
 - chaque étape arrive avec son titre qui surgit, sa consigne écrite lettre par lettre et une gerbe de petits ballons ;
 - le cadre du tableau pulse en or pour attirer l'œil.
 
@@ -298,23 +301,32 @@ On démarre avec **0 banane et aucun singe** : la vague 1 se gagne à l'arc, pui
 - **Seule l'action demandée est permise.** Toute autre action est refusée : le tableau tremble et son cadre rougit.
 - **Vague 1 stricte :** un seul ballon qui passe et c'est raté, il faut la relancer. On ne félicite pas un joueur qui n'a pas tiré.
 
-**Les 17 étapes :**
+**Les 23 étapes :**
 
 | # | Étape | Lieu | Ce que fait le joueur | Passe à la suite quand… |
 |---|---|---|---|---|
-| 1-3 | L'univers | Cabane | Lit trois tableaux | SUIVANT |
+| 1-3 | L'univers et le genre | Cabane | Lit : la cabane, les ballons qui arrivent, ce qu'est un tower defense (éclater les ballons avant la sortie, avec l'arc et des singes posés) | SUIVANT |
 | 4 | En route | Cabane | Appuie sur SE TP | il arrive sur la carte |
-| 5 | Vague 1 | Carte | Appuie sur LANCER | la vague part |
-| 6 | À l'arc | Carte | Éclate les 8 ballons, sans en laisser passer | vague gagnée |
-| 7 | Bravo | Carte | Reçoit son premier singe, appuie sur HUB | il est au hub |
-| 8 | La bibliothèque | Cabane | Lit : types en lignes, raretés en colonnes, plaques de déblocage | SUIVANT |
-| 9 | Ton premier singe | Cabane | Le prend (la flèche montre sa case) | il le tient |
-| 10 | Pose-le | Cabane | Le pose sur le plateau | il est posé |
-| 11 | Les bananes | Bananeraie | Passe la porte, lance une banane dans le panier | il a gagné des bananes |
-| 12-14 | Comptoir, récolteurs, casino | Bananeraie | Lit (la flèche montre chaque meuble) | SUIVANT |
-| 15 | Le coffre | Cabane | Ouvre le coffre, **offert** ; il donne un Classique gris | coffre ouvert |
-| 16 | La fusion | Cabane | Pose le nouveau singe **sur** le premier (la pose à côté est refusée) | un singe vert existe |
-| 17 | À toi de jouer | Cabane | Lance la vague 2 | la vague part : fin |
+| 5 | Ton arc | Carte | Lit où est l'arc (main gauche au casque, bas de l'écran au PC) | SUIVANT |
+| 6 | Échauffement | Carte | Éclate 3 ballons d'entraînement qui flottent au-dessus du chemin, au milieu de la carte (le tableau compte « 1 / 3 BALLONS ») ; une flèche trop peu tendue tombe et le tableau dit « TENDS PLUS FORT ! » | 3 ballons éclatés |
+| 7 | Vague 1 | Carte | Appuie sur LANCER | la vague part |
+| 8 | Pas un seul ne passe | Carte | Éclate les 8 ballons, sans en laisser passer. Raté : « DOMMAGE ! » surgit, et le tableau propose **REFAIRE** (la vague repart) ou **CONTINUER** (on passe à la suite, le premier singe est quand même offert) | vague gagnée, ou CONTINUER |
+| 9 | Améliore ton arc | Carte | Lit : les boutons de l'arc (flèches qui percent, tir triple…) | SUIVANT |
+| 10 | Bravo | Carte | Reçoit son premier singe, appuie sur HUB | il est au hub |
+| 11 | Tes bananes | Cabane | Lit : les bananes sont l'argent, la caisse les compte | SUIVANT |
+| 12 | La bibliothèque | Cabane | Lit : types en lignes, raretés en colonnes, plus rare = plus fort | SUIVANT |
+| 13 | De nouveaux singes | Cabane | Lit : les plaques débloquent un type, qui pourra sortir du coffre ; chacun a son pouvoir | SUIVANT |
+| 14 | Ton premier singe | Cabane | Le prend (la flèche montre sa case) | il le tient |
+| 15 | Pose-le | Cabane | Le pose sur le plateau | il est posé |
+| 16 | Les bananes | Bananeraie | Passe la porte, lance une banane dans le panier | il a gagné des bananes |
+| 17 | Le comptoir | Bananeraie | Lit à quoi servent PRODUCTION, FRAÎCHEUR et VALEUR | SUIVANT |
+| 18 | Les récolteurs | Bananeraie | Lit : ils ramassent pour lui, on améliore leur vitesse et leur part | SUIVANT |
+| 19 | Le coffre | Cabane | Ouvre le coffre, **offert** ; il donne un Classique gris | coffre ouvert |
+| 20 | La fusion | Cabane | Pose le nouveau singe **sur** le premier (la pose à côté est refusée) | un singe vert existe |
+| 21-22 | Trophées, fléchettes | Cabane | Lit (la flèche montre l'armoire, puis la cible) | SUIVANT |
+| 23 | À toi de jouer | Cabane | Lance la vague 2 | la vague part : fin |
+
+**Le casino, plus tard :** la roulette n'est plus dans le tutoriel. La roulette et la borne de blackjack sont **fermées par des barrières** rouges et blanches, avec une pancarte « CASINO FERMÉ · ouvre à la vague 5 (2 / 5) » ; ses boutons et sa roue refusent. À la **vague 5**, les barrières s'enfoncent dans le sol et deux étapes de plus apparaissent sur les tableaux : « LE CASINO OUVRE ! » (la flèche l'y amène), puis « LA ROULETTE » (comment jouer). Elles ne bloquent rien. Pourquoi : au début, on apprend la boucle (arc, singes, bananes) sans parier ses premières bananes, et le casino devient une récompense.
 
 **PASSER** saute tout (le premier singe est quand même offert). Le tutoriel ne se lance pas en bac à sable (mode de développement).
 
