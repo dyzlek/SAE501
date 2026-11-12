@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Jeu. 12 nov. 2026
 
+### Ballons du plateau
+> Sur le plateau, on ne voit pas les ballons.
+
 ### Ballons blindés et équilibrage des vagues
 > Est-ce que toutes les vagues sont bien réglées ? Est-ce qu'on détruit bien les ballons en acier, etc. ?
 >
