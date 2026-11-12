@@ -76,6 +76,16 @@ namespace SAE
             var look = PlayerRig.Local ? PlayerRig.Local.HeadPosition - position : Vector3.forward;
             look.y = 0f;
             pointer.rotation = look.sqrMagnitude > 0.01f ? Quaternion.LookRotation(look) : Quaternion.identity;
+
+            // La plaque de déblocage, dans la bibliothèque : la flèche sort des étagères, côté joueur, penchée vers la plaque
+            // (12 nov. : droite au-dessus, elle traversait l'étagère du dessus)
+            if (spot == TutorialSpot.Plaque && PlaqueFront(out var plaque, out var inward))
+            {
+                const float Tilt = 35f * Mathf.Deg2Rad;
+                var dir = -inward * Mathf.Cos(Tilt) + Vector3.down * Mathf.Sin(Tilt);   // de dehors vers la plaque, un peu vers le bas
+                pointer.position = plaque - dir * (Gap + 0.05f + bounce);
+                pointer.rotation = Quaternion.FromToRotation(Vector3.down, dir);
+            }
         }
 
         // La flèche au sol : à nos pieds, tournée vers la cible, seulement si elle est loin
@@ -154,6 +164,18 @@ namespace SAE
             bars = list.ToArray();
             root.gameObject.SetActive(false);
             return root;
+        }
+
+        // Le devant de la plaque de déblocage montrée par le tutoriel, et la direction vers le centre de la cabane
+        static bool PlaqueFront(out Vector3 front, out Vector3 inward)
+        {
+            front = inward = default;
+            var target = TutorialTarget.Nearest(TutorialSpot.Plaque, Level.Hub, Vector3.zero);
+            if (!target || !target.transform.parent) return false;
+            var p = target.transform.parent.position;                 // le milieu de la plaque (la cible, elle, est au-dessus)
+            inward = new Vector3(-p.x, 0f, -p.z).normalized;
+            front = p + inward * 0.03f;
+            return inward != Vector3.zero;
         }
 
         // Le coffre est en train de s'ouvrir (le tutoriel cache la flèche pendant ce temps)
