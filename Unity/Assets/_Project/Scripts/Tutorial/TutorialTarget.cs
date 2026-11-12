@@ -17,7 +17,7 @@ namespace SAE
         void OnDisable() => All.Remove(this);
 
         // Pose une cible au-dessus de cet objet, au lancement (pour les endroits ajoutés au tutoriel après coup :
-        // pas besoin de régénérer les scènes). La flèche flotte au-dessus du haut de ce qu'on voit de l'objet.
+        // pas besoin de régénérer les scènes). La pointe de la flèche est juste au-dessus du haut de ce qu'on voit de l'objet.
         public static void Add(Transform on, TutorialSpot spot, Level level)
         {
             var renderers = on.GetComponentsInChildren<Renderer>();
@@ -34,7 +34,7 @@ namespace SAE
             var t = go.AddComponent<TutorialTarget>();
             t.spot = spot;
             t.level = level;
-            t.height = 0.3f;
+            t.height = 0.08f;   // la pointe de la flèche juste au-dessus de l'objet (0,3 avant le 12 nov. : elle flottait trop haut)
         }
 
         // La cible de cet endroit dans ce niveau, la plus proche de from (null s'il n'y en a pas)
