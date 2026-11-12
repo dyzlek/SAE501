@@ -18,6 +18,19 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 
 ---
 
+## Palmiers de la carte allégés
+**Jeu. 12 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · issue #207
+
+**Le problème.** Les 22 palmiers de la carte étaient l'objet le plus lourd du décor : **14 520 triangles** (660 par palmier), dont 85 % dans le tronc (6 rondins à 8 côtés et 5 tronçons). Ils sont pourtant loin du joueur (18 à 34 m).
+
+**Ce qui a été fait** (`build_palms` dans `Blender/cabane.py`, seulement pour la carte) : tronc à **6 côtés** en tronçons simples (3 au lieu de 5, sans le léger renflement) et palmes en **4 morceaux au lieu de 6**. Les anneaux du tronc restent (bouts chanfreinés des rondins). Les palmiers du hub, plus proches, ne changent pas. Même placement et mêmes formes (mêmes tirages au hasard).
+
+**Avant / après.** Palmiers de la carte 14 520 → **7 392** triangles (−49 %) ; paysage de la carte 59 919 → **52 791**. Fps à mesurer.
+
+**Est-ce que ça a vraiment marché ?** Rendu avant/après comparé dans Blender à 10 m et 25 m : presque pareil (tronc un peu plus anguleux de près). **Pas vu dans Unity ni au casque**.
+
+**Suggestions.** Même chose pour les palmiers du hub (9 240, plus proches : 8 à 16 m) ; ensuite les buissons (14 400 au hub et sur la carte) et les montagnes (13 056).
+
 ## Points blancs des champignons dans une texture
 **Jeu. 12 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · issue #206
 

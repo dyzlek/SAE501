@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Jeu. 12 nov. 2026
 
+### Palmiers de la carte
+> Tu peux réduire le nombre de polygones des palmiers sur la carte, s'il te plaît ?
+
 ### Scintillement entre deux objets
 > Salut, j'aimerais que tu règles ces bugs d'affichage de clipping entre deux objets, s'il te plaît. (avec deux captures)
 >

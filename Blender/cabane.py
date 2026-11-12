@@ -1257,8 +1257,12 @@ def build_mountains(M, coll, suffix=""):
 
 
 def build_palms(M, coll, clear=hub_clear, suffix="", ring=(8, 16), count=14):
-    """Des palmiers tout autour : tronc courbe en anneaux, couronne de palmes arquées."""
+    """Des palmiers tout autour : tronc courbe en anneaux, couronne de palmes arquées.
+    Sur la carte (12 nov., optimisation) : ils sont loin (18 à 34 m), donc tronc à 6 côtés en tronçons simples
+    et palmes en 4 morceaux au lieu de 6 (environ 340 triangles par palmier au lieu de 660)."""
     g = random.Random(17 if not suffix else 29)
+    far = bool(suffix)                                   # suffix = " carte" : les palmiers de la carte
+    trunk_segs, leaf_steps = (6, 4) if far else (8, 6)
     b = Builder([M["poutre"], M["bout"], M["palme"]])
     for idx, (x, z, ang) in enumerate(scatter(g, count, ring[0], ring[1], clear)):
         base = P(x, GROUND_Y, z)
@@ -1266,7 +1270,8 @@ def build_palms(M, coll, clear=hub_clear, suffix="", ring=(8, 16), count=14):
         lean = Vector((g.uniform(-1, 1), g.uniform(-1, 1), 0)).normalized() * g.uniform(0.6, 1.4)
         pts = [base + lean * (t * t) + Vector((0, 0, height * t)) for t in np.linspace(0, 1, 7)]
         for k in range(6):
-            b.log(pts[k], pts[k + 1] + (pts[k + 1] - pts[k]) * 0.05, 0.16 - 0.015 * k, M["poutre"], M["bout"], 1000 + idx * 10 + k, segs=8)
+            b.log(pts[k], pts[k + 1] + (pts[k + 1] - pts[k]) * 0.05, 0.16 - 0.015 * k, M["poutre"], M["bout"], 1000 + idx * 10 + k,
+                  segs=trunk_segs, simple=far)
         crown = pts[-1]
         for f in range(9):
             yaw = 2 * math.pi * f / 9 + g.uniform(-0.2, 0.2)
@@ -1274,8 +1279,8 @@ def build_palms(M, coll, clear=hub_clear, suffix="", ring=(8, 16), count=14):
             side = Vector((-d.y, d.x, 0))
             length = g.uniform(2.4, 3.4)
             prev_l = prev_r = None
-            for s_ in range(7):
-                t = s_ / 6
+            for s_ in range(leaf_steps + 1):
+                t = s_ / leaf_steps
                 p = crown + d * (length * t) + Vector((0, 0, 0.6 * t - 1.6 * t * t))
                 w = 0.45 * math.sin(math.pi * min(t + 0.08, 1.0)) + 0.02
                 l, r = p - side * w, p + side * w
