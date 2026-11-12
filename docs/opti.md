@@ -18,6 +18,34 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 
 ---
 
+## Palmiers de la carte et du hub allégés
+**Jeu. 12 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · issue #207
+
+> **Mise à jour (même jour)** : à la demande de Dylan, même allègement pour les **14 palmiers du hub** (8 à 16 m) : **9 240 → 4 704** triangles, cabane 72 869 → **68 333**. Rendu avant/après comparé à 8 et 16 m : presque pareil. Pas vu dans Unity ni au casque.
+
+**Le problème.** Les 22 palmiers de la carte étaient l'objet le plus lourd du décor : **14 520 triangles** (660 par palmier), dont 85 % dans le tronc (6 rondins à 8 côtés et 5 tronçons). Ils sont pourtant loin du joueur (18 à 34 m).
+
+**Ce qui a été fait** (`build_palms` dans `Blender/cabane.py`, seulement pour la carte) : tronc à **6 côtés** en tronçons simples (3 au lieu de 5, sans le léger renflement) et palmes en **4 morceaux au lieu de 6**. Les anneaux du tronc restent (bouts chanfreinés des rondins). Les palmiers du hub, plus proches, ne changent pas. Même placement et mêmes formes (mêmes tirages au hasard).
+
+**Avant / après.** Palmiers de la carte 14 520 → **7 392** triangles (−49 %) ; paysage de la carte 59 919 → **52 791**. Fps à mesurer.
+
+**Est-ce que ça a vraiment marché ?** Rendu avant/après comparé dans Blender à 10 m et 25 m : presque pareil (tronc un peu plus anguleux de près). **Pas vu dans Unity ni au casque**.
+
+**Suggestions.** Même chose pour les palmiers du hub (9 240, plus proches : 8 à 16 m) ; ensuite les buissons (14 400 au hub et sur la carte) et les montagnes (13 056).
+
+## Points blancs des champignons dans une texture
+**Jeu. 12 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · issue #206
+
+**Le problème.** Les points blancs des champignons étaient de petits pavés en 3D posés sur le chapeau (12 triangles chacun, 2 à 9 par champignon) : moches de près (on voyait des cubes qui dépassent, capture de Dylan) et un 3e matériau sur l'objet.
+
+**Ce qui a été fait** (`Blender/cabane.py`) : une texture `Champi_Chapeau` (512 px, JPEG) dessinée par le script : un disque rouge à 13 points blancs. Le chapeau est « déplié » dessus (sommet au centre, bord sur le cercle), tourné au hasard pour que deux champignons n'aient pas les mêmes points ; le dessous du chapeau prend un coin rouge uni. Les pavés et le matériau `Champi_Point` sont retirés. Mêmes tirages au hasard qu'avant : l'herbe et les fleurs ne bougent pas.
+
+**Avant / après** (triangles comptés dans les .glb). Champignons du hub 8 740 → **6 832**, de la carte 9 852 → **7 728** ; 3 → 2 matériaux. Cabane 74 777 → 72 869, paysage 62 043 → 59 919. Une texture de 512 px en plus. Fps à mesurer.
+
+**Est-ce que ça a vraiment marché ?** Rendu vérifié dans Blender (points ronds, pas étirés) ; **pas vu dans Unity ni au casque**. Gain faible en triangles ; surtout un gain visuel. Perte : les points ne sont plus en relief.
+
+**Suggestions.** Les champignons restent à ~110 triangles pièce pour ~70 champignons, dont beaucoup de petits dans l'herbe : un pied à 6 côtés et un chapeau à 8 côtés pour les petits diviserait encore par deux. Les plus gros objets du décor restent les palmiers de la carte (14 520), les buissons (14 400, hub et carte) et les montagnes (13 056, hub et carte).
+
 ## Murs, fenêtres, volets et porte de la cabane allégés
 **Mar. 10 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-tapis-lustre` · issue #195
 

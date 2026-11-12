@@ -29,6 +29,17 @@ namespace SAE
         bool flying;
         Vector3 throwVelocity;
         float returnAt = -1f;
+        bool visualOnly;                  // coop : la fléchette d'un autre joueur, juste pour la voir (elle disparaît ensuite)
+
+        // Coop : un autre joueur vient de lancer une fléchette. On la fait voler chez nous, avec le même élan :
+        // elle se plante dans la cible et y marque comme chez lui, puis disparaît (elle n'a pas de présentoir ici).
+        public static void ShowRemote(Vector3 position, Quaternion rotation, Vector3 velocity)
+        {
+            var dart = Create(null, position, rotation);
+            dart.visualOnly = true;
+            dart.grab.enabled = false;    // on ne peut pas l'attraper : ce n'est pas la nôtre
+            dart.Throw(velocity);
+        }
 
         // Fabrique une fléchette (fût en bois, pointe en fer, ailettes rouges) posée en 'position'
         public static Dart Create(Transform parent, Vector3 position, Quaternion rotation)
@@ -112,6 +123,7 @@ namespace SAE
             capsule.radius = FlightRadius;
             flying = true;
             returnAt = Time.time + LostDelay;
+            if (!visualOnly) Coop.SendDart(transform.position, transform.rotation, velocity);   // les autres la voient partir
         }
 
         void FixedUpdate()
@@ -152,6 +164,7 @@ namespace SAE
 
         void ReturnHome()
         {
+            if (visualOnly) { Destroy(gameObject); return; }   // la fléchette d'un autre joueur : elle a fini son vol
             returnAt = -1f;
             flying = false;
             body.isKinematic = true;

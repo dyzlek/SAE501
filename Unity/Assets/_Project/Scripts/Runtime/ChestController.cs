@@ -85,7 +85,18 @@ namespace Sae501.Coffres
 
         public void ResetOpenedCount() => OpenedCount = 0;
 
-        IEnumerator OpenRoutine()
+        // Coop : un autre joueur vient d'ouvrir le coffre. On joue la même ouverture, avec le même singe, mais sans
+        // payer ni rien gagner : c'est chez lui que le singe arrive dans la bibliothèque (commune). Pendant ce temps,
+        // le coffre est occupé (IsBusy) : on ne peut pas l'ouvrir en même temps.
+        public void ShowRemote(int rarity, int type)
+        {
+            if (IsBusy) return;   // on l'ouvrait au même moment : chacun voit le sien
+            StartCoroutine(OpenRoutine(new Remote { rarity = (Rarity)rarity, type = type }));
+        }
+
+        class Remote { public Rarity rarity; public int type; }
+
+        IEnumerator OpenRoutine(Remote remote = null)
         {
             IsBusy = true;
             if (hideRoutine != null) StopCoroutine(hideRoutine); // une roulette encore affichée est reprise
@@ -93,18 +104,20 @@ namespace Sae501.Coffres
             roulette.SetVisible(true);
 
             var odds = CurrentOdds();            // probabilités AVANT cette ouverture
-            bool forced = SAE.Tutorial.ForcedChest;   // tutoriel : un Classique gris, pour montrer la fusion
+            bool forced = remote == null && SAE.Tutorial.ForcedChest;   // tutoriel : un Classique gris, pour montrer la fusion
             // Résultats décidés d'avance (un par singe), la roulette ne fait que montrer le meilleur
             LastResults.Clear();
             LastTypes.Clear();
             for (int i = 0; i < MonkeysPerChest; i++)
             {
+                if (remote != null) { LastResults.Add(remote.rarity); LastTypes.Add(remote.type); continue; }   // le tirage de l'autre joueur
                 LastResults.Add(forced ? (Rarity)0 : ChestOdds.Roll(odds));   // 0 = gris
                 LastTypes.Add(forced ? (int)SAE.MonkeyType.Classique : rollType != null ? rollType() : 0);
             }
             int best = 0;
             for (int i = 1; i < LastResults.Count; i++) if (LastResults[i] > LastResults[best]) best = i;
             Rarity result = LastResults[best];
+            if (remote == null) SAE.Coop.SendChest((int)result, LastTypes[best]);   // coop : les autres voient la même ouverture
 
             PlayChestAnimation();
             yield return new WaitForSeconds(spinDelay);
@@ -115,7 +128,7 @@ namespace Sae501.Coffres
             // Le nom du singe gagné et sa rareté, dans la couleur de la rareté (ex. « CANON VIOLET ! »)
             string won = $"{(SAE.MonkeyType)LastTypes[best]} {SAE.MonkeyData.RarityName((SAE.Rarity)(int)result)} !".ToUpper();
             roulette.ShowMessage(LastResults.Count == 1 ? won : $"{won}  (+{LastResults.Count - 1})", RarityInfo.ColorOf(result));
-            Opened?.Invoke(LastResults);
+            if (remote == null) Opened?.Invoke(LastResults);   // le singe gagné (ChestReward) : seulement chez celui qui a ouvert
             if (forced) SAE.Tutorial.ChestOpened();
             IsBusy = false;
             hideRoutine = StartCoroutine(HideRouletteAfter(hideDelay));

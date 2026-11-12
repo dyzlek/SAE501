@@ -208,6 +208,31 @@ def tex_rug(n=512):
     return image("Tapis", np.clip(col, 0, 1))             # JPEG sans alpha
 
 
+def tex_mushroom(n=512):
+    """Chapeau de champignon vu du dessus : un disque rouge à points blancs (12 nov., à la place des pavés en 3D).
+    Hors du disque (les coins) : rouge uni, pour le dessous du chapeau."""
+    y, x = np.mgrid[0:n, 0:n] / (n - 1) * 2 - 1
+    r = np.sqrt(x * x + y * y)
+    red, cream = np.array((0.80, 0.12, 0.08)), np.array((0.97, 0.95, 0.88))
+    col = np.zeros((n, n, 3)) + red
+    col = col * (1 - 0.25 * np.clip(r - 0.6, 0, 0.4) / 0.4)[..., None]   # le bord un peu plus sombre
+    g = np.random.default_rng(31)
+    dots = []
+    while len(dots) < 13:                                # des points de tailles variées qui ne se touchent pas
+        rad = g.uniform(0.07, 0.13)
+        cx, cy = g.uniform(-0.85, 0.85, 2)
+        if math.hypot(cx, cy) + rad < 0.95 and all(math.hypot(cx - dx, cy - dy) > rad + dr + 0.05 for dx, dy, dr in dots):
+            dots.append((cx, cy, rad))
+    for cx, cy, rad in dots:
+        wobble = 1 + 0.12 * np.sin(np.arctan2(y - cy, x - cx) * 3 + cx * 9)   # des points pas tout à fait ronds
+        d = np.sqrt((x - cx) ** 2 + (y - cy) ** 2) / (rad * wobble)
+        a = np.clip((1 - d) * n * rad * 0.5, 0, 1)[..., None]                  # bord adouci (anticrénelage)
+        col = col * (1 - a) + cream * a
+    col = col * (0.95 + 0.05 * tnoise(n, 40, 40, 33))[..., None]
+    col[r > 1.0] = red
+    return image("Champi_Chapeau", np.clip(col, 0, 1))
+
+
 def tex_dartboard(n=512):
     y, x = np.mgrid[0:n, 0:n] / (n - 1) * 2 - 1
     r = np.sqrt(x * x + y * y)
@@ -348,9 +373,8 @@ def build_materials():
     M["plume_rouge"] = material("Plume", color=(0.85, 0.12, 0.1), rough=0.6)
     M["plume_rouge"].use_backface_culling = False     # les ailettes des fléchettes sont de simples plans
     # Champignons (rouge à points blancs, comme dans les contes) et décor des murs (ballons de Bloons, pots)
-    M["champi_chapeau"] = material("Champi_Chapeau", color=(0.85, 0.15, 0.1), rough=0.5)
+    M["champi_chapeau"] = material("Champi_Chapeau", tex_mushroom(), rough=0.5)   # rouge à points blancs, dans la texture
     M["champi_pied"] = material("Champi_Pied", color=(0.95, 0.9, 0.78), rough=0.8)
-    M["champi_point"] = material("Champi_Point", color=(0.98, 0.97, 0.94), rough=0.6)
     M["ballon_deco"] = material("Ballon_Deco", vcol=True, rough=0.3)     # chaque ballon de la guirlande a sa couleur (sommets)
     M["ficelle"] = material("Ficelle", color=(0.85, 0.8, 0.7), rough=0.9)
     M["pot"] = material("Pot", color=(0.72, 0.38, 0.22), rough=0.85)    # terre cuite
@@ -1050,7 +1074,7 @@ def build_outside(M, coll, clear=hub_clear, seed=5, suffix="", palm_ring=(8, 16)
 def build_mushrooms(M, coll, g, clear, suffix):
     """Des champignons rouges à points blancs : de petites touffes dans l'herbe, et quelques géants plus loin
     (2 à 3 m, on les voit depuis la cabane et la carte). Pied crème légèrement courbé, chapeau bombé, points blancs."""
-    b = Builder([M["champi_pied"], M["champi_chapeau"], M["champi_point"]])
+    b = Builder([M["champi_pied"], M["champi_chapeau"]])
 
     def mushroom(x, z, h):
         base = P(x, GROUND_Y, z)
@@ -1058,13 +1082,24 @@ def build_mushrooms(M, coll, g, clear, suffix):
         b.lathe([(r_stem * 1.2, 0), (r_stem, h * 0.4), (r_stem * 0.9, h * 0.85)], 8, M["champi_pied"], base)
         cap = [(r_cap * math.cos(t), h * 0.8 + r_cap * 0.75 * math.sin(t)) for t in np.linspace(0, math.pi / 2, 4)]
         cap[-1] = (0.0001, cap[-1][1])
+        n0 = len(b.bm.faces)
         b.lathe([(r_stem * 0.9, h * 0.8)] + cap, 10, M["champi_chapeau"], base)
-        for k in range(int(2 + h * 2.5)):               # les points blancs, posés sur le chapeau (peu : léger pour le casque)
-            t = g.uniform(0.25, 1.2)
-            a = g.uniform(0, 2 * math.pi)
-            p = base + Vector((math.cos(a) * r_cap * math.cos(t), math.sin(a) * r_cap * math.cos(t), h * 0.8 + r_cap * 0.75 * math.sin(t)))
-            s = r_cap * g.uniform(0.08, 0.14)
-            b.box(p, (s, s, s * 0.4), Matrix.Identity(3), M["champi_point"])
+        # Les points blancs sont dans la texture (12 nov.) : avant, des petits pavés posés sur le chapeau.
+        # On tire les mêmes nombres qu'avant pour que l'herbe et les fleurs (même générateur) ne bougent pas ;
+        # le premier angle sert à tourner la texture, pour que deux champignons n'aient pas les mêmes points.
+        draws = [(g.uniform(0.25, 1.2), g.uniform(0, 2 * math.pi), g.uniform(0.08, 0.14)) for _ in range(int(2 + h * 2.5))]
+        rot = draws[0][1]
+        for f in list(b.bm.faces)[n0:]:
+            under = all(abs(l.vert.co.z - (base.z + h * 0.8)) < 1e-5 for l in f.loops)   # le dessous du chapeau : rouge uni
+            for l in f.loops:
+                if under:
+                    l[b.uv].uv = (0.02, 0.02)                # un coin de la texture, hors du disque : sans point
+                else:   # le chapeau déplié sur le disque de la texture : sommet au centre, bord sur le cercle (points pas étirés)
+                    d = l.vert.co - base
+                    t = math.atan2((d.z - h * 0.8) / 0.75, math.hypot(d.x, d.y))     # 0 au bord, 90° au sommet
+                    rho = 0.49 * (1 - t / (math.pi / 2))
+                    az = math.atan2(d.y, d.x) + rot
+                    l[b.uv].uv = (0.5 + rho * math.cos(az), 0.5 + rho * math.sin(az))
 
     for (cx, cz, _) in scatter(g, 20, 5.5, 28.0, clear):        # petites touffes de 2 à 4
         for _ in range(g.randint(2, 4)):
@@ -1222,8 +1257,11 @@ def build_mountains(M, coll, suffix=""):
 
 
 def build_palms(M, coll, clear=hub_clear, suffix="", ring=(8, 16), count=14):
-    """Des palmiers tout autour : tronc courbe en anneaux, couronne de palmes arquées."""
+    """Des palmiers tout autour : tronc courbe en anneaux, couronne de palmes arquées.
+    Allégés le 12 nov. (optimisation, carte puis hub) : tronc à 6 côtés en tronçons simples et palmes en 4 morceaux
+    au lieu de 6 (environ 340 triangles par palmier au lieu de 660)."""
     g = random.Random(17 if not suffix else 29)
+    trunk_segs, leaf_steps = 6, 4
     b = Builder([M["poutre"], M["bout"], M["palme"]])
     for idx, (x, z, ang) in enumerate(scatter(g, count, ring[0], ring[1], clear)):
         base = P(x, GROUND_Y, z)
@@ -1231,7 +1269,8 @@ def build_palms(M, coll, clear=hub_clear, suffix="", ring=(8, 16), count=14):
         lean = Vector((g.uniform(-1, 1), g.uniform(-1, 1), 0)).normalized() * g.uniform(0.6, 1.4)
         pts = [base + lean * (t * t) + Vector((0, 0, height * t)) for t in np.linspace(0, 1, 7)]
         for k in range(6):
-            b.log(pts[k], pts[k + 1] + (pts[k + 1] - pts[k]) * 0.05, 0.16 - 0.015 * k, M["poutre"], M["bout"], 1000 + idx * 10 + k, segs=8)
+            b.log(pts[k], pts[k + 1] + (pts[k + 1] - pts[k]) * 0.05, 0.16 - 0.015 * k, M["poutre"], M["bout"], 1000 + idx * 10 + k,
+                  segs=trunk_segs, simple=True)
         crown = pts[-1]
         for f in range(9):
             yaw = 2 * math.pi * f / 9 + g.uniform(-0.2, 0.2)
@@ -1239,8 +1278,8 @@ def build_palms(M, coll, clear=hub_clear, suffix="", ring=(8, 16), count=14):
             side = Vector((-d.y, d.x, 0))
             length = g.uniform(2.4, 3.4)
             prev_l = prev_r = None
-            for s_ in range(7):
-                t = s_ / 6
+            for s_ in range(leaf_steps + 1):
+                t = s_ / leaf_steps
                 p = crown + d * (length * t) + Vector((0, 0, 0.6 * t - 1.6 * t * t))
                 w = 0.45 * math.sin(math.pi * min(t + 0.08, 1.0)) + 0.02
                 l, r = p - side * w, p + side * w
@@ -1262,6 +1301,7 @@ BAN_X0, BAN_X1 = -4.6, 9.4          # la terrasse (repère Unity), agrandie à d
 BAN_Z0, BAN_Z1 = -3.6, 4.8
 PATH_HALF = 1.1                     # demi-largeur de l'allée : le battant de la porte, ouvert, y tient sans toucher la barrière
 WALK_Z = -4.7                       # le passage en planches, de la terrasse (BAN_Z0) jusqu'à la terrasse de la cabane
+WALK_END = GROVE_Z + 5.6            # = -4,5 : le bord de la terrasse de la cabane (z0 = -5,6 de build_floor) dans ce repère retourné
 PATH_Z = -6.45                      # le bout de l'allée, contre le mur de la cabane (sa porte est à -6,7 dans ce repère)
 SHED_X, SHED_Z0, SHED_Z1 = 3.2, 2.9, 4.6   # l'abri : de -SHED_X à SHED_X, de SHED_Z0 à SHED_Z1
 SHED_H = 2.75
@@ -1290,13 +1330,18 @@ def build_bananeraie(M, coll):
 
     # Le passage en planches de l'allée, au-dessus de l'herbe, entre la terrasse et celle de la cabane
     b = Builder([M["plancher"], M["poutre"]])
+    # 12 nov. (scintillement) : l'allée s'arrête au bord de la terrasse de la cabane (WALK_END). Avant, ses dernières
+    # planches recouvraient 20 cm de la terrasse, à la même hauteur : deux faces au même endroit = z-fighting.
     z = BAN_Z0
     while z > WALK_Z + 0.01:
-        b.box(P(0, -0.025, z - 0.095), (2 * PATH_HALF, 0.18, 0.05), Matrix.Identity(3), M["plancher"],
-              uv_scale=1 / 1.2, uv_offset=(rng.random(), rng.random()), bevel=0.006, tint=rng.uniform(0.78, 1.05))
+        uv_offset, tint = (rng.random(), rng.random()), rng.uniform(0.78, 1.05)   # tirés même si la planche saute : le reste du décor ne bouge pas
+        length = min(0.18, z - WALK_END)                                          # la dernière planche est recoupée au ras de la terrasse
+        if length > 0.02:
+            b.box(P(0, -0.025, z - length / 2), (2 * PATH_HALF, length, 0.05), Matrix.Identity(3), M["plancher"],
+                  uv_scale=1 / 1.2, uv_offset=uv_offset, bevel=0.006, tint=tint)
         z -= 0.19
     for side in (-1, 1):   # deux poutres dessous, posées dans l'herbe
-        b.box(P(side * (PATH_HALF - 0.1), -0.12, (BAN_Z0 + WALK_Z) / 2), (0.12, abs(WALK_Z - BAN_Z0), 0.14), Matrix.Identity(3), M["poutre"], uv_scale=1 / 1.5, bevel=0.01)
+        b.box(P(side * (PATH_HALF - 0.1), -0.12, (BAN_Z0 + WALK_END) / 2), (0.12, abs(WALK_END - BAN_Z0), 0.14), Matrix.Identity(3), M["poutre"], uv_scale=1 / 1.5, bevel=0.01)
     objs.append(b.finish("Allee", coll))
 
     # L'abri : un mur de rondins au fond, quatre poteaux, des poutres et un toit de chaume à quatre pans

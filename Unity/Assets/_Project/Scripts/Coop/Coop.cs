@@ -345,6 +345,29 @@ namespace SAE
             CoopPlayer.Local.ShotRpc(from, velocity);
         }
 
+        // --- Le coffre et les fléchettes de la cabane : les autres voient ce qu'on fait ---
+
+        static bool CanShare => Role != CoopRole.Solo && !(IsGuest && !Connected) && CoopPlayer.Local;
+
+        // On vient d'ouvrir le coffre (ChestController) : le singe tiré, pour que les autres voient le même
+        public static void SendChest(int rarity, int type)
+        {
+            if (CanShare) CoopPlayer.Local.ChestRpc(rarity, type);
+        }
+
+        // Un autre joueur a ouvert le coffre : on joue l'ouverture chez nous, pour voir (c'est chez lui que le singe est gagné)
+        public static void ShowChest(int rarity, int type)
+        {
+            var chest = FindAnyObjectByType<Sae501.Coffres.ChestController>();   // rare (une ouverture) : on peut le chercher
+            if (chest) chest.ShowRemote(rarity, type);
+        }
+
+        // On vient de lancer une fléchette (Dart.Throw)
+        public static void SendDart(Vector3 pos, Quaternion rotation, Vector3 velocity)
+        {
+            if (CanShare) CoopPlayer.Local.DartRpc(pos, rotation, velocity);
+        }
+
         // La flèche d'un autre joueur : seulement pour la voir, c'est chez le tireur qu'elle perce les ballons
         public static void ShowShot(Vector3 from, Vector3 velocity)
         {
