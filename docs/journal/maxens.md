@@ -2,6 +2,21 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Jeu. 12 nov. 2026
+- **Fait : un tutoriel plus complet** (branche `feat/tuto-complet`). Il passe de 17 à 23 étapes :
+  - **le genre** : un tableau explique ce qu'est un tower defense (éclater les ballons avant la sortie, avec l'arc et des singes posés) ;
+  - **l'arc** : où il est (« regarde ta main GAUCHE » au casque, le bas de l'écran au PC), puis un **entraînement** de 3 flèches avant la vague 1. Le geste est expliqué pas à pas (main droite sur la corde, grip, reculer jusqu'à la joue, viser avec la ligne, lâcher). Une flèche pas assez tendue tombe, et le tableau dit « TENDS PLUS FORT ! » avec le bon conseil. Le texte change entre le casque et le PC ;
+  - **le reste** : les améliorations de l'arc sur la carte, la caisse (les bananes sont l'argent), les plaques de la bibliothèque (débloquer un type pour qu'il sorte du coffre, et pourquoi), à quoi servent PRODUCTION, FRAÎCHEUR et VALEUR, les récolteurs et leurs améliorations, l'armoire à trophées et les fléchettes ;
+  - **des flèches plus voyantes** : la flèche dorée pulse, un **rayon doré** monte de la cible vers le ciel (on le voit de loin), et une **flèche au sol**, à nos pieds, montre la direction quand la cible est loin (au sol plutôt que devant les yeux : confort) ;
+  - les nouvelles cibles de la flèche (caisse, plaque, boutons de l'arc, trophées, cible des fléchettes) sont posées au lancement par les objets eux-mêmes (`TutorialTarget.Add`) : **pas besoin de régénérer les scènes**.
+- **Fait : la roulette fermée jusqu'à la vague 5** (`Casino/CasinoGate.cs`). Des barrières de chantier rouges et blanches l'entourent, avec une pancarte « CASINO FERMÉ · ouvre à la vague 5 (2 / 5) ». Ses boutons et sa roue refusent (son d'alerte, pancarte qui rougit). À la vague 5, les barrières s'enfoncent dans le sol, et deux étapes du tutoriel amènent à la roulette (« LE CASINO OUVRE ! », puis comment jouer) ; elles ne bloquent rien. Le casino ne fait donc plus partie du tutoriel du début. La borne de blackjack, plus loin, reste ouverte.
+- Compilé, **pas encore testé en jeu** (UnityMCP déconnecté : pas de captures cette fois).
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Code) | Tutoriel complet : genre, arc (où il est, comment tirer, entraînement de 3 flèches), améliorations, caisse, plaques, comptoir, récolteurs, trophées, fléchettes ; flèches plus voyantes (rayon doré, flèche au sol) ; compilé | À tester |
+| Claude (Code) | Roulette fermée par des barrières jusqu'à la vague 5, puis tutoriel qui y amène (`CasinoGate`) ; compilé | À tester |
+
 ## Mar. 10 nov. 2026
 - **Fait : la bananeraie partagée en coop** (branche `feat/bananeraie-partagee`). Avant, chaque joueur avait sa propre bananeraie : ses bananes tombaient au hasard chez lui seulement, et seul l'argent de la vente passait par le réseau. Quand un joueur prenait une banane, l'autre voyait sa main bouger, mais vide. Maintenant **tout est partagé** :
   - **les mêmes bananes chez tout le monde** : c'est l'hôte qui les fait tomber et pourrir ; chaque invité en a une copie qui suit sa position ;

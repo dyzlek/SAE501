@@ -121,6 +121,7 @@ namespace SAE
                     nocked.transform.SetParent(null, true);
                     nocked.Launch(velocity);
                     Sounds.Play(Sounds.ArcTir, transform.position, 0.8f, Random.Range(0.95f, 1.05f));
+                    Tutorial.ArrowShot(true);   // entraînement du tutoriel : une flèche bien tendue de plus
                     nextNock = Time.time + reloadTime;   // on recharge : pas de nouvelle flèche avant reloadTime
                     if (BowUpgrades.TripleShot)
                     {
@@ -128,7 +129,11 @@ namespace SAE
                         ExtraArrow(BowUpgrades.TripleSpread, velocity, nocked.transform.localScale);
                     }
                 }
-                else Destroy(nocked.gameObject);   // à peine tirée : on range la flèche
+                else
+                {
+                    Destroy(nocked.gameObject);   // à peine tirée : on range la flèche
+                    Tutorial.ArrowShot(false);    // le tutoriel dit de tendre plus fort
+                }
                 nocked = null;
             }
             SetDraw(0f);

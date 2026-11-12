@@ -19,7 +19,11 @@ namespace SAE
         int thrown;
         int best;
 
-        void Start() => Show();
+        void Start()
+        {
+            Show();
+            TutorialTarget.Add(transform, TutorialSpot.Darts, Level.Hub);   // le tutoriel montre la cible
+        }
 
         // Une fléchette s'est plantée en 'point' : ses points, d'après sa distance au centre dans le plan de la cible
         public void Hit(Vector3 point)

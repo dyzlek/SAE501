@@ -69,6 +69,7 @@ namespace SAE
             ShowGlow();
             Refresh();
             BlackjackTable.CreateNear(transform);
+            CasinoGate.CreateAround(this);   // fermée par des barrières jusqu'à la vague 5
         }
 
         // Les lueurs allumées (cadre de la zone, cases de la roue) pulsent doucement pour attirer l'œil

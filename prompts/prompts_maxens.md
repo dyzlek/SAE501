@@ -2,6 +2,16 @@
 
 _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (orthographe, clarté, structure : contexte, objectif, contraintes). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/maxens.md)._
 
+## Jeu. 12 nov. 2026
+
+### Un tutoriel complet
+> Sur une autre branche, améliore le tutoriel :
+> - la roulette ne doit être déblocable qu'après quelques vagues (5 ou 10). Au début, le tutoriel ne la montre plus et elle est bloquée, par exemple par des barrières ; quand elle se débloque, un tutoriel amène le joueur jusqu'à elle ;
+> - explique rapidement ce qu'est un tower defense ;
+> - dis où est l'arc (si on ne regarde pas ses mains, on ne le voit pas) et surtout comment tirer ;
+> - rends les flèches d'indication plus voyantes ;
+> - explique comment débloquer les singes et pourquoi le faire, à quoi servent les améliorations de la bananeraie, etc., et pareil dans le hub. Bref, un tutoriel vraiment complet.
+
 ## Mar. 10 nov. 2026
 
 ### Partager la bananeraie en coop

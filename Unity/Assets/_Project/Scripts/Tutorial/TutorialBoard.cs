@@ -10,7 +10,7 @@ namespace SAE
     //   - SUIVANT n'apparaît que sur les étapes à lire.
     // Le cadre lumineux pulse en continu, pour qu'on le remarque. Une interaction pas encore permise :
     // le tableau tremble et son cadre passe au rouge un instant.
-    // Le tutoriel fini, le tableau disparaît (visual éteint).
+    // Le tutoriel fini, le tableau disparaît (visual éteint) ; il revient pour les étapes du casino.
     public class TutorialBoard : MonoBehaviour
     {
         public GameObject visual;          // tout ce qui se voit (ardoise, textes, boutons) : éteint à la fin
@@ -54,7 +54,7 @@ namespace SAE
 
         void Show()
         {
-            bool on = Tutorial.Active;
+            bool on = Tutorial.Showing;   // le tutoriel, ou plus tard les étapes du casino
             visual.SetActive(on);
             if (!on) return;
             var step = Tutorial.Current;
@@ -62,7 +62,7 @@ namespace SAE
             title.text = confirm ? "PASSER LE TUTORIEL ?" : Tutorial.Title(step);
             fullBody = confirm ? "Tu es sûr ? Tu ne verras pas la suite\ndes explications (le premier singe\nte sera quand même offert)." : Tutorial.Body(step);
             body.text = "";
-            progress.text = $"{(int)step + 1} / {(int)Tutorial.Step.Done}";
+            progress.text = Tutorial.Progress(step);
             nextButton.SetActive(confirm || Tutorial.NeedsNext(step));
             SetLabel(nextButton, confirm ? "NON" : "SUIVANT");
             SetLabel(skipButton, confirm ? "OUI" : "PASSER");

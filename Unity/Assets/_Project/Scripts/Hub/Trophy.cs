@@ -45,7 +45,12 @@ namespace SAE
         int Progress => goal == TrophyGoal.Vagues ? GameState.WavesWon : GameState.BananasEarned;
         string Unit => goal == TrophyGoal.Vagues ? "VAGUES" : "BANANES";
 
-        void Awake() => baseScale = transform.localScale;
+        void Awake()
+        {
+            baseScale = transform.localScale;
+            // Le tutoriel montre l'armoire : la flèche se pose au-dessus du premier trophée (bronze des vagues)
+            if (goal == TrophyGoal.Vagues && tier == 0) TutorialTarget.Add(transform, TutorialSpot.Trophies, Level.Hub);
+        }
 
         // Pour voir l'annonce sans jouer : en mode Play, clic droit sur le composant d'un trophée
         [ContextMenu("Tester l'annonce du trophée")] void TestPopup() => TrophyPopup.Show(this);

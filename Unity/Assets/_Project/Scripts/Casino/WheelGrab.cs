@@ -81,6 +81,7 @@ namespace SAE
 
         bool Begin()
         {
+            if (!CasinoGate.Open) { CasinoGate.Refuse(); return false; }   // casino fermé (barrières) jusqu'à la vague 5
             if (!Tutorial.Allows(TutorialAction.Other)) { Tutorial.Refuse(); return false; }   // comme les boutons pendant le tutoriel
             return wheel.BeginDrag();
         }

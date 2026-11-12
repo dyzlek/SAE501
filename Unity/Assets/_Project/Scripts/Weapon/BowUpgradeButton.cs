@@ -23,6 +23,7 @@ namespace SAE
 
         void Start()
         {
+            TutorialTarget.Add(transform, TutorialSpot.BowUpgrades, Level.Carte);   // le tutoriel montre les boutons de l'arc
             capRest = cap.localPosition;
             capTint = cap.GetComponent<ColorTint>();
         }
