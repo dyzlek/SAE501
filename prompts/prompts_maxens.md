@@ -4,6 +4,11 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Jeu. 12 nov. 2026
 
+### Le GDD final
+> Je dois faire un GDD pour cette SAÉ sur Bloons. Aide-moi à en faire un complet, bon et beau : dis-moi d'abord ce qu'il faut dedans (on en avait un des deux premières semaines, je ne sais pas s'il est correct). Fais la mise en page en code. Prends la dernière version du `main` sur GitHub, et refais par le MCP toutes les captures dont tu as besoin, belles et cohérentes.
+>
+> Suite : la porte, on appuie dessus, on ne la pousse pas ; revérifie vraiment le tableau du périmètre, et mets seulement « gardé » ou « coupé » (on a tout testé au casque) ; explique les colonnes DOIT / DEVRAIT / POURRAIT / NE FERA PAS ; précise « personne ne construisait ». Mets-le sur GitHub.
+
 ### Corrections du tutoriel, 2e test
 > Crée une autre branche pour améliorer le tutoriel :
 > - pendant l'explication de l'arc, mets les ballons au milieu de la carte ou vers le début du chemin : là, ils sont cachés par le tableau ;

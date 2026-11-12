@@ -3,6 +3,17 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Jeu. 12 nov. 2026
+- **Fait : le GDD final** (branche `docs/gdd-final`, dossier [docs/gdd-maxens](../gdd-maxens/)) : [GDD_final.pdf](../gdd-maxens/GDD_final.pdf), 34 pages, à jour du `main` du 12 nov.
+  - **Contenu** : l'ancien GDD (version longue du 22 oct.) et `docs/GDD.md` réunis et mis à jour, en 5 parties et 29 sections. Les chiffres (singes, arc, ballons, 100 vagues, bananeraie, trophées) sont repris du code. Ajouté : audio et vibrations, coop, tests et retours, ce qu'on a coupé et pourquoi, bilan.
+  - **Mise en page** : en code (Markdown → HTML/CSS → PDF par Edge, `build_final.py`), avec couverture, sommaire paginé, pages de partie et 7 schémas dessinés par le script (boucle de jeu, lieux, économie, plan de la carte, plan de la cabane, courbe des 100 vagues, planning).
+  - **Captures** : une trentaine refaites dans le jeu par UnityMCP (mode PC, caméra à part, 1920 × 1080) : tutoriel, casino fermé puis ouvert, cabane, bananeraie, carte, vague 24 sous l'orage, boss, camouflés. Ma sauvegarde a été mise de côté puis remise.
+  - **Corrigé après ma relecture** : la porte ne se pousse pas, on appuie dessus ; le tableau du périmètre revérifié dans le code (la brume existe, seule la nuit est coupée) et réduit à « gardé / coupé » ; les quatre colonnes expliquées.
+  - **À relire à trois** : le bilan et la répartition (écrits d'après les journaux). `docs/GDD.md` n'est pas remplacé.
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Code) | GDD final : contenu mis à jour d'après le code et les journaux, mise en page HTML/CSS → PDF, schémas, captures refaites par UnityMCP, corrections après relecture | Gardé (bilan et répartition à relire à trois) |
+
 - **Corrigé après mon 2e test du tutoriel** (branche `feat/amelioration-tuto`) :
   - **les ballons d'entraînement étaient cachés par le tableau** de la carte : ils flottent maintenant au-dessus du chemin, au milieu de la carte, bien en face de l'arrivée, et ils sont plus gros (70 cm) ;
   - **le tableau de la carte cachait le pupitre ARC** : il passe à droite de l'arrivée, après la caisse (dans le générateur : **régénérer les scènes**) ;
