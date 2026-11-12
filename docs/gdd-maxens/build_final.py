@@ -7,7 +7,7 @@
 import html, math, os, re, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO = r'C:\Users\maxen\Desktop\sae 505\SAE501'
+REPO = r'C:\Users\maxen\Desktop\sae 501\SAE501'
 CAPTURES = os.path.join(REPO, 'docs', 'captures')
 FONTS = os.path.join(REPO, 'Unity', 'Assets', '_Project', 'Art', 'Resources', 'Fonts')
 EDGE = r'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'

@@ -8,6 +8,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
   - **Mise en page** : en code (Markdown → HTML/CSS → PDF par Edge, `build_final.py`), avec couverture, sommaire paginé, pages de partie et 7 schémas dessinés par le script (boucle de jeu, lieux, économie, plan de la carte, plan de la cabane, courbe des 100 vagues, planning).
   - **Captures** : une trentaine refaites dans le jeu par UnityMCP (mode PC, caméra à part, 1920 × 1080) : tutoriel, casino fermé puis ouvert, cabane, bananeraie, carte, vague 24 sous l'orage, boss, camouflés. Ma sauvegarde a été mise de côté puis remise.
   - **Corrigé après ma relecture** : la porte ne se pousse pas, on appuie dessus ; le tableau du périmètre revérifié dans le code (la brume existe, seule la nuit est coupée) et réduit à « gardé / coupé » ; les quatre colonnes expliquées.
+  - **Ajouté à ma demande** : les 72 images par seconde, plafonnées (la fréquence de l'écran du casque) et tenues de façon constante au casque (sections Confort, Optimisation et Risques).
   - **À relire à trois** : le bilan et la répartition (écrits d'après les journaux). `docs/GDD.md` n'est pas remplacé.
 
 | Outil | Pour quoi | Gardé / jeté |

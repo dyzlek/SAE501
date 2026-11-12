@@ -508,7 +508,7 @@ La page **COMMANDES** des options rappelle ces touches, au casque comme au clavi
 - **Interface :** dans le décor, à 1-2 m. Les annonces apparaissent une fois devant le joueur et **ne suivent pas la tête**.
 - **Portée :** tout est à portée de bras (cercle de 2,8 m). Les singes et les bananes s'attrapent de loin, jusqu'à 6 m : on ne ramasse pas au sol en boucle.
 - **Sessions :** vagues courtes, pause naturelle entre deux vagues, pause à tout moment, sauvegarde automatique.
-- **Technique :** objectif 72 fps (compteur au poignet en build de test), 1 unité Unity = 1 m.
+- **Technique :** 72 images par seconde, plafonnées et tenues de façon constante au casque (compteur au poignet en build de test) ; 1 unité Unity = 1 m.
 
 ## Menu, pause et sauvegarde
 
@@ -577,6 +577,8 @@ Nous avons appliqué le **test du silence** : donner le jeu sans rien dire, note
 - **Classement en ligne :** une petite API PHP et une base MySQL sur l'espace web de l'IUT.
 
 ### Optimisation pour le Quest
+>! **72 images par seconde, constantes.** Le jeu est plafonné à 72 fps, la fréquence de l'écran du casque : aller au-delà ne servirait à rien. Au casque, il les atteint et les tient de façon constante, y compris pendant les vagues chargées.
+
 Chaque modification de performance est notée dans `docs/opti.md` (problème, ce qui a été fait, avant / après).
 
 <div class="cards c3">
@@ -607,7 +609,7 @@ Un mode clavier-souris permet de développer et de tester sans casque. Il sert �
 
 | Risque | Parade |
 |---|---|
-| Chute de fps aux vagues hautes (centaines de ballons, orage) | Pools, maillages fusionnés, pluie réduite au casque ; mesure sur le Quest |
+| Chute de fps aux vagues hautes (centaines de ballons, orage) | Pools, maillages fusionnés, pluie réduite au casque : les 72 fps sont tenus |
 | Équilibrage des 100 vagues | Une formule et des données centralisées : on règle en quelques minutes |
 | Coop ajouté tard (fin de semaine 2) | Le jeu est complet en solo ; le coop reste un bonus |
 | Mode développeur du casque qui saute | Partage de connexion, date et heure automatiques |
