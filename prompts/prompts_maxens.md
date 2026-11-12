@@ -4,6 +4,10 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 
 ## Jeu. 12 nov. 2026
 
+### Dylan ne trouve pas ma partie
+> Je donne le code et le mot de passe à Dylan, mais il ne trouve pas ma partie. Pourquoi ?
+
+
 ### Retours sur le tutoriel
 > Les textes ne sont pas terribles et ne donnent pas envie. Je n'ai pas compris tout de suite qu'il fallait tirer 3 fois pour s'entraîner. Si on rate la vague, il faudrait qu'un « DOMMAGE ! » (ou autre) apparaisse, puis un choix : refaire ou continuer. Je n'ai pas pu tester le reste, mais s'il y a d'autres points comme ça, modifie-les.
 
