@@ -7,6 +7,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 ### Retours sur le tutoriel
 > Premier truc pour le tuto : la flèche est dégueulasse avec le trait lumineux. J'aimerais que la pancarte tienne à quelque chose, car elle vole simplement. J'aimerais indiquer par le son où se trouvent les panneaux du tuto, en 360°, sans que ce soit lourd. J'aimerais que les trois ballons soient plus visibles. Enlève deux ballons à la première vague pour que ce soit plus simple. La flèche montre au-dessus du meuble ; que la flèche dans la bibliothèque soit un peu mieux. Pour la porte, pas de flèche mais un contour autour de la porte (n'oublie pas qu'on la voit dans le hub et dans la bananeraie). (avec huit captures)
 
+### Bananeraie agrandie et pancarte du casino
+> Agrandis la bananeraie, s'il te plaît, et corrige le texte (de la pancarte du casino). (avec deux captures)
+
 ### Palmiers de la carte
 > Tu peux réduire le nombre de polygones des palmiers sur la carte, s'il te plaît ?
 >
