@@ -7,6 +7,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
+| Claude (Claude Code) | Viseur de la case de la bibliothèque descendu de 6 cm (ma demande : « un peu plus bas ») | À tester |
 | Claude (Claude Code) | **Flèche de la plaque de déblocage** (ma demande, capture) : sortie des étagères côté joueur et penchée de 35° vers la plaque, au lieu d'être droite au-dessus (elle traversait l'étagère du dessus) | À tester |
 | Claude (Claude Code) | **Tutoriel, 4e passe** (mes retours, 2 captures) : les annonces (« SUIS LA FLÈCHE DORÉE ! » au premier LANCER…) apparaissaient en bas en mode PC, parce que la tête du rig XR reste au sol : elles se posent maintenant devant la vraie caméra ; cadre de la bibliothèque remplacé par un viseur à 4 coins dorés ajusté à la case, qui respire ; la flèche disparaît pendant l'ouverture du coffre. Rien testé en jeu | À tester |
 | Claude (Claude Code) | **Tutoriel, 3e passe** (mes retours, 2 captures) : flèche remise bien droite partout (la version penchée ne me plaisait pas) ; au-dessus de tout le meuble de l'arc (une cible sur le meuble entier au lieu d'un bouton) ; bibliothèque : plus de flèche, un cadre doré qui pulse autour de la case du premier singe ; porte : **cause trouvée**, le contour était calé sur le battant (dans l'épaisseur du mur, côté dehors), donc le cadre intérieur était caché dans les rondins ; il est maintenant calé sur le milieu du mur, à 30 cm de chaque côté. Rien testé en jeu | À tester |

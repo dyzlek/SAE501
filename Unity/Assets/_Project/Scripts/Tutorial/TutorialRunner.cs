@@ -133,7 +133,7 @@ namespace SAE
             var p = target.transform.position;
             var inward = new Vector3(-p.x, 0f, -p.z).normalized;   // vers le centre de la cabane, là où est le joueur
             float breathe = 1f + 0.08f * Mathf.Sin(Time.time * 4f);
-            slotFrame.SetPositionAndRotation(p + Vector3.up * 0.11f + inward * 0.14f, Quaternion.LookRotation(-inward));
+            slotFrame.SetPositionAndRotation(p + Vector3.up * 0.05f + inward * 0.14f, Quaternion.LookRotation(-inward));
             slotFrame.localScale = Vector3.one * breathe;
             var c = Color.Lerp(GoldDark, Gold, 0.5f + 0.5f * Mathf.Sin(Time.time * 4f));
             foreach (var bar in slotBars) bar.Animate(c);
