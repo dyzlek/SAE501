@@ -208,6 +208,31 @@ def tex_rug(n=512):
     return image("Tapis", np.clip(col, 0, 1))             # JPEG sans alpha
 
 
+def tex_mushroom(n=512):
+    """Chapeau de champignon vu du dessus : un disque rouge à points blancs (12 nov., à la place des pavés en 3D).
+    Hors du disque (les coins) : rouge uni, pour le dessous du chapeau."""
+    y, x = np.mgrid[0:n, 0:n] / (n - 1) * 2 - 1
+    r = np.sqrt(x * x + y * y)
+    red, cream = np.array((0.80, 0.12, 0.08)), np.array((0.97, 0.95, 0.88))
+    col = np.zeros((n, n, 3)) + red
+    col = col * (1 - 0.25 * np.clip(r - 0.6, 0, 0.4) / 0.4)[..., None]   # le bord un peu plus sombre
+    g = np.random.default_rng(31)
+    dots = []
+    while len(dots) < 13:                                # des points de tailles variées qui ne se touchent pas
+        rad = g.uniform(0.07, 0.13)
+        cx, cy = g.uniform(-0.85, 0.85, 2)
+        if math.hypot(cx, cy) + rad < 0.95 and all(math.hypot(cx - dx, cy - dy) > rad + dr + 0.05 for dx, dy, dr in dots):
+            dots.append((cx, cy, rad))
+    for cx, cy, rad in dots:
+        wobble = 1 + 0.12 * np.sin(np.arctan2(y - cy, x - cx) * 3 + cx * 9)   # des points pas tout à fait ronds
+        d = np.sqrt((x - cx) ** 2 + (y - cy) ** 2) / (rad * wobble)
+        a = np.clip((1 - d) * n * rad * 0.5, 0, 1)[..., None]                  # bord adouci (anticrénelage)
+        col = col * (1 - a) + cream * a
+    col = col * (0.95 + 0.05 * tnoise(n, 40, 40, 33))[..., None]
+    col[r > 1.0] = red
+    return image("Champi_Chapeau", np.clip(col, 0, 1))
+
+
 def tex_dartboard(n=512):
     y, x = np.mgrid[0:n, 0:n] / (n - 1) * 2 - 1
     r = np.sqrt(x * x + y * y)
@@ -348,9 +373,8 @@ def build_materials():
     M["plume_rouge"] = material("Plume", color=(0.85, 0.12, 0.1), rough=0.6)
     M["plume_rouge"].use_backface_culling = False     # les ailettes des fléchettes sont de simples plans
     # Champignons (rouge à points blancs, comme dans les contes) et décor des murs (ballons de Bloons, pots)
-    M["champi_chapeau"] = material("Champi_Chapeau", color=(0.85, 0.15, 0.1), rough=0.5)
+    M["champi_chapeau"] = material("Champi_Chapeau", tex_mushroom(), rough=0.5)   # rouge à points blancs, dans la texture
     M["champi_pied"] = material("Champi_Pied", color=(0.95, 0.9, 0.78), rough=0.8)
-    M["champi_point"] = material("Champi_Point", color=(0.98, 0.97, 0.94), rough=0.6)
     M["ballon_deco"] = material("Ballon_Deco", vcol=True, rough=0.3)     # chaque ballon de la guirlande a sa couleur (sommets)
     M["ficelle"] = material("Ficelle", color=(0.85, 0.8, 0.7), rough=0.9)
     M["pot"] = material("Pot", color=(0.72, 0.38, 0.22), rough=0.85)    # terre cuite
@@ -1050,7 +1074,7 @@ def build_outside(M, coll, clear=hub_clear, seed=5, suffix="", palm_ring=(8, 16)
 def build_mushrooms(M, coll, g, clear, suffix):
     """Des champignons rouges à points blancs : de petites touffes dans l'herbe, et quelques géants plus loin
     (2 à 3 m, on les voit depuis la cabane et la carte). Pied crème légèrement courbé, chapeau bombé, points blancs."""
-    b = Builder([M["champi_pied"], M["champi_chapeau"], M["champi_point"]])
+    b = Builder([M["champi_pied"], M["champi_chapeau"]])
 
     def mushroom(x, z, h):
         base = P(x, GROUND_Y, z)
@@ -1058,13 +1082,24 @@ def build_mushrooms(M, coll, g, clear, suffix):
         b.lathe([(r_stem * 1.2, 0), (r_stem, h * 0.4), (r_stem * 0.9, h * 0.85)], 8, M["champi_pied"], base)
         cap = [(r_cap * math.cos(t), h * 0.8 + r_cap * 0.75 * math.sin(t)) for t in np.linspace(0, math.pi / 2, 4)]
         cap[-1] = (0.0001, cap[-1][1])
+        n0 = len(b.bm.faces)
         b.lathe([(r_stem * 0.9, h * 0.8)] + cap, 10, M["champi_chapeau"], base)
-        for k in range(int(2 + h * 2.5)):               # les points blancs, posés sur le chapeau (peu : léger pour le casque)
-            t = g.uniform(0.25, 1.2)
-            a = g.uniform(0, 2 * math.pi)
-            p = base + Vector((math.cos(a) * r_cap * math.cos(t), math.sin(a) * r_cap * math.cos(t), h * 0.8 + r_cap * 0.75 * math.sin(t)))
-            s = r_cap * g.uniform(0.08, 0.14)
-            b.box(p, (s, s, s * 0.4), Matrix.Identity(3), M["champi_point"])
+        # Les points blancs sont dans la texture (12 nov.) : avant, des petits pavés posés sur le chapeau.
+        # On tire les mêmes nombres qu'avant pour que l'herbe et les fleurs (même générateur) ne bougent pas ;
+        # le premier angle sert à tourner la texture, pour que deux champignons n'aient pas les mêmes points.
+        draws = [(g.uniform(0.25, 1.2), g.uniform(0, 2 * math.pi), g.uniform(0.08, 0.14)) for _ in range(int(2 + h * 2.5))]
+        rot = draws[0][1]
+        for f in list(b.bm.faces)[n0:]:
+            under = all(abs(l.vert.co.z - (base.z + h * 0.8)) < 1e-5 for l in f.loops)   # le dessous du chapeau : rouge uni
+            for l in f.loops:
+                if under:
+                    l[b.uv].uv = (0.02, 0.02)                # un coin de la texture, hors du disque : sans point
+                else:   # le chapeau déplié sur le disque de la texture : sommet au centre, bord sur le cercle (points pas étirés)
+                    d = l.vert.co - base
+                    t = math.atan2((d.z - h * 0.8) / 0.75, math.hypot(d.x, d.y))     # 0 au bord, 90° au sommet
+                    rho = 0.49 * (1 - t / (math.pi / 2))
+                    az = math.atan2(d.y, d.x) + rot
+                    l[b.uv].uv = (0.5 + rho * math.cos(az), 0.5 + rho * math.sin(az))
 
     for (cx, cz, _) in scatter(g, 20, 5.5, 28.0, clear):        # petites touffes de 2 à 4
         for _ in range(g.randint(2, 4)):

@@ -3,11 +3,14 @@
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
 ## Jeu. 12 nov. 2026
-**Ce que j'ai fait :** correction d'un scintillement du sol au hub (#205).
+**Ce que j'ai fait :** correction de deux scintillements au hub (#205) ; champignons avec des points blancs en texture (#206) ; liste des modèles les plus lourds.
 
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
 | Claude (Claude Code) | **Scintillement du sol** (ma demande, avec 2 captures : « règle ces bugs de clipping entre deux objets ») : le bout de l'allée en planches (bananeraie → porte) recouvrait 20 cm de la terrasse de la cabane, à la même hauteur (z-fighting). Dans `Blender/cabane.py`, l'allée s'arrête au bord de la terrasse (`WALK_END`), dernière planche recoupée, tirages aléatoires gardés pour que le reste du décor ne bouge pas ; `Bananeraie.glb` régénéré (bout de l'allée vérifié à 4,50 m au lieu de 4,70 m), les autres modèles remis comme avant. Pour trouver la cause, Claude a écrit un petit script Blender qui cherche les faces superposées dans les modèles : rien d'autre de visible dans la cabane (seulement des faces cachées dans les murs ou sous le sol). Claude pense que mes 2 captures montrent le même endroit, **à confirmer** : si la 1re (planche sombre avec un rebord) est ailleurs, il faut lui dire où. Issue #205. **Pas vu dans Unity ni au casque** | Gardé (à vérifier) |
+| Claude (Claude Code) | **Armoire à trophées** (ma réponse : la 1re capture, c'était elle) : les côtés montaient jusqu'au niveau du dessus (1,38 m), leurs faces du haut scintillaient avec celle du dessus ; côtés 5 cm plus bas dans `PrototypeGenerator.BuildTrophyCabinet`. Issue #205. **Pas compilé ; scène Hub à régénérer** | Gardé (à vérifier) |
+| Claude (Claude Code) | **Champignons** (ma demande : « à la place des pavés, des taches blanches dans une texture ») : texture `Champi_Chapeau` dessinée par le script (disque rouge à 13 points blancs), chapeau déplié dessus et tourné au hasard ; pavés et matériau `Champi_Point` retirés. Un premier essai en projection vue du dessus étirait les points sur le bord (vu sur le rendu) : remplacé. Champignons 8 740 → 6 832 triangles (hub) et 9 852 → 7 728 (carte). `Cabane.glb` et `Paysage.glb` régénérés, rendu vérifié dans Blender. Issue #206, opti.md. **Pas vu dans Unity ni au casque** | Gardé (à vérifier) |
+| Claude (Claude Code) | **Modèles les plus lourds** (ma demande) : script Blender qui compte les triangles de tous les FBX et GLB de `Art/`. En tête : palmiers de la carte 14 520, buissons 14 400 (hub et carte), montagnes 13 056 (hub et carte), herbes ~8 900, champignons ~7 000, murs 5 100, barrière 5 060, bananier 4 742. Ne compte pas les meubles faits en cubes dans Unity ni le nombre d'exemplaires en jeu. Rien modifié | Gardé |
 
 ## Mar. 10 nov. 2026
 **Ce que j'ai fait :** relecture de la PR #188 (optimisations) avant le merge, et corrections.

@@ -1305,7 +1305,10 @@ namespace SAE.EditorTools
                 // les portes du bas s'arrêtent sous les plaques des trophées des bananes
                 Visuals.Box("Porte", root, new Vector3(side * halfW / 2f, 0.23f, -halfD - 0.01f), new Vector3(halfW - 0.06f, 0.22f, 0.02f), DarkWood);
                 Visuals.Box("Bouton de porte", root, new Vector3(side * 0.06f, 0.23f, -halfD - 0.03f), new Vector3(0.025f, 0.025f, 0.02f), Brass);
-                Visuals.Solid("Côté", root, new Vector3(side * (halfW + 0.025f), CabinetH / 2f, 0), new Vector3(0.05f, CabinetH, CabinetD + 0.02f), Wood);
+                // Les côtés s'arrêtent sous le dessus (5 cm) : avant, leur face du haut était au même niveau que celle du dessus
+                // et les deux scintillaient (z-fighting, 12 nov.)
+                float sideH = CabinetH - 0.05f;
+                Visuals.Solid("Côté", root, new Vector3(side * (halfW + 0.025f), sideH / 2f, 0), new Vector3(0.05f, sideH, CabinetD + 0.02f), Wood);
             }
             Visuals.Box("Fond", root, new Vector3(0, (LowShelfY + CabinetH) / 2f, halfD - 0.015f), new Vector3(CabinetW, CabinetH - LowShelfY, 0.03f), Velvet);
             Visuals.Solid("Etagère du haut", root, new Vector3(0, HighShelfY - 0.02f, 0), new Vector3(CabinetW, 0.04f, CabinetD), DarkWood);

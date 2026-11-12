@@ -6,6 +6,11 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ### Scintillement entre deux objets
 > Salut, j'aimerais que tu règles ces bugs d'affichage de clipping entre deux objets, s'il te plaît. (avec deux captures)
+>
+> Suite : la première capture, c'est l'armoire à trophées.
+
+### Champignons et modèles les plus lourds
+> Tu peux améliorer le champignon ? Au lieu de mettre des pavés, mets plutôt des taches blanches dans une texture. Dis-moi aussi quels sont tous les objets qui ont le plus de polygones.
 
 ## Mar. 10 nov. 2026
 
