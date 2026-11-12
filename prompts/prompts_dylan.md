@@ -4,6 +4,11 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Jeu. 12 nov. 2026
 
+### Build Windows et page des commandes
+> J'aimerais compiler le jeu en .exe, s'il te plaît.
+>
+> Suite : enlève l'aide des touches en bas de l'écran et mets tout dans les options : le choix du déplacement (téléportation, par défaut en VR, ou joystick) et toutes les touches du clavier, etc. (avec une capture)
+
 ### Retours sur le tutoriel
 > Premier truc pour le tuto : la flèche est dégueulasse avec le trait lumineux. J'aimerais que la pancarte tienne à quelque chose, car elle vole simplement. J'aimerais indiquer par le son où se trouvent les panneaux du tuto, en 360°, sans que ce soit lourd. J'aimerais que les trois ballons soient plus visibles. Enlève deux ballons à la première vague pour que ce soit plus simple. La flèche montre au-dessus du meuble ; que la flèche dans la bibliothèque soit un peu mieux. Pour la porte, pas de flèche mais un contour autour de la porte (n'oublie pas qu'on la voit dans le hub et dans la bananeraie). (avec huit captures)
 
