@@ -1549,9 +1549,9 @@ namespace SAE.EditorTools
         // Tout est construit autour de l'origine (comme le modèle), puis posé d'un bloc derrière la cabane, retourné :
         // l'allée arrive à la porte ; on voit la bananeraie en l'ouvrant (et par les fenêtres). Le paysage est celui de la cabane.
         // Mesures : celles de build_bananeraie dans cabane.py (BAN_*, SHED_*), à garder identiques.
-        const float GroveX0 = -4.6f, GroveX1 = 9.4f, GroveZ0 = -3.6f, GroveZ1 = 4.8f;   // la terrasse (agrandie à droite pour la roulette)
+        const float GroveX0 = -4.6f, GroveX1 = 11.4f, GroveZ0 = -3.6f, GroveZ1 = 4.8f;  // la terrasse (agrandie à droite pour la roulette, puis de 2 m le 12 nov. : le casino touchait la barrière)
         const float OldGroveX1 = 4.6f;                                                  // le bord droit d'avant : la caisse et le panier sont avant
-        static readonly Vector3 RouletteSpot = new Vector3(6.9f, 0f, 2.6f);             // la roulette, au fond de la partie agrandie, face au joueur
+        static readonly Vector3 RouletteSpot = new Vector3(7.9f, 0f, 2.6f);             // la roulette, au fond de la partie agrandie, face au joueur (le blackjack la suit)
         const float RouletteFrontZ = 2.05f;                                             // le bord avant de sa table
         const float PathHalf = 1.1f, WalkZ = -4.7f, PathZ = -6.45f;                     // l'allée : demi-largeur, fin des planches, bout contre la cabane
         const float ShedX = 3.2f, ShedZ0 = 2.9f, ShedZ1 = 4.6f;                          // l'abri (mur de rondins au fond)

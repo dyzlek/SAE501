@@ -103,9 +103,9 @@ namespace SAE
             float x = (left + right) / 2f;
             var board = Visuals.Box("Pancarte", transform, new Vector3(x, 1.35f, front), new Vector3(SignWidth, SignHeight, 0.04f), Slate);
             sign = board.GetComponent<ColorTint>();
-            label = Visuals.Label(transform, "", new Vector3(x, 1.35f, front + side * 0.03f), TextHeight, White, title: true);
-            var turn = label.GetComponent<Sae501.Coffres.Billboard>();
-            if (turn) Destroy(turn);
+            // Visuals.Text = un texte fixe (sans le Billboard SAE qui le tournait vers la caméra : avant, on retirait celui
+            // des coffres, qui n'y était pas, et le texte pivotait à travers l'ardoise, coupé à moitié, 12 nov.)
+            label = Visuals.Text(transform, "", new Vector3(x, 1.35f, front + side * 0.03f), TextHeight, White, title: true);
             label.transform.localRotation = Quaternion.LookRotation(new Vector3(0f, 0f, -side));   // lisible depuis le devant
             Refresh();
         }

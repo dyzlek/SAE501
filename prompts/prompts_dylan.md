@@ -4,6 +4,9 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Jeu. 12 nov. 2026
 
+### Bananeraie agrandie et pancarte du casino
+> Agrandis la bananeraie, s'il te plaît, et corrige le texte (de la pancarte du casino). (avec deux captures)
+
 ### Palmiers de la carte
 > Tu peux réduire le nombre de polygones des palmiers sur la carte, s'il te plaît ?
 >
