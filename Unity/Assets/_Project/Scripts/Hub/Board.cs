@@ -21,7 +21,10 @@ namespace SAE
         readonly Dictionary<Balloon, (Vector3 center, Vector3 size, ColorTint tint)> shapes = new Dictionary<Balloon, (Vector3, Vector3, ColorTint)>();
         // Les miniatures à dessiner cette image, rangées par couleur (une couleur = un matériau = un appel de dessin)
         readonly Dictionary<Color, List<Matrix4x4>> batches = new Dictionary<Color, List<Matrix4x4>>();
-        static Material baseMaterial;   // le matériau des cubes du jeu, qu'on teinte (ColorTint.Shared)
+        // Le matériau URP des formes du jeu (Visuals.PrimitiveMaterial), qu'on teinte (ColorTint.Shared).
+        // Avant, on prenait celui d'un cube de Unity : son vieux matériau « Standard » n'existe pas dans un build URP,
+        // et les ballons du plateau étaient invisibles dans le .exe (alors qu'on les voyait dans l'éditeur).
+        static Material baseMaterial;
         // Boss et dirigeables : leur miniature (copie du modèle). Un ballon rangé dans le pool garde la sienne, cachée.
         readonly Dictionary<Balloon, GameObject> models = new Dictionary<Balloon, GameObject>();
         readonly List<Balloon> gone = new List<Balloon>();
@@ -91,7 +94,8 @@ namespace SAE
                 group.Add(matrix);
             }
 
-            if (!baseMaterial) baseMaterial = BaseMaterial();
+            if (!baseMaterial) baseMaterial = Visuals.PrimitiveMaterial;
+            if (!baseMaterial) return;
             foreach (var pair in batches)
             {
                 if (pair.Value.Count == 0) continue;
@@ -153,15 +157,6 @@ namespace SAE
                 }
             }
             return (bounds.center, bounds.size, balloon.GetComponent<ColorTint>());
-        }
-
-        // Le matériau par défaut des cubes (celui de Visuals.Box), lu une fois sur un cube temporaire
-        static Material BaseMaterial()
-        {
-            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            var material = cube.GetComponent<Renderer>().sharedMaterial;
-            Destroy(cube);
-            return material;
         }
     }
 }
