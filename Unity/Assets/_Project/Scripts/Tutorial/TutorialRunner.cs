@@ -59,6 +59,7 @@ namespace SAE
             bool door = spot == TutorialSpot.Door && Levels.Current == Level.Hub && doorFrames;
             var position = Vector3.zero;
             bool slot = spot == TutorialSpot.FirstMonkey && Levels.Current == Level.Hub;
+            if (spot == TutorialSpot.Chest && ChestBusy()) spot = TutorialSpot.None;   // le coffre s'ouvre : plus de flèche
             bool show = !door && !slot && Where(spot, out position);
             ShowSlot(slot);
             if (pointer.gameObject.activeSelf != show) pointer.gameObject.SetActive(show);
@@ -110,39 +111,57 @@ namespace SAE
 
         // La case du premier singe dans la bibliothèque : un cadre doré qui pulse autour d'elle, tourné vers le centre de la
         // cabane (12 nov. : une flèche entre les étagères, c'était moche)
+        // Un viseur : quatre coins dorés, fins, ajustés à la case (le singe fait 20 cm, les cases sont espacées de
+        // 28 × 26 cm), devant le bord de l'étagère. Ils « respirent » (s'écartent et se resserrent un peu).
         void ShowSlot(bool on)
         {
-            if (!slotFrame) slotFrame = BuildFrame("Cadre de la case (tutoriel)", 0.34f, 0.3f, 0.03f, out slotBars);
+            if (!slotFrame) slotFrame = BuildCorners("Viseur de la case (tutoriel)", out slotBars);
             var target = on ? LibrarySlot.Find(new Monkey(MonkeyType.Classique, Rarity.Gris)) : null;
             on = on && target;
             if (slotFrame.gameObject.activeSelf != on) slotFrame.gameObject.SetActive(on);
             if (!on) return;
             var p = target.transform.position;
             var inward = new Vector3(-p.x, 0f, -p.z).normalized;   // vers le centre de la cabane, là où est le joueur
-            slotFrame.SetPositionAndRotation(p + Vector3.up * 0.13f + inward * 0.12f, Quaternion.LookRotation(-inward));
+            float breathe = 1f + 0.08f * Mathf.Sin(Time.time * 4f);
+            slotFrame.SetPositionAndRotation(p + Vector3.up * 0.11f + inward * 0.14f, Quaternion.LookRotation(-inward));
+            slotFrame.localScale = Vector3.one * breathe;
             var c = Color.Lerp(GoldDark, Gold, 0.5f + 0.5f * Mathf.Sin(Time.time * 4f));
             foreach (var bar in slotBars) bar.Animate(c);
         }
 
-        // Un cadre rectangulaire (deux montants, un haut, un bas) de w × h, centré sur l'origine, dans le plan XY
-        Transform BuildFrame(string name, float w, float h, float bar, out ColorTint[] bars)
+        // Quatre coins en L (bras de 6 cm, 1,4 cm d'épaisseur) autour d'un rectangle de 24 × 23 cm, centré sur l'origine
+        Transform BuildCorners(string name, out ColorTint[] bars)
         {
+            const float W = 0.24f, H = 0.23f, Arm = 0.06f, T = 0.014f;
             var root = new GameObject(name).transform;
             root.SetParent(transform, true);
             var list = new System.Collections.Generic.List<ColorTint>();
-            void Piece(Vector3 pos, Vector3 size)
-            {
-                var go = Visuals.Box("Cadre", root, pos, size, Gold);
-                go.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                list.Add(go.GetComponent<ColorTint>());
-            }
-            Piece(new Vector3(-w / 2f, 0f, 0f), new Vector3(bar, h + bar, 0.015f));
-            Piece(new Vector3(w / 2f, 0f, 0f), new Vector3(bar, h + bar, 0.015f));
-            Piece(new Vector3(0f, h / 2f, 0f), new Vector3(w + bar, bar, 0.015f));
-            Piece(new Vector3(0f, -h / 2f, 0f), new Vector3(w + bar, bar, 0.015f));
+            foreach (int sx in new[] { -1, 1 })
+                foreach (int sy in new[] { -1, 1 })
+                {
+                    var corner = new Vector3(sx * W / 2f, sy * H / 2f, 0f);
+                    foreach (var (pos, size) in new[]
+                    {
+                        (corner + new Vector3(-sx * Arm / 2f, 0f, 0f), new Vector3(Arm, T, T)),   // le bras horizontal
+                        (corner + new Vector3(0f, -sy * Arm / 2f, 0f), new Vector3(T, Arm, T)),   // le bras vertical
+                    })
+                    {
+                        var go = Visuals.Box("Coin", root, pos, size, Gold);
+                        go.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                        list.Add(go.GetComponent<ColorTint>());
+                    }
+                }
             bars = list.ToArray();
             root.gameObject.SetActive(false);
             return root;
+        }
+
+        // Le coffre est en train de s'ouvrir (le tutoriel cache la flèche pendant ce temps)
+        static Sae501.Coffres.ChestController chest;
+        static bool ChestBusy()
+        {
+            if (!chest) chest = FindAnyObjectByType<Sae501.Coffres.ChestController>();
+            return chest && chest.IsBusy;
         }
 
         // --- Le ding du tableau ---

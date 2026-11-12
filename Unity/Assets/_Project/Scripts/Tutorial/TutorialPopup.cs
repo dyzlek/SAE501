@@ -28,8 +28,11 @@ namespace SAE
             var rig = PlayerRig.Local;
             if (!rig) return;
             if (current) Destroy(current.gameObject);
-            var head = rig.HeadPosition;
-            var forward = Vector3.ProjectOnPlane(rig.head ? rig.head.forward : Vector3.forward, Vector3.up);
+            // La vraie caméra (casque ou mode PC) : en mode PC, la tête du rig XR reste au sol, et l'annonce apparaissait
+            // en bas (12 nov.)
+            var cam = Camera.main ? Camera.main.transform : rig.head;
+            var head = cam ? cam.position : rig.HeadPosition;
+            var forward = Vector3.ProjectOnPlane(cam ? cam.forward : Vector3.forward, Vector3.up);
             if (forward.sqrMagnitude < 0.01f) forward = Vector3.forward;
             var go = new GameObject("Annonce du tutoriel");
             go.transform.position = at ?? head + forward.normalized * Ahead;
