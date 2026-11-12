@@ -18,8 +18,10 @@ Une entrée par modification, **la plus récente en haut**, avec toujours les m�
 
 ---
 
-## Palmiers de la carte allégés
+## Palmiers de la carte et du hub allégés
 **Jeu. 12 nov. 2026** · Dylan (avec Claude) · branche `feat/opti-fusion` · issue #207
+
+> **Mise à jour (même jour)** : à la demande de Dylan, même allègement pour les **14 palmiers du hub** (8 à 16 m) : **9 240 → 4 704** triangles, cabane 72 869 → **68 333**. Rendu avant/après comparé à 8 et 16 m : presque pareil. Pas vu dans Unity ni au casque.
 
 **Le problème.** Les 22 palmiers de la carte étaient l'objet le plus lourd du décor : **14 520 triangles** (660 par palmier), dont 85 % dans le tronc (6 rondins à 8 côtés et 5 tronçons). Ils sont pourtant loin du joueur (18 à 34 m).
 

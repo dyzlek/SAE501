@@ -6,6 +6,8 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ### Palmiers de la carte
 > Tu peux réduire le nombre de polygones des palmiers sur la carte, s'il te plaît ?
+>
+> Suite : oui, ceux du hub aussi.
 
 ### Scintillement entre deux objets
 > Salut, j'aimerais que tu règles ces bugs d'affichage de clipping entre deux objets, s'il te plaît. (avec deux captures)

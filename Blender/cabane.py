@@ -1258,11 +1258,10 @@ def build_mountains(M, coll, suffix=""):
 
 def build_palms(M, coll, clear=hub_clear, suffix="", ring=(8, 16), count=14):
     """Des palmiers tout autour : tronc courbe en anneaux, couronne de palmes arquées.
-    Sur la carte (12 nov., optimisation) : ils sont loin (18 à 34 m), donc tronc à 6 côtés en tronçons simples
-    et palmes en 4 morceaux au lieu de 6 (environ 340 triangles par palmier au lieu de 660)."""
+    Allégés le 12 nov. (optimisation, carte puis hub) : tronc à 6 côtés en tronçons simples et palmes en 4 morceaux
+    au lieu de 6 (environ 340 triangles par palmier au lieu de 660)."""
     g = random.Random(17 if not suffix else 29)
-    far = bool(suffix)                                   # suffix = " carte" : les palmiers de la carte
-    trunk_segs, leaf_steps = (6, 4) if far else (8, 6)
+    trunk_segs, leaf_steps = 6, 4
     b = Builder([M["poutre"], M["bout"], M["palme"]])
     for idx, (x, z, ang) in enumerate(scatter(g, count, ring[0], ring[1], clear)):
         base = P(x, GROUND_Y, z)
@@ -1271,7 +1270,7 @@ def build_palms(M, coll, clear=hub_clear, suffix="", ring=(8, 16), count=14):
         pts = [base + lean * (t * t) + Vector((0, 0, height * t)) for t in np.linspace(0, 1, 7)]
         for k in range(6):
             b.log(pts[k], pts[k + 1] + (pts[k + 1] - pts[k]) * 0.05, 0.16 - 0.015 * k, M["poutre"], M["bout"], 1000 + idx * 10 + k,
-                  segs=trunk_segs, simple=far)
+                  segs=trunk_segs, simple=True)
         crown = pts[-1]
         for f in range(9):
             yaw = 2 * math.pi * f / 9 + g.uniform(-0.2, 0.2)
