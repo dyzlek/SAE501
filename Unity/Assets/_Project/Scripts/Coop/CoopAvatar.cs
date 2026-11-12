@@ -57,6 +57,14 @@ namespace SAE
             return go.transform;
         }
 
+        // Le singe qu'il tient (pris dans la bibliothèque) : le même modèle que sur l'étagère, là où il est chez lui
+        const float HeldSize = 0.2f;         // en mètres, à peu près la taille d'un singe de la bibliothèque
+        Transform held;
+        Monkey heldMonkey;
+        Vector3 heldPos;
+        Quaternion heldRot = Quaternion.identity;
+        bool holding;
+
         public void SetPose(CoopPose pose)
         {
             level = pose.level;
@@ -64,6 +72,23 @@ namespace SAE
             headPos = pose.headPos; headRot = pose.headRot;
             leftPos = pose.leftPos; leftRot = pose.leftRot;
             rightPos = pose.rightPos; rightRot = pose.rightRot;
+
+            // Il a pris un autre singe (ou l'a posé) : on change le modèle dans sa main
+            var monkey = new Monkey(pose.heldType, pose.heldLevel);
+            if (pose.holding != holding || (pose.holding && !monkey.Equals(heldMonkey)))
+            {
+                if (held) Destroy(held.gameObject);
+                held = null;
+                if (pose.holding)
+                {
+                    held = Visuals.MonkeyPiece(monkey, visuals, Vector3.zero, HeldSize, withLabel: false).transform;
+                    held.SetPositionAndRotation(pose.heldPos, pose.heldRot);   // il apparaît dans sa main, sans glisser
+                }
+                holding = pose.holding;
+                heldMonkey = monkey;
+            }
+            heldPos = pose.heldPos;
+            heldRot = pose.heldRot;
         }
 
         void Update()
@@ -83,6 +108,7 @@ namespace SAE
                 Follow(left, leftPos, leftRot, t);
                 Follow(right, rightPos, rightRot, t);
             }
+            if (held) Follow(held, heldPos, heldRot, t);
 
             // Le buste reste droit : il ne suit que la direction du regard, à plat
             var forward = Vector3.ProjectOnPlane(head.forward, Vector3.up);

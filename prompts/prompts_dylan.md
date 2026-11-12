@@ -2,6 +2,21 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Jeu. 12 nov. 2026
+
+### Palmiers de la carte
+> Tu peux réduire le nombre de polygones des palmiers sur la carte, s'il te plaît ?
+>
+> Suite : oui, ceux du hub aussi.
+
+### Scintillement entre deux objets
+> Salut, j'aimerais que tu règles ces bugs d'affichage de clipping entre deux objets, s'il te plaît. (avec deux captures)
+>
+> Suite : la première capture, c'est l'armoire à trophées.
+
+### Champignons et modèles les plus lourds
+> Tu peux améliorer le champignon ? Au lieu de mettre des pavés, mets plutôt des taches blanches dans une texture. Dis-moi aussi quels sont tous les objets qui ont le plus de polygones.
+
 ## Mar. 10 nov. 2026
 
 ### Encore moins de rondins

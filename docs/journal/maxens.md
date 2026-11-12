@@ -27,6 +27,19 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 |---|---|---|
 | Claude (Code) | Tutoriel complet : genre, arc (où il est, comment tirer, entraînement de 3 flèches), améliorations, caisse, plaques, comptoir, récolteurs, trophées, fléchettes ; flèches plus voyantes (rayon doré, flèche au sol) ; compilé | À tester |
 | Claude (Code) | Roulette fermée par des barrières jusqu'à la vague 5, puis tutoriel qui y amène (`CasinoGate`) ; compilé | À tester |
+## Mer. 11 nov. 2026
+- **Fait : le reste du coop partagé, hors bananeraie** (branche `feat/coop-coffre-flechettes`, issues #201, #202 et #203). J'ai fait le tour de ce qu'un joueur ne voyait pas de l'autre. L'argent, la bibliothèque, les singes posés, les vagues, les ballons, les flèches et la roulette étaient déjà partagés. Il manquait :
+  - **le coffre** (#201) : quand un joueur l'ouvre, il s'ouvre aussi chez les autres, avec la même roulette et le même singe gagné. Le singe n'est donné qu'une fois, chez celui qui a ouvert (la bibliothèque est commune). Pendant l'ouverture, le coffre est occupé chez tout le monde ;
+  - **les fléchettes** (#202) : les autres voient la fléchette voler et se planter dans la cible. Elle marque aussi sur leur tableau, et le klaxon du plein centre s'entend chez eux. Elle disparaît ensuite (elle n'a pas de présentoir chez eux) ;
+  - **le singe tenu en main** (#203) : quand un joueur prend un singe dans la bibliothèque, les autres voient le même singe dans sa main, jusqu'à ce qu'il le pose.
+  - **Laissé chacun chez soi, exprès** : l'arc et ses améliorations (chacun a son arc), la borne de blackjack (chacun joue sa partie, décision du 23 oct.), le tutoriel et la sauvegarde.
+  - **Issues créées** à ma demande : #201, #202, #203 (en cours) et #204 (le test à deux).
+  - Compilé, **pas encore testé à deux** (#204).
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Code) | Tour de ce qui n'était pas partagé en coop hors bananeraie, issues #201 à #204 créées et ajoutées au tableau | Gardé |
+| Claude (Code) | Coffre, fléchettes et singe tenu en main partagés en coop (`CoopPlayer` : ChestRpc, DartRpc et le singe tenu dans la pose ; `ChestController.ShowRemote`, `Dart.ShowRemote`, `CoopAvatar`) ; compilé, pas encore testé à deux | À tester à deux |
 
 ## Mar. 10 nov. 2026
 - **Fait : la bananeraie partagée en coop** (branche `feat/bananeraie-partagee`). Avant, chaque joueur avait sa propre bananeraie : ses bananes tombaient au hasard chez lui seulement, et seul l'argent de la vente passait par le réseau. Quand un joueur prenait une banane, l'autre voyait sa main bouger, mais vide. Maintenant **tout est partagé** :

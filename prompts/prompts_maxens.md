@@ -14,6 +14,10 @@ _Les demandes les plus utiles faites à l'IA, **reformulées et corrigées** (or
 > - dis où est l'arc (si on ne regarde pas ses mains, on ne le voit pas) et surtout comment tirer ;
 > - rends les flèches d'indication plus voyantes ;
 > - explique comment débloquer les singes et pourquoi le faire, à quoi servent les améliorations de la bananeraie, etc., et pareil dans le hub. Bref, un tutoriel vraiment complet.
+## Mer. 11 nov. 2026
+
+### Partager le reste du coop
+> Pour le multijoueur, ajoute les issues. Vérifie que tout est partagé aussi en dehors de la bananeraie, et si ce n'est pas le cas, fais-le. Récupère bien `main` avant de commencer, puis dis-moi comment tester.
 
 ## Mar. 10 nov. 2026
 
