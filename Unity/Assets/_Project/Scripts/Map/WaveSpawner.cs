@@ -42,8 +42,12 @@ namespace SAE
 
         public int LastWrittenWave => waves.Count;
         const string CamoWarning = "\n<color=#B5C26A>Ballons camouflés ! Seuls le Tireur et les singes Violet et + les voient</color>";
+        // Les blindés : tes flèches les percent, tes singes seulement à partir de Bleu (le Tireur dès Gris)
+        const string ArmorWarning = "\n<color=#AEB4BC>Ballons blindés ! Tes flèches les percent ; tes singes, à partir de Bleu (Tireur : toujours)</color>";
         public WaveData Current => Wave <= waves.Count ? waves[Wave - 1] : WaveBook.Endless(Wave);
         public int BossCount => Current.BossCount;
+        // La vague d'avant la vague n (vide avant la 1re)
+        WaveData Previous(int n) => n <= 1 ? new WaveData() : n - 1 <= waves.Count ? waves[n - 2] : WaveBook.Endless(n - 1);
 
         // Mode admin (AdminPanel, éditeur seulement) : plus de ballons, plus solides, et vies infinies pour tester les perfs
         public static int CheatCount = 1;      // chaque groupe a CheatCount fois plus de ballons
@@ -104,6 +108,7 @@ namespace SAE
             bool special = WaveAnnouncer.IsSpecial(wave);
             Status = special ? WaveAnnouncer.Title(wave) : "Attaque en cours !";
             if (wave.HasCamo) Status += CamoWarning;
+            if (wave.HasArmor && !Previous(Wave).HasArmor) Status += ArmorWarning;   // seulement à la 1re vague de blindés
             if (special)
             {
                 WaveAnnouncer.WaveStarts();
@@ -158,6 +163,7 @@ namespace SAE
                 // La prochaine est spéciale : on prévient pendant la préparation
                 if (!Won && WaveAnnouncer.IsSpecial(Current)) Status += $"\n{WaveAnnouncer.Title(Current)}";
                 if (Current.HasCamo && !wave.HasCamo) Status += CamoWarning;   // les premiers camouflés : on prévient avant
+                if (Current.HasArmor && !wave.HasArmor) Status += ArmorWarning;   // les premiers blindés aussi
                 Haptics.PlayBoth(Haptics.Victory);
                 Sounds.Play(Won && Wave == LastWrittenWave + 1 ? Sounds.VictoireFinale : Sounds.VagueGagnee);
                 Lives = startLives;   // la vague suivante repart avec toutes les vies (affiché pendant la préparation)

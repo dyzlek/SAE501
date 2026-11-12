@@ -4,6 +4,11 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 
 ## Jeu. 12 nov. 2026
 
+### Ballons blindés et équilibrage des vagues
+> Est-ce que toutes les vagues sont bien réglées ? Est-ce qu'on détruit bien les ballons en acier, etc. ?
+>
+> Suite : fais en sorte qu'on puisse aussi les éclater nous-mêmes, sinon c'est trop compliqué. Et plus largement, essaie de tout équilibrer.
+
 ### Envoyer le jeu au prof
 > J'aimerais l'envoyer au prof : je ne peux pas simplement le mettre sur GitHub en .zip ?
 >

@@ -74,7 +74,7 @@ namespace SAE
         public CoopBalloon Proxy { get; set; }
         public bool Remote { get; private set; }
         int hitRequest;        // notre dernier tir sur ce ballon, envoyé à l'hôte (voir ApplyHostLayers)
-        bool Armored => Kind == BalloonKind.Blinde || Kind == BalloonKind.Dirigeable;
+        public bool Armored => Kind == BalloonKind.Blinde || Kind == BalloonKind.Dirigeable;
         bool IsBlimp => Kind == BalloonKind.Boss || Kind == BalloonKind.Dirigeable;
 
         // Distance parcourue : les singes visent le ballon le plus avancé.
@@ -199,6 +199,7 @@ namespace SAE
 
         // Un tir qui peut percer 'pierce' couches touche ce ballon. Renvoie la perforation dépensée :
         // 1 par couche, 2 par couche blindée. Un tir trop faible pour une couche blindée s'y arrête (tout est dépensé).
+        // Exception : les flèches de Quincy percent le blindage (Arrow leur donne deux fois plus de perforation).
         public int Pop(int pierce)
         {
             if (pierce <= 0 || layers <= 0 || !isActiveAndEnabled) return 0;   // déjà rangé dans le pool

@@ -46,6 +46,7 @@ namespace SAE
         }
 
         public bool HasCamo => groups.Exists(g => g.camo);
+        public bool HasArmor => groups.Exists(g => g.kind == BalloonKind.Blinde);
     }
 
     // Le livre des vagues : 100 vagues calculées par une même formule, pour une difficulté qui monte sans à-coups,

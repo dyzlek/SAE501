@@ -11,6 +11,7 @@ namespace SAE
     //   perforation (BowUpgrades.Pierce)        : les couches percées sur chaque ballon touché (ses « dégâts ») ;
     //   transperçante (BowUpgrades.PassThrough) : le nombre de ballons qu'elle traverse (tir collatéral).
     // Sans amélioration : 1 couche sur 1 ballon, puis elle disparaît. Si elle touche autre chose qu'un ballon, elle s'y plante.
+    // Elle perce le blindage (ballons blindés et dirigeables) : une couche blindée lui coûte 1, comme une normale.
     // Explosive (BowUpgrades.Explosive) : à chaque ballon touché, une onde perce aussi les ballons voisins.
     // Rebond (BowUpgrades.Bounces) : au lieu de disparaître après son dernier ballon, elle file tout droit vers le ballon
     // le plus proche, autant de fois que de rebonds. Givrante (BowUpgrades.Frost) : chaque ballon touché est ralenti.
@@ -96,7 +97,9 @@ namespace SAE
                 Haptics.Play(shooterHand, Haptics.Hit);
                 if (shooterHand) Sounds.Quincy();   // de temps en temps, Quincy parle (flèches du joueur seulement)
             }
-            balloon.Pop(BowUpgrades.Pierce);
+            // Les flèches percent le blindage : sur un blindé, une couche ne leur coûte que 1 (Pop en compte 2, on double).
+            // Sans ça, un joueur sans singe Bleu ni Tireur ne pouvait rien contre les blindés (dès la vague 6).
+            balloon.Pop(balloon.Armored ? BowUpgrades.Pierce * 2 : BowUpgrades.Pierce);
             if (BowUpgrades.Frost) balloon.Slow(BowUpgrades.FrostFactor, BowUpgrades.FrostSeconds);
             if (BowUpgrades.Explosive) Explode(center, balloon);
             balloonsLeft--;
