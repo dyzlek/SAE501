@@ -2,6 +2,11 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Ven. 13 nov. 2026
+
+### Difficulté des vagues
+> J'aimerais augmenter un peu plus la difficulté globale, et que plus on avance dans le jeu, plus les ballons apparaissent rapidement.
+
 ## Jeu. 12 nov. 2026
 
 ### Ballons du plateau
