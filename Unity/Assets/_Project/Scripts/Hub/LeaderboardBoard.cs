@@ -154,24 +154,43 @@ namespace SAE
             stateText.text = message ?? StateText(editing);
             editLabel.text = editing ? "ANNULER" : "MODIFIER";
 
+            // Ta partie en cours (au moins une vague gagnée) : si elle n'est pas dans le top 10, elle prend la 10e ligne.
+            // Sans ça, une nouvelle partie n'apparaissait nulle part et on croyait que le score n'était pas envoyé.
+            int myWave = GameState.WavesWon;
+
             var sb = new StringBuilder("<color=#FFD45A>ICI</color>\n");
             var local = Leaderboard.Local;
-            if (local.Count == 0) sb.Append("Gagne une vague\npour y entrer !");
-            for (int i = 0; i < local.Count; i++)
+            bool mineMissing = myWave > 0 && Leaderboard.CurrentRank() == 0;
+            if (local.Count == 0 && !mineMissing) sb.Append("Gagne une vague\npour y entrer !");
+            int shown = mineMissing ? Mathf.Min(local.Count, Leaderboard.Size - 1) : local.Count;
+            for (int i = 0; i < shown; i++)
             {
                 var e = local[i];
                 string line = Line(i, e);
-                sb.AppendLine(e.game == Leaderboard.GameId ? $"<color=#7CFF7C>{line}</color>" : line);   // ta partie en vert
+                sb.AppendLine(e.game == Leaderboard.GameId ? InGreen(line) : line);   // ta partie en vert
             }
+            if (mineMissing) sb.AppendLine(InGreen(MyLine(myWave)));
             here.text = sb.ToString();
 
             sb.Clear();
             sb.AppendLine("<color=#FFD45A>MONDE</color>");
             if (!Leaderboard.OnlineReady) sb.Append(Leaderboard.OnlineFailed ? "Hors ligne" : "Connexion…");
             var online = Leaderboard.Online;
-            for (int i = 0; i < online.Count; i++) sb.AppendLine(Line(i, online[i]));
+            // Le serveur ne donne que le top 10, sans identifiant de partie : on reconnaît la tienne à ton nom et ta vague
+            int mine = -1;
+            for (int i = 0; i < online.Count && myWave > 0; i++)
+                if (online[i].name == Leaderboard.Name && online[i].wave == myWave) { mine = i; break; }
+            mineMissing = Leaderboard.OnlineReady && myWave > 0 && mine < 0;
+            shown = mineMissing ? Mathf.Min(online.Count, Leaderboard.Size - 1) : online.Count;
+            for (int i = 0; i < shown; i++) sb.AppendLine(i == mine ? InGreen(Line(i, online[i])) : Line(i, online[i]));
+            if (mineMissing) sb.AppendLine(InGreen(MyLine(myWave)));
             world.text = sb.ToString();
         }
+
+        static string InGreen(string line) => $"<color=#7CFF7C>{line}</color>";
+
+        // « … DYLAN   vague 1 » : ta partie, hors du top 10 (on ne connaît pas son rang exact)
+        static string MyLine(int wave) => $"… {Leaderboard.Name}   vague {wave}";
 
         static string StateText(bool editing) => Leaderboard.State switch
         {

@@ -2,6 +2,13 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Ven. 13 nov. 2026
+**Ce que j'ai fait :** classement corrigé (ma partie en cours n'apparaissait pas).
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | **Classement : « le score n'est pas envoyé »** (ma remarque) : le serveur répond bien et la partie est bien enregistrée (vérifié dans les PlayerPrefs de l'éditeur : top 10 local plein, le plus bas à la vague 2 ; ma partie en cours n'avait gagné qu'une vague), mais le tableau n'affichait que le top 10, donc une nouvelle partie n'apparaissait nulle part. Correction dans `LeaderboardBoard` : si la partie en cours n'est pas dans le top 10, elle prend la 10e ligne en vert (« … NOM vague N »), dans ICI et MONDE ; dans MONDE, elle est aussi en vert quand elle est dans le top. Compilé avec dotnet (0 erreur). Issue #222. **Pas testé en jeu** | Gardé (à tester) |
+
 ## Jeu. 12 nov. 2026
 **Ce que j'ai fait :** correction de deux scintillements au hub (#205) ; champignons avec des points blancs en texture (#206) ; liste des modèles les plus lourds.
 
