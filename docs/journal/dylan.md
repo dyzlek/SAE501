@@ -2,6 +2,13 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Ven. 13 nov. 2026
+**Ce que j'ai fait :** vagues durcies, apparition de plus en plus rapide.
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | **Vagues plus dures et de plus en plus rapides** (ma demande) : dans `WaveBook.Make`, 20 % de ballons en plus par groupe (sauf vague 1 du tuto, boss, dirigeables) et un rythme `Pace` qui resserre tous les écarts avec la vague (1 → 0,5 à la 26 → au plus 0,25 dès la 76, infini compris). Comparé avant/après par un script Python : couches +15 à +22 %, vague 50 sortie en 61 s au lieu de 121 s (2,3 fois plus de couches par seconde), vague 100 en 86 s au lieu de 231 s. Un essai « +1 couche toutes les 5 vagues » a été jeté (vague 5 doublée). GDD 7.7 mis à jour. Compilé avec dotnet (0 erreur). Issue #223. **Pas testé en jeu : à vérifier aussi les fps au casque (plus de ballons en même temps)** | Gardé (à tester) ; couches toutes les 5 vagues jeté |
+
 ## Jeu. 12 nov. 2026
 **Ce que j'ai fait :** correction de deux scintillements au hub (#205) ; champignons avec des points blancs en texture (#206) ; liste des modèles les plus lourds.
 
