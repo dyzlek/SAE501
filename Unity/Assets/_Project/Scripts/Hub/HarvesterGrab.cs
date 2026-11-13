@@ -72,6 +72,7 @@ namespace SAE
         {
             flying = false;
             handSpeed.Clear();
+            body.collisionDetectionMode = CollisionDetectionMode.Discrete;   // rattrapé en vol : de nouveau cinématique
             body.isKinematic = true;
             monkey.PickedUp();
         }
@@ -104,6 +105,7 @@ namespace SAE
             body.isKinematic = false;
             body.useGravity = true;
             body.interpolation = RigidbodyInterpolation.Interpolate;   // un vol fluide, même entre deux pas de physique
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;   // lancé fort, il ne traverse pas un sol fin
             body.linearVelocity = throwVelocity;
             body.angularVelocity = Random.onUnitSphere * 8f;
         }
@@ -124,6 +126,7 @@ namespace SAE
             body.isKinematic = true;
             body.useGravity = false;
             body.interpolation = RigidbodyInterpolation.None;   // de nouveau à pied : c'est HarvesterMonkey qui le déplace
+            body.collisionDetectionMode = CollisionDetectionMode.Discrete;   // le continu ne sert qu'en vol (et pas en cinématique)
             var center = monkey.areaCenter;
             var flat = new Vector3(transform.position.x - center.x, 0f, transform.position.z - center.z);
             flat = Vector3.ClampMagnitude(flat, monkey.areaRadius);   // le point de la terrasse le plus proche, au sol
