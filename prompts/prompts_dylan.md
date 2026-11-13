@@ -2,6 +2,11 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Ven. 13 nov. 2026
+
+### Singe lancé hors de la bananeraie
+> Quand je lance le singe en dehors de la bananeraie, j'aimerais qu'il ne traverse pas le sol.
+
 ## Jeu. 12 nov. 2026
 
 ### Ballons du plateau
