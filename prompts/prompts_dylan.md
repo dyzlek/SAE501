@@ -2,6 +2,13 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Ven. 13 nov. 2026
+
+### Tableau des scores
+> Regarde aussi pourquoi le tableau des scores ne marche pas.
+>
+> Suite : mon score n'est pas envoyé (ma partie n'apparaît ni dans ICI ni dans MONDE après une vague gagnée).
+
 ## Jeu. 12 nov. 2026
 
 ### Ballons du plateau
