@@ -8,6 +8,7 @@ _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide d
 | Outil | Pour quoi | Gardé / jeté |
 |---|---|---|
 | Claude (Claude Code) | **Rapport de SAÉ** (ma demande, avec le mail du prof : 4 sections attendues) : [RAPPORT_SAE.md](../RAPPORT_SAE.md) et sa version Word (`md2docx.py`), écrits à partir des journaux, du GDD, de `opti.md`, de l'historique Git et des fichiers du projet (sons, polices, modèles). Responsabilités par personne, ressources prises en ligne (paquets Unity, polices OFL, sons de Bloons TD et Pixabay, ancien coffre téléchargé, Claude Code), contribution technique, améliorations. Issue #227 créée, carte En cours | À relire par les trois (répartition et origine des modèles de Maxens à confirmer) |
+| Claude (Claude Code) | **PDF du rapport** (ma demande, pour l'envoi avant mardi) : [RAPPORT_SAE.pdf](../RAPPORT_SAE.pdf), 3 pages A4, fait par un petit script sans dépendance (`docs/md2pdf.py` : Markdown → HTML → PDF par Edge en mode headless) ; rendu vérifié page par page | Gardé |
 
 ## Jeu. 12 nov. 2026
 **Ce que j'ai fait :** correction de deux scintillements au hub (#205) ; champignons avec des points blancs en texture (#206) ; liste des modèles les plus lourds.
