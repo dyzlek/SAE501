@@ -14,6 +14,13 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 ### Singe lancé hors de la bananeraie
 > Quand je lance le singe en dehors de la bananeraie, j'aimerais qu'il ne traverse pas le sol.
 
+## Ven. 13 nov. 2026
+
+### Tableau des scores
+> Regarde aussi pourquoi le tableau des scores ne marche pas.
+>
+> Suite : mon score n'est pas envoyé (ma partie n'apparaît ni dans ICI ni dans MONDE après une vague gagnée).
+
 ## Jeu. 12 nov. 2026
 
 ### Ballons du plateau
