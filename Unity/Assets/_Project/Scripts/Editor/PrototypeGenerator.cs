@@ -1592,6 +1592,9 @@ namespace SAE.EditorTools
             Blocker(env, "Mur de l'abri", new Vector3(0f, 1.4f, ShedZ1), new Vector3(2f * ShedX + 0.3f, 2.8f, 0.3f));
             for (int side = -1; side <= 1; side += 2)
                 Blocker(env, "Poteau de l'abri", new Vector3(side * ShedX, 1.4f, ShedZ0), new Vector3(0.24f, 2.8f, 0.24f));
+            // La prairie autour (celle du modèle, 35 cm sous la terrasse) : un singe lancé par-dessus la barrière s'y pose
+            // au lieu de tomber à travers. Épaisse d'1 m : même lancé fort, il ne passe pas au travers. Pas une zone de téléportation.
+            Blocker(env, "Prairie", new Vector3((GroveX0 + GroveX1) / 2f, BlenderGroundY - 0.5f, midZ), new Vector3(60f, 1f, 60f));
 
             // La zone de téléportation : la terrasse et l'allée, à 30 cm de la barrière, et sous l'abri jusqu'à 30 cm de l'armoire
             // ni la place des meubles (les trois bananiers et leurs étals, le panier, la caisse). Ailleurs, le rayon s'arrête sur
