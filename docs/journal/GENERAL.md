@@ -57,6 +57,8 @@ _Vue d'ensemble : décisions, jalons, blocages communs. Le détail de chacun est
 - [ ] Ven. 9 oct. — GDD v1 + prototype gris jouable
 - [ ] Ven. 23 oct. — un autre groupe teste le jeu
 - [ ] Ven. 13 nov. — rendu + oral
+- [ ] Mar. 17 nov. — **rapport de SAÉ envoyé par mail** (pénalité sinon) : [RAPPORT_SAE.md](../RAPPORT_SAE.md) / `.docx`, issue #227
+- [ ] Mer. 18 nov., 15 h 30 — évaluation : 5-10 min en équipe, 5-10 min en individuel avec chacun, 5 min de test du jeu
 
 ## Semaine 1 · 5-9 oct. — PROUVER
 **Jeu. 8 oct. — urgent** _(objectif : vendredi 9, GDD v1 + prototype jouable au casque)_

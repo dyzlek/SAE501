@@ -2,6 +2,21 @@
 
 _Entrée la plus récente en haut. Une entrée par jour travaillé. Toute aide de l'IA est notée ici (outil, pour quoi, gardé/jeté)._
 
+## Lun. 16 nov. 2026
+**Ce que j'ai fait :** rapport de SAÉ pour l'évaluation du 18 nov. (à envoyer par mail avant le mar. 17), issue #227.
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | **Rapport de SAÉ** (ma demande, avec le mail du prof : 4 sections attendues) : [RAPPORT_SAE.md](../RAPPORT_SAE.md) et sa version Word (`md2docx.py`), écrits à partir des journaux, du GDD, de `opti.md`, de l'historique Git et des fichiers du projet (sons, polices, modèles). Responsabilités par personne, ressources prises en ligne (paquets Unity, polices OFL, sons de Bloons TD et Pixabay, ancien coffre téléchargé, Claude Code), contribution technique, améliorations. Issue #227 créée, carte En cours | À relire par les trois (répartition et origine des modèles de Maxens à confirmer) |
+| Claude (Claude Code) | **PDF du rapport** (ma demande, pour l'envoi avant mardi) : [RAPPORT_SAE.pdf](../RAPPORT_SAE.pdf), 3 pages A4, fait par un petit script sans dépendance (`docs/md2pdf.py` : Markdown → HTML → PDF par Edge en mode headless) ; rendu vérifié page par page | Gardé |
+
+## Ven. 13 nov. 2026
+**Ce que j'ai fait :** correction du singe récolteur lancé hors de la bananeraie.
+
+| Outil | Pour quoi | Gardé / jeté |
+|---|---|---|
+| Claude (Claude Code) | **Singe lancé hors de la bananeraie** (ma demande : « qu'il ne traverse pas le sol ») : hors de la terrasse, il n'y avait aucun collider, le singe tombait jusqu'à -5 m avant d'être ramené. Ajout d'un sol invisible d'1 m d'épaisseur sous la prairie autour de la bananeraie (`PrototypeGenerator.BuildGrove`, pas une zone de téléportation) et détection de collision continue pendant le vol (`HarvesterGrab`), remise en discret quand il se pose ou est rattrapé. Une fois posé, il revient toujours au bord de la terrasse comme avant. Compilé avec dotnet (0 erreur). Issue #221. **Scène Hub à régénérer, pas testé en jeu** | Gardé (à tester) |
+
 ## Ven. 13 nov. 2026
 **Ce que j'ai fait :** classement corrigé (ma partie en cours n'apparaissait pas).
 
