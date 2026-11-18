@@ -9,6 +9,11 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 >
 > Suite : fais un PDF du rapport à rendre avant mardi.
 
+## Ven. 13 nov. 2026
+
+### Singe lancé hors de la bananeraie
+> Quand je lance le singe en dehors de la bananeraie, j'aimerais qu'il ne traverse pas le sol.
+
 ## Jeu. 12 nov. 2026
 
 ### Ballons du plateau
