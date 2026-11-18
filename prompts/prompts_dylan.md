@@ -2,6 +2,13 @@
 
 _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et corrigées** (orthographe, clarté). Le sens est conservé. La plus récente est en haut. Le détail de ce qui a été gardé ou jeté est dans [mon journal](../docs/journal/dylan.md)._
 
+## Lun. 16 nov. 2026
+
+### Rapport de SAÉ
+> Fais le rapport de SAÉ demandé dans ce mail : l'évaluation a lieu le 18/11 à partir de 15 h 30 (discussion en équipe, puis individuelle, puis test du jeu), et le rapport doit être envoyé par mail avant le mardi 17/11. Sections attendues : la division des responsabilités entre les élèves, les ressources prises en ligne, la contribution technique et les améliorations possibles.
+>
+> Suite : fais un PDF du rapport à rendre avant mardi.
+
 ## Jeu. 12 nov. 2026
 
 ### Ballons du plateau
