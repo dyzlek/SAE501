@@ -21,6 +21,11 @@ _Les demandes les plus utiles faites à l'IA (Claude Code), **reformulées et co
 >
 > Suite : mon score n'est pas envoyé (ma partie n'apparaît ni dans ICI ni dans MONDE après une vague gagnée).
 
+## Ven. 13 nov. 2026
+
+### Difficulté des vagues
+> J'aimerais augmenter un peu plus la difficulté globale, et que plus on avance dans le jeu, plus les ballons apparaissent rapidement.
+
 ## Jeu. 12 nov. 2026
 
 ### Ballons du plateau

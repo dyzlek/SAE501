@@ -58,7 +58,7 @@ namespace SAE
     //   vague 12      : premier boss (gros ballon lent), puis un toutes les 4 vagues ; dès la 40, à chaque vague
     //   vague 25, 50, 75 : un dirigeable rouge ; vague 100 : la finale, 4 dirigeables rouges -> victoire
     // Le 23 oct., tout est durci (retour de Dylan : « les vagues sont trop faciles ») : plus de ballons, plus de couches,
-    // plus serrés, chaque sorte arrive plus tôt.
+    // plus serrés, chaque sorte arrive plus tôt. Le 13 nov., encore 20 % de ballons en plus, et ils apparaissent de plus en plus vite (Pace).
     // Après la 100 : mode infini, la même formule continue.
     // Tout se règle ici (nombres, couches, écarts) ; rien n'est gardé dans la scène.
     public static class WaveBook
@@ -91,10 +91,9 @@ namespace SAE
         {
             var groups = new List<BalloonGroup>();
 
-            // Normaux : toujours là. 10 au début, ~100 à la vague 100 ; 1 couche, puis +1 toutes les 6 vagues ; vite très serrés
-            float interval = Mathf.Lerp(0.7f, 0.25f, Mathf.Clamp01((w - 1) / 40f));
-            groups.Add(N(w == 1 ? 8 : 10 + w * 9 / 10, 1 + w / 6, interval));   // vague 1 : 8 (le tutoriel, 12 nov. : plus simple)
-            if (w >= 2) groups.Add(N(5 + w / 3, 2 + w / 6, interval));          // un 2e groupe, plus solide
+            // Normaux : toujours là. 10 au début, ~100 à la vague 100 ; 1 couche, puis +1 toutes les 6 vagues
+            groups.Add(N(w == 1 ? 8 : 10 + w * 9 / 10, 1 + w / 6, 0.7f));   // vague 1 : 8 (le tutoriel, 12 nov. : plus simple)
+            if (w >= 2) groups.Add(N(5 + w / 3, 2 + w / 6, 0.7f));          // un 2e groupe, plus solide
 
             if (w >= 3) groups.Add(R(3 + (w - 3) * 4 / 5, 1 + (w - 3) / 7));      // rapides
             if (w >= 6) groups.Add(B(2 + (w - 6) * 2 / 3, 2 + (w - 6) / 7));     // blindés
@@ -110,7 +109,25 @@ namespace SAE
             // Dirigeables rouges : aux vagues 25, 50, 75, et 4 pour la finale (100) ; en infini, toutes les 25 vagues
             if (w % 25 == 0) groups.Add(Blimp(w / 25, 80 + w * 3 / 2));
 
+            // 13 nov. (Dylan : « un peu plus dur, et plus on avance, plus ça apparaît vite ») :
+            //   - 20 % de ballons en plus dans chaque groupe (sauf la vague 1 du tutoriel, les boss et les dirigeables) ;
+            //   - tous les écarts (entre deux ballons, avant un groupe) rétrécissent avec la vague : voir Pace.
+            float pace = Pace(w);
+            foreach (var g in groups)
+            {
+                g.interval *= pace;
+                g.pause *= pace;
+                bool big = g.kind == BalloonKind.Boss || g.kind == BalloonKind.Dirigeable;
+                if (w > 1 && !big) g.count = Mathf.RoundToInt(g.count * MoreBalloons);
+            }
             return new WaveData(groups.ToArray());
         }
+
+        const float MoreBalloons = 1.2f;   // la difficulté globale : 20 % de ballons en plus
+        const float MinPace = 0.25f;       // les écarts ne descendent pas sous le quart de ceux du début
+
+        // Le rythme d'apparition : 1 à la vague 1 (écarts normaux), puis de plus en plus serré :
+        // 0,5 à la vague 26 (deux fois plus vite), 0,33 à la vague 51, et au plus 4 fois plus vite (vague 76 et après, infini compris)
+        public static float Pace(int w) => Mathf.Max(MinPace, 1f / (1f + (w - 1) / 25f));
     }
 }
